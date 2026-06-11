@@ -1,0 +1,13 @@
+root = true
+
+[*]
+indent_type = space
+indent_size = 2
+
+[*.go]
+indent_type = tab
+indent_size = 4
+
+[{Makefile,*.mk}]
+indent_type = tab
+indent_size = 4

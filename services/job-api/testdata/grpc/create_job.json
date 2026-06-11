@@ -1,0 +1,50 @@
+{
+  "spec": {
+    "name": "Example health check",
+    "type": "JOB_TYPE_HTTP_REQUEST",
+    "http": {
+      "method": "HTTP_METHOD_GET",
+      "url": "https://example.com/health",
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "timeout": "10s",
+      "expectedStatusCodes": {
+        "codes": [
+          200,
+          204
+        ],
+        "ranges": [
+          {
+            "from": 200,
+            "to": 299
+          }
+        ]
+      },
+      "maxResponseBodyBytes": "1048576",
+      "followRedirects": true,
+      "retryOnTimeout": true,
+      "retryOnNetworkError": true,
+      "retryOnStatusCodes": {
+        "codes": [
+          429
+        ],
+        "ranges": [
+          {
+            "from": 500,
+            "to": 599
+          }
+        ]
+      }
+    },
+    "retryPolicy": {
+      "maxAttempts": 3,
+      "backoffType": "BACKOFF_TYPE_FIXED",
+      "initialDelay": "1s",
+      "maxDelay": "5s"
+    }
+  }
+}

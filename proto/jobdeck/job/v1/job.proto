@@ -1,0 +1,146 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+package jobdeck.job.v1;
+
+message JobSpec {
+  string name = 1;
+  JobType type = 2;
+
+  oneof config {
+    HttpJobConfig http = 10;
+  }
+
+  RetryPolicy retry_policy = 20;
+}
+
+message Job {
+  string id = 1;
+  string owner_id = 2;
+  bool enabled = 3;
+
+  JobSpec spec = 10;
+
+  google.protobuf.Timestamp created_at = 20;
+  google.protobuf.Timestamp updated_at = 21;
+}
+
+enum JobType {
+  JOB_TYPE_UNSPECIFIED = 0;
+  JOB_TYPE_HTTP_REQUEST = 1;
+}
+
+enum HttpMethod {
+  HTTP_METHOD_UNSPECIFIED = 0;
+  HTTP_METHOD_GET = 1;
+  HTTP_METHOD_HEAD = 2;
+  HTTP_METHOD_POST = 3;
+  HTTP_METHOD_PUT = 4;
+  HTTP_METHOD_PATCH = 5;
+  HTTP_METHOD_DELETE = 6;
+}
+
+message StatusCodeRange {
+  int32 from = 1;
+  int32 to = 2;
+}
+
+message StatusCodes {
+    repeated int32 codes = 1;
+    repeated StatusCodeRange ranges = 2;
+}
+
+message HttpJobConfig {
+  HttpMethod method = 1;
+  string url = 2;
+  repeated HttpHeader headers = 3;
+  bytes body = 4;
+
+  google.protobuf.Duration timeout = 5;
+  StatusCodes expected_status_codes = 6;
+  int64 max_response_body_bytes = 8;
+  bool follow_redirects = 9;
+
+  bool retry_on_timeout = 10;
+  bool retry_on_network_error = 11;
+
+  StatusCodes retry_on_status_codes = 12;
+}
+
+message HttpHeader {
+  string name = 1;
+  string value = 2;
+}
+
+message RetryPolicy {
+  int32 max_attempts = 1;
+
+  BackoffType backoff_type = 2;
+  google.protobuf.Duration initial_delay = 3;
+  google.protobuf.Duration max_delay = 4;
+
+}
+
+enum BackoffType {
+  BACKOFF_TYPE_UNSPECIFIED = 0;
+  BACKOFF_TYPE_FIXED = 1;
+//  BACKOFF_TYPE_EXPONENTIAL = 2;
+//  BACKOFF_TYPE_EXPONENTIAL_WITH_JITTER = 3;
+}
+
+message CreateJobRequest {
+  JobSpec spec = 1;
+}
+
+message CreateJobResponse {
+  Job job = 1;
+}
+
+message GetJobRequest {
+  string job_id = 1;
+}
+
+message GetJobResponse {
+  Job job = 1;
+}
+
+message ListJobsRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message ListJobsResponse {
+  repeated Job jobs = 1;
+  string next_page_token = 2;
+}
+
+message UpdateJobRequest {
+  string job_id = 1;
+  bool enabled = 2;
+  JobSpec spec = 3;
+}
+
+message UpdateJobResponse {
+  Job job = 1;
+}
+
+message DeleteJobRequest {
+  string job_id = 1;
+}
+
+message DeleteJobResponse {
+}
+
+service JobService {
+  rpc CreateJob(CreateJobRequest) returns (CreateJobResponse);
+  rpc UpdateJob(UpdateJobRequest) returns (UpdateJobResponse);
+  rpc DeleteJob(DeleteJobRequest) returns (DeleteJobResponse);
+  rpc GetJob(GetJobRequest) returns (GetJobResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc ListJobs(ListJobsRequest) returns (ListJobsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
