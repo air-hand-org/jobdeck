@@ -1,0 +1,19 @@
+on:
+  workflow_call:
+
+permissions: {}
+
+jobs:
+  test:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-tools
+      - name: build
+        run: make build
+      - name: test
+        run: make test
