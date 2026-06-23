@@ -23,5 +23,5 @@ go-lint:
 .PHONY: go-test
 go-test:
 	@for mod in $(GO_MODULES); do \
-       	(cd $$mod && go test -cover ./...); \
+       	(cd $$mod && go test -cover ./...) || exit $$?; \
 	done;

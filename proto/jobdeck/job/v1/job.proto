@@ -117,12 +117,23 @@ message ListJobsResponse {
 }
 
 message UpdateJobRequest {
+  reserved 2;
+  reserved "enabled";
+
   string job_id = 1;
-  bool enabled = 2;
   JobSpec spec = 3;
 }
 
 message UpdateJobResponse {
+  Job job = 1;
+}
+
+message SetJobEnabledRequest {
+  string job_id = 1;
+  bool enabled = 2;
+}
+
+message SetJobEnabledResponse {
   Job job = 1;
 }
 
@@ -136,6 +147,7 @@ message DeleteJobResponse {
 service JobService {
   rpc CreateJob(CreateJobRequest) returns (CreateJobResponse);
   rpc UpdateJob(UpdateJobRequest) returns (UpdateJobResponse);
+  rpc SetJobEnabled(SetJobEnabledRequest) returns (SetJobEnabledResponse);
   rpc DeleteJob(DeleteJobRequest) returns (DeleteJobResponse);
   rpc GetJob(GetJobRequest) returns (GetJobResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;

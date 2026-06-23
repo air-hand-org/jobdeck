@@ -981,7 +981,6 @@ func (x *ListJobsResponse) GetNextPageToken() string {
 type UpdateJobRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	JobId         string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
-	Enabled       bool                   `protobuf:"varint,2,opt,name=enabled,proto3" json:"enabled,omitempty"`
 	Spec          *JobSpec               `protobuf:"bytes,3,opt,name=spec,proto3" json:"spec,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1022,13 +1021,6 @@ func (x *UpdateJobRequest) GetJobId() string {
 		return x.JobId
 	}
 	return ""
-}
-
-func (x *UpdateJobRequest) GetEnabled() bool {
-	if x != nil {
-		return x.Enabled
-	}
-	return false
 }
 
 func (x *UpdateJobRequest) GetSpec() *JobSpec {
@@ -1082,6 +1074,102 @@ func (x *UpdateJobResponse) GetJob() *Job {
 	return nil
 }
 
+type SetJobEnabledRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	JobId         string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	Enabled       bool                   `protobuf:"varint,2,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetJobEnabledRequest) Reset() {
+	*x = SetJobEnabledRequest{}
+	mi := &file_jobdeck_job_v1_job_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetJobEnabledRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetJobEnabledRequest) ProtoMessage() {}
+
+func (x *SetJobEnabledRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_jobdeck_job_v1_job_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetJobEnabledRequest.ProtoReflect.Descriptor instead.
+func (*SetJobEnabledRequest) Descriptor() ([]byte, []int) {
+	return file_jobdeck_job_v1_job_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *SetJobEnabledRequest) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
+func (x *SetJobEnabledRequest) GetEnabled() bool {
+	if x != nil {
+		return x.Enabled
+	}
+	return false
+}
+
+type SetJobEnabledResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Job           *Job                   `protobuf:"bytes,1,opt,name=job,proto3" json:"job,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetJobEnabledResponse) Reset() {
+	*x = SetJobEnabledResponse{}
+	mi := &file_jobdeck_job_v1_job_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetJobEnabledResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetJobEnabledResponse) ProtoMessage() {}
+
+func (x *SetJobEnabledResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_jobdeck_job_v1_job_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetJobEnabledResponse.ProtoReflect.Descriptor instead.
+func (*SetJobEnabledResponse) Descriptor() ([]byte, []int) {
+	return file_jobdeck_job_v1_job_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *SetJobEnabledResponse) GetJob() *Job {
+	if x != nil {
+		return x.Job
+	}
+	return nil
+}
+
 type DeleteJobRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	JobId         string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
@@ -1091,7 +1179,7 @@ type DeleteJobRequest struct {
 
 func (x *DeleteJobRequest) Reset() {
 	*x = DeleteJobRequest{}
-	mi := &file_jobdeck_job_v1_job_proto_msgTypes[15]
+	mi := &file_jobdeck_job_v1_job_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1103,7 +1191,7 @@ func (x *DeleteJobRequest) String() string {
 func (*DeleteJobRequest) ProtoMessage() {}
 
 func (x *DeleteJobRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_jobdeck_job_v1_job_proto_msgTypes[15]
+	mi := &file_jobdeck_job_v1_job_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1116,7 +1204,7 @@ func (x *DeleteJobRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteJobRequest.ProtoReflect.Descriptor instead.
 func (*DeleteJobRequest) Descriptor() ([]byte, []int) {
-	return file_jobdeck_job_v1_job_proto_rawDescGZIP(), []int{15}
+	return file_jobdeck_job_v1_job_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *DeleteJobRequest) GetJobId() string {
@@ -1134,7 +1222,7 @@ type DeleteJobResponse struct {
 
 func (x *DeleteJobResponse) Reset() {
 	*x = DeleteJobResponse{}
-	mi := &file_jobdeck_job_v1_job_proto_msgTypes[16]
+	mi := &file_jobdeck_job_v1_job_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1146,7 +1234,7 @@ func (x *DeleteJobResponse) String() string {
 func (*DeleteJobResponse) ProtoMessage() {}
 
 func (x *DeleteJobResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_jobdeck_job_v1_job_proto_msgTypes[16]
+	mi := &file_jobdeck_job_v1_job_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1159,7 +1247,7 @@ func (x *DeleteJobResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteJobResponse.ProtoReflect.Descriptor instead.
 func (*DeleteJobResponse) Descriptor() ([]byte, []int) {
-	return file_jobdeck_job_v1_job_proto_rawDescGZIP(), []int{16}
+	return file_jobdeck_job_v1_job_proto_rawDescGZIP(), []int{18}
 }
 
 var File_jobdeck_job_v1_job_proto protoreflect.FileDescriptor
@@ -1226,12 +1314,16 @@ const file_jobdeck_job_v1_job_proto_rawDesc = "" +
 	"page_token\x18\x02 \x01(\tR\tpageToken\"c\n" +
 	"\x10ListJobsResponse\x12'\n" +
 	"\x04jobs\x18\x01 \x03(\v2\x13.jobdeck.job.v1.JobR\x04jobs\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"p\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"e\n" +
 	"\x10UpdateJobRequest\x12\x15\n" +
-	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x18\n" +
-	"\aenabled\x18\x02 \x01(\bR\aenabled\x12+\n" +
-	"\x04spec\x18\x03 \x01(\v2\x17.jobdeck.job.v1.JobSpecR\x04spec\":\n" +
+	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12+\n" +
+	"\x04spec\x18\x03 \x01(\v2\x17.jobdeck.job.v1.JobSpecR\x04specJ\x04\b\x02\x10\x03R\aenabled\":\n" +
 	"\x11UpdateJobResponse\x12%\n" +
+	"\x03job\x18\x01 \x01(\v2\x13.jobdeck.job.v1.JobR\x03job\"G\n" +
+	"\x14SetJobEnabledRequest\x12\x15\n" +
+	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x18\n" +
+	"\aenabled\x18\x02 \x01(\bR\aenabled\">\n" +
+	"\x15SetJobEnabledResponse\x12%\n" +
 	"\x03job\x18\x01 \x01(\v2\x13.jobdeck.job.v1.JobR\x03job\")\n" +
 	"\x10DeleteJobRequest\x12\x15\n" +
 	"\x06job_id\x18\x01 \x01(\tR\x05jobId\"\x13\n" +
@@ -1250,11 +1342,12 @@ const file_jobdeck_job_v1_job_proto_rawDesc = "" +
 	"\x12HTTP_METHOD_DELETE\x10\x06*C\n" +
 	"\vBackoffType\x12\x1c\n" +
 	"\x18BACKOFF_TYPE_UNSPECIFIED\x10\x00\x12\x16\n" +
-	"\x12BACKOFF_TYPE_FIXED\x10\x012\xa4\x03\n" +
+	"\x12BACKOFF_TYPE_FIXED\x10\x012\x82\x04\n" +
 	"\n" +
 	"JobService\x12P\n" +
 	"\tCreateJob\x12 .jobdeck.job.v1.CreateJobRequest\x1a!.jobdeck.job.v1.CreateJobResponse\x12P\n" +
-	"\tUpdateJob\x12 .jobdeck.job.v1.UpdateJobRequest\x1a!.jobdeck.job.v1.UpdateJobResponse\x12P\n" +
+	"\tUpdateJob\x12 .jobdeck.job.v1.UpdateJobRequest\x1a!.jobdeck.job.v1.UpdateJobResponse\x12\\\n" +
+	"\rSetJobEnabled\x12$.jobdeck.job.v1.SetJobEnabledRequest\x1a%.jobdeck.job.v1.SetJobEnabledResponse\x12P\n" +
 	"\tDeleteJob\x12 .jobdeck.job.v1.DeleteJobRequest\x1a!.jobdeck.job.v1.DeleteJobResponse\x12L\n" +
 	"\x06GetJob\x12\x1d.jobdeck.job.v1.GetJobRequest\x1a\x1e.jobdeck.job.v1.GetJobResponse\"\x03\x90\x02\x01\x12R\n" +
 	"\bListJobs\x12\x1f.jobdeck.job.v1.ListJobsRequest\x1a .jobdeck.job.v1.ListJobsResponse\"\x03\x90\x02\x01B\x9a\x01\n" +
@@ -1273,7 +1366,7 @@ func file_jobdeck_job_v1_job_proto_rawDescGZIP() []byte {
 }
 
 var file_jobdeck_job_v1_job_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_jobdeck_job_v1_job_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
+var file_jobdeck_job_v1_job_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_jobdeck_job_v1_job_proto_goTypes = []any{
 	(JobType)(0),                  // 0: jobdeck.job.v1.JobType
 	(HttpMethod)(0),               // 1: jobdeck.job.v1.HttpMethod
@@ -1293,48 +1386,53 @@ var file_jobdeck_job_v1_job_proto_goTypes = []any{
 	(*ListJobsResponse)(nil),      // 15: jobdeck.job.v1.ListJobsResponse
 	(*UpdateJobRequest)(nil),      // 16: jobdeck.job.v1.UpdateJobRequest
 	(*UpdateJobResponse)(nil),     // 17: jobdeck.job.v1.UpdateJobResponse
-	(*DeleteJobRequest)(nil),      // 18: jobdeck.job.v1.DeleteJobRequest
-	(*DeleteJobResponse)(nil),     // 19: jobdeck.job.v1.DeleteJobResponse
-	(*timestamppb.Timestamp)(nil), // 20: google.protobuf.Timestamp
-	(*durationpb.Duration)(nil),   // 21: google.protobuf.Duration
+	(*SetJobEnabledRequest)(nil),  // 18: jobdeck.job.v1.SetJobEnabledRequest
+	(*SetJobEnabledResponse)(nil), // 19: jobdeck.job.v1.SetJobEnabledResponse
+	(*DeleteJobRequest)(nil),      // 20: jobdeck.job.v1.DeleteJobRequest
+	(*DeleteJobResponse)(nil),     // 21: jobdeck.job.v1.DeleteJobResponse
+	(*timestamppb.Timestamp)(nil), // 22: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),   // 23: google.protobuf.Duration
 }
 var file_jobdeck_job_v1_job_proto_depIdxs = []int32{
 	0,  // 0: jobdeck.job.v1.JobSpec.type:type_name -> jobdeck.job.v1.JobType
 	7,  // 1: jobdeck.job.v1.JobSpec.http:type_name -> jobdeck.job.v1.HttpJobConfig
 	9,  // 2: jobdeck.job.v1.JobSpec.retry_policy:type_name -> jobdeck.job.v1.RetryPolicy
 	3,  // 3: jobdeck.job.v1.Job.spec:type_name -> jobdeck.job.v1.JobSpec
-	20, // 4: jobdeck.job.v1.Job.created_at:type_name -> google.protobuf.Timestamp
-	20, // 5: jobdeck.job.v1.Job.updated_at:type_name -> google.protobuf.Timestamp
+	22, // 4: jobdeck.job.v1.Job.created_at:type_name -> google.protobuf.Timestamp
+	22, // 5: jobdeck.job.v1.Job.updated_at:type_name -> google.protobuf.Timestamp
 	5,  // 6: jobdeck.job.v1.StatusCodes.ranges:type_name -> jobdeck.job.v1.StatusCodeRange
 	1,  // 7: jobdeck.job.v1.HttpJobConfig.method:type_name -> jobdeck.job.v1.HttpMethod
 	8,  // 8: jobdeck.job.v1.HttpJobConfig.headers:type_name -> jobdeck.job.v1.HttpHeader
-	21, // 9: jobdeck.job.v1.HttpJobConfig.timeout:type_name -> google.protobuf.Duration
+	23, // 9: jobdeck.job.v1.HttpJobConfig.timeout:type_name -> google.protobuf.Duration
 	6,  // 10: jobdeck.job.v1.HttpJobConfig.expected_status_codes:type_name -> jobdeck.job.v1.StatusCodes
 	6,  // 11: jobdeck.job.v1.HttpJobConfig.retry_on_status_codes:type_name -> jobdeck.job.v1.StatusCodes
 	2,  // 12: jobdeck.job.v1.RetryPolicy.backoff_type:type_name -> jobdeck.job.v1.BackoffType
-	21, // 13: jobdeck.job.v1.RetryPolicy.initial_delay:type_name -> google.protobuf.Duration
-	21, // 14: jobdeck.job.v1.RetryPolicy.max_delay:type_name -> google.protobuf.Duration
+	23, // 13: jobdeck.job.v1.RetryPolicy.initial_delay:type_name -> google.protobuf.Duration
+	23, // 14: jobdeck.job.v1.RetryPolicy.max_delay:type_name -> google.protobuf.Duration
 	3,  // 15: jobdeck.job.v1.CreateJobRequest.spec:type_name -> jobdeck.job.v1.JobSpec
 	4,  // 16: jobdeck.job.v1.CreateJobResponse.job:type_name -> jobdeck.job.v1.Job
 	4,  // 17: jobdeck.job.v1.GetJobResponse.job:type_name -> jobdeck.job.v1.Job
 	4,  // 18: jobdeck.job.v1.ListJobsResponse.jobs:type_name -> jobdeck.job.v1.Job
 	3,  // 19: jobdeck.job.v1.UpdateJobRequest.spec:type_name -> jobdeck.job.v1.JobSpec
 	4,  // 20: jobdeck.job.v1.UpdateJobResponse.job:type_name -> jobdeck.job.v1.Job
-	10, // 21: jobdeck.job.v1.JobService.CreateJob:input_type -> jobdeck.job.v1.CreateJobRequest
-	16, // 22: jobdeck.job.v1.JobService.UpdateJob:input_type -> jobdeck.job.v1.UpdateJobRequest
-	18, // 23: jobdeck.job.v1.JobService.DeleteJob:input_type -> jobdeck.job.v1.DeleteJobRequest
-	12, // 24: jobdeck.job.v1.JobService.GetJob:input_type -> jobdeck.job.v1.GetJobRequest
-	14, // 25: jobdeck.job.v1.JobService.ListJobs:input_type -> jobdeck.job.v1.ListJobsRequest
-	11, // 26: jobdeck.job.v1.JobService.CreateJob:output_type -> jobdeck.job.v1.CreateJobResponse
-	17, // 27: jobdeck.job.v1.JobService.UpdateJob:output_type -> jobdeck.job.v1.UpdateJobResponse
-	19, // 28: jobdeck.job.v1.JobService.DeleteJob:output_type -> jobdeck.job.v1.DeleteJobResponse
-	13, // 29: jobdeck.job.v1.JobService.GetJob:output_type -> jobdeck.job.v1.GetJobResponse
-	15, // 30: jobdeck.job.v1.JobService.ListJobs:output_type -> jobdeck.job.v1.ListJobsResponse
-	26, // [26:31] is the sub-list for method output_type
-	21, // [21:26] is the sub-list for method input_type
-	21, // [21:21] is the sub-list for extension type_name
-	21, // [21:21] is the sub-list for extension extendee
-	0,  // [0:21] is the sub-list for field type_name
+	4,  // 21: jobdeck.job.v1.SetJobEnabledResponse.job:type_name -> jobdeck.job.v1.Job
+	10, // 22: jobdeck.job.v1.JobService.CreateJob:input_type -> jobdeck.job.v1.CreateJobRequest
+	16, // 23: jobdeck.job.v1.JobService.UpdateJob:input_type -> jobdeck.job.v1.UpdateJobRequest
+	18, // 24: jobdeck.job.v1.JobService.SetJobEnabled:input_type -> jobdeck.job.v1.SetJobEnabledRequest
+	20, // 25: jobdeck.job.v1.JobService.DeleteJob:input_type -> jobdeck.job.v1.DeleteJobRequest
+	12, // 26: jobdeck.job.v1.JobService.GetJob:input_type -> jobdeck.job.v1.GetJobRequest
+	14, // 27: jobdeck.job.v1.JobService.ListJobs:input_type -> jobdeck.job.v1.ListJobsRequest
+	11, // 28: jobdeck.job.v1.JobService.CreateJob:output_type -> jobdeck.job.v1.CreateJobResponse
+	17, // 29: jobdeck.job.v1.JobService.UpdateJob:output_type -> jobdeck.job.v1.UpdateJobResponse
+	19, // 30: jobdeck.job.v1.JobService.SetJobEnabled:output_type -> jobdeck.job.v1.SetJobEnabledResponse
+	21, // 31: jobdeck.job.v1.JobService.DeleteJob:output_type -> jobdeck.job.v1.DeleteJobResponse
+	13, // 32: jobdeck.job.v1.JobService.GetJob:output_type -> jobdeck.job.v1.GetJobResponse
+	15, // 33: jobdeck.job.v1.JobService.ListJobs:output_type -> jobdeck.job.v1.ListJobsResponse
+	28, // [28:34] is the sub-list for method output_type
+	22, // [22:28] is the sub-list for method input_type
+	22, // [22:22] is the sub-list for extension type_name
+	22, // [22:22] is the sub-list for extension extendee
+	0,  // [0:22] is the sub-list for field type_name
 }
 
 func init() { file_jobdeck_job_v1_job_proto_init() }
@@ -1351,7 +1449,7 @@ func file_jobdeck_job_v1_job_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_jobdeck_job_v1_job_proto_rawDesc), len(file_jobdeck_job_v1_job_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   17,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -15,7 +15,8 @@ type Querier interface {
 	DeleteJob(ctx context.Context, arg DeleteJobParams) (int64, error)
 	GetJob(ctx context.Context, arg GetJobParams) (Job, error)
 	ListJobsByOwner(ctx context.Context, ownerID uuid.UUID) ([]Job, error)
-	UpdateJob(ctx context.Context, arg UpdateJobParams) (Job, error)
+	SetJobEnabled(ctx context.Context, arg SetJobEnabledParams) (Job, error)
+	UpdateJobSpec(ctx context.Context, arg UpdateJobSpecParams) (Job, error)
 }
 
 var _ Querier = (*Queries)(nil)

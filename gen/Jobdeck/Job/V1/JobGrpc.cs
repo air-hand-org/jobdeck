@@ -54,6 +54,10 @@ namespace Jobdeck.Job.V1 {
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Marshaller<global::Jobdeck.Job.V1.UpdateJobResponse> __Marshaller_jobdeck_job_v1_UpdateJobResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Jobdeck.Job.V1.UpdateJobResponse.Parser));
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::Jobdeck.Job.V1.SetJobEnabledRequest> __Marshaller_jobdeck_job_v1_SetJobEnabledRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Jobdeck.Job.V1.SetJobEnabledRequest.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::Jobdeck.Job.V1.SetJobEnabledResponse> __Marshaller_jobdeck_job_v1_SetJobEnabledResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Jobdeck.Job.V1.SetJobEnabledResponse.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Marshaller<global::Jobdeck.Job.V1.DeleteJobRequest> __Marshaller_jobdeck_job_v1_DeleteJobRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Jobdeck.Job.V1.DeleteJobRequest.Parser));
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Marshaller<global::Jobdeck.Job.V1.DeleteJobResponse> __Marshaller_jobdeck_job_v1_DeleteJobResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Jobdeck.Job.V1.DeleteJobResponse.Parser));
@@ -81,6 +85,14 @@ namespace Jobdeck.Job.V1 {
         "UpdateJob",
         __Marshaller_jobdeck_job_v1_UpdateJobRequest,
         __Marshaller_jobdeck_job_v1_UpdateJobResponse);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::Jobdeck.Job.V1.SetJobEnabledRequest, global::Jobdeck.Job.V1.SetJobEnabledResponse> __Method_SetJobEnabled = new grpc::Method<global::Jobdeck.Job.V1.SetJobEnabledRequest, global::Jobdeck.Job.V1.SetJobEnabledResponse>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "SetJobEnabled",
+        __Marshaller_jobdeck_job_v1_SetJobEnabledRequest,
+        __Marshaller_jobdeck_job_v1_SetJobEnabledResponse);
 
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Method<global::Jobdeck.Job.V1.DeleteJobRequest, global::Jobdeck.Job.V1.DeleteJobResponse> __Method_DeleteJob = new grpc::Method<global::Jobdeck.Job.V1.DeleteJobRequest, global::Jobdeck.Job.V1.DeleteJobResponse>(
@@ -124,6 +136,12 @@ namespace Jobdeck.Job.V1 {
 
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
       public virtual global::System.Threading.Tasks.Task<global::Jobdeck.Job.V1.UpdateJobResponse> UpdateJob(global::Jobdeck.Job.V1.UpdateJobRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::Jobdeck.Job.V1.SetJobEnabledResponse> SetJobEnabled(global::Jobdeck.Job.V1.SetJobEnabledRequest request, grpc::ServerCallContext context)
       {
         throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
       }
@@ -216,6 +234,26 @@ namespace Jobdeck.Job.V1 {
         return CallInvoker.AsyncUnaryCall(__Method_UpdateJob, null, options, request);
       }
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Jobdeck.Job.V1.SetJobEnabledResponse SetJobEnabled(global::Jobdeck.Job.V1.SetJobEnabledRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return SetJobEnabled(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Jobdeck.Job.V1.SetJobEnabledResponse SetJobEnabled(global::Jobdeck.Job.V1.SetJobEnabledRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_SetJobEnabled, null, options, request);
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Jobdeck.Job.V1.SetJobEnabledResponse> SetJobEnabledAsync(global::Jobdeck.Job.V1.SetJobEnabledRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return SetJobEnabledAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Jobdeck.Job.V1.SetJobEnabledResponse> SetJobEnabledAsync(global::Jobdeck.Job.V1.SetJobEnabledRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_SetJobEnabled, null, options, request);
+      }
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
       public virtual global::Jobdeck.Job.V1.DeleteJobResponse DeleteJob(global::Jobdeck.Job.V1.DeleteJobRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
       {
         return DeleteJob(request, new grpc::CallOptions(headers, deadline, cancellationToken));
@@ -291,6 +329,7 @@ namespace Jobdeck.Job.V1 {
       return grpc::ServerServiceDefinition.CreateBuilder()
           .AddMethod(__Method_CreateJob, serviceImpl.CreateJob)
           .AddMethod(__Method_UpdateJob, serviceImpl.UpdateJob)
+          .AddMethod(__Method_SetJobEnabled, serviceImpl.SetJobEnabled)
           .AddMethod(__Method_DeleteJob, serviceImpl.DeleteJob)
           .AddMethod(__Method_GetJob, serviceImpl.GetJob)
           .AddMethod(__Method_ListJobs, serviceImpl.ListJobs).Build();
@@ -305,6 +344,7 @@ namespace Jobdeck.Job.V1 {
     {
       serviceBinder.AddMethod(__Method_CreateJob, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Jobdeck.Job.V1.CreateJobRequest, global::Jobdeck.Job.V1.CreateJobResponse>(serviceImpl.CreateJob));
       serviceBinder.AddMethod(__Method_UpdateJob, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Jobdeck.Job.V1.UpdateJobRequest, global::Jobdeck.Job.V1.UpdateJobResponse>(serviceImpl.UpdateJob));
+      serviceBinder.AddMethod(__Method_SetJobEnabled, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Jobdeck.Job.V1.SetJobEnabledRequest, global::Jobdeck.Job.V1.SetJobEnabledResponse>(serviceImpl.SetJobEnabled));
       serviceBinder.AddMethod(__Method_DeleteJob, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Jobdeck.Job.V1.DeleteJobRequest, global::Jobdeck.Job.V1.DeleteJobResponse>(serviceImpl.DeleteJob));
       serviceBinder.AddMethod(__Method_GetJob, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Jobdeck.Job.V1.GetJobRequest, global::Jobdeck.Job.V1.GetJobResponse>(serviceImpl.GetJob));
       serviceBinder.AddMethod(__Method_ListJobs, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Jobdeck.Job.V1.ListJobsRequest, global::Jobdeck.Job.V1.ListJobsResponse>(serviceImpl.ListJobs));

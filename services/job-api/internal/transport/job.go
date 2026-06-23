@@ -18,8 +18,10 @@ var OwnerId domain.UserId = uuid.Max
 type jobServiceServer struct {
 	u app.JobUsecase
 
-	jobv1.UnimplementedJobServiceServer
+	jobv1.UnsafeJobServiceServer
 }
+
+var _ jobv1.JobServiceServer = (*jobServiceServer)(nil)
 
 func (s *jobServiceServer) CreateJob(ctx context.Context, req *jobv1.CreateJobRequest) (*jobv1.CreateJobResponse, error) {
 	if req == nil {
@@ -54,7 +56,7 @@ func (s *jobServiceServer) UpdateJob(ctx context.Context, req *jobv1.UpdateJobRe
 	if err != nil {
 		return nil, err
 	}
-	job, err := s.u.UpdateJob(ctx, OwnerId, job_id, req.GetEnabled(), spec)
+	job, err := s.u.UpdateJobSpec(ctx, OwnerId, job_id, spec)
 	if err != nil {
 		return nil, err
 	}
@@ -63,6 +65,28 @@ func (s *jobServiceServer) UpdateJob(ctx context.Context, req *jobv1.UpdateJobRe
 		return nil, err
 	}
 	return &jobv1.UpdateJobResponse{
+		Job: protoJob,
+	}, nil
+}
+
+func (s *jobServiceServer) SetJobEnabled(ctx context.Context, req *jobv1.SetJobEnabledRequest) (*jobv1.SetJobEnabledResponse, error) {
+	if req == nil {
+		return nil, errors.New("req is required")
+	}
+	job_id, err := transform.JobIdFromProto(req.GetJobId())
+	if err != nil {
+		return nil, err
+	}
+
+	job, err := s.u.SetJobEnabled(ctx, OwnerId, job_id, req.GetEnabled())
+	if err != nil {
+		return nil, err
+	}
+	protoJob, err := transform.JobToProto(job)
+	if err != nil {
+		return nil, err
+	}
+	return &jobv1.SetJobEnabledResponse{
 		Job: protoJob,
 	}, nil
 }

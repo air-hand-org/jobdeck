@@ -37,6 +37,9 @@ const (
 	JobServiceCreateJobProcedure = "/jobdeck.job.v1.JobService/CreateJob"
 	// JobServiceUpdateJobProcedure is the fully-qualified name of the JobService's UpdateJob RPC.
 	JobServiceUpdateJobProcedure = "/jobdeck.job.v1.JobService/UpdateJob"
+	// JobServiceSetJobEnabledProcedure is the fully-qualified name of the JobService's SetJobEnabled
+	// RPC.
+	JobServiceSetJobEnabledProcedure = "/jobdeck.job.v1.JobService/SetJobEnabled"
 	// JobServiceDeleteJobProcedure is the fully-qualified name of the JobService's DeleteJob RPC.
 	JobServiceDeleteJobProcedure = "/jobdeck.job.v1.JobService/DeleteJob"
 	// JobServiceGetJobProcedure is the fully-qualified name of the JobService's GetJob RPC.
@@ -49,6 +52,7 @@ const (
 type JobServiceClient interface {
 	CreateJob(context.Context, *v1.CreateJobRequest) (*v1.CreateJobResponse, error)
 	UpdateJob(context.Context, *v1.UpdateJobRequest) (*v1.UpdateJobResponse, error)
+	SetJobEnabled(context.Context, *v1.SetJobEnabledRequest) (*v1.SetJobEnabledResponse, error)
 	DeleteJob(context.Context, *v1.DeleteJobRequest) (*v1.DeleteJobResponse, error)
 	GetJob(context.Context, *v1.GetJobRequest) (*v1.GetJobResponse, error)
 	ListJobs(context.Context, *v1.ListJobsRequest) (*v1.ListJobsResponse, error)
@@ -77,6 +81,12 @@ func NewJobServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...
 			connect.WithSchema(jobServiceMethods.ByName("UpdateJob")),
 			connect.WithClientOptions(opts...),
 		),
+		setJobEnabled: connect.NewClient[v1.SetJobEnabledRequest, v1.SetJobEnabledResponse](
+			httpClient,
+			baseURL+JobServiceSetJobEnabledProcedure,
+			connect.WithSchema(jobServiceMethods.ByName("SetJobEnabled")),
+			connect.WithClientOptions(opts...),
+		),
 		deleteJob: connect.NewClient[v1.DeleteJobRequest, v1.DeleteJobResponse](
 			httpClient,
 			baseURL+JobServiceDeleteJobProcedure,
@@ -102,11 +112,12 @@ func NewJobServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...
 
 // jobServiceClient implements JobServiceClient.
 type jobServiceClient struct {
-	createJob *connect.Client[v1.CreateJobRequest, v1.CreateJobResponse]
-	updateJob *connect.Client[v1.UpdateJobRequest, v1.UpdateJobResponse]
-	deleteJob *connect.Client[v1.DeleteJobRequest, v1.DeleteJobResponse]
-	getJob    *connect.Client[v1.GetJobRequest, v1.GetJobResponse]
-	listJobs  *connect.Client[v1.ListJobsRequest, v1.ListJobsResponse]
+	createJob     *connect.Client[v1.CreateJobRequest, v1.CreateJobResponse]
+	updateJob     *connect.Client[v1.UpdateJobRequest, v1.UpdateJobResponse]
+	setJobEnabled *connect.Client[v1.SetJobEnabledRequest, v1.SetJobEnabledResponse]
+	deleteJob     *connect.Client[v1.DeleteJobRequest, v1.DeleteJobResponse]
+	getJob        *connect.Client[v1.GetJobRequest, v1.GetJobResponse]
+	listJobs      *connect.Client[v1.ListJobsRequest, v1.ListJobsResponse]
 }
 
 // CreateJob calls jobdeck.job.v1.JobService.CreateJob.
@@ -121,6 +132,15 @@ func (c *jobServiceClient) CreateJob(ctx context.Context, req *v1.CreateJobReque
 // UpdateJob calls jobdeck.job.v1.JobService.UpdateJob.
 func (c *jobServiceClient) UpdateJob(ctx context.Context, req *v1.UpdateJobRequest) (*v1.UpdateJobResponse, error) {
 	response, err := c.updateJob.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// SetJobEnabled calls jobdeck.job.v1.JobService.SetJobEnabled.
+func (c *jobServiceClient) SetJobEnabled(ctx context.Context, req *v1.SetJobEnabledRequest) (*v1.SetJobEnabledResponse, error) {
+	response, err := c.setJobEnabled.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -158,6 +178,7 @@ func (c *jobServiceClient) ListJobs(ctx context.Context, req *v1.ListJobsRequest
 type JobServiceHandler interface {
 	CreateJob(context.Context, *v1.CreateJobRequest) (*v1.CreateJobResponse, error)
 	UpdateJob(context.Context, *v1.UpdateJobRequest) (*v1.UpdateJobResponse, error)
+	SetJobEnabled(context.Context, *v1.SetJobEnabledRequest) (*v1.SetJobEnabledResponse, error)
 	DeleteJob(context.Context, *v1.DeleteJobRequest) (*v1.DeleteJobResponse, error)
 	GetJob(context.Context, *v1.GetJobRequest) (*v1.GetJobResponse, error)
 	ListJobs(context.Context, *v1.ListJobsRequest) (*v1.ListJobsResponse, error)
@@ -180,6 +201,12 @@ func NewJobServiceHandler(svc JobServiceHandler, opts ...connect.HandlerOption) 
 		JobServiceUpdateJobProcedure,
 		svc.UpdateJob,
 		connect.WithSchema(jobServiceMethods.ByName("UpdateJob")),
+		connect.WithHandlerOptions(opts...),
+	)
+	jobServiceSetJobEnabledHandler := connect.NewUnaryHandlerSimple(
+		JobServiceSetJobEnabledProcedure,
+		svc.SetJobEnabled,
+		connect.WithSchema(jobServiceMethods.ByName("SetJobEnabled")),
 		connect.WithHandlerOptions(opts...),
 	)
 	jobServiceDeleteJobHandler := connect.NewUnaryHandlerSimple(
@@ -208,6 +235,8 @@ func NewJobServiceHandler(svc JobServiceHandler, opts ...connect.HandlerOption) 
 			jobServiceCreateJobHandler.ServeHTTP(w, r)
 		case JobServiceUpdateJobProcedure:
 			jobServiceUpdateJobHandler.ServeHTTP(w, r)
+		case JobServiceSetJobEnabledProcedure:
+			jobServiceSetJobEnabledHandler.ServeHTTP(w, r)
 		case JobServiceDeleteJobProcedure:
 			jobServiceDeleteJobHandler.ServeHTTP(w, r)
 		case JobServiceGetJobProcedure:
@@ -229,6 +258,10 @@ func (UnimplementedJobServiceHandler) CreateJob(context.Context, *v1.CreateJobRe
 
 func (UnimplementedJobServiceHandler) UpdateJob(context.Context, *v1.UpdateJobRequest) (*v1.UpdateJobResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("jobdeck.job.v1.JobService.UpdateJob is not implemented"))
+}
+
+func (UnimplementedJobServiceHandler) SetJobEnabled(context.Context, *v1.SetJobEnabledRequest) (*v1.SetJobEnabledResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("jobdeck.job.v1.JobService.SetJobEnabled is not implemented"))
 }
 
 func (UnimplementedJobServiceHandler) DeleteJob(context.Context, *v1.DeleteJobRequest) (*v1.DeleteJobResponse, error) {

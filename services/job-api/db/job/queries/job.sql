@@ -31,19 +31,27 @@ INSERT INTO job.job (
 ) RETURNING *
 ;
 
--- name: UpdateJob :one
+-- name: UpdateJobSpec :one
 UPDATE job.job SET
   name = $1
-  , enabled = $2
-  , type = $3
-  , config = $4
-  , retry_max_attempts = $5
-  , retry_backoff_type = $6
-  , retry_initial_delay_ms = $7
-  , retry_max_delay_ms = $8
+  , type = $2
+  , config = $3
+  , retry_max_attempts = $4
+  , retry_backoff_type = $5
+  , retry_initial_delay_ms = $6
+  , retry_max_delay_ms = $7
 WHERE
-  job_id = $9
-  AND owner_id = $10
+  job_id = $8
+  AND owner_id = $9
+RETURNING *
+;
+
+-- name: SetJobEnabled :one
+UPDATE job.job SET
+  enabled = $1
+WHERE
+  job_id = $2
+  AND owner_id = $3
 RETURNING *
 ;
 

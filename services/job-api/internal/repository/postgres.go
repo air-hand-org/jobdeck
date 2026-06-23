@@ -21,7 +21,7 @@ func NewJobRepository(q jobdb.Querier) app.JobRepository {
 	return &jobRepository{q: q}
 }
 
-var _ app.JobRepository = &jobRepository{}
+var _ app.JobRepository = (*jobRepository)(nil)
 
 func (r *jobRepository) Create(ctx context.Context, owner_id domain.UserId, spec domain.JobSpec) (domain.Job, error) {
 	cfg, err := json.Marshal(spec.Config)
@@ -46,27 +46,41 @@ func (r *jobRepository) Create(ctx context.Context, owner_id domain.UserId, spec
 	return jobFromDB(job)
 }
 
-func (r *jobRepository) Update(ctx context.Context, owner_id domain.UserId, job domain.Job) (domain.Job, error) {
-	cfg, err := json.Marshal(job.Spec.Config)
+func (r *jobRepository) UpdateSpec(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, spec domain.JobSpec) (domain.Job, error) {
+	cfg, err := json.Marshal(spec.Config)
 	if err != nil {
 		return domain.Job{}, err
 	}
-	j, err := r.q.UpdateJob(ctx, jobdb.UpdateJobParams{
-		Name:    job.Spec.Name,
-		Enabled: job.Enabled,
-		Type:    string(job.Spec.Type),
+	j, err := r.q.UpdateJobSpec(ctx, jobdb.UpdateJobSpecParams{
+		Name:    spec.Name,
+		Type:    string(spec.Type),
 		Config:  cfg,
 
-		RetryMaxAttempts:    job.Spec.RetryPolicy.MaxAttempts,
-		RetryBackoffType:    string(job.Spec.RetryPolicy.BackoffType),
-		RetryInitialDelayMs: job.Spec.RetryPolicy.InitialDelay.Milliseconds(),
-		RetryMaxDelayMs:     job.Spec.RetryPolicy.MaxDelay.Milliseconds(),
-		JobID:               job.Id,
-		OwnerID:             job.OwnerId,
+		RetryMaxAttempts:    spec.RetryPolicy.MaxAttempts,
+		RetryBackoffType:    string(spec.RetryPolicy.BackoffType),
+		RetryInitialDelayMs: spec.RetryPolicy.InitialDelay.Milliseconds(),
+		RetryMaxDelayMs:     spec.RetryPolicy.MaxDelay.Milliseconds(),
+		JobID:               job_id,
+		OwnerID:             owner_id,
 	})
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return domain.Job{}, errors.Wrapf(domain.ErrJobNotFound, "job %v was not found", job.Id)
+			return domain.Job{}, errors.Wrapf(domain.ErrJobNotFound, "job %v was not found", job_id)
+		}
+		return domain.Job{}, err
+	}
+	return jobFromDB(j)
+}
+
+func (r *jobRepository) SetEnabled(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, enabled bool) (domain.Job, error) {
+	j, err := r.q.SetJobEnabled(ctx, jobdb.SetJobEnabledParams{
+		Enabled: enabled,
+		JobID: job_id,
+		OwnerID: owner_id,
+	})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.Job{}, errors.Wrapf(domain.ErrJobNotFound, "job %v was not found", job_id)
 		}
 		return domain.Job{}, err
 	}

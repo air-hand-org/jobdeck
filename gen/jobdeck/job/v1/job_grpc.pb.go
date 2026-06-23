@@ -19,11 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	JobService_CreateJob_FullMethodName = "/jobdeck.job.v1.JobService/CreateJob"
-	JobService_UpdateJob_FullMethodName = "/jobdeck.job.v1.JobService/UpdateJob"
-	JobService_DeleteJob_FullMethodName = "/jobdeck.job.v1.JobService/DeleteJob"
-	JobService_GetJob_FullMethodName    = "/jobdeck.job.v1.JobService/GetJob"
-	JobService_ListJobs_FullMethodName  = "/jobdeck.job.v1.JobService/ListJobs"
+	JobService_CreateJob_FullMethodName     = "/jobdeck.job.v1.JobService/CreateJob"
+	JobService_UpdateJob_FullMethodName     = "/jobdeck.job.v1.JobService/UpdateJob"
+	JobService_SetJobEnabled_FullMethodName = "/jobdeck.job.v1.JobService/SetJobEnabled"
+	JobService_DeleteJob_FullMethodName     = "/jobdeck.job.v1.JobService/DeleteJob"
+	JobService_GetJob_FullMethodName        = "/jobdeck.job.v1.JobService/GetJob"
+	JobService_ListJobs_FullMethodName      = "/jobdeck.job.v1.JobService/ListJobs"
 )
 
 // JobServiceClient is the client API for JobService service.
@@ -32,6 +33,7 @@ const (
 type JobServiceClient interface {
 	CreateJob(ctx context.Context, in *CreateJobRequest, opts ...grpc.CallOption) (*CreateJobResponse, error)
 	UpdateJob(ctx context.Context, in *UpdateJobRequest, opts ...grpc.CallOption) (*UpdateJobResponse, error)
+	SetJobEnabled(ctx context.Context, in *SetJobEnabledRequest, opts ...grpc.CallOption) (*SetJobEnabledResponse, error)
 	DeleteJob(ctx context.Context, in *DeleteJobRequest, opts ...grpc.CallOption) (*DeleteJobResponse, error)
 	GetJob(ctx context.Context, in *GetJobRequest, opts ...grpc.CallOption) (*GetJobResponse, error)
 	ListJobs(ctx context.Context, in *ListJobsRequest, opts ...grpc.CallOption) (*ListJobsResponse, error)
@@ -59,6 +61,16 @@ func (c *jobServiceClient) UpdateJob(ctx context.Context, in *UpdateJobRequest, 
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateJobResponse)
 	err := c.cc.Invoke(ctx, JobService_UpdateJob_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *jobServiceClient) SetJobEnabled(ctx context.Context, in *SetJobEnabledRequest, opts ...grpc.CallOption) (*SetJobEnabledResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetJobEnabledResponse)
+	err := c.cc.Invoke(ctx, JobService_SetJobEnabled_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -101,6 +113,7 @@ func (c *jobServiceClient) ListJobs(ctx context.Context, in *ListJobsRequest, op
 type JobServiceServer interface {
 	CreateJob(context.Context, *CreateJobRequest) (*CreateJobResponse, error)
 	UpdateJob(context.Context, *UpdateJobRequest) (*UpdateJobResponse, error)
+	SetJobEnabled(context.Context, *SetJobEnabledRequest) (*SetJobEnabledResponse, error)
 	DeleteJob(context.Context, *DeleteJobRequest) (*DeleteJobResponse, error)
 	GetJob(context.Context, *GetJobRequest) (*GetJobResponse, error)
 	ListJobs(context.Context, *ListJobsRequest) (*ListJobsResponse, error)
@@ -119,6 +132,9 @@ func (UnimplementedJobServiceServer) CreateJob(context.Context, *CreateJobReques
 }
 func (UnimplementedJobServiceServer) UpdateJob(context.Context, *UpdateJobRequest) (*UpdateJobResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateJob not implemented")
+}
+func (UnimplementedJobServiceServer) SetJobEnabled(context.Context, *SetJobEnabledRequest) (*SetJobEnabledResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetJobEnabled not implemented")
 }
 func (UnimplementedJobServiceServer) DeleteJob(context.Context, *DeleteJobRequest) (*DeleteJobResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteJob not implemented")
@@ -182,6 +198,24 @@ func _JobService_UpdateJob_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(JobServiceServer).UpdateJob(ctx, req.(*UpdateJobRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _JobService_SetJobEnabled_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetJobEnabledRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(JobServiceServer).SetJobEnabled(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: JobService_SetJobEnabled_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(JobServiceServer).SetJobEnabled(ctx, req.(*SetJobEnabledRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -254,6 +288,10 @@ var JobService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateJob",
 			Handler:    _JobService_UpdateJob_Handler,
+		},
+		{
+			MethodName: "SetJobEnabled",
+			Handler:    _JobService_SetJobEnabled_Handler,
 		},
 		{
 			MethodName: "DeleteJob",

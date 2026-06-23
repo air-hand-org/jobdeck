@@ -31,8 +31,11 @@ var _ JobRepository = &JobRepositoryMock{}
 //			ListByOwnerFunc: func(contextMoqParam context.Context, v domain.UserId) ([]domain.Job, error) {
 //				panic("mock out the ListByOwner method")
 //			},
-//			UpdateFunc: func(contextMoqParam context.Context, v domain.UserId, job domain.Job) (domain.Job, error) {
-//				panic("mock out the Update method")
+//			SetEnabledFunc: func(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId, b bool) (domain.Job, error) {
+//				panic("mock out the SetEnabled method")
+//			},
+//			UpdateSpecFunc: func(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId, jobSpec domain.JobSpec) (domain.Job, error) {
+//				panic("mock out the UpdateSpec method")
 //			},
 //		}
 //
@@ -53,8 +56,11 @@ type JobRepositoryMock struct {
 	// ListByOwnerFunc mocks the ListByOwner method.
 	ListByOwnerFunc func(contextMoqParam context.Context, v domain.UserId) ([]domain.Job, error)
 
-	// UpdateFunc mocks the Update method.
-	UpdateFunc func(contextMoqParam context.Context, v domain.UserId, job domain.Job) (domain.Job, error)
+	// SetEnabledFunc mocks the SetEnabled method.
+	SetEnabledFunc func(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId, b bool) (domain.Job, error)
+
+	// UpdateSpecFunc mocks the UpdateSpec method.
+	UpdateSpecFunc func(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId, jobSpec domain.JobSpec) (domain.Job, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -92,21 +98,35 @@ type JobRepositoryMock struct {
 			// V is the v argument value.
 			V domain.UserId
 		}
-		// Update holds details about calls to the Update method.
-		Update []struct {
+		// SetEnabled holds details about calls to the SetEnabled method.
+		SetEnabled []struct {
 			// ContextMoqParam is the contextMoqParam argument value.
 			ContextMoqParam context.Context
-			// V is the v argument value.
-			V domain.UserId
-			// Job is the job argument value.
-			Job domain.Job
+			// V1 is the v1 argument value.
+			V1 domain.UserId
+			// V2 is the v2 argument value.
+			V2 domain.JobId
+			// B is the b argument value.
+			B bool
+		}
+		// UpdateSpec holds details about calls to the UpdateSpec method.
+		UpdateSpec []struct {
+			// ContextMoqParam is the contextMoqParam argument value.
+			ContextMoqParam context.Context
+			// V1 is the v1 argument value.
+			V1 domain.UserId
+			// V2 is the v2 argument value.
+			V2 domain.JobId
+			// JobSpec is the jobSpec argument value.
+			JobSpec domain.JobSpec
 		}
 	}
 	lockCreate      sync.RWMutex
 	lockDelete      sync.RWMutex
 	lockFindById    sync.RWMutex
 	lockListByOwner sync.RWMutex
-	lockUpdate      sync.RWMutex
+	lockSetEnabled  sync.RWMutex
+	lockUpdateSpec  sync.RWMutex
 }
 
 // Create calls CreateFunc.
@@ -265,42 +285,90 @@ func (mock *JobRepositoryMock) ListByOwnerCalls() []struct {
 	return calls
 }
 
-// Update calls UpdateFunc.
-func (mock *JobRepositoryMock) Update(contextMoqParam context.Context, v domain.UserId, job domain.Job) (domain.Job, error) {
-	if mock.UpdateFunc == nil {
-		panic("JobRepositoryMock.UpdateFunc: method is nil but JobRepository.Update was just called")
+// SetEnabled calls SetEnabledFunc.
+func (mock *JobRepositoryMock) SetEnabled(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId, b bool) (domain.Job, error) {
+	if mock.SetEnabledFunc == nil {
+		panic("JobRepositoryMock.SetEnabledFunc: method is nil but JobRepository.SetEnabled was just called")
 	}
 	callInfo := struct {
 		ContextMoqParam context.Context
-		V               domain.UserId
-		Job             domain.Job
+		V1              domain.UserId
+		V2              domain.JobId
+		B               bool
 	}{
 		ContextMoqParam: contextMoqParam,
-		V:               v,
-		Job:             job,
+		V1:              v1,
+		V2:              v2,
+		B:               b,
 	}
-	mock.lockUpdate.Lock()
-	mock.calls.Update = append(mock.calls.Update, callInfo)
-	mock.lockUpdate.Unlock()
-	return mock.UpdateFunc(contextMoqParam, v, job)
+	mock.lockSetEnabled.Lock()
+	mock.calls.SetEnabled = append(mock.calls.SetEnabled, callInfo)
+	mock.lockSetEnabled.Unlock()
+	return mock.SetEnabledFunc(contextMoqParam, v1, v2, b)
 }
 
-// UpdateCalls gets all the calls that were made to Update.
+// SetEnabledCalls gets all the calls that were made to SetEnabled.
 // Check the length with:
 //
-//	len(mockedJobRepository.UpdateCalls())
-func (mock *JobRepositoryMock) UpdateCalls() []struct {
+//	len(mockedJobRepository.SetEnabledCalls())
+func (mock *JobRepositoryMock) SetEnabledCalls() []struct {
 	ContextMoqParam context.Context
-	V               domain.UserId
-	Job             domain.Job
+	V1              domain.UserId
+	V2              domain.JobId
+	B               bool
 } {
 	var calls []struct {
 		ContextMoqParam context.Context
-		V               domain.UserId
-		Job             domain.Job
+		V1              domain.UserId
+		V2              domain.JobId
+		B               bool
 	}
-	mock.lockUpdate.RLock()
-	calls = mock.calls.Update
-	mock.lockUpdate.RUnlock()
+	mock.lockSetEnabled.RLock()
+	calls = mock.calls.SetEnabled
+	mock.lockSetEnabled.RUnlock()
+	return calls
+}
+
+// UpdateSpec calls UpdateSpecFunc.
+func (mock *JobRepositoryMock) UpdateSpec(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId, jobSpec domain.JobSpec) (domain.Job, error) {
+	if mock.UpdateSpecFunc == nil {
+		panic("JobRepositoryMock.UpdateSpecFunc: method is nil but JobRepository.UpdateSpec was just called")
+	}
+	callInfo := struct {
+		ContextMoqParam context.Context
+		V1              domain.UserId
+		V2              domain.JobId
+		JobSpec         domain.JobSpec
+	}{
+		ContextMoqParam: contextMoqParam,
+		V1:              v1,
+		V2:              v2,
+		JobSpec:         jobSpec,
+	}
+	mock.lockUpdateSpec.Lock()
+	mock.calls.UpdateSpec = append(mock.calls.UpdateSpec, callInfo)
+	mock.lockUpdateSpec.Unlock()
+	return mock.UpdateSpecFunc(contextMoqParam, v1, v2, jobSpec)
+}
+
+// UpdateSpecCalls gets all the calls that were made to UpdateSpec.
+// Check the length with:
+//
+//	len(mockedJobRepository.UpdateSpecCalls())
+func (mock *JobRepositoryMock) UpdateSpecCalls() []struct {
+	ContextMoqParam context.Context
+	V1              domain.UserId
+	V2              domain.JobId
+	JobSpec         domain.JobSpec
+} {
+	var calls []struct {
+		ContextMoqParam context.Context
+		V1              domain.UserId
+		V2              domain.JobId
+		JobSpec         domain.JobSpec
+	}
+	mock.lockUpdateSpec.RLock()
+	calls = mock.calls.UpdateSpec
+	mock.lockUpdateSpec.RUnlock()
 	return calls
 }
