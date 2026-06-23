@@ -9,7 +9,7 @@ go-work-use:
 .PHONY: go-build
 go-build: go-work-use
 	@for mod in $(GO_MODULES); do \
-       	(cd $$mod && go generate ./... && go mod tidy && go build ./...); \
+       	(cd $$mod && go generate ./... && go mod tidy && go build ./...) || exit $$?; \
 	done;
 
 .PHONY: go-fmt
