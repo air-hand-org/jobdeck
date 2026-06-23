@@ -1,0 +1,122 @@
+# TODO
+
+## MVP implementation order
+
+- [ ] Keep the first vertical slice small:
+  - `CreateJob`
+  - `ListJobs`
+  - request/create execution
+  - `ClaimExecution`
+  - `ReportExecutionResult`
+  - `ListExecutions`
+- [ ] Fix proto naming before generated code and DB schema depend on it:
+  - Rename `Execution.attepmt` to `Execution.attempt`.
+  - Use `attempt` for the current attempt number.
+  - Keep `max_attempts` for the retry limit.
+- [ ] Decide the async execution RPC name:
+  - Prefer `RequestExecution` or `CreateExecution` if the API only queues work.
+  - Avoid `DoExecution` if it may imply synchronous execution.
+- [ ] Define the PostgreSQL schema around the execution flow, not only jobs:
+  - `job.job`
+  - `job.execution`
+  - `job.execution_event`
+- [ ] Keep `job.job.config` as `JSONB` for job-type-specific config.
+- [ ] Keep common retry scheduling fields as relational columns:
+  - `retry_max_attempts`
+  - `retry_backoff_type`
+  - `retry_initial_delay_ms`
+  - `retry_max_delay_ms`
+- [ ] Keep HTTP-specific retry predicates inside `HttpJobConfig` / config JSON:
+  - `retry_on_timeout`
+  - `retry_on_network_error`
+  - `retry_on_status_codes`
+  - `retry_on_status_code_ranges`
+- [ ] Add shared HTTP job URL validation:
+  - Parse and validate URLs through a common validator or domain constructor, not only in the proto transform.
+  - Require an absolute URL with a host.
+  - Allow only `http` and `https` schemes.
+  - Decide explicitly whether fragments and user info are allowed.
+  - Reuse the same validation for proto input and JSON/DB deserialization.
+  - Add SSRF protection before worker execution, including loopback, link-local, private-network, and DNS resolution checks.
+- [ ] Add execution queue fields to `job.execution`:
+  - `status`
+  - `trigger`
+  - `attempt`
+  - `max_attempts`
+  - `lease_token`
+  - `lease_expires_at`
+  - `next_run_at`
+  - `result`
+  - `error_message`
+  - `created_at`
+  - `updated_at`
+- [ ] Add event history fields to `job.execution_event`:
+  - `id`
+  - `execution_id`
+  - `status`
+  - optional message/error detail
+  - `created_at`
+- [ ] Define Go domain models based on execution logic:
+  - `Job`
+  - `JobSpec`
+  - `HTTPConfig`
+  - `RetryPolicy`
+  - `Execution`
+  - `ExecutionStatus`
+- [ ] Keep mapping explicit:
+  - proto to domain
+  - domain to DB row
+  - DB row to domain
+  - domain to proto
+- [ ] Start persistence with a concrete PostgreSQL store before adding broad repository interfaces.
+- [ ] Model transaction requirements as atomic application ports:
+  - Do not introduce a generic `TxManager` or `UnitOfWork` yet.
+  - Do not expose `DBTX`, `pgx.Tx`, sqlc `Queries`, or `WithinTx` through application interfaces.
+  - Define intent-oriented operations such as `CreateQueuedExecution`, `ClaimExecutions`, `CompleteExecution`, and `ScheduleRetry`.
+  - Keep PostgreSQL transactions, locking, and `FOR UPDATE SKIP LOCKED` inside the adapter implementing those operations.
+  - Keep HTTP calls, RPC calls, and other external side effects outside database transactions; use outbox or compensation patterns if atomic coordination becomes necessary.
+- [ ] Enforce owner authorization explicitly in the MVP:
+  - Resolve the authenticated principal in the gRPC interceptor/handler.
+  - Pass `actorID` to use cases as `domain.UserId`; do not read authentication context inside use cases.
+  - Include `owner_id = actorID` in repository queries for get, update, and delete operations.
+  - Return not-found behavior for resources owned by another user to avoid leaking their existence.
+- [ ] Evaluate PostgreSQL Row-Level Security as a later defense-in-depth measure:
+  - Do not rely on RLS as the only application authorization mechanism.
+  - Design policies and database roles for API users, workers, schedulers, migrators, and administrative operations.
+  - Workers and internal services may require cross-owner access or an explicit RLS bypass role.
+  - With connection pooling, use transaction-scoped settings such as `SET LOCAL` and prevent tenant context from leaking between requests.
+- [ ] Use a lightweight SQL migrator:
+  - Prefer `goose` for now.
+  - Keep migrations as SQL files with `-- +goose Up` and `-- +goose Down`.
+  - Use `goose up`, `goose down`, and `goose down-to` to verify forward/backward migration.
+  - Store goose history in the target database; consider `-table job.goose_db_version` if the version table should live in the `job` schema.
+- [ ] Keep other migrators as alternatives, not the default:
+  - `golang-migrate/migrate` is also solid, but uses separate `.up.sql` and `.down.sql` files.
+  - Atlas is more powerful, but likely too heavy for the current MVP stage.
+- [ ] Use disposable local PostgreSQL during early schema work:
+  - Run the official PostgreSQL image without a Docker volume at first.
+  - Recreate the container freely while the schema is still changing.
+  - Treat `goose up` from an empty database as the main bootstrap path.
+  - Before committing a migration, test `up -> down -> up` against a fresh container.
+- [ ] Implement in this order:
+  - [x] migration and domain model foundation
+  - [x] PostgreSQL and gRPC Job CRUD
+  - [ ] add focused job-api tests:
+    - domain JSON round-trip and invalid value cases
+    - proto/domain transforms
+    - use cases with a fake repository
+  - [ ] add a minimal GitHub Actions workflow:
+    - `go test ./...` for each Go module
+    - `buf lint`
+  - [ ] merge the Job CRUD implementation
+  - [ ] implement request/create execution
+  - [ ] implement queue claim/report
+  - [ ] implement the Go worker HTTP execution path without retry first
+  - [ ] persist execution events, results, errors, timing, and bounded worker log output
+  - [ ] expose execution history and worker logs through query APIs
+  - [ ] add retry behavior and multi-worker double-execution protection
+  - [ ] build the Blazor BFF/UI:
+    - Job CRUD
+    - manual execution
+    - execution status and history
+    - worker execution log display
