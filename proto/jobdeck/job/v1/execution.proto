@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package jobdeck.job.v1;
+
+message Execution {
+  string id = 1;
+  string job_id = 2;
+//  string requested_by = 3;
+
+  ExecutionTrigger trigger = 4;
+  repeated ExecutionEvent events = 5;
+
+  int32 attempt = 6;
+  int32 max_attempts = 7;
+
+  ExecutionResult result = 10;
+}
+
+enum ExecutionStatus {
+  EXECUTION_STATUS_UNSPECIFIED = 0;
+  EXECUTION_STATUS_QUEUED = 1;
+  EXECUTION_STATUS_RUNNING = 2;
+  EXECUTION_STATUS_SUCCEEDED = 3;
+  EXECUTION_STATUS_FAILED = 4;
+  EXECUTION_STATUS_TIMED_OUT = 5;
+  EXECUTION_STATUS_CANCELLED = 6;
+}
+
+message ExecutionEvent {
+  ExecutionStatus status = 1;
+  google.protobuf.Timestamp created_at = 10;
+}
+
+enum ExecutionTrigger {
+  EXECUTION_TRIGGER_UNSPECIFIED = 0;
+  EXECUTION_TRIGGER_MANUAL = 1;
+}
+
+message ExecutionResult {
+  oneof result {
+    HttpExecutionResult http = 1;
+  }
+
+  string error_message = 10;
+}
+
+message HttpExecutionResult {
+  int32 status_code = 1;
+}
+
+service ExecutionService {
+  rpc GetExecution(GetExecutionRequest) returns (GetExecutionResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc ListExecutions(ListExecutionsRequest) returns (ListExecutionsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc DoExecution(DoExecutionRequest) returns (DoExecutionResponse);
+}
+
+message GetExecutionRequest {
+  string execution_id = 1;
+}
+
+message GetExecutionResponse {
+  Execution execution = 1;
+}
+
+message ListExecutionsRequest {
+  string job_id = 1;
+  int32 page_size = 3;
+  string page_token = 4;
+}
+
+message ListExecutionsResponse {
+  repeated Execution executions = 1;
+  string next_page_token = 2;
+}
+
+message DoExecutionRequest {
+  string job_id = 1;
+}
+
+message DoExecutionResponse {
+  Execution execution = 1;
+}

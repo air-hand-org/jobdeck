@@ -1,0 +1,21 @@
+version: "2"
+
+linters:
+  enable:
+    - govet
+    - revive
+  exclusions:
+    paths:
+      - gen/
+      - gen_*\.go
+      - _test\.go
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    paths:
+      - gen/
+      - gen_*\.go
+      - _test\.go

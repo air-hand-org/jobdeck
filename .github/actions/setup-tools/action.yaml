@@ -1,0 +1,14 @@
+name: setup tools
+description: Set up project tools with aqua and mise.
+
+inputs: {}
+runs:
+  using: composite
+  steps:
+    - uses: aquaproj/aqua-installer@11dd79b4e498d471a9385aa9fb7f62bb5f52a73c # v4.0.4
+      with:
+        aqua_version: v2.60.1
+        aqua_opts: ""
+    - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+      with:
+        cache: true

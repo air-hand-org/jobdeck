@@ -1,0 +1,5 @@
+[tools]
+dotnet = "10.0"
+go = "1.26.4"
+buf = "1.70.0"
+grpcurl = "1.9.3"
