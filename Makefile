@@ -20,6 +20,9 @@ fmt: go-fmt
 .PHONY: lint
 lint: buf-lint go-lint
 
+.PHONY: test
+test: go-test
+
 .PHONY: run
 run:
 	@cd apphosts && aspire run

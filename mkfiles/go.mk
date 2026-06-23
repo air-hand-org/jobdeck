@@ -19,3 +19,9 @@ go-fmt:
 .PHONY: go-lint
 go-lint:
 	@golangci-lint run
+
+.PHONY: go-test
+go-test:
+	@for mod in $(GO_MODULES); do \
+       	(cd $$mod && go test -cover ./...); \
+	done;
