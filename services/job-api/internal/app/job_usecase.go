@@ -14,14 +14,12 @@ func (u *JobUsecase) CreateJob(ctx context.Context, owner_id domain.UserId, spec
 	return u.repo.Create(ctx, owner_id, spec)
 }
 
-func (u *JobUsecase) UpdateJob(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, enabled bool, spec domain.JobSpec) (domain.Job, error) {
-	job, err := u.repo.FindById(ctx, owner_id, job_id)
-	if err != nil {
-		return domain.Job{}, err
-	}
-	job.Enabled = enabled
-	job.Spec = spec
-	return u.repo.Update(ctx, owner_id, job)
+func (u *JobUsecase) UpdateJobSpec(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, spec domain.JobSpec) (domain.Job, error) {
+	return u.repo.UpdateSpec(ctx, owner_id, job_id, spec)
+}
+
+func (u *JobUsecase) SetJobEnabled(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, enabled bool) (domain.Job, error) {
+	return u.repo.SetEnabled(ctx, owner_id, job_id, enabled)
 }
 
 func (u *JobUsecase) DeleteJob(ctx context.Context, owner_id domain.UserId, job_id domain.JobId) error {

@@ -162,25 +162,58 @@ func (q *Queries) ListJobsByOwner(ctx context.Context, ownerID uuid.UUID) ([]Job
 	return items, nil
 }
 
-const updateJob = `-- name: UpdateJob :one
+const setJobEnabled = `-- name: SetJobEnabled :one
 UPDATE job.job SET
-  name = $1
-  , enabled = $2
-  , type = $3
-  , config = $4
-  , retry_max_attempts = $5
-  , retry_backoff_type = $6
-  , retry_initial_delay_ms = $7
-  , retry_max_delay_ms = $8
+  enabled = $1
 WHERE
-  job_id = $9
-  AND owner_id = $10
+  job_id = $2
+  AND owner_id = $3
 RETURNING job_id, owner_id, enabled, name, type, config, retry_max_attempts, retry_backoff_type, retry_initial_delay_ms, retry_max_delay_ms, created_at, updated_at
 `
 
-type UpdateJobParams struct {
+type SetJobEnabledParams struct {
+	Enabled bool
+	JobID   uuid.UUID
+	OwnerID uuid.UUID
+}
+
+func (q *Queries) SetJobEnabled(ctx context.Context, arg SetJobEnabledParams) (Job, error) {
+	row := q.db.QueryRow(ctx, setJobEnabled, arg.Enabled, arg.JobID, arg.OwnerID)
+	var i Job
+	err := row.Scan(
+		&i.JobID,
+		&i.OwnerID,
+		&i.Enabled,
+		&i.Name,
+		&i.Type,
+		&i.Config,
+		&i.RetryMaxAttempts,
+		&i.RetryBackoffType,
+		&i.RetryInitialDelayMs,
+		&i.RetryMaxDelayMs,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateJobSpec = `-- name: UpdateJobSpec :one
+UPDATE job.job SET
+  name = $1
+  , type = $2
+  , config = $3
+  , retry_max_attempts = $4
+  , retry_backoff_type = $5
+  , retry_initial_delay_ms = $6
+  , retry_max_delay_ms = $7
+WHERE
+  job_id = $8
+  AND owner_id = $9
+RETURNING job_id, owner_id, enabled, name, type, config, retry_max_attempts, retry_backoff_type, retry_initial_delay_ms, retry_max_delay_ms, created_at, updated_at
+`
+
+type UpdateJobSpecParams struct {
 	Name                string
-	Enabled             bool
 	Type                string
 	Config              []byte
 	RetryMaxAttempts    int32
@@ -191,10 +224,9 @@ type UpdateJobParams struct {
 	OwnerID             uuid.UUID
 }
 
-func (q *Queries) UpdateJob(ctx context.Context, arg UpdateJobParams) (Job, error) {
-	row := q.db.QueryRow(ctx, updateJob,
+func (q *Queries) UpdateJobSpec(ctx context.Context, arg UpdateJobSpecParams) (Job, error) {
+	row := q.db.QueryRow(ctx, updateJobSpec,
 		arg.Name,
-		arg.Enabled,
 		arg.Type,
 		arg.Config,
 		arg.RetryMaxAttempts,
