@@ -298,7 +298,7 @@ Workerは常駐プロセスとして動く。
 4. HTTP requestを実行
 5. 成功 / 失敗 / timeoutを判定
 6. ReportExecutionResult を呼ぶ
-7. retry対象ならserver側で再queue
+7. server側でretry対象かどうか判定し、再queue
 ```
 
 ### Workerで重視すること

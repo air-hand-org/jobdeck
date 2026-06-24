@@ -9,30 +9,58 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createJob = `-- name: CreateJob :one
-INSERT INTO job.job (
-	owner_id
-	, enabled
-	, name
-	, type
-	, config
-	, retry_max_attempts
-	, retry_backoff_type
-	, retry_initial_delay_ms
-	, retry_max_delay_ms
-) VALUES (
-	$1
-	, TRUE
-	, $2
-	, $3
-	, $4
-	, $5
-	, $6
-	, $7
-	, $8
-) RETURNING job_id, owner_id, enabled, name, type, config, retry_max_attempts, retry_backoff_type, retry_initial_delay_ms, retry_max_delay_ms, created_at, updated_at
+WITH j AS (
+    INSERT INTO job.job (
+    	owner_id
+    	, enabled
+        , name
+    ) VALUES (
+    	$1
+    	, TRUE
+        , $2
+    ) RETURNING job_id, owner_id, enabled, name, created_at, updated_at
+),
+r AS (
+    INSERT INTO job.job_revision (
+	    job_id
+	    , revision_number
+	    , type
+	    , config
+	    , retry_max_attempts
+	    , retry_backoff_type
+	    , retry_initial_delay_ms
+	    , retry_max_delay_ms
+    )
+    SELECT
+    	j.job_id
+    	, 1
+    	, $3
+    	, $4
+    	, $5
+    	, $6
+    	, $7
+    	, $8
+    FROM j
+    RETURNING revision_id, job_id, revision_number, type, config, retry_max_attempts, retry_backoff_type, retry_initial_delay_ms, retry_max_delay_ms, created_at
+),
+cr AS (
+    INSERT INTO job.job_current_revision (
+        job_id
+        , revision_id
+    )
+    SELECT
+        r.job_id
+        , r.revision_id
+    FROM r
+    RETURNING job_id, revision_id
+)
+SELECT job_id, owner_id, enabled, name, created_at, updated_at, type, config, retry_max_attempts, retry_backoff_type, retry_initial_delay_ms, retry_max_delay_ms
+FROM job.job_detail
+WHERE job_id = (SELECT job_id FROM cr)
 `
 
 type CreateJobParams struct {
@@ -63,21 +91,23 @@ func (q *Queries) CreateJob(ctx context.Context, arg CreateJobParams) (Job, erro
 		&i.OwnerID,
 		&i.Enabled,
 		&i.Name,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 		&i.Type,
 		&i.Config,
 		&i.RetryMaxAttempts,
 		&i.RetryBackoffType,
 		&i.RetryInitialDelayMs,
 		&i.RetryMaxDelayMs,
-		&i.CreatedAt,
-		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const deleteJob = `-- name: DeleteJob :execrows
 DELETE FROM job.job
-WHERE job_id = $1 AND owner_id = $2
+WHERE
+  job_id = $1
+  AND owner_id = $2
 `
 
 type DeleteJobParams struct {
@@ -94,7 +124,7 @@ func (q *Queries) DeleteJob(ctx context.Context, arg DeleteJobParams) (int64, er
 }
 
 const getJob = `-- name: GetJob :one
-SELECT job_id, owner_id, enabled, name, type, config, retry_max_attempts, retry_backoff_type, retry_initial_delay_ms, retry_max_delay_ms, created_at, updated_at FROM job.job
+SELECT job_id, owner_id, enabled, name, created_at, updated_at, type, config, retry_max_attempts, retry_backoff_type, retry_initial_delay_ms, retry_max_delay_ms FROM job.job_detail
 WHERE job_id = $1 AND owner_id = $2
 `
 
@@ -111,26 +141,43 @@ func (q *Queries) GetJob(ctx context.Context, arg GetJobParams) (Job, error) {
 		&i.OwnerID,
 		&i.Enabled,
 		&i.Name,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 		&i.Type,
 		&i.Config,
 		&i.RetryMaxAttempts,
 		&i.RetryBackoffType,
 		&i.RetryInitialDelayMs,
 		&i.RetryMaxDelayMs,
-		&i.CreatedAt,
-		&i.UpdatedAt,
 	)
 	return i, err
 }
 
-const listJobsByOwner = `-- name: ListJobsByOwner :many
-SELECT job_id, owner_id, enabled, name, type, config, retry_max_attempts, retry_backoff_type, retry_initial_delay_ms, retry_max_delay_ms, created_at, updated_at FROM job.job
+const listJobsAfter = `-- name: ListJobsAfter :many
+SELECT job_id, owner_id, enabled, name, created_at, updated_at, type, config, retry_max_attempts, retry_backoff_type, retry_initial_delay_ms, retry_max_delay_ms FROM job.job_detail
 WHERE owner_id = $1
-ORDER BY job_id
+  AND (
+    created_at < $2
+    OR (created_at = $2 AND job_id < $3)
+  )
+ORDER BY created_at DESC, job_id DESC
+LIMIT $4
 `
 
-func (q *Queries) ListJobsByOwner(ctx context.Context, ownerID uuid.UUID) ([]Job, error) {
-	rows, err := q.db.Query(ctx, listJobsByOwner, ownerID)
+type ListJobsAfterParams struct {
+	OwnerID   uuid.UUID
+	CreatedAt pgtype.Timestamptz
+	JobID     uuid.UUID
+	PageSize  int32
+}
+
+func (q *Queries) ListJobsAfter(ctx context.Context, arg ListJobsAfterParams) ([]Job, error) {
+	rows, err := q.db.Query(ctx, listJobsAfter,
+		arg.OwnerID,
+		arg.CreatedAt,
+		arg.JobID,
+		arg.PageSize,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -143,14 +190,14 @@ func (q *Queries) ListJobsByOwner(ctx context.Context, ownerID uuid.UUID) ([]Job
 			&i.OwnerID,
 			&i.Enabled,
 			&i.Name,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 			&i.Type,
 			&i.Config,
 			&i.RetryMaxAttempts,
 			&i.RetryBackoffType,
 			&i.RetryInitialDelayMs,
 			&i.RetryMaxDelayMs,
-			&i.CreatedAt,
-			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -162,13 +209,87 @@ func (q *Queries) ListJobsByOwner(ctx context.Context, ownerID uuid.UUID) ([]Job
 	return items, nil
 }
 
-const setJobEnabled = `-- name: SetJobEnabled :one
-UPDATE job.job SET
-  enabled = $1
+const listJobsFirstPage = `-- name: ListJobsFirstPage :many
+SELECT job_id, owner_id, enabled, name, created_at, updated_at, type, config, retry_max_attempts, retry_backoff_type, retry_initial_delay_ms, retry_max_delay_ms FROM job.job_detail
+WHERE owner_id = $1
+ORDER BY created_at DESC, job_id DESC
+LIMIT $2
+`
+
+type ListJobsFirstPageParams struct {
+	OwnerID  uuid.UUID
+	PageSize int32
+}
+
+func (q *Queries) ListJobsFirstPage(ctx context.Context, arg ListJobsFirstPageParams) ([]Job, error) {
+	rows, err := q.db.Query(ctx, listJobsFirstPage, arg.OwnerID, arg.PageSize)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Job{}
+	for rows.Next() {
+		var i Job
+		if err := rows.Scan(
+			&i.JobID,
+			&i.OwnerID,
+			&i.Enabled,
+			&i.Name,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Type,
+			&i.Config,
+			&i.RetryMaxAttempts,
+			&i.RetryBackoffType,
+			&i.RetryInitialDelayMs,
+			&i.RetryMaxDelayMs,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const renameJob = `-- name: RenameJob :execrows
+UPDATE job.job
+SET
+  name = $1
 WHERE
   job_id = $2
   AND owner_id = $3
-RETURNING job_id, owner_id, enabled, name, type, config, retry_max_attempts, retry_backoff_type, retry_initial_delay_ms, retry_max_delay_ms, created_at, updated_at
+`
+
+type RenameJobParams struct {
+	Name    string
+	JobID   uuid.UUID
+	OwnerID uuid.UUID
+}
+
+func (q *Queries) RenameJob(ctx context.Context, arg RenameJobParams) (int64, error) {
+	result, err := q.db.Exec(ctx, renameJob, arg.Name, arg.JobID, arg.OwnerID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const setJobEnabled = `-- name: SetJobEnabled :one
+WITH updated AS (
+    UPDATE job.job AS j
+    SET
+        enabled = $1
+    WHERE
+        j.job_id = $2
+        AND j.owner_id = $3
+    RETURNING job_id, owner_id, enabled, name, created_at, updated_at
+)
+SELECT job_id, owner_id, enabled, name, created_at, updated_at, type, config, retry_max_attempts, retry_backoff_type, retry_initial_delay_ms, retry_max_delay_ms
+FROM job.job_detail
+WHERE job_id = (SELECT job_id FROM updated)
 `
 
 type SetJobEnabledParams struct {
@@ -185,56 +306,93 @@ func (q *Queries) SetJobEnabled(ctx context.Context, arg SetJobEnabledParams) (J
 		&i.OwnerID,
 		&i.Enabled,
 		&i.Name,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 		&i.Type,
 		&i.Config,
 		&i.RetryMaxAttempts,
 		&i.RetryBackoffType,
 		&i.RetryInitialDelayMs,
 		&i.RetryMaxDelayMs,
-		&i.CreatedAt,
-		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const updateJobSpec = `-- name: UpdateJobSpec :one
-UPDATE job.job SET
-  name = $1
-  , type = $2
-  , config = $3
-  , retry_max_attempts = $4
-  , retry_backoff_type = $5
-  , retry_initial_delay_ms = $6
-  , retry_max_delay_ms = $7
-WHERE
-  job_id = $8
-  AND owner_id = $9
-RETURNING job_id, owner_id, enabled, name, type, config, retry_max_attempts, retry_backoff_type, retry_initial_delay_ms, retry_max_delay_ms, created_at, updated_at
+WITH touched_job AS (
+    UPDATE job.job AS j
+    SET updated_at = NOW()
+    WHERE
+        j.job_id = $1
+        AND j.owner_id = $2
+    RETURNING job_id
+)
+, current AS (
+    SELECT
+      cr.job_id
+      , cr.revision_id
+      , r.revision_number
+    FROM job.job_current_revision AS cr
+    INNER JOIN touched_job AS tj ON tj.job_id = cr.job_id
+    INNER JOIN job.job_revision AS r ON cr.job_id = r.job_id AND cr.revision_id = r.revision_id
+    FOR UPDATE OF cr
+)
+, r AS (
+    INSERT INTO job.job_revision (
+        job_id
+        , revision_number
+        , type
+        , config
+        , retry_max_attempts
+        , retry_backoff_type
+        , retry_initial_delay_ms
+        , retry_max_delay_ms
+    )
+    SELECT
+        current.job_id
+        , current.revision_number + 1
+       	, $3
+       	, $4
+       	, $5
+       	, $6
+       	, $7
+       	, $8
+    FROM current
+    RETURNING job_id, revision_id
+)
+, updated_current AS (
+    UPDATE job.job_current_revision AS cr
+    SET revision_id = r.revision_id
+    FROM r
+    WHERE cr.job_id = r.job_id
+    RETURNING r.job_id, r.revision_id, cr.job_id, cr.revision_id
+)
+SELECT job_id, owner_id, enabled, name, created_at, updated_at, type, config, retry_max_attempts, retry_backoff_type, retry_initial_delay_ms, retry_max_delay_ms
+FROM job.job_detail
+WHERE job_id = (SELECT job_id FROM updated_current)
 `
 
 type UpdateJobSpecParams struct {
-	Name                string
+	JobID               uuid.UUID
+	OwnerID             uuid.UUID
 	Type                string
 	Config              []byte
 	RetryMaxAttempts    int32
 	RetryBackoffType    string
 	RetryInitialDelayMs int64
 	RetryMaxDelayMs     int64
-	JobID               uuid.UUID
-	OwnerID             uuid.UUID
 }
 
 func (q *Queries) UpdateJobSpec(ctx context.Context, arg UpdateJobSpecParams) (Job, error) {
 	row := q.db.QueryRow(ctx, updateJobSpec,
-		arg.Name,
+		arg.JobID,
+		arg.OwnerID,
 		arg.Type,
 		arg.Config,
 		arg.RetryMaxAttempts,
 		arg.RetryBackoffType,
 		arg.RetryInitialDelayMs,
 		arg.RetryMaxDelayMs,
-		arg.JobID,
-		arg.OwnerID,
 	)
 	var i Job
 	err := row.Scan(
@@ -242,14 +400,14 @@ func (q *Queries) UpdateJobSpec(ctx context.Context, arg UpdateJobSpecParams) (J
 		&i.OwnerID,
 		&i.Enabled,
 		&i.Name,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 		&i.Type,
 		&i.Config,
 		&i.RetryMaxAttempts,
 		&i.RetryBackoffType,
 		&i.RetryInitialDelayMs,
 		&i.RetryMaxDelayMs,
-		&i.CreatedAt,
-		&i.UpdatedAt,
 	)
 	return i, err
 }

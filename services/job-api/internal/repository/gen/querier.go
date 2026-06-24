@@ -6,15 +6,19 @@ package jobdb
 
 import (
 	"context"
-
-	"github.com/google/uuid"
 )
 
 type Querier interface {
+	ClaimExecutions(ctx context.Context, arg ClaimExecutionsParams) ([]JobExecutionClaimDetail, error)
+	CreateExecutionForCurrentJob(ctx context.Context, arg CreateExecutionForCurrentJobParams) (Execution, error)
 	CreateJob(ctx context.Context, arg CreateJobParams) (Job, error)
+	CreateRetryForUnsuccessfulExecution(ctx context.Context, arg CreateRetryForUnsuccessfulExecutionParams) (Execution, error)
 	DeleteJob(ctx context.Context, arg DeleteJobParams) (int64, error)
 	GetJob(ctx context.Context, arg GetJobParams) (Job, error)
-	ListJobsByOwner(ctx context.Context, ownerID uuid.UUID) ([]Job, error)
+	ListJobsAfter(ctx context.Context, arg ListJobsAfterParams) ([]Job, error)
+	ListJobsFirstPage(ctx context.Context, arg ListJobsFirstPageParams) ([]Job, error)
+	RenameJob(ctx context.Context, arg RenameJobParams) (int64, error)
+	ReportExecutionResult(ctx context.Context, arg ReportExecutionResultParams) (Execution, error)
 	SetJobEnabled(ctx context.Context, arg SetJobEnabledParams) (Job, error)
 	UpdateJobSpec(ctx context.Context, arg UpdateJobSpecParams) (Job, error)
 }

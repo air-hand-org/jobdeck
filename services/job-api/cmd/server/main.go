@@ -13,7 +13,6 @@ import (
 	jobv1 "jobdeck/gen/jobdeck/job/v1"
 	"jobdeck/services/job-api/internal/app"
 	"jobdeck/services/job-api/internal/repository"
-	jobdb "jobdeck/services/job-api/internal/repository/gen"
 	"jobdeck/services/job-api/internal/transport"
 
 	"google.golang.org/grpc"
@@ -42,12 +41,13 @@ func main() {
 	}
 	defer pool.Close()
 
-	job_usecase := app.NewJobUsecase(repository.NewJobRepository(jobdb.New(pool)))
+	store := repository.NewStore(pool)
 
 	s := grpc.NewServer()
 	healthcheck := health.NewServer()
 	healthgrpc.RegisterHealthServer(s, healthcheck)
-	jobv1.RegisterJobServiceServer(s, transport.NewJobServiceServer(job_usecase))
+	jobv1.RegisterJobServiceServer(s, transport.NewJobServiceServer(app.NewJobUsecase(store)))
+	jobv1.RegisterExecutionQueueServiceServer(s, transport.NewExecutionQueueServiceServer(app.NewExecutionUsecase(store)))
 	reflection.Register(s)
 
 	// FIXME

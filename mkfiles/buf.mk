@@ -6,3 +6,7 @@ buf-generate:
 .PHONY: buf-lint
 buf-lint:
 	@buf lint
+
+.PHONY: buf-fmt
+buf-fmt:
+	@buf format -w

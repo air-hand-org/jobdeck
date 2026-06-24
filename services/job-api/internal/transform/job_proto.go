@@ -169,7 +169,6 @@ func JobIdFromProto(job_id string) (domain.JobId, error) {
 
 func JobSpecToProto(s domain.JobSpec) (*jobv1.JobSpec, error) {
 	p := &jobv1.JobSpec{
-		Name: s.Name,
 		Type: jobTypeToProto(s.Type),
 
 		RetryPolicy: retryPolicyToProto(s.RetryPolicy),
@@ -203,7 +202,6 @@ func JobSpecFromProto(p *jobv1.JobSpec) (domain.JobSpec, error) {
 	}
 
 	spec := domain.JobSpec{
-		Name: p.GetName(),
 		Type: job_type,
 
 		RetryPolicy: retry_policy,
@@ -233,6 +231,7 @@ func JobToProto(j domain.Job) (*jobv1.Job, error) {
 		Id:      j.Id.String(),
 		OwnerId: j.OwnerId.String(),
 		Enabled: j.Enabled,
+		Name:    j.Name,
 
 		Spec: spec,
 
@@ -265,6 +264,7 @@ func JobFromProto(j *jobv1.Job) (domain.Job, error) {
 		Id:        id,
 		OwnerId:   owner_id,
 		Enabled:   j.GetEnabled(),
+		Name:      j.GetName(),
 		Spec:      spec,
 		CreatedAt: j.GetCreatedAt().AsTime(),
 		UpdatedAt: j.GetUpdatedAt().AsTime(),

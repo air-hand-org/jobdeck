@@ -17,18 +17,29 @@ import (
 func TestJobUsecase_CreateJob_RepositoryError(t *testing.T) {
 	expectedErr := errors.New("failed to create job")
 	ownerID := domain.UserId(uuid.Max)
+	name := "Example Job"
 	spec := domain.JobSpec{}
 
 	repo := &JobRepositoryMock{
-		CreateFunc: func(_ context.Context, actualOwnerID domain.UserId, actualSpec domain.JobSpec) (domain.Job, error) {
+		CreateFunc: func(_ context.Context, actualOwnerID domain.UserId, actualName string, actualSpec domain.JobSpec) (domain.Job, error) {
 			assert.Equal(t, ownerID, actualOwnerID)
+			assert.Equal(t, name, actualName)
 			assert.Equal(t, spec, actualSpec)
 			return domain.Job{}, expectedErr
 		},
 	}
 
-	u := NewJobUsecase(repo)
-	_, err := u.CreateJob(context.Background(), ownerID, spec)
+	store := &JobStoreMock{
+		JobsFunc: func() JobRepository {
+			return repo
+		},
+		WithinJobTxFunc: func(ctx context.Context, fn func(ctx context.Context, r JobRepository) error) error {
+			return fn(ctx, repo)
+		},
+	}
+
+	u := NewJobUsecase(store)
+	_, err := u.CreateJob(context.Background(), ownerID, name, spec)
 
 	assert.ErrorIs(t, err, expectedErr)
 	assert.Len(t, repo.CreateCalls(), 1)
@@ -36,18 +47,35 @@ func TestJobUsecase_CreateJob_RepositoryError(t *testing.T) {
 
 func TestJobUsecase_ListJobs_Empty(t *testing.T) {
 	owner_id := domain.UserId(uuid.Max)
+	page_size := int32(10)
+	page_token := "foo/bar"
 	repo := &JobRepositoryMock{
-		ListByOwnerFunc: func(_ context.Context, actualOwnerId domain.UserId) ([]domain.Job, error) {
+		ListByOwnerFunc: func(_ context.Context, actualOwnerId domain.UserId, actualPageSize int32, actualPageToken string) (ListJobsResult, error) {
 			assert.Equal(t, owner_id, actualOwnerId)
-			return []domain.Job{}, nil
+			assert.Equal(t, page_size, actualPageSize)
+			assert.Equal(t, page_token, actualPageToken)
+			return ListJobsResult{
+				Jobs: []domain.Job{},
+				NextPageToken: "",
+			}, nil
 		},
 	}
 
-	u := NewJobUsecase(repo)
-	jobs, err := u.ListJobs(context.Background(), owner_id)
+	store := &JobStoreMock{
+		JobsFunc: func() JobRepository {
+			return repo
+		},
+		WithinJobTxFunc: func(ctx context.Context, fn func(ctx context.Context, r JobRepository) error) error {
+			return fn(ctx, repo)
+		},
+	}
+
+	u := NewJobUsecase(store)
+	result, err := u.ListJobs(context.Background(), owner_id, page_size, page_token)
 
 	assert.NoError(t, err)
-	assert.Empty(t, jobs)
+	assert.Empty(t, result.Jobs)
+	assert.Empty(t, result.NextPageToken)
 }
 
 func TestJobUsecase_SetJobEnabled(t *testing.T) {
@@ -78,7 +106,16 @@ func TestJobUsecase_SetJobEnabled(t *testing.T) {
 					return domain.Job{}, nil
 				},
 			}
-			u := NewJobUsecase(repo)
+			store := &JobStoreMock{
+				JobsFunc: func() JobRepository {
+					return repo
+				},
+				WithinJobTxFunc: func(ctx context.Context, fn func(ctx context.Context, r JobRepository) error) error {
+					return fn(ctx, repo)
+				},
+			}
+
+			u := NewJobUsecase(store)
 
 			u.SetJobEnabled(context.Background(), owner_id, job_id, tt.enabled)
 			assert.Len(t, repo.SetEnabledCalls(), 1)
@@ -92,6 +129,8 @@ func TestJobUsecase_UpdateJobSpec_ChangeName(t *testing.T) {
 	spec := validJobSpec()
 	updatedSpec := validJobSpec()
 	assert.Equal(t, spec, updatedSpec)
+
+	expectedJobName := "Updated Job Name"
 	repo := &JobRepositoryMock{
 		UpdateSpecFunc: func(_ context.Context, actualOwnerId domain.UserId, actualJobId domain.JobId, actualSpec domain.JobSpec) (domain.Job, error) {
 			assert.Equal(t, owner_id, actualOwnerId)
@@ -99,19 +138,31 @@ func TestJobUsecase_UpdateJobSpec_ChangeName(t *testing.T) {
 			assert.Equal(t, updatedSpec, actualSpec)
 			return domain.Job{}, nil
 		},
+		RenameFunc: func(_ context.Context, actualOwnerId domain.UserId, actualJobId domain.JobId, actualName string) error {
+			assert.Equal(t, owner_id, actualOwnerId)
+			assert.Equal(t, job_id, actualJobId)
+			assert.Equal(t, expectedJobName, actualName)
+			return nil
+		},
 	}
 
-	u := NewJobUsecase(repo)
+	store := &JobStoreMock{
+		JobsFunc: func() JobRepository {
+			return repo
+		},
+		WithinJobTxFunc: func(ctx context.Context, fn func(ctx context.Context, r JobRepository) error) error {
+			return fn(ctx, repo)
+		},
+	}
 
-	expectedJobName := "Updated Job Name"
-	updatedSpec.Name = expectedJobName
-	u.UpdateJobSpec(context.Background(), owner_id, job_id, updatedSpec)
+	u := NewJobUsecase(store)
+
+	u.UpdateJobMetadata(context.Background(), owner_id, job_id, expectedJobName, updatedSpec)
 	assert.Len(t, repo.UpdateSpecCalls(), 1)
 }
 
 func validJobSpec() domain.JobSpec {
 	return domain.JobSpec{
-		Name: "FooBar",
 		Type: domain.JOB_TYPE_HTTP_REQUEST,
 
 		Config: &domain.HttpJobConfig{

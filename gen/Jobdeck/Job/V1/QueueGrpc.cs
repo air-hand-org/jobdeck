@@ -46,21 +46,21 @@ namespace Jobdeck.Job.V1 {
     }
 
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-    static readonly grpc::Marshaller<global::Jobdeck.Job.V1.ClaimExecutionRequest> __Marshaller_jobdeck_job_v1_ClaimExecutionRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Jobdeck.Job.V1.ClaimExecutionRequest.Parser));
+    static readonly grpc::Marshaller<global::Jobdeck.Job.V1.ClaimExecutionsRequest> __Marshaller_jobdeck_job_v1_ClaimExecutionsRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Jobdeck.Job.V1.ClaimExecutionsRequest.Parser));
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-    static readonly grpc::Marshaller<global::Jobdeck.Job.V1.ClaimExecutionResponse> __Marshaller_jobdeck_job_v1_ClaimExecutionResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Jobdeck.Job.V1.ClaimExecutionResponse.Parser));
+    static readonly grpc::Marshaller<global::Jobdeck.Job.V1.ClaimExecutionsResponse> __Marshaller_jobdeck_job_v1_ClaimExecutionsResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Jobdeck.Job.V1.ClaimExecutionsResponse.Parser));
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Marshaller<global::Jobdeck.Job.V1.ReportExecutionResultRequest> __Marshaller_jobdeck_job_v1_ReportExecutionResultRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Jobdeck.Job.V1.ReportExecutionResultRequest.Parser));
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Marshaller<global::Jobdeck.Job.V1.ReportExecutionResultResponse> __Marshaller_jobdeck_job_v1_ReportExecutionResultResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Jobdeck.Job.V1.ReportExecutionResultResponse.Parser));
 
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-    static readonly grpc::Method<global::Jobdeck.Job.V1.ClaimExecutionRequest, global::Jobdeck.Job.V1.ClaimExecutionResponse> __Method_ClaimExecution = new grpc::Method<global::Jobdeck.Job.V1.ClaimExecutionRequest, global::Jobdeck.Job.V1.ClaimExecutionResponse>(
+    static readonly grpc::Method<global::Jobdeck.Job.V1.ClaimExecutionsRequest, global::Jobdeck.Job.V1.ClaimExecutionsResponse> __Method_ClaimExecutions = new grpc::Method<global::Jobdeck.Job.V1.ClaimExecutionsRequest, global::Jobdeck.Job.V1.ClaimExecutionsResponse>(
         grpc::MethodType.Unary,
         __ServiceName,
-        "ClaimExecution",
-        __Marshaller_jobdeck_job_v1_ClaimExecutionRequest,
-        __Marshaller_jobdeck_job_v1_ClaimExecutionResponse);
+        "ClaimExecutions",
+        __Marshaller_jobdeck_job_v1_ClaimExecutionsRequest,
+        __Marshaller_jobdeck_job_v1_ClaimExecutionsResponse);
 
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Method<global::Jobdeck.Job.V1.ReportExecutionResultRequest, global::Jobdeck.Job.V1.ReportExecutionResultResponse> __Method_ReportExecutionResult = new grpc::Method<global::Jobdeck.Job.V1.ReportExecutionResultRequest, global::Jobdeck.Job.V1.ReportExecutionResultResponse>(
@@ -81,7 +81,7 @@ namespace Jobdeck.Job.V1 {
     public abstract partial class ExecutionQueueServiceBase
     {
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-      public virtual global::System.Threading.Tasks.Task<global::Jobdeck.Job.V1.ClaimExecutionResponse> ClaimExecution(global::Jobdeck.Job.V1.ClaimExecutionRequest request, grpc::ServerCallContext context)
+      public virtual global::System.Threading.Tasks.Task<global::Jobdeck.Job.V1.ClaimExecutionsResponse> ClaimExecutions(global::Jobdeck.Job.V1.ClaimExecutionsRequest request, grpc::ServerCallContext context)
       {
         throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
       }
@@ -122,24 +122,24 @@ namespace Jobdeck.Job.V1 {
       }
 
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-      public virtual global::Jobdeck.Job.V1.ClaimExecutionResponse ClaimExecution(global::Jobdeck.Job.V1.ClaimExecutionRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      public virtual global::Jobdeck.Job.V1.ClaimExecutionsResponse ClaimExecutions(global::Jobdeck.Job.V1.ClaimExecutionsRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
       {
-        return ClaimExecution(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+        return ClaimExecutions(request, new grpc::CallOptions(headers, deadline, cancellationToken));
       }
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-      public virtual global::Jobdeck.Job.V1.ClaimExecutionResponse ClaimExecution(global::Jobdeck.Job.V1.ClaimExecutionRequest request, grpc::CallOptions options)
+      public virtual global::Jobdeck.Job.V1.ClaimExecutionsResponse ClaimExecutions(global::Jobdeck.Job.V1.ClaimExecutionsRequest request, grpc::CallOptions options)
       {
-        return CallInvoker.BlockingUnaryCall(__Method_ClaimExecution, null, options, request);
+        return CallInvoker.BlockingUnaryCall(__Method_ClaimExecutions, null, options, request);
       }
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-      public virtual grpc::AsyncUnaryCall<global::Jobdeck.Job.V1.ClaimExecutionResponse> ClaimExecutionAsync(global::Jobdeck.Job.V1.ClaimExecutionRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      public virtual grpc::AsyncUnaryCall<global::Jobdeck.Job.V1.ClaimExecutionsResponse> ClaimExecutionsAsync(global::Jobdeck.Job.V1.ClaimExecutionsRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
       {
-        return ClaimExecutionAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+        return ClaimExecutionsAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
       }
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-      public virtual grpc::AsyncUnaryCall<global::Jobdeck.Job.V1.ClaimExecutionResponse> ClaimExecutionAsync(global::Jobdeck.Job.V1.ClaimExecutionRequest request, grpc::CallOptions options)
+      public virtual grpc::AsyncUnaryCall<global::Jobdeck.Job.V1.ClaimExecutionsResponse> ClaimExecutionsAsync(global::Jobdeck.Job.V1.ClaimExecutionsRequest request, grpc::CallOptions options)
       {
-        return CallInvoker.AsyncUnaryCall(__Method_ClaimExecution, null, options, request);
+        return CallInvoker.AsyncUnaryCall(__Method_ClaimExecutions, null, options, request);
       }
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
       public virtual global::Jobdeck.Job.V1.ReportExecutionResultResponse ReportExecutionResult(global::Jobdeck.Job.V1.ReportExecutionResultRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
@@ -175,7 +175,7 @@ namespace Jobdeck.Job.V1 {
     public static grpc::ServerServiceDefinition BindService(ExecutionQueueServiceBase serviceImpl)
     {
       return grpc::ServerServiceDefinition.CreateBuilder()
-          .AddMethod(__Method_ClaimExecution, serviceImpl.ClaimExecution)
+          .AddMethod(__Method_ClaimExecutions, serviceImpl.ClaimExecutions)
           .AddMethod(__Method_ReportExecutionResult, serviceImpl.ReportExecutionResult).Build();
     }
 
@@ -186,7 +186,7 @@ namespace Jobdeck.Job.V1 {
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     public static void BindService(grpc::ServiceBinderBase serviceBinder, ExecutionQueueServiceBase serviceImpl)
     {
-      serviceBinder.AddMethod(__Method_ClaimExecution, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Jobdeck.Job.V1.ClaimExecutionRequest, global::Jobdeck.Job.V1.ClaimExecutionResponse>(serviceImpl.ClaimExecution));
+      serviceBinder.AddMethod(__Method_ClaimExecutions, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Jobdeck.Job.V1.ClaimExecutionsRequest, global::Jobdeck.Job.V1.ClaimExecutionsResponse>(serviceImpl.ClaimExecutions));
       serviceBinder.AddMethod(__Method_ReportExecutionResult, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Jobdeck.Job.V1.ReportExecutionResultRequest, global::Jobdeck.Job.V1.ReportExecutionResultResponse>(serviceImpl.ReportExecutionResult));
     }
 

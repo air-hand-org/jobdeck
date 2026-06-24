@@ -1,16 +1,17 @@
 syntax = "proto3";
 
-import "google/protobuf/timestamp.proto";
-
 package jobdeck.job.v1;
 
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
 message Execution {
-  string id = 1;
-  string job_id = 2;
-//  string requested_by = 3;
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  string job_id = 2 [(buf.validate.field).string.uuid = true];
+  //  string requested_by = 3;
 
   ExecutionTrigger trigger = 4;
-  repeated ExecutionEvent events = 5;
+  repeated ExecutionEvent events = 5 [(buf.validate.field).repeated.min_items = 1];
 
   int32 attempt = 6;
   int32 max_attempts = 7;

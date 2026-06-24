@@ -15,7 +15,7 @@ generate: buf-generate
 build: generate go-build
 
 .PHONY: fmt
-fmt: go-fmt
+fmt: buf-fmt go-fmt
 
 .PHONY: lint
 lint: buf-lint go-lint
