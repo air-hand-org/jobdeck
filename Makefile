@@ -21,7 +21,11 @@ fmt: buf-fmt go-fmt
 lint: buf-lint go-lint
 
 .PHONY: test
-test: go-test
+test: go-test migration-test
+
+.PHONY: migration-test
+migration-test:
+	@./tests/migration-test.sh
 
 .PHONY: run
 run:
