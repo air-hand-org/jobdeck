@@ -15,13 +15,17 @@ generate: buf-generate
 build: generate go-build
 
 .PHONY: fmt
-fmt: go-fmt
+fmt: buf-fmt go-fmt
 
 .PHONY: lint
 lint: buf-lint go-lint
 
 .PHONY: test
-test: go-test
+test: go-test migration-test
+
+.PHONY: migration-test
+migration-test:
+	@./tests/migration-test.sh
 
 .PHONY: run
 run:

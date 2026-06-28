@@ -19,7 +19,7 @@ var _ JobRepository = &JobRepositoryMock{}
 //
 //		// make and configure a mocked JobRepository
 //		mockedJobRepository := &JobRepositoryMock{
-//			CreateFunc: func(contextMoqParam context.Context, v domain.UserId, jobSpec domain.JobSpec) (domain.Job, error) {
+//			CreateFunc: func(ctx context.Context, owner_id domain.UserId, name string, spec domain.JobSpec) (domain.Job, error) {
 //				panic("mock out the Create method")
 //			},
 //			DeleteFunc: func(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId) error {
@@ -28,8 +28,11 @@ var _ JobRepository = &JobRepositoryMock{}
 //			FindByIdFunc: func(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId) (domain.Job, error) {
 //				panic("mock out the FindById method")
 //			},
-//			ListByOwnerFunc: func(contextMoqParam context.Context, v domain.UserId) ([]domain.Job, error) {
+//			ListByOwnerFunc: func(ctx context.Context, owner_id domain.UserId, page_size int32, page_token string) (ListJobsResult, error) {
 //				panic("mock out the ListByOwner method")
+//			},
+//			RenameFunc: func(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, name string) error {
+//				panic("mock out the Rename method")
 //			},
 //			SetEnabledFunc: func(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId, b bool) (domain.Job, error) {
 //				panic("mock out the SetEnabled method")
@@ -45,7 +48,7 @@ var _ JobRepository = &JobRepositoryMock{}
 //	}
 type JobRepositoryMock struct {
 	// CreateFunc mocks the Create method.
-	CreateFunc func(contextMoqParam context.Context, v domain.UserId, jobSpec domain.JobSpec) (domain.Job, error)
+	CreateFunc func(ctx context.Context, owner_id domain.UserId, name string, spec domain.JobSpec) (domain.Job, error)
 
 	// DeleteFunc mocks the Delete method.
 	DeleteFunc func(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId) error
@@ -54,7 +57,10 @@ type JobRepositoryMock struct {
 	FindByIdFunc func(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId) (domain.Job, error)
 
 	// ListByOwnerFunc mocks the ListByOwner method.
-	ListByOwnerFunc func(contextMoqParam context.Context, v domain.UserId) ([]domain.Job, error)
+	ListByOwnerFunc func(ctx context.Context, owner_id domain.UserId, page_size int32, page_token string) (ListJobsResult, error)
+
+	// RenameFunc mocks the Rename method.
+	RenameFunc func(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, name string) error
 
 	// SetEnabledFunc mocks the SetEnabled method.
 	SetEnabledFunc func(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId, b bool) (domain.Job, error)
@@ -66,12 +72,14 @@ type JobRepositoryMock struct {
 	calls struct {
 		// Create holds details about calls to the Create method.
 		Create []struct {
-			// ContextMoqParam is the contextMoqParam argument value.
-			ContextMoqParam context.Context
-			// V is the v argument value.
-			V domain.UserId
-			// JobSpec is the jobSpec argument value.
-			JobSpec domain.JobSpec
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Owner_id is the owner_id argument value.
+			Owner_id domain.UserId
+			// Name is the name argument value.
+			Name string
+			// Spec is the spec argument value.
+			Spec domain.JobSpec
 		}
 		// Delete holds details about calls to the Delete method.
 		Delete []struct {
@@ -93,10 +101,25 @@ type JobRepositoryMock struct {
 		}
 		// ListByOwner holds details about calls to the ListByOwner method.
 		ListByOwner []struct {
-			// ContextMoqParam is the contextMoqParam argument value.
-			ContextMoqParam context.Context
-			// V is the v argument value.
-			V domain.UserId
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Owner_id is the owner_id argument value.
+			Owner_id domain.UserId
+			// Page_size is the page_size argument value.
+			Page_size int32
+			// Page_token is the page_token argument value.
+			Page_token string
+		}
+		// Rename holds details about calls to the Rename method.
+		Rename []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Owner_id is the owner_id argument value.
+			Owner_id domain.UserId
+			// Job_id is the job_id argument value.
+			Job_id domain.JobId
+			// Name is the name argument value.
+			Name string
 		}
 		// SetEnabled holds details about calls to the SetEnabled method.
 		SetEnabled []struct {
@@ -125,28 +148,31 @@ type JobRepositoryMock struct {
 	lockDelete      sync.RWMutex
 	lockFindById    sync.RWMutex
 	lockListByOwner sync.RWMutex
+	lockRename      sync.RWMutex
 	lockSetEnabled  sync.RWMutex
 	lockUpdateSpec  sync.RWMutex
 }
 
 // Create calls CreateFunc.
-func (mock *JobRepositoryMock) Create(contextMoqParam context.Context, v domain.UserId, jobSpec domain.JobSpec) (domain.Job, error) {
+func (mock *JobRepositoryMock) Create(ctx context.Context, owner_id domain.UserId, name string, spec domain.JobSpec) (domain.Job, error) {
 	if mock.CreateFunc == nil {
 		panic("JobRepositoryMock.CreateFunc: method is nil but JobRepository.Create was just called")
 	}
 	callInfo := struct {
-		ContextMoqParam context.Context
-		V               domain.UserId
-		JobSpec         domain.JobSpec
+		Ctx      context.Context
+		Owner_id domain.UserId
+		Name     string
+		Spec     domain.JobSpec
 	}{
-		ContextMoqParam: contextMoqParam,
-		V:               v,
-		JobSpec:         jobSpec,
+		Ctx:      ctx,
+		Owner_id: owner_id,
+		Name:     name,
+		Spec:     spec,
 	}
 	mock.lockCreate.Lock()
 	mock.calls.Create = append(mock.calls.Create, callInfo)
 	mock.lockCreate.Unlock()
-	return mock.CreateFunc(contextMoqParam, v, jobSpec)
+	return mock.CreateFunc(ctx, owner_id, name, spec)
 }
 
 // CreateCalls gets all the calls that were made to Create.
@@ -154,14 +180,16 @@ func (mock *JobRepositoryMock) Create(contextMoqParam context.Context, v domain.
 //
 //	len(mockedJobRepository.CreateCalls())
 func (mock *JobRepositoryMock) CreateCalls() []struct {
-	ContextMoqParam context.Context
-	V               domain.UserId
-	JobSpec         domain.JobSpec
+	Ctx      context.Context
+	Owner_id domain.UserId
+	Name     string
+	Spec     domain.JobSpec
 } {
 	var calls []struct {
-		ContextMoqParam context.Context
-		V               domain.UserId
-		JobSpec         domain.JobSpec
+		Ctx      context.Context
+		Owner_id domain.UserId
+		Name     string
+		Spec     domain.JobSpec
 	}
 	mock.lockCreate.RLock()
 	calls = mock.calls.Create
@@ -250,21 +278,25 @@ func (mock *JobRepositoryMock) FindByIdCalls() []struct {
 }
 
 // ListByOwner calls ListByOwnerFunc.
-func (mock *JobRepositoryMock) ListByOwner(contextMoqParam context.Context, v domain.UserId) ([]domain.Job, error) {
+func (mock *JobRepositoryMock) ListByOwner(ctx context.Context, owner_id domain.UserId, page_size int32, page_token string) (ListJobsResult, error) {
 	if mock.ListByOwnerFunc == nil {
 		panic("JobRepositoryMock.ListByOwnerFunc: method is nil but JobRepository.ListByOwner was just called")
 	}
 	callInfo := struct {
-		ContextMoqParam context.Context
-		V               domain.UserId
+		Ctx        context.Context
+		Owner_id   domain.UserId
+		Page_size  int32
+		Page_token string
 	}{
-		ContextMoqParam: contextMoqParam,
-		V:               v,
+		Ctx:        ctx,
+		Owner_id:   owner_id,
+		Page_size:  page_size,
+		Page_token: page_token,
 	}
 	mock.lockListByOwner.Lock()
 	mock.calls.ListByOwner = append(mock.calls.ListByOwner, callInfo)
 	mock.lockListByOwner.Unlock()
-	return mock.ListByOwnerFunc(contextMoqParam, v)
+	return mock.ListByOwnerFunc(ctx, owner_id, page_size, page_token)
 }
 
 // ListByOwnerCalls gets all the calls that were made to ListByOwner.
@@ -272,16 +304,64 @@ func (mock *JobRepositoryMock) ListByOwner(contextMoqParam context.Context, v do
 //
 //	len(mockedJobRepository.ListByOwnerCalls())
 func (mock *JobRepositoryMock) ListByOwnerCalls() []struct {
-	ContextMoqParam context.Context
-	V               domain.UserId
+	Ctx        context.Context
+	Owner_id   domain.UserId
+	Page_size  int32
+	Page_token string
 } {
 	var calls []struct {
-		ContextMoqParam context.Context
-		V               domain.UserId
+		Ctx        context.Context
+		Owner_id   domain.UserId
+		Page_size  int32
+		Page_token string
 	}
 	mock.lockListByOwner.RLock()
 	calls = mock.calls.ListByOwner
 	mock.lockListByOwner.RUnlock()
+	return calls
+}
+
+// Rename calls RenameFunc.
+func (mock *JobRepositoryMock) Rename(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, name string) error {
+	if mock.RenameFunc == nil {
+		panic("JobRepositoryMock.RenameFunc: method is nil but JobRepository.Rename was just called")
+	}
+	callInfo := struct {
+		Ctx      context.Context
+		Owner_id domain.UserId
+		Job_id   domain.JobId
+		Name     string
+	}{
+		Ctx:      ctx,
+		Owner_id: owner_id,
+		Job_id:   job_id,
+		Name:     name,
+	}
+	mock.lockRename.Lock()
+	mock.calls.Rename = append(mock.calls.Rename, callInfo)
+	mock.lockRename.Unlock()
+	return mock.RenameFunc(ctx, owner_id, job_id, name)
+}
+
+// RenameCalls gets all the calls that were made to Rename.
+// Check the length with:
+//
+//	len(mockedJobRepository.RenameCalls())
+func (mock *JobRepositoryMock) RenameCalls() []struct {
+	Ctx      context.Context
+	Owner_id domain.UserId
+	Job_id   domain.JobId
+	Name     string
+} {
+	var calls []struct {
+		Ctx      context.Context
+		Owner_id domain.UserId
+		Job_id   domain.JobId
+		Name     string
+	}
+	mock.lockRename.RLock()
+	calls = mock.calls.Rename
+	mock.lockRename.RUnlock()
 	return calls
 }
 

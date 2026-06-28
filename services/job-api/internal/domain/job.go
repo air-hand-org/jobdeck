@@ -17,6 +17,7 @@ type Job struct {
 	Id      JobId  `json:"id"`
 	OwnerId UserId `json:"owner_id"`
 	Enabled bool   `json:"enabled"`
+	Name    string `json:"name"`
 
 	Spec JobSpec `json:"spec"`
 
@@ -178,10 +179,9 @@ func (c *HttpJobConfig) UnmarshalJSON(data []byte) error {
 
 func (c *HttpJobConfig) JobConfig() {}
 
-var _ JobConfig = &HttpJobConfig{}
+var _ JobConfig = (*HttpJobConfig)(nil)
 
 type JobSpec struct {
-	Name string  `json:"name"`
 	Type JobType `json:"type"`
 
 	Config      JobConfig   `json:"config"`

@@ -24,97 +24,98 @@ namespace Jobdeck.Job.V1 {
     static JobReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Chhqb2JkZWNrL2pvYi92MS9qb2IucHJvdG8SDmpvYmRlY2suam9iLnYxGh9n",
-            "b29nbGUvcHJvdG9idWYvdGltZXN0YW1wLnByb3RvGh5nb29nbGUvcHJvdG9i",
-            "dWYvZHVyYXRpb24ucHJvdG8iyQEKB0pvYlNwZWMSEgoEbmFtZRgBIAEoCVIE",
-            "bmFtZRIrCgR0eXBlGAIgASgOMhcuam9iZGVjay5qb2IudjEuSm9iVHlwZVIE",
-            "dHlwZRIzCgRodHRwGAogASgLMh0uam9iZGVjay5qb2IudjEuSHR0cEpvYkNv",
-            "bmZpZ0gAUgRodHRwEj4KDHJldHJ5X3BvbGljeRgUIAEoCzIbLmpvYmRlY2su",
-            "am9iLnYxLlJldHJ5UG9saWN5UgtyZXRyeVBvbGljeUIICgZjb25maWci7QEK",
-            "A0pvYhIOCgJpZBgBIAEoCVICaWQSGQoIb3duZXJfaWQYAiABKAlSB293bmVy",
-            "SWQSGAoHZW5hYmxlZBgDIAEoCFIHZW5hYmxlZBIrCgRzcGVjGAogASgLMhcu",
-            "am9iZGVjay5qb2IudjEuSm9iU3BlY1IEc3BlYxI5CgpjcmVhdGVkX2F0GBQg",
-            "ASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJY3JlYXRlZEF0EjkK",
-            "CnVwZGF0ZWRfYXQYFSABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1w",
-            "Ugl1cGRhdGVkQXQiNQoPU3RhdHVzQ29kZVJhbmdlEhIKBGZyb20YASABKAVS",
-            "BGZyb20SDgoCdG8YAiABKAVSAnRvIlwKC1N0YXR1c0NvZGVzEhQKBWNvZGVz",
-            "GAEgAygFUgVjb2RlcxI3CgZyYW5nZXMYAiADKAsyHy5qb2JkZWNrLmpvYi52",
-            "MS5TdGF0dXNDb2RlUmFuZ2VSBnJhbmdlcyK2BAoNSHR0cEpvYkNvbmZpZxIy",
-            "CgZtZXRob2QYASABKA4yGi5qb2JkZWNrLmpvYi52MS5IdHRwTWV0aG9kUgZt",
-            "ZXRob2QSEAoDdXJsGAIgASgJUgN1cmwSNAoHaGVhZGVycxgDIAMoCzIaLmpv",
-            "YmRlY2suam9iLnYxLkh0dHBIZWFkZXJSB2hlYWRlcnMSEgoEYm9keRgEIAEo",
-            "DFIEYm9keRIzCgd0aW1lb3V0GAUgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1",
-            "cmF0aW9uUgd0aW1lb3V0Ek8KFWV4cGVjdGVkX3N0YXR1c19jb2RlcxgGIAEo",
-            "CzIbLmpvYmRlY2suam9iLnYxLlN0YXR1c0NvZGVzUhNleHBlY3RlZFN0YXR1",
-            "c0NvZGVzEjUKF21heF9yZXNwb25zZV9ib2R5X2J5dGVzGAggASgDUhRtYXhS",
-            "ZXNwb25zZUJvZHlCeXRlcxIpChBmb2xsb3dfcmVkaXJlY3RzGAkgASgIUg9m",
-            "b2xsb3dSZWRpcmVjdHMSKAoQcmV0cnlfb25fdGltZW91dBgKIAEoCFIOcmV0",
-            "cnlPblRpbWVvdXQSMwoWcmV0cnlfb25fbmV0d29ya19lcnJvchgLIAEoCFIT",
-            "cmV0cnlPbk5ldHdvcmtFcnJvchJOChVyZXRyeV9vbl9zdGF0dXNfY29kZXMY",
-            "DCABKAsyGy5qb2JkZWNrLmpvYi52MS5TdGF0dXNDb2Rlc1IScmV0cnlPblN0",
-            "YXR1c0NvZGVzIjYKCkh0dHBIZWFkZXISEgoEbmFtZRgBIAEoCVIEbmFtZRIU",
-            "CgV2YWx1ZRgCIAEoCVIFdmFsdWUi6AEKC1JldHJ5UG9saWN5EiEKDG1heF9h",
-            "dHRlbXB0cxgBIAEoBVILbWF4QXR0ZW1wdHMSPgoMYmFja29mZl90eXBlGAIg",
-            "ASgOMhsuam9iZGVjay5qb2IudjEuQmFja29mZlR5cGVSC2JhY2tvZmZUeXBl",
-            "Ej4KDWluaXRpYWxfZGVsYXkYAyABKAsyGS5nb29nbGUucHJvdG9idWYuRHVy",
-            "YXRpb25SDGluaXRpYWxEZWxheRI2CgltYXhfZGVsYXkYBCABKAsyGS5nb29n",
-            "bGUucHJvdG9idWYuRHVyYXRpb25SCG1heERlbGF5Ij8KEENyZWF0ZUpvYlJl",
-            "cXVlc3QSKwoEc3BlYxgBIAEoCzIXLmpvYmRlY2suam9iLnYxLkpvYlNwZWNS",
-            "BHNwZWMiOgoRQ3JlYXRlSm9iUmVzcG9uc2USJQoDam9iGAEgASgLMhMuam9i",
-            "ZGVjay5qb2IudjEuSm9iUgNqb2IiJgoNR2V0Sm9iUmVxdWVzdBIVCgZqb2Jf",
-            "aWQYASABKAlSBWpvYklkIjcKDkdldEpvYlJlc3BvbnNlEiUKA2pvYhgBIAEo",
-            "CzITLmpvYmRlY2suam9iLnYxLkpvYlIDam9iIk0KD0xpc3RKb2JzUmVxdWVz",
-            "dBIbCglwYWdlX3NpemUYASABKAVSCHBhZ2VTaXplEh0KCnBhZ2VfdG9rZW4Y",
-            "AiABKAlSCXBhZ2VUb2tlbiJjChBMaXN0Sm9ic1Jlc3BvbnNlEicKBGpvYnMY",
-            "ASADKAsyEy5qb2JkZWNrLmpvYi52MS5Kb2JSBGpvYnMSJgoPbmV4dF9wYWdl",
-            "X3Rva2VuGAIgASgJUg1uZXh0UGFnZVRva2VuImUKEFVwZGF0ZUpvYlJlcXVl",
-            "c3QSFQoGam9iX2lkGAEgASgJUgVqb2JJZBIrCgRzcGVjGAMgASgLMhcuam9i",
-            "ZGVjay5qb2IudjEuSm9iU3BlY1IEc3BlY0oECAIQA1IHZW5hYmxlZCI6ChFV",
-            "cGRhdGVKb2JSZXNwb25zZRIlCgNqb2IYASABKAsyEy5qb2JkZWNrLmpvYi52",
-            "MS5Kb2JSA2pvYiJHChRTZXRKb2JFbmFibGVkUmVxdWVzdBIVCgZqb2JfaWQY",
-            "ASABKAlSBWpvYklkEhgKB2VuYWJsZWQYAiABKAhSB2VuYWJsZWQiPgoVU2V0",
-            "Sm9iRW5hYmxlZFJlc3BvbnNlEiUKA2pvYhgBIAEoCzITLmpvYmRlY2suam9i",
-            "LnYxLkpvYlIDam9iIikKEERlbGV0ZUpvYlJlcXVlc3QSFQoGam9iX2lkGAEg",
-            "ASgJUgVqb2JJZCITChFEZWxldGVKb2JSZXNwb25zZSo+CgdKb2JUeXBlEhgK",
-            "FEpPQl9UWVBFX1VOU1BFQ0lGSUVEEAASGQoVSk9CX1RZUEVfSFRUUF9SRVFV",
-            "RVNUEAEqrgEKCkh0dHBNZXRob2QSGwoXSFRUUF9NRVRIT0RfVU5TUEVDSUZJ",
-            "RUQQABITCg9IVFRQX01FVEhPRF9HRVQQARIUChBIVFRQX01FVEhPRF9IRUFE",
-            "EAISFAoQSFRUUF9NRVRIT0RfUE9TVBADEhMKD0hUVFBfTUVUSE9EX1BVVBAE",
-            "EhUKEUhUVFBfTUVUSE9EX1BBVENIEAUSFgoSSFRUUF9NRVRIT0RfREVMRVRF",
-            "EAYqQwoLQmFja29mZlR5cGUSHAoYQkFDS09GRl9UWVBFX1VOU1BFQ0lGSUVE",
-            "EAASFgoSQkFDS09GRl9UWVBFX0ZJWEVEEAEyggQKCkpvYlNlcnZpY2USUAoJ",
-            "Q3JlYXRlSm9iEiAuam9iZGVjay5qb2IudjEuQ3JlYXRlSm9iUmVxdWVzdBoh",
-            "LmpvYmRlY2suam9iLnYxLkNyZWF0ZUpvYlJlc3BvbnNlElAKCVVwZGF0ZUpv",
-            "YhIgLmpvYmRlY2suam9iLnYxLlVwZGF0ZUpvYlJlcXVlc3QaIS5qb2JkZWNr",
-            "LmpvYi52MS5VcGRhdGVKb2JSZXNwb25zZRJcCg1TZXRKb2JFbmFibGVkEiQu",
-            "am9iZGVjay5qb2IudjEuU2V0Sm9iRW5hYmxlZFJlcXVlc3QaJS5qb2JkZWNr",
-            "LmpvYi52MS5TZXRKb2JFbmFibGVkUmVzcG9uc2USUAoJRGVsZXRlSm9iEiAu",
-            "am9iZGVjay5qb2IudjEuRGVsZXRlSm9iUmVxdWVzdBohLmpvYmRlY2suam9i",
-            "LnYxLkRlbGV0ZUpvYlJlc3BvbnNlEkwKBkdldEpvYhIdLmpvYmRlY2suam9i",
-            "LnYxLkdldEpvYlJlcXVlc3QaHi5qb2JkZWNrLmpvYi52MS5HZXRKb2JSZXNw",
-            "b25zZSIDkAIBElIKCExpc3RKb2JzEh8uam9iZGVjay5qb2IudjEuTGlzdEpv",
-            "YnNSZXF1ZXN0GiAuam9iZGVjay5qb2IudjEuTGlzdEpvYnNSZXNwb25zZSID",
-            "kAIBQpoBChJjb20uam9iZGVjay5qb2IudjFCCEpvYlByb3RvUAFaIGpvYmRl",
-            "Y2svZ2VuL2pvYmRlY2svam9iL3YxO2pvYnYxogIDSkpYqgIOSm9iZGVjay5K",
-            "b2IuVjHKAg5Kb2JkZWNrXEpvYlxWMeICGkpvYmRlY2tcSm9iXFYxXEdQQk1l",
-            "dGFkYXRh6gIQSm9iZGVjazo6Sm9iOjpWMWIGcHJvdG8z"));
+            "Chhqb2JkZWNrL2pvYi92MS9qb2IucHJvdG8SDmpvYmRlY2suam9iLnYxGh5n",
+            "b29nbGUvcHJvdG9idWYvZHVyYXRpb24ucHJvdG8aH2dvb2dsZS9wcm90b2J1",
+            "Zi90aW1lc3RhbXAucHJvdG8iwQEKB0pvYlNwZWMSKwoEdHlwZRgCIAEoDjIX",
+            "LmpvYmRlY2suam9iLnYxLkpvYlR5cGVSBHR5cGUSMwoEaHR0cBgKIAEoCzId",
+            "LmpvYmRlY2suam9iLnYxLkh0dHBKb2JDb25maWdIAFIEaHR0cBI+CgxyZXRy",
+            "eV9wb2xpY3kYFCABKAsyGy5qb2JkZWNrLmpvYi52MS5SZXRyeVBvbGljeVIL",
+            "cmV0cnlQb2xpY3lCCAoGY29uZmlnSgQIARACUgRuYW1lIoECCgNKb2ISDgoC",
+            "aWQYASABKAlSAmlkEhkKCG93bmVyX2lkGAIgASgJUgdvd25lcklkEhgKB2Vu",
+            "YWJsZWQYAyABKAhSB2VuYWJsZWQSEgoEbmFtZRgEIAEoCVIEbmFtZRIrCgRz",
+            "cGVjGAogASgLMhcuam9iZGVjay5qb2IudjEuSm9iU3BlY1IEc3BlYxI5Cgpj",
+            "cmVhdGVkX2F0GBQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJ",
+            "Y3JlYXRlZEF0EjkKCnVwZGF0ZWRfYXQYFSABKAsyGi5nb29nbGUucHJvdG9i",
+            "dWYuVGltZXN0YW1wUgl1cGRhdGVkQXQiNQoPU3RhdHVzQ29kZVJhbmdlEhIK",
+            "BGZyb20YASABKAVSBGZyb20SDgoCdG8YAiABKAVSAnRvIlwKC1N0YXR1c0Nv",
+            "ZGVzEhQKBWNvZGVzGAEgAygFUgVjb2RlcxI3CgZyYW5nZXMYAiADKAsyHy5q",
+            "b2JkZWNrLmpvYi52MS5TdGF0dXNDb2RlUmFuZ2VSBnJhbmdlcyK2BAoNSHR0",
+            "cEpvYkNvbmZpZxIyCgZtZXRob2QYASABKA4yGi5qb2JkZWNrLmpvYi52MS5I",
+            "dHRwTWV0aG9kUgZtZXRob2QSEAoDdXJsGAIgASgJUgN1cmwSNAoHaGVhZGVy",
+            "cxgDIAMoCzIaLmpvYmRlY2suam9iLnYxLkh0dHBIZWFkZXJSB2hlYWRlcnMS",
+            "EgoEYm9keRgEIAEoDFIEYm9keRIzCgd0aW1lb3V0GAUgASgLMhkuZ29vZ2xl",
+            "LnByb3RvYnVmLkR1cmF0aW9uUgd0aW1lb3V0Ek8KFWV4cGVjdGVkX3N0YXR1",
+            "c19jb2RlcxgGIAEoCzIbLmpvYmRlY2suam9iLnYxLlN0YXR1c0NvZGVzUhNl",
+            "eHBlY3RlZFN0YXR1c0NvZGVzEjUKF21heF9yZXNwb25zZV9ib2R5X2J5dGVz",
+            "GAggASgDUhRtYXhSZXNwb25zZUJvZHlCeXRlcxIpChBmb2xsb3dfcmVkaXJl",
+            "Y3RzGAkgASgIUg9mb2xsb3dSZWRpcmVjdHMSKAoQcmV0cnlfb25fdGltZW91",
+            "dBgKIAEoCFIOcmV0cnlPblRpbWVvdXQSMwoWcmV0cnlfb25fbmV0d29ya19l",
+            "cnJvchgLIAEoCFITcmV0cnlPbk5ldHdvcmtFcnJvchJOChVyZXRyeV9vbl9z",
+            "dGF0dXNfY29kZXMYDCABKAsyGy5qb2JkZWNrLmpvYi52MS5TdGF0dXNDb2Rl",
+            "c1IScmV0cnlPblN0YXR1c0NvZGVzIjYKCkh0dHBIZWFkZXISEgoEbmFtZRgB",
+            "IAEoCVIEbmFtZRIUCgV2YWx1ZRgCIAEoCVIFdmFsdWUi6AEKC1JldHJ5UG9s",
+            "aWN5EiEKDG1heF9hdHRlbXB0cxgBIAEoBVILbWF4QXR0ZW1wdHMSPgoMYmFj",
+            "a29mZl90eXBlGAIgASgOMhsuam9iZGVjay5qb2IudjEuQmFja29mZlR5cGVS",
+            "C2JhY2tvZmZUeXBlEj4KDWluaXRpYWxfZGVsYXkYAyABKAsyGS5nb29nbGUu",
+            "cHJvdG9idWYuRHVyYXRpb25SDGluaXRpYWxEZWxheRI2CgltYXhfZGVsYXkY",
+            "BCABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25SCG1heERlbGF5IlMK",
+            "EENyZWF0ZUpvYlJlcXVlc3QSKwoEc3BlYxgBIAEoCzIXLmpvYmRlY2suam9i",
+            "LnYxLkpvYlNwZWNSBHNwZWMSEgoEbmFtZRgCIAEoCVIEbmFtZSI6ChFDcmVh",
+            "dGVKb2JSZXNwb25zZRIlCgNqb2IYASABKAsyEy5qb2JkZWNrLmpvYi52MS5K",
+            "b2JSA2pvYiImCg1HZXRKb2JSZXF1ZXN0EhUKBmpvYl9pZBgBIAEoCVIFam9i",
+            "SWQiNwoOR2V0Sm9iUmVzcG9uc2USJQoDam9iGAEgASgLMhMuam9iZGVjay5q",
+            "b2IudjEuSm9iUgNqb2IiTQoPTGlzdEpvYnNSZXF1ZXN0EhsKCXBhZ2Vfc2l6",
+            "ZRgBIAEoBVIIcGFnZVNpemUSHQoKcGFnZV90b2tlbhgCIAEoCVIJcGFnZVRv",
+            "a2VuImMKEExpc3RKb2JzUmVzcG9uc2USJwoEam9icxgBIAMoCzITLmpvYmRl",
+            "Y2suam9iLnYxLkpvYlIEam9icxImCg9uZXh0X3BhZ2VfdG9rZW4YAiABKAlS",
+            "DW5leHRQYWdlVG9rZW4ieQoQVXBkYXRlSm9iUmVxdWVzdBIVCgZqb2JfaWQY",
+            "ASABKAlSBWpvYklkEisKBHNwZWMYAyABKAsyFy5qb2JkZWNrLmpvYi52MS5K",
+            "b2JTcGVjUgRzcGVjEhIKBG5hbWUYBCABKAlSBG5hbWVKBAgCEANSB2VuYWJs",
+            "ZWQiOgoRVXBkYXRlSm9iUmVzcG9uc2USJQoDam9iGAEgASgLMhMuam9iZGVj",
+            "ay5qb2IudjEuSm9iUgNqb2IiRwoUU2V0Sm9iRW5hYmxlZFJlcXVlc3QSFQoG",
+            "am9iX2lkGAEgASgJUgVqb2JJZBIYCgdlbmFibGVkGAIgASgIUgdlbmFibGVk",
+            "Ij4KFVNldEpvYkVuYWJsZWRSZXNwb25zZRIlCgNqb2IYASABKAsyEy5qb2Jk",
+            "ZWNrLmpvYi52MS5Kb2JSA2pvYiIpChBEZWxldGVKb2JSZXF1ZXN0EhUKBmpv",
+            "Yl9pZBgBIAEoCVIFam9iSWQiEwoRRGVsZXRlSm9iUmVzcG9uc2UqPgoHSm9i",
+            "VHlwZRIYChRKT0JfVFlQRV9VTlNQRUNJRklFRBAAEhkKFUpPQl9UWVBFX0hU",
+            "VFBfUkVRVUVTVBABKq4BCgpIdHRwTWV0aG9kEhsKF0hUVFBfTUVUSE9EX1VO",
+            "U1BFQ0lGSUVEEAASEwoPSFRUUF9NRVRIT0RfR0VUEAESFAoQSFRUUF9NRVRI",
+            "T0RfSEVBRBACEhQKEEhUVFBfTUVUSE9EX1BPU1QQAxITCg9IVFRQX01FVEhP",
+            "RF9QVVQQBBIVChFIVFRQX01FVEhPRF9QQVRDSBAFEhYKEkhUVFBfTUVUSE9E",
+            "X0RFTEVURRAGKkMKC0JhY2tvZmZUeXBlEhwKGEJBQ0tPRkZfVFlQRV9VTlNQ",
+            "RUNJRklFRBAAEhYKEkJBQ0tPRkZfVFlQRV9GSVhFRBABMoIECgpKb2JTZXJ2",
+            "aWNlElAKCUNyZWF0ZUpvYhIgLmpvYmRlY2suam9iLnYxLkNyZWF0ZUpvYlJl",
+            "cXVlc3QaIS5qb2JkZWNrLmpvYi52MS5DcmVhdGVKb2JSZXNwb25zZRJQCglV",
+            "cGRhdGVKb2ISIC5qb2JkZWNrLmpvYi52MS5VcGRhdGVKb2JSZXF1ZXN0GiEu",
+            "am9iZGVjay5qb2IudjEuVXBkYXRlSm9iUmVzcG9uc2USXAoNU2V0Sm9iRW5h",
+            "YmxlZBIkLmpvYmRlY2suam9iLnYxLlNldEpvYkVuYWJsZWRSZXF1ZXN0GiUu",
+            "am9iZGVjay5qb2IudjEuU2V0Sm9iRW5hYmxlZFJlc3BvbnNlElAKCURlbGV0",
+            "ZUpvYhIgLmpvYmRlY2suam9iLnYxLkRlbGV0ZUpvYlJlcXVlc3QaIS5qb2Jk",
+            "ZWNrLmpvYi52MS5EZWxldGVKb2JSZXNwb25zZRJMCgZHZXRKb2ISHS5qb2Jk",
+            "ZWNrLmpvYi52MS5HZXRKb2JSZXF1ZXN0Gh4uam9iZGVjay5qb2IudjEuR2V0",
+            "Sm9iUmVzcG9uc2UiA5ACARJSCghMaXN0Sm9icxIfLmpvYmRlY2suam9iLnYx",
+            "Lkxpc3RKb2JzUmVxdWVzdBogLmpvYmRlY2suam9iLnYxLkxpc3RKb2JzUmVz",
+            "cG9uc2UiA5ACAUKaAQoSY29tLmpvYmRlY2suam9iLnYxQghKb2JQcm90b1AB",
+            "WiBqb2JkZWNrL2dlbi9qb2JkZWNrL2pvYi92MTtqb2J2MaICA0pKWKoCDkpv",
+            "YmRlY2suSm9iLlYxygIOSm9iZGVja1xKb2JcVjHiAhpKb2JkZWNrXEpvYlxW",
+            "MVxHUEJNZXRhZGF0YeoCEEpvYmRlY2s6OkpvYjo6VjFiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Google.Protobuf.WellKnownTypes.TimestampReflection.Descriptor, global::Google.Protobuf.WellKnownTypes.DurationReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Google.Protobuf.WellKnownTypes.DurationReflection.Descriptor, global::Google.Protobuf.WellKnownTypes.TimestampReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Jobdeck.Job.V1.JobType), typeof(global::Jobdeck.Job.V1.HttpMethod), typeof(global::Jobdeck.Job.V1.BackoffType), }, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.JobSpec), global::Jobdeck.Job.V1.JobSpec.Parser, new[]{ "Name", "Type", "Http", "RetryPolicy" }, new[]{ "Config" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.Job), global::Jobdeck.Job.V1.Job.Parser, new[]{ "Id", "OwnerId", "Enabled", "Spec", "CreatedAt", "UpdatedAt" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.JobSpec), global::Jobdeck.Job.V1.JobSpec.Parser, new[]{ "Type", "Http", "RetryPolicy" }, new[]{ "Config" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.Job), global::Jobdeck.Job.V1.Job.Parser, new[]{ "Id", "OwnerId", "Enabled", "Name", "Spec", "CreatedAt", "UpdatedAt" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.StatusCodeRange), global::Jobdeck.Job.V1.StatusCodeRange.Parser, new[]{ "From", "To" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.StatusCodes), global::Jobdeck.Job.V1.StatusCodes.Parser, new[]{ "Codes", "Ranges" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.HttpJobConfig), global::Jobdeck.Job.V1.HttpJobConfig.Parser, new[]{ "Method", "Url", "Headers", "Body", "Timeout", "ExpectedStatusCodes", "MaxResponseBodyBytes", "FollowRedirects", "RetryOnTimeout", "RetryOnNetworkError", "RetryOnStatusCodes" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.HttpHeader), global::Jobdeck.Job.V1.HttpHeader.Parser, new[]{ "Name", "Value" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.RetryPolicy), global::Jobdeck.Job.V1.RetryPolicy.Parser, new[]{ "MaxAttempts", "BackoffType", "InitialDelay", "MaxDelay" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.CreateJobRequest), global::Jobdeck.Job.V1.CreateJobRequest.Parser, new[]{ "Spec" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.CreateJobRequest), global::Jobdeck.Job.V1.CreateJobRequest.Parser, new[]{ "Spec", "Name" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.CreateJobResponse), global::Jobdeck.Job.V1.CreateJobResponse.Parser, new[]{ "Job" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.GetJobRequest), global::Jobdeck.Job.V1.GetJobRequest.Parser, new[]{ "JobId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.GetJobResponse), global::Jobdeck.Job.V1.GetJobResponse.Parser, new[]{ "Job" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.ListJobsRequest), global::Jobdeck.Job.V1.ListJobsRequest.Parser, new[]{ "PageSize", "PageToken" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.ListJobsResponse), global::Jobdeck.Job.V1.ListJobsResponse.Parser, new[]{ "Jobs", "NextPageToken" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.UpdateJobRequest), global::Jobdeck.Job.V1.UpdateJobRequest.Parser, new[]{ "JobId", "Spec" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.UpdateJobRequest), global::Jobdeck.Job.V1.UpdateJobRequest.Parser, new[]{ "JobId", "Spec", "Name" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.UpdateJobResponse), global::Jobdeck.Job.V1.UpdateJobResponse.Parser, new[]{ "Job" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.SetJobEnabledRequest), global::Jobdeck.Job.V1.SetJobEnabledRequest.Parser, new[]{ "JobId", "Enabled" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.SetJobEnabledResponse), global::Jobdeck.Job.V1.SetJobEnabledResponse.Parser, new[]{ "Job" }, null, null, null, null),
@@ -188,7 +189,6 @@ namespace Jobdeck.Job.V1 {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public JobSpec(JobSpec other) : this() {
-      name_ = other.name_;
       type_ = other.type_;
       retryPolicy_ = other.retryPolicy_ != null ? other.retryPolicy_.Clone() : null;
       switch (other.ConfigCase) {
@@ -204,18 +204,6 @@ namespace Jobdeck.Job.V1 {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public JobSpec Clone() {
       return new JobSpec(this);
-    }
-
-    /// <summary>Field number for the "name" field.</summary>
-    public const int NameFieldNumber = 1;
-    private string name_ = "";
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public string Name {
-      get { return name_; }
-      set {
-        name_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-      }
     }
 
     /// <summary>Field number for the "type" field.</summary>
@@ -289,7 +277,6 @@ namespace Jobdeck.Job.V1 {
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (Name != other.Name) return false;
       if (Type != other.Type) return false;
       if (!object.Equals(Http, other.Http)) return false;
       if (!object.Equals(RetryPolicy, other.RetryPolicy)) return false;
@@ -301,7 +288,6 @@ namespace Jobdeck.Job.V1 {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override int GetHashCode() {
       int hash = 1;
-      if (Name.Length != 0) hash ^= Name.GetHashCode();
       if (Type != global::Jobdeck.Job.V1.JobType.Unspecified) hash ^= Type.GetHashCode();
       if (configCase_ == ConfigOneofCase.Http) hash ^= Http.GetHashCode();
       if (retryPolicy_ != null) hash ^= RetryPolicy.GetHashCode();
@@ -324,10 +310,6 @@ namespace Jobdeck.Job.V1 {
     #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       output.WriteRawMessage(this);
     #else
-      if (Name.Length != 0) {
-        output.WriteRawTag(10);
-        output.WriteString(Name);
-      }
       if (Type != global::Jobdeck.Job.V1.JobType.Unspecified) {
         output.WriteRawTag(16);
         output.WriteEnum((int) Type);
@@ -350,10 +332,6 @@ namespace Jobdeck.Job.V1 {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (Name.Length != 0) {
-        output.WriteRawTag(10);
-        output.WriteString(Name);
-      }
       if (Type != global::Jobdeck.Job.V1.JobType.Unspecified) {
         output.WriteRawTag(16);
         output.WriteEnum((int) Type);
@@ -376,9 +354,6 @@ namespace Jobdeck.Job.V1 {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public int CalculateSize() {
       int size = 0;
-      if (Name.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
-      }
       if (Type != global::Jobdeck.Job.V1.JobType.Unspecified) {
         size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Type);
       }
@@ -399,9 +374,6 @@ namespace Jobdeck.Job.V1 {
     public void MergeFrom(JobSpec other) {
       if (other == null) {
         return;
-      }
-      if (other.Name.Length != 0) {
-        Name = other.Name;
       }
       if (other.Type != global::Jobdeck.Job.V1.JobType.Unspecified) {
         Type = other.Type;
@@ -440,10 +412,6 @@ namespace Jobdeck.Job.V1 {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
-          case 10: {
-            Name = input.ReadString();
-            break;
-          }
           case 16: {
             Type = (global::Jobdeck.Job.V1.JobType) input.ReadEnum();
             break;
@@ -483,10 +451,6 @@ namespace Jobdeck.Job.V1 {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
-          case 10: {
-            Name = input.ReadString();
-            break;
-          }
           case 16: {
             Type = (global::Jobdeck.Job.V1.JobType) input.ReadEnum();
             break;
@@ -552,6 +516,7 @@ namespace Jobdeck.Job.V1 {
       id_ = other.id_;
       ownerId_ = other.ownerId_;
       enabled_ = other.enabled_;
+      name_ = other.name_;
       spec_ = other.spec_ != null ? other.spec_.Clone() : null;
       createdAt_ = other.createdAt_ != null ? other.createdAt_.Clone() : null;
       updatedAt_ = other.updatedAt_ != null ? other.updatedAt_.Clone() : null;
@@ -597,6 +562,18 @@ namespace Jobdeck.Job.V1 {
       get { return enabled_; }
       set {
         enabled_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "name" field.</summary>
+    public const int NameFieldNumber = 4;
+    private string name_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string Name {
+      get { return name_; }
+      set {
+        name_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
@@ -654,6 +631,7 @@ namespace Jobdeck.Job.V1 {
       if (Id != other.Id) return false;
       if (OwnerId != other.OwnerId) return false;
       if (Enabled != other.Enabled) return false;
+      if (Name != other.Name) return false;
       if (!object.Equals(Spec, other.Spec)) return false;
       if (!object.Equals(CreatedAt, other.CreatedAt)) return false;
       if (!object.Equals(UpdatedAt, other.UpdatedAt)) return false;
@@ -667,6 +645,7 @@ namespace Jobdeck.Job.V1 {
       if (Id.Length != 0) hash ^= Id.GetHashCode();
       if (OwnerId.Length != 0) hash ^= OwnerId.GetHashCode();
       if (Enabled != false) hash ^= Enabled.GetHashCode();
+      if (Name.Length != 0) hash ^= Name.GetHashCode();
       if (spec_ != null) hash ^= Spec.GetHashCode();
       if (createdAt_ != null) hash ^= CreatedAt.GetHashCode();
       if (updatedAt_ != null) hash ^= UpdatedAt.GetHashCode();
@@ -699,6 +678,10 @@ namespace Jobdeck.Job.V1 {
       if (Enabled != false) {
         output.WriteRawTag(24);
         output.WriteBool(Enabled);
+      }
+      if (Name.Length != 0) {
+        output.WriteRawTag(34);
+        output.WriteString(Name);
       }
       if (spec_ != null) {
         output.WriteRawTag(82);
@@ -734,6 +717,10 @@ namespace Jobdeck.Job.V1 {
         output.WriteRawTag(24);
         output.WriteBool(Enabled);
       }
+      if (Name.Length != 0) {
+        output.WriteRawTag(34);
+        output.WriteString(Name);
+      }
       if (spec_ != null) {
         output.WriteRawTag(82);
         output.WriteMessage(Spec);
@@ -765,6 +752,9 @@ namespace Jobdeck.Job.V1 {
       if (Enabled != false) {
         size += 1 + 1;
       }
+      if (Name.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
+      }
       if (spec_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(Spec);
       }
@@ -794,6 +784,9 @@ namespace Jobdeck.Job.V1 {
       }
       if (other.Enabled != false) {
         Enabled = other.Enabled;
+      }
+      if (other.Name.Length != 0) {
+        Name = other.Name;
       }
       if (other.spec_ != null) {
         if (spec_ == null) {
@@ -842,6 +835,10 @@ namespace Jobdeck.Job.V1 {
           }
           case 24: {
             Enabled = input.ReadBool();
+            break;
+          }
+          case 34: {
+            Name = input.ReadString();
             break;
           }
           case 82: {
@@ -894,6 +891,10 @@ namespace Jobdeck.Job.V1 {
           }
           case 24: {
             Enabled = input.ReadBool();
+            break;
+          }
+          case 34: {
+            Name = input.ReadString();
             break;
           }
           case 82: {
@@ -2556,6 +2557,7 @@ namespace Jobdeck.Job.V1 {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public CreateJobRequest(CreateJobRequest other) : this() {
       spec_ = other.spec_ != null ? other.spec_.Clone() : null;
+      name_ = other.name_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -2577,6 +2579,18 @@ namespace Jobdeck.Job.V1 {
       }
     }
 
+    /// <summary>Field number for the "name" field.</summary>
+    public const int NameFieldNumber = 2;
+    private string name_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string Name {
+      get { return name_; }
+      set {
+        name_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -2593,6 +2607,7 @@ namespace Jobdeck.Job.V1 {
         return true;
       }
       if (!object.Equals(Spec, other.Spec)) return false;
+      if (Name != other.Name) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -2601,6 +2616,7 @@ namespace Jobdeck.Job.V1 {
     public override int GetHashCode() {
       int hash = 1;
       if (spec_ != null) hash ^= Spec.GetHashCode();
+      if (Name.Length != 0) hash ^= Name.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -2623,6 +2639,10 @@ namespace Jobdeck.Job.V1 {
         output.WriteRawTag(10);
         output.WriteMessage(Spec);
       }
+      if (Name.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteString(Name);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -2637,6 +2657,10 @@ namespace Jobdeck.Job.V1 {
         output.WriteRawTag(10);
         output.WriteMessage(Spec);
       }
+      if (Name.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteString(Name);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -2649,6 +2673,9 @@ namespace Jobdeck.Job.V1 {
       int size = 0;
       if (spec_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(Spec);
+      }
+      if (Name.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -2667,6 +2694,9 @@ namespace Jobdeck.Job.V1 {
           Spec = new global::Jobdeck.Job.V1.JobSpec();
         }
         Spec.MergeFrom(other.Spec);
+      }
+      if (other.Name.Length != 0) {
+        Name = other.Name;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -2694,6 +2724,10 @@ namespace Jobdeck.Job.V1 {
             input.ReadMessage(Spec);
             break;
           }
+          case 18: {
+            Name = input.ReadString();
+            break;
+          }
         }
       }
     #endif
@@ -2718,6 +2752,10 @@ namespace Jobdeck.Job.V1 {
               Spec = new global::Jobdeck.Job.V1.JobSpec();
             }
             input.ReadMessage(Spec);
+            break;
+          }
+          case 18: {
+            Name = input.ReadString();
             break;
           }
         }
@@ -3835,6 +3873,7 @@ namespace Jobdeck.Job.V1 {
     public UpdateJobRequest(UpdateJobRequest other) : this() {
       jobId_ = other.jobId_;
       spec_ = other.spec_ != null ? other.spec_.Clone() : null;
+      name_ = other.name_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -3868,6 +3907,18 @@ namespace Jobdeck.Job.V1 {
       }
     }
 
+    /// <summary>Field number for the "name" field.</summary>
+    public const int NameFieldNumber = 4;
+    private string name_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string Name {
+      get { return name_; }
+      set {
+        name_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -3885,6 +3936,7 @@ namespace Jobdeck.Job.V1 {
       }
       if (JobId != other.JobId) return false;
       if (!object.Equals(Spec, other.Spec)) return false;
+      if (Name != other.Name) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -3894,6 +3946,7 @@ namespace Jobdeck.Job.V1 {
       int hash = 1;
       if (JobId.Length != 0) hash ^= JobId.GetHashCode();
       if (spec_ != null) hash ^= Spec.GetHashCode();
+      if (Name.Length != 0) hash ^= Name.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -3920,6 +3973,10 @@ namespace Jobdeck.Job.V1 {
         output.WriteRawTag(26);
         output.WriteMessage(Spec);
       }
+      if (Name.Length != 0) {
+        output.WriteRawTag(34);
+        output.WriteString(Name);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -3938,6 +3995,10 @@ namespace Jobdeck.Job.V1 {
         output.WriteRawTag(26);
         output.WriteMessage(Spec);
       }
+      if (Name.Length != 0) {
+        output.WriteRawTag(34);
+        output.WriteString(Name);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -3953,6 +4014,9 @@ namespace Jobdeck.Job.V1 {
       }
       if (spec_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(Spec);
+      }
+      if (Name.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -3974,6 +4038,9 @@ namespace Jobdeck.Job.V1 {
           Spec = new global::Jobdeck.Job.V1.JobSpec();
         }
         Spec.MergeFrom(other.Spec);
+      }
+      if (other.Name.Length != 0) {
+        Name = other.Name;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -4005,6 +4072,10 @@ namespace Jobdeck.Job.V1 {
             input.ReadMessage(Spec);
             break;
           }
+          case 34: {
+            Name = input.ReadString();
+            break;
+          }
         }
       }
     #endif
@@ -4033,6 +4104,10 @@ namespace Jobdeck.Job.V1 {
               Spec = new global::Jobdeck.Job.V1.JobSpec();
             }
             input.ReadMessage(Spec);
+            break;
+          }
+          case 34: {
+            Name = input.ReadString();
             break;
           }
         }

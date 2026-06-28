@@ -1,12 +1,14 @@
 syntax = "proto3";
 
-import "google/protobuf/timestamp.proto";
-import "google/protobuf/duration.proto";
-
 package jobdeck.job.v1;
 
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
 message JobSpec {
-  string name = 1;
+  reserved 1;
+  reserved "name";
+
   JobType type = 2;
 
   oneof config {
@@ -20,6 +22,7 @@ message Job {
   string id = 1;
   string owner_id = 2;
   bool enabled = 3;
+  string name = 4;
 
   JobSpec spec = 10;
 
@@ -48,8 +51,8 @@ message StatusCodeRange {
 }
 
 message StatusCodes {
-    repeated int32 codes = 1;
-    repeated StatusCodeRange ranges = 2;
+  repeated int32 codes = 1;
+  repeated StatusCodeRange ranges = 2;
 }
 
 message HttpJobConfig {
@@ -80,18 +83,18 @@ message RetryPolicy {
   BackoffType backoff_type = 2;
   google.protobuf.Duration initial_delay = 3;
   google.protobuf.Duration max_delay = 4;
-
 }
 
 enum BackoffType {
   BACKOFF_TYPE_UNSPECIFIED = 0;
   BACKOFF_TYPE_FIXED = 1;
-//  BACKOFF_TYPE_EXPONENTIAL = 2;
-//  BACKOFF_TYPE_EXPONENTIAL_WITH_JITTER = 3;
+  //  BACKOFF_TYPE_EXPONENTIAL = 2;
+  //  BACKOFF_TYPE_EXPONENTIAL_WITH_JITTER = 3;
 }
 
 message CreateJobRequest {
   JobSpec spec = 1;
+  string name = 2;
 }
 
 message CreateJobResponse {
@@ -122,6 +125,7 @@ message UpdateJobRequest {
 
   string job_id = 1;
   JobSpec spec = 3;
+  string name = 4;
 }
 
 message UpdateJobResponse {
@@ -141,8 +145,7 @@ message DeleteJobRequest {
   string job_id = 1;
 }
 
-message DeleteJobResponse {
-}
+message DeleteJobResponse {}
 
 service JobService {
   rpc CreateJob(CreateJobRequest) returns (CreateJobResponse);

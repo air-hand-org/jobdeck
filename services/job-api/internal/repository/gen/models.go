@@ -9,19 +9,42 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Execution struct {
+	ExecutionID            uuid.UUID
+	JobID                  uuid.UUID
+	JobOwnerID             uuid.UUID
+	JobRevisionID          uuid.UUID
+	TriggerType            string
+	CurrentStatus          string
+	Attempt                int32
+	LeaseToken             *uuid.UUID
+	LeaseExpiresAt         pgtype.Timestamptz
+	NextRunAt              pgtype.Timestamptz
+	Result                 []byte
+	ErrorMessage           pgtype.Text
+	CreatedAt              pgtype.Timestamptz
+	UpdatedAt              pgtype.Timestamptz
+	JobType                string
+	JobConfig              []byte
+	JobRetryMaxAttempts    int32
+	JobRetryBackoffType    string
+	JobRetryInitialDelayMs int64
+	JobRetryMaxDelayMs     int64
+}
+
 type Job struct {
 	JobID               uuid.UUID
 	OwnerID             uuid.UUID
 	Enabled             bool
 	Name                string
+	CreatedAt           pgtype.Timestamptz
+	UpdatedAt           pgtype.Timestamptz
 	Type                string
 	Config              []byte
 	RetryMaxAttempts    int32
 	RetryBackoffType    string
 	RetryInitialDelayMs int64
 	RetryMaxDelayMs     int64
-	CreatedAt           pgtype.Timestamptz
-	UpdatedAt           pgtype.Timestamptz
 }
 
 type JobExecution struct {
@@ -30,7 +53,6 @@ type JobExecution struct {
 	TriggerType    string
 	Status         string
 	Attempt        int32
-	MaxAttempts    int32
 	LeaseToken     *uuid.UUID
 	LeaseExpiresAt pgtype.Timestamptz
 	NextRunAt      pgtype.Timestamptz
@@ -38,6 +60,43 @@ type JobExecution struct {
 	ErrorMessage   pgtype.Text
 	CreatedAt      pgtype.Timestamptz
 	UpdatedAt      pgtype.Timestamptz
+	JobRevisionID  uuid.UUID
+}
+
+type JobExecutionClaimDetail struct {
+	ExecutionID    uuid.UUID
+	JobID          uuid.UUID
+	JobRevisionID  uuid.UUID
+	Attempt        int32
+	LeaseToken     *uuid.UUID
+	LeaseExpiresAt pgtype.Timestamptz
+	JobType        string
+	JobConfig      []byte
+}
+
+type JobExecutionDetailWithEvent struct {
+	ExecutionID            uuid.UUID
+	JobID                  uuid.UUID
+	JobOwnerID             uuid.UUID
+	JobRevisionID          uuid.UUID
+	TriggerType            string
+	CurrentStatus          string
+	Attempt                int32
+	LeaseToken             *uuid.UUID
+	LeaseExpiresAt         pgtype.Timestamptz
+	NextRunAt              pgtype.Timestamptz
+	Result                 []byte
+	ErrorMessage           pgtype.Text
+	CreatedAt              pgtype.Timestamptz
+	UpdatedAt              pgtype.Timestamptz
+	JobType                string
+	JobConfig              []byte
+	JobRetryMaxAttempts    int32
+	JobRetryBackoffType    string
+	JobRetryInitialDelayMs int64
+	JobRetryMaxDelayMs     int64
+	EventStatus            string
+	EventCreatedAt         pgtype.Timestamptz
 }
 
 type JobExecutionEvent struct {
@@ -56,8 +115,35 @@ type JobExecutionTrigger struct {
 	TriggerType string
 }
 
+type JobJob struct {
+	JobID     uuid.UUID
+	OwnerID   uuid.UUID
+	Enabled   bool
+	Name      string
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+}
+
+type JobJobCurrentRevision struct {
+	JobID      uuid.UUID
+	RevisionID uuid.UUID
+}
+
 type JobJobRetryBackoffType struct {
 	Type string
+}
+
+type JobJobRevision struct {
+	RevisionID          uuid.UUID
+	JobID               uuid.UUID
+	RevisionNumber      int32
+	Type                string
+	Config              []byte
+	RetryMaxAttempts    int32
+	RetryBackoffType    string
+	RetryInitialDelayMs int64
+	RetryMaxDelayMs     int64
+	CreatedAt           pgtype.Timestamptz
 }
 
 type JobJobType struct {

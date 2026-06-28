@@ -178,7 +178,6 @@ func (BackoffType) EnumDescriptor() ([]byte, []int) {
 
 type JobSpec struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	Name  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Type  JobType                `protobuf:"varint,2,opt,name=type,proto3,enum=jobdeck.job.v1.JobType" json:"type,omitempty"`
 	// Types that are valid to be assigned to Config:
 	//
@@ -217,13 +216,6 @@ func (x *JobSpec) ProtoReflect() protoreflect.Message {
 // Deprecated: Use JobSpec.ProtoReflect.Descriptor instead.
 func (*JobSpec) Descriptor() ([]byte, []int) {
 	return file_jobdeck_job_v1_job_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *JobSpec) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
 }
 
 func (x *JobSpec) GetType() JobType {
@@ -271,6 +263,7 @@ type Job struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	OwnerId       string                 `protobuf:"bytes,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
 	Enabled       bool                   `protobuf:"varint,3,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
 	Spec          *JobSpec               `protobuf:"bytes,10,opt,name=spec,proto3" json:"spec,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,20,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,21,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
@@ -327,6 +320,13 @@ func (x *Job) GetEnabled() bool {
 		return x.Enabled
 	}
 	return false
+}
+
+func (x *Job) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
 }
 
 func (x *Job) GetSpec() *JobSpec {
@@ -701,6 +701,7 @@ func (x *RetryPolicy) GetMaxDelay() *durationpb.Duration {
 type CreateJobRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Spec          *JobSpec               `protobuf:"bytes,1,opt,name=spec,proto3" json:"spec,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -740,6 +741,13 @@ func (x *CreateJobRequest) GetSpec() *JobSpec {
 		return x.Spec
 	}
 	return nil
+}
+
+func (x *CreateJobRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
 }
 
 type CreateJobResponse struct {
@@ -982,6 +990,7 @@ type UpdateJobRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	JobId         string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
 	Spec          *JobSpec               `protobuf:"bytes,3,opt,name=spec,proto3" json:"spec,omitempty"`
+	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1028,6 +1037,13 @@ func (x *UpdateJobRequest) GetSpec() *JobSpec {
 		return x.Spec
 	}
 	return nil
+}
+
+func (x *UpdateJobRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
 }
 
 type UpdateJobResponse struct {
@@ -1254,18 +1270,18 @@ var File_jobdeck_job_v1_job_proto protoreflect.FileDescriptor
 
 const file_jobdeck_job_v1_job_proto_rawDesc = "" +
 	"\n" +
-	"\x18jobdeck/job/v1/job.proto\x12\x0ejobdeck.job.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/duration.proto\"\xc9\x01\n" +
-	"\aJobSpec\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12+\n" +
+	"\x18jobdeck/job/v1/job.proto\x12\x0ejobdeck.job.v1\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc1\x01\n" +
+	"\aJobSpec\x12+\n" +
 	"\x04type\x18\x02 \x01(\x0e2\x17.jobdeck.job.v1.JobTypeR\x04type\x123\n" +
 	"\x04http\x18\n" +
 	" \x01(\v2\x1d.jobdeck.job.v1.HttpJobConfigH\x00R\x04http\x12>\n" +
 	"\fretry_policy\x18\x14 \x01(\v2\x1b.jobdeck.job.v1.RetryPolicyR\vretryPolicyB\b\n" +
-	"\x06config\"\xed\x01\n" +
+	"\x06configJ\x04\b\x01\x10\x02R\x04name\"\x81\x02\n" +
 	"\x03Job\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\tR\aownerId\x12\x18\n" +
-	"\aenabled\x18\x03 \x01(\bR\aenabled\x12+\n" +
+	"\aenabled\x18\x03 \x01(\bR\aenabled\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\x12+\n" +
 	"\x04spec\x18\n" +
 	" \x01(\v2\x17.jobdeck.job.v1.JobSpecR\x04spec\x129\n" +
 	"\n" +
@@ -1299,9 +1315,10 @@ const file_jobdeck_job_v1_job_proto_rawDesc = "" +
 	"\fmax_attempts\x18\x01 \x01(\x05R\vmaxAttempts\x12>\n" +
 	"\fbackoff_type\x18\x02 \x01(\x0e2\x1b.jobdeck.job.v1.BackoffTypeR\vbackoffType\x12>\n" +
 	"\rinitial_delay\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\finitialDelay\x126\n" +
-	"\tmax_delay\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\bmaxDelay\"?\n" +
+	"\tmax_delay\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\bmaxDelay\"S\n" +
 	"\x10CreateJobRequest\x12+\n" +
-	"\x04spec\x18\x01 \x01(\v2\x17.jobdeck.job.v1.JobSpecR\x04spec\":\n" +
+	"\x04spec\x18\x01 \x01(\v2\x17.jobdeck.job.v1.JobSpecR\x04spec\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\":\n" +
 	"\x11CreateJobResponse\x12%\n" +
 	"\x03job\x18\x01 \x01(\v2\x13.jobdeck.job.v1.JobR\x03job\"&\n" +
 	"\rGetJobRequest\x12\x15\n" +
@@ -1314,10 +1331,11 @@ const file_jobdeck_job_v1_job_proto_rawDesc = "" +
 	"page_token\x18\x02 \x01(\tR\tpageToken\"c\n" +
 	"\x10ListJobsResponse\x12'\n" +
 	"\x04jobs\x18\x01 \x03(\v2\x13.jobdeck.job.v1.JobR\x04jobs\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"e\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"y\n" +
 	"\x10UpdateJobRequest\x12\x15\n" +
 	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12+\n" +
-	"\x04spec\x18\x03 \x01(\v2\x17.jobdeck.job.v1.JobSpecR\x04specJ\x04\b\x02\x10\x03R\aenabled\":\n" +
+	"\x04spec\x18\x03 \x01(\v2\x17.jobdeck.job.v1.JobSpecR\x04spec\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04nameJ\x04\b\x02\x10\x03R\aenabled\":\n" +
 	"\x11UpdateJobResponse\x12%\n" +
 	"\x03job\x18\x01 \x01(\v2\x13.jobdeck.job.v1.JobR\x03job\"G\n" +
 	"\x14SetJobEnabledRequest\x12\x15\n" +

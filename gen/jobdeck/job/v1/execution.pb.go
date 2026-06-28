@@ -7,6 +7,7 @@
 package jobv1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
@@ -683,12 +684,12 @@ var File_jobdeck_job_v1_execution_proto protoreflect.FileDescriptor
 
 const file_jobdeck_job_v1_execution_proto_rawDesc = "" +
 	"\n" +
-	"\x1ejobdeck/job/v1/execution.proto\x12\x0ejobdeck.job.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x9c\x02\n" +
-	"\tExecution\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x15\n" +
-	"\x06job_id\x18\x02 \x01(\tR\x05jobId\x12:\n" +
-	"\atrigger\x18\x04 \x01(\x0e2 .jobdeck.job.v1.ExecutionTriggerR\atrigger\x126\n" +
-	"\x06events\x18\x05 \x03(\v2\x1e.jobdeck.job.v1.ExecutionEventR\x06events\x12\x18\n" +
+	"\x1ejobdeck/job/v1/execution.proto\x12\x0ejobdeck.job.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xba\x02\n" +
+	"\tExecution\x12\x18\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12\x1f\n" +
+	"\x06job_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x05jobId\x12:\n" +
+	"\atrigger\x18\x04 \x01(\x0e2 .jobdeck.job.v1.ExecutionTriggerR\atrigger\x12@\n" +
+	"\x06events\x18\x05 \x03(\v2\x1e.jobdeck.job.v1.ExecutionEventB\b\xbaH\x05\x92\x01\x02\b\x01R\x06events\x12\x18\n" +
 	"\aattempt\x18\x06 \x01(\x05R\aattempt\x12!\n" +
 	"\fmax_attempts\x18\a \x01(\x05R\vmaxAttempts\x127\n" +
 	"\x06result\x18\n" +

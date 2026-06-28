@@ -17,7 +17,8 @@ sql:
         emit_interface: true
         emit_empty_slices: true
         rename:
-          job_job: Job
+          job_job_detail: Job
+          job_execution_detail: Execution
         overrides:
           - db_type: "uuid"
             nullable: false

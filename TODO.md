@@ -68,6 +68,21 @@
   - domain to DB row
   - DB row to domain
   - domain to proto
+- [ ] Add proto validation:
+  - validate string UUID fields such as `job_id`, `execution_id`, and `owner_id`.
+  - validate pagination fields such as `page_size` and `page_token`.
+  - validate enum presence and required nested messages before proto/domain transforms.
+  - evaluate `buf.validate` / `protovalidate` as the default validation path.
+- [ ] Add gRPC validation/error interceptors as a separate task, not in `feat/execution`:
+  - add a `protovalidate` unary interceptor after authentication and before handlers.
+  - return `InvalidArgument` for proto validation failures.
+  - consider mapping validation failures to `google.rpc.BadRequest.FieldViolation` rich error details for C# and other clients.
+  - document interceptor order explicitly, for example recovery/logging/auth/validation/handler.
+  - keep domain validation for invariants that cannot be expressed safely in proto annotations.
+- [ ] Add generated proto documentation:
+  - introduce `protoc-gen-doc` or the Buf equivalent.
+  - generate API docs for `proto/jobdeck/**/*.proto`.
+  - include the doc generation step in local tooling and CI once the proto surface stabilizes.
 - [ ] Start persistence with a concrete PostgreSQL store before adding broad repository interfaces.
 - [ ] Model transaction requirements as atomic application ports:
   - Do not introduce a generic `TxManager` or `UnitOfWork` yet.
@@ -111,10 +126,23 @@
   - [ ] merge the Job CRUD implementation
   - [ ] implement request/create execution
   - [ ] implement queue claim/report
+  - [ ] evaluate bidirectional streaming for job-api/job-worker queue exchange:
+    - keep the first implementation simple with unary `ClaimExecutions` / `ReportExecutionResult`.
+    - prototype a bidirectional stream where job-worker requests/renews work and job-api sends claimed executions.
+    - decide how leases, backpressure, worker shutdown, and reconnect behavior work on the stream.
+    - keep execution reporting explicit so retries and result persistence remain owned by job-api.
   - [ ] implement the Go worker HTTP execution path without retry first
   - [ ] persist execution events, results, errors, timing, and bounded worker log output
   - [ ] expose execution history and worker logs through query APIs
   - [ ] add retry behavior and multi-worker double-execution protection
+  - [ ] design scheduler-service as a separate service boundary:
+    - keep `job-api` DB as the source of truth for job definitions
+    - give scheduler-service its own DB for scheduling projections/read models
+    - start with scheduler reading `job-api` through gRPC if that is enough for the MVP
+    - add outbox events from `job-api` when async synchronization is needed
+    - publish job lifecycle events through Dapr pub/sub, such as `JobCreated`, `JobSpecUpdated`, `JobEnabledChanged`, and `JobDeleted`
+    - make scheduler projection updates idempotent and tolerate at-least-once delivery
+    - consider reconciliation later so missed delete/update events do not leave stale scheduled jobs
   - [ ] build the Blazor BFF/UI:
     - Job CRUD
     - manual execution

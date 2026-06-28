@@ -6,6 +6,9 @@ managed:
       path: jobdeck
 #      value: github.com/air-hand/jobdeck/gen
       value: jobdeck/gen
+  disable:
+    - file_option: go_package
+      module: buf.build/bufbuild/protovalidate
 plugins:
   - remote: buf.build/protocolbuffers/go
     out: gen

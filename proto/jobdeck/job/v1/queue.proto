@@ -1,12 +1,10 @@
 syntax = "proto3";
 
-import "google/protobuf/timestamp.proto";
-import "google/protobuf/duration.proto";
+package jobdeck.job.v1;
 
+import "google/protobuf/timestamp.proto";
 import "jobdeck/job/v1/execution.proto";
 import "jobdeck/job/v1/job.proto";
-
-package jobdeck.job.v1;
 
 message ClaimedExecution {
   string execution_id = 1;
@@ -15,31 +13,36 @@ message ClaimedExecution {
 
   int32 attempt = 4;
   JobSpec job_spec = 5;
+  string job_id = 6;
 }
 
 service ExecutionQueueService {
-  rpc ClaimExecution(ClaimExecutionRequest) returns (ClaimExecutionResponse);
+  rpc ClaimExecutions(ClaimExecutionsRequest) returns (ClaimExecutionsResponse);
   rpc ReportExecutionResult(ReportExecutionResultRequest) returns (ReportExecutionResultResponse);
 }
 
-message ClaimExecutionRequest {
+message ClaimExecutionsRequest {
+  reserved 2;
+  reserved "lease_duration";
+
   int32 max_count = 1;
-  google.protobuf.Duration lease_duration = 2;
 }
 
-message ClaimExecutionResponse {
+message ClaimExecutionsResponse {
   repeated ClaimedExecution executions = 1;
 }
 
 message ReportExecutionResultRequest {
+  reserved 5;
+  reserved "duration";
+
   string execution_id = 1;
   string lease_token = 2;
   ExecutionStatus status = 3;
   ExecutionResult result = 4;
-
-  google.protobuf.Duration duration = 5;
 }
 
 message ReportExecutionResultResponse {
-  Execution execution = 1;
+  reserved "execution";
+  reserved 1;
 }
