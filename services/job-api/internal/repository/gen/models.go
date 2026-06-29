@@ -74,31 +74,6 @@ type JobExecutionClaimDetail struct {
 	JobConfig      []byte
 }
 
-type JobExecutionDetailWithEvent struct {
-	ExecutionID            uuid.UUID
-	JobID                  uuid.UUID
-	JobOwnerID             uuid.UUID
-	JobRevisionID          uuid.UUID
-	TriggerType            string
-	CurrentStatus          string
-	Attempt                int32
-	LeaseToken             *uuid.UUID
-	LeaseExpiresAt         pgtype.Timestamptz
-	NextRunAt              pgtype.Timestamptz
-	Result                 []byte
-	ErrorMessage           pgtype.Text
-	CreatedAt              pgtype.Timestamptz
-	UpdatedAt              pgtype.Timestamptz
-	JobType                string
-	JobConfig              []byte
-	JobRetryMaxAttempts    int32
-	JobRetryBackoffType    string
-	JobRetryInitialDelayMs int64
-	JobRetryMaxDelayMs     int64
-	EventStatus            string
-	EventCreatedAt         pgtype.Timestamptz
-}
-
 type JobExecutionEvent struct {
 	ExecutionEventID uuid.UUID
 	ExecutionID      uuid.UUID

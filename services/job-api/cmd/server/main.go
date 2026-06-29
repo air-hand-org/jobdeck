@@ -48,6 +48,7 @@ func main() {
 	healthgrpc.RegisterHealthServer(s, healthcheck)
 	jobv1.RegisterJobServiceServer(s, transport.NewJobServiceServer(app.NewJobUsecase(store)))
 	jobv1.RegisterExecutionQueueServiceServer(s, transport.NewExecutionQueueServiceServer(app.NewExecutionUsecase(store)))
+	jobv1.RegisterExecutionServiceServer(s, transport.NewExecutionServiceServer(app.NewExecutionUsecase(store)))
 	reflection.Register(s)
 
 	// FIXME

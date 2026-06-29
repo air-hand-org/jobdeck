@@ -157,22 +157,45 @@ FROM job.execution_detail
 WHERE execution_id = (SELECT execution_id FROM added_event)
 ;
 
--- TODO: ReportAsTimeoutByReaper
-
-/*
--- name: GetExecution :one
+-- name: GetExecutionDetail :one
 SELECT *
-FROM job.execution_detail_with_events AS e
+FROM job.execution_detail AS e
 WHERE
   e.execution_id = sqlc.arg(execution_id)
+  AND
+  e.job_owner_id = sqlc.arg(owner_id)
 ;
 
--- name: ListExecutions :many
+-- name: ListExecutionEvents :many
+SELECT *
+FROM job.execution_event AS ee
+WHERE
+  ee.execution_id = sqlc.arg(execution_id)
+ORDER BY ee.created_at ASC, ee.execution_event_id ASC
+;
+
+-- name: ListExecutionsFirstPage :many
 SELECT *
 FROM job.execution_detail AS e
 WHERE
   e.job_id = sqlc.arg(job_id)
   AND
   e.job_owner_id = sqlc.arg(owner_id)
+ORDER BY e.created_at DESC, e.execution_id DESC
+LIMIT sqlc.arg(page_size)
 ;
-*/
+
+-- name: ListExecutionsAfter :many
+SELECT *
+FROM job.execution_detail AS e
+WHERE
+  e.job_id = sqlc.arg(job_id)
+  AND
+  e.job_owner_id = sqlc.arg(owner_id)
+  AND (
+    e.created_at < sqlc.arg(created_at)
+    OR (e.created_at = sqlc.arg(created_at) AND e.execution_id < sqlc.arg(execution_id))
+  )
+ORDER BY e.created_at DESC, e.execution_id DESC
+LIMIT sqlc.arg(page_size)
+;

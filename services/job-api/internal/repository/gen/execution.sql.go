@@ -241,6 +241,209 @@ func (q *Queries) CreateRetryForUnsuccessfulExecution(ctx context.Context, arg C
 	return i, err
 }
 
+const getExecutionDetail = `-- name: GetExecutionDetail :one
+SELECT execution_id, job_id, job_owner_id, job_revision_id, trigger_type, current_status, attempt, lease_token, lease_expires_at, next_run_at, result, error_message, created_at, updated_at, job_type, job_config, job_retry_max_attempts, job_retry_backoff_type, job_retry_initial_delay_ms, job_retry_max_delay_ms
+FROM job.execution_detail AS e
+WHERE
+  e.execution_id = $1
+  AND
+  e.job_owner_id = $2
+`
+
+type GetExecutionDetailParams struct {
+	ExecutionID uuid.UUID
+	OwnerID     uuid.UUID
+}
+
+func (q *Queries) GetExecutionDetail(ctx context.Context, arg GetExecutionDetailParams) (Execution, error) {
+	row := q.db.QueryRow(ctx, getExecutionDetail, arg.ExecutionID, arg.OwnerID)
+	var i Execution
+	err := row.Scan(
+		&i.ExecutionID,
+		&i.JobID,
+		&i.JobOwnerID,
+		&i.JobRevisionID,
+		&i.TriggerType,
+		&i.CurrentStatus,
+		&i.Attempt,
+		&i.LeaseToken,
+		&i.LeaseExpiresAt,
+		&i.NextRunAt,
+		&i.Result,
+		&i.ErrorMessage,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.JobType,
+		&i.JobConfig,
+		&i.JobRetryMaxAttempts,
+		&i.JobRetryBackoffType,
+		&i.JobRetryInitialDelayMs,
+		&i.JobRetryMaxDelayMs,
+	)
+	return i, err
+}
+
+const listExecutionEvents = `-- name: ListExecutionEvents :many
+SELECT execution_event_id, execution_id, status, created_at
+FROM job.execution_event AS ee
+WHERE
+  ee.execution_id = $1
+ORDER BY ee.created_at ASC, ee.execution_event_id ASC
+`
+
+func (q *Queries) ListExecutionEvents(ctx context.Context, executionID uuid.UUID) ([]JobExecutionEvent, error) {
+	rows, err := q.db.Query(ctx, listExecutionEvents, executionID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []JobExecutionEvent{}
+	for rows.Next() {
+		var i JobExecutionEvent
+		if err := rows.Scan(
+			&i.ExecutionEventID,
+			&i.ExecutionID,
+			&i.Status,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listExecutionsAfter = `-- name: ListExecutionsAfter :many
+SELECT execution_id, job_id, job_owner_id, job_revision_id, trigger_type, current_status, attempt, lease_token, lease_expires_at, next_run_at, result, error_message, created_at, updated_at, job_type, job_config, job_retry_max_attempts, job_retry_backoff_type, job_retry_initial_delay_ms, job_retry_max_delay_ms
+FROM job.execution_detail AS e
+WHERE
+  e.job_id = $1
+  AND
+  e.job_owner_id = $2
+  AND (
+    e.created_at < $3
+    OR (e.created_at = $3 AND e.execution_id < $4)
+  )
+ORDER BY e.created_at DESC, e.execution_id DESC
+LIMIT $5
+`
+
+type ListExecutionsAfterParams struct {
+	JobID       uuid.UUID
+	OwnerID     uuid.UUID
+	CreatedAt   pgtype.Timestamptz
+	ExecutionID uuid.UUID
+	PageSize    int32
+}
+
+func (q *Queries) ListExecutionsAfter(ctx context.Context, arg ListExecutionsAfterParams) ([]Execution, error) {
+	rows, err := q.db.Query(ctx, listExecutionsAfter,
+		arg.JobID,
+		arg.OwnerID,
+		arg.CreatedAt,
+		arg.ExecutionID,
+		arg.PageSize,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Execution{}
+	for rows.Next() {
+		var i Execution
+		if err := rows.Scan(
+			&i.ExecutionID,
+			&i.JobID,
+			&i.JobOwnerID,
+			&i.JobRevisionID,
+			&i.TriggerType,
+			&i.CurrentStatus,
+			&i.Attempt,
+			&i.LeaseToken,
+			&i.LeaseExpiresAt,
+			&i.NextRunAt,
+			&i.Result,
+			&i.ErrorMessage,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.JobType,
+			&i.JobConfig,
+			&i.JobRetryMaxAttempts,
+			&i.JobRetryBackoffType,
+			&i.JobRetryInitialDelayMs,
+			&i.JobRetryMaxDelayMs,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listExecutionsFirstPage = `-- name: ListExecutionsFirstPage :many
+SELECT execution_id, job_id, job_owner_id, job_revision_id, trigger_type, current_status, attempt, lease_token, lease_expires_at, next_run_at, result, error_message, created_at, updated_at, job_type, job_config, job_retry_max_attempts, job_retry_backoff_type, job_retry_initial_delay_ms, job_retry_max_delay_ms
+FROM job.execution_detail AS e
+WHERE
+  e.job_id = $1
+  AND
+  e.job_owner_id = $2
+ORDER BY e.created_at DESC, e.execution_id DESC
+LIMIT $3
+`
+
+type ListExecutionsFirstPageParams struct {
+	JobID    uuid.UUID
+	OwnerID  uuid.UUID
+	PageSize int32
+}
+
+func (q *Queries) ListExecutionsFirstPage(ctx context.Context, arg ListExecutionsFirstPageParams) ([]Execution, error) {
+	rows, err := q.db.Query(ctx, listExecutionsFirstPage, arg.JobID, arg.OwnerID, arg.PageSize)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Execution{}
+	for rows.Next() {
+		var i Execution
+		if err := rows.Scan(
+			&i.ExecutionID,
+			&i.JobID,
+			&i.JobOwnerID,
+			&i.JobRevisionID,
+			&i.TriggerType,
+			&i.CurrentStatus,
+			&i.Attempt,
+			&i.LeaseToken,
+			&i.LeaseExpiresAt,
+			&i.NextRunAt,
+			&i.Result,
+			&i.ErrorMessage,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.JobType,
+			&i.JobConfig,
+			&i.JobRetryMaxAttempts,
+			&i.JobRetryBackoffType,
+			&i.JobRetryInitialDelayMs,
+			&i.JobRetryMaxDelayMs,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const reportExecutionResult = `-- name: ReportExecutionResult :one
 WITH updated AS (
   UPDATE job.execution AS e

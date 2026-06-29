@@ -7,6 +7,7 @@ import (
 
 	"github.com/cockroachdb/errors"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/samber/lo"
 
 	"jobdeck/services/job-api/internal/domain"
 	jobdb "jobdeck/services/job-api/internal/repository/gen"
@@ -194,4 +195,17 @@ func textToPGType(s string) pgtype.Text {
 		String: s,
 		Valid:  true,
 	}
+}
+
+func executionEventsFromDB(events []jobdb.JobExecutionEvent) ([]domain.ExecutionEvent, error) {
+	return lo.MapErr(events, func(ee jobdb.JobExecutionEvent, _ int) (domain.ExecutionEvent, error) {
+		created_at, err := timeFromPGType(ee.CreatedAt)
+		if err != nil {
+			return domain.ExecutionEvent{}, err
+		}
+		return domain.ExecutionEvent{
+			CreatedAt: created_at,
+			Status:    domain.ExecutionStatus(ee.Status),
+		}, nil
+	})
 }

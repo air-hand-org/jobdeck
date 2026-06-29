@@ -29,6 +29,12 @@ var _ ExecutionRepository = &ExecutionRepositoryMock{}
 //			CreateRetryUnsuccessfulFunc: func(ctx context.Context, execution_id domain.ExecutionId, next_run_at time.Time) (domain.Execution, error) {
 //				panic("mock out the CreateRetryUnsuccessful method")
 //			},
+//			FindByIdFunc: func(ctx context.Context, owner_id domain.UserId, execution_id domain.ExecutionId) (domain.Execution, error) {
+//				panic("mock out the FindById method")
+//			},
+//			ListByJobFunc: func(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, page_size int32, page_token string) (ListExecutionsResult, error) {
+//				panic("mock out the ListByJob method")
+//			},
 //			ReportResultFunc: func(ctx context.Context, execution_id domain.ExecutionId, status domain.ExecutionStatus, lease_token domain.LeaseToken, result domain.ExecutionResult) (domain.Execution, error) {
 //				panic("mock out the ReportResult method")
 //			},
@@ -47,6 +53,12 @@ type ExecutionRepositoryMock struct {
 
 	// CreateRetryUnsuccessfulFunc mocks the CreateRetryUnsuccessful method.
 	CreateRetryUnsuccessfulFunc func(ctx context.Context, execution_id domain.ExecutionId, next_run_at time.Time) (domain.Execution, error)
+
+	// FindByIdFunc mocks the FindById method.
+	FindByIdFunc func(ctx context.Context, owner_id domain.UserId, execution_id domain.ExecutionId) (domain.Execution, error)
+
+	// ListByJobFunc mocks the ListByJob method.
+	ListByJobFunc func(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, page_size int32, page_token string) (ListExecutionsResult, error)
 
 	// ReportResultFunc mocks the ReportResult method.
 	ReportResultFunc func(ctx context.Context, execution_id domain.ExecutionId, status domain.ExecutionStatus, lease_token domain.LeaseToken, result domain.ExecutionResult) (domain.Execution, error)
@@ -80,6 +92,28 @@ type ExecutionRepositoryMock struct {
 			// Next_run_at is the next_run_at argument value.
 			Next_run_at time.Time
 		}
+		// FindById holds details about calls to the FindById method.
+		FindById []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Owner_id is the owner_id argument value.
+			Owner_id domain.UserId
+			// Execution_id is the execution_id argument value.
+			Execution_id domain.ExecutionId
+		}
+		// ListByJob holds details about calls to the ListByJob method.
+		ListByJob []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Owner_id is the owner_id argument value.
+			Owner_id domain.UserId
+			// Job_id is the job_id argument value.
+			Job_id domain.JobId
+			// Page_size is the page_size argument value.
+			Page_size int32
+			// Page_token is the page_token argument value.
+			Page_token string
+		}
 		// ReportResult holds details about calls to the ReportResult method.
 		ReportResult []struct {
 			// Ctx is the ctx argument value.
@@ -97,6 +131,8 @@ type ExecutionRepositoryMock struct {
 	lockClaims                  sync.RWMutex
 	lockCreateForCurrentJob     sync.RWMutex
 	lockCreateRetryUnsuccessful sync.RWMutex
+	lockFindById                sync.RWMutex
+	lockListByJob               sync.RWMutex
 	lockReportResult            sync.RWMutex
 }
 
@@ -217,6 +253,94 @@ func (mock *ExecutionRepositoryMock) CreateRetryUnsuccessfulCalls() []struct {
 	mock.lockCreateRetryUnsuccessful.RLock()
 	calls = mock.calls.CreateRetryUnsuccessful
 	mock.lockCreateRetryUnsuccessful.RUnlock()
+	return calls
+}
+
+// FindById calls FindByIdFunc.
+func (mock *ExecutionRepositoryMock) FindById(ctx context.Context, owner_id domain.UserId, execution_id domain.ExecutionId) (domain.Execution, error) {
+	if mock.FindByIdFunc == nil {
+		panic("ExecutionRepositoryMock.FindByIdFunc: method is nil but ExecutionRepository.FindById was just called")
+	}
+	callInfo := struct {
+		Ctx          context.Context
+		Owner_id     domain.UserId
+		Execution_id domain.ExecutionId
+	}{
+		Ctx:          ctx,
+		Owner_id:     owner_id,
+		Execution_id: execution_id,
+	}
+	mock.lockFindById.Lock()
+	mock.calls.FindById = append(mock.calls.FindById, callInfo)
+	mock.lockFindById.Unlock()
+	return mock.FindByIdFunc(ctx, owner_id, execution_id)
+}
+
+// FindByIdCalls gets all the calls that were made to FindById.
+// Check the length with:
+//
+//	len(mockedExecutionRepository.FindByIdCalls())
+func (mock *ExecutionRepositoryMock) FindByIdCalls() []struct {
+	Ctx          context.Context
+	Owner_id     domain.UserId
+	Execution_id domain.ExecutionId
+} {
+	var calls []struct {
+		Ctx          context.Context
+		Owner_id     domain.UserId
+		Execution_id domain.ExecutionId
+	}
+	mock.lockFindById.RLock()
+	calls = mock.calls.FindById
+	mock.lockFindById.RUnlock()
+	return calls
+}
+
+// ListByJob calls ListByJobFunc.
+func (mock *ExecutionRepositoryMock) ListByJob(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, page_size int32, page_token string) (ListExecutionsResult, error) {
+	if mock.ListByJobFunc == nil {
+		panic("ExecutionRepositoryMock.ListByJobFunc: method is nil but ExecutionRepository.ListByJob was just called")
+	}
+	callInfo := struct {
+		Ctx        context.Context
+		Owner_id   domain.UserId
+		Job_id     domain.JobId
+		Page_size  int32
+		Page_token string
+	}{
+		Ctx:        ctx,
+		Owner_id:   owner_id,
+		Job_id:     job_id,
+		Page_size:  page_size,
+		Page_token: page_token,
+	}
+	mock.lockListByJob.Lock()
+	mock.calls.ListByJob = append(mock.calls.ListByJob, callInfo)
+	mock.lockListByJob.Unlock()
+	return mock.ListByJobFunc(ctx, owner_id, job_id, page_size, page_token)
+}
+
+// ListByJobCalls gets all the calls that were made to ListByJob.
+// Check the length with:
+//
+//	len(mockedExecutionRepository.ListByJobCalls())
+func (mock *ExecutionRepositoryMock) ListByJobCalls() []struct {
+	Ctx        context.Context
+	Owner_id   domain.UserId
+	Job_id     domain.JobId
+	Page_size  int32
+	Page_token string
+} {
+	var calls []struct {
+		Ctx        context.Context
+		Owner_id   domain.UserId
+		Job_id     domain.JobId
+		Page_size  int32
+		Page_token string
+	}
+	mock.lockListByJob.RLock()
+	calls = mock.calls.ListByJob
+	mock.lockListByJob.RUnlock()
 	return calls
 }
 
