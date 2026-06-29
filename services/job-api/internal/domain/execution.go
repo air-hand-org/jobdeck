@@ -101,6 +101,13 @@ type Execution struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+func (e *Execution) GetResult() *ExecutionResult {
+	if e == nil {
+		return nil
+	}
+	return e.Result
+}
+
 type ClaimedExecution struct {
 	Id    ExecutionId `json:"id"`
 	JobId JobId       `json:"job_id"`

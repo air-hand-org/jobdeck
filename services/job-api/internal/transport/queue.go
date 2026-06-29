@@ -66,6 +66,6 @@ func (s *executionQueueServiceServer) ReportExecutionResult(ctx context.Context,
 	return &jobv1.ReportExecutionResultResponse{}, nil
 }
 
-func NewExecutionQueueServiceServer(u *app.ExecutionUsecase) jobv1.ExecutionQueueServiceServer {
+func NewExecutionQueueServiceServer(u *app.ExecutionUsecase) *executionQueueServiceServer {
 	return &executionQueueServiceServer{u: *u}
 }

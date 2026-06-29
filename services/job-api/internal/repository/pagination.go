@@ -37,3 +37,31 @@ func decodeJobPageToken(s string) (jobPageToken, error) {
 	}
 	return t, nil
 }
+
+type executionPageToken struct {
+	CreatedAt   time.Time          `json:"created_at"`
+	ExecutionId domain.ExecutionId `json:"execution_id"`
+}
+
+func encodeExecutionPageToken(t executionPageToken) (string, error) {
+	b, err := json.Marshal(t)
+	if err != nil {
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(b), nil
+}
+
+func decodeExecutionPageToken(s string) (executionPageToken, error) {
+	d, err := base64.RawURLEncoding.DecodeString(s)
+	if err != nil {
+		return executionPageToken{}, err
+	}
+	var t executionPageToken
+	if err := json.Unmarshal(d, &t); err != nil {
+		return executionPageToken{}, err
+	}
+	if t.CreatedAt.IsZero() || t.ExecutionId == uuid.Nil {
+		return executionPageToken{}, errors.New("invalid page token")
+	}
+	return t, nil
+}

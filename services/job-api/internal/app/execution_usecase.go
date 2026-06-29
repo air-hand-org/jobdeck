@@ -79,6 +79,14 @@ func (u *ExecutionUsecase) ReportExecutionResult(ctx context.Context, command Re
 	})
 }
 
+func (u *ExecutionUsecase) GetExecution(ctx context.Context, owner_id domain.UserId, execution_id domain.ExecutionId) (domain.Execution, error) {
+	return u.s.Executions().FindById(ctx, owner_id, execution_id)
+}
+
+func (u *ExecutionUsecase) ListExecutions(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, page_size int32, page_token string) (ListExecutionsResult, error) {
+	return u.s.Executions().ListByJob(ctx, owner_id, job_id, page_size, page_token)
+}
+
 func NewExecutionUsecase(s ExecutionStore) *ExecutionUsecase {
 	return &ExecutionUsecase{s: s}
 }
