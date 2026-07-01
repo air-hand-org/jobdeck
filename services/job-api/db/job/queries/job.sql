@@ -66,9 +66,9 @@ cr AS (
     FROM r
     RETURNING *
 )
-SELECT *
-FROM job.job_detail
-WHERE job_id = (SELECT job_id FROM cr)
+SELECT
+  job_id
+FROM cr
 ;
 
 -- name: UpdateJobSpec :one
@@ -118,11 +118,11 @@ WITH touched_job AS (
     SET revision_id = r.revision_id
     FROM r
     WHERE cr.job_id = r.job_id
-    RETURNING *
+    RETURNING cr.*
 )
-SELECT *
-FROM job.job_detail
-WHERE job_id = (SELECT job_id FROM updated_current)
+SELECT
+  u.job_id
+FROM updated_current AS u
 ;
 
 -- name: SetJobEnabled :one
@@ -135,9 +135,9 @@ WITH updated AS (
         AND j.owner_id = sqlc.arg(owner_id)
     RETURNING *
 )
-SELECT *
-FROM job.job_detail
-WHERE job_id = (SELECT job_id FROM updated)
+SELECT
+  u.job_id
+FROM updated AS u
 ;
 
 -- name: RenameJob :execrows

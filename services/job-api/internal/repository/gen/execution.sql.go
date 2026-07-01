@@ -34,7 +34,7 @@ WITH claimed AS (
     , lease_token = uuidv7()
     , lease_expires_at = $2
   FROM claimed AS c
-  WHERE execution_id = c.execution_id
+  WHERE e.execution_id = c.execution_id
   RETURNING e.execution_id, e.job_id, e.trigger_type, e.status, e.attempt, e.lease_token, e.lease_expires_at, e.next_run_at, e.result, e.error_message, e.created_at, e.updated_at, e.job_revision_id
 )
 , added_event AS (
@@ -49,9 +49,8 @@ WITH claimed AS (
   RETURNING ee.execution_event_id, ee.execution_id, ee.status, ee.created_at
 )
 SELECT
-  execution_id, job_id, job_revision_id, attempt, lease_token, lease_expires_at, job_type, job_config
-FROM job.execution_claim_detail AS e
-WHERE e.execution_id IN (SELECT execution_id FROM added_event)
+  execution_id
+FROM added_event
 `
 
 type ClaimExecutionsParams struct {
@@ -59,28 +58,19 @@ type ClaimExecutionsParams struct {
 	LeaseExpiresAt pgtype.Timestamptz
 }
 
-func (q *Queries) ClaimExecutions(ctx context.Context, arg ClaimExecutionsParams) ([]JobExecutionClaimDetail, error) {
+func (q *Queries) ClaimExecutions(ctx context.Context, arg ClaimExecutionsParams) ([]uuid.UUID, error) {
 	rows, err := q.db.Query(ctx, claimExecutions, arg.MaxSize, arg.LeaseExpiresAt)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []JobExecutionClaimDetail{}
+	items := []uuid.UUID{}
 	for rows.Next() {
-		var i JobExecutionClaimDetail
-		if err := rows.Scan(
-			&i.ExecutionID,
-			&i.JobID,
-			&i.JobRevisionID,
-			&i.Attempt,
-			&i.LeaseToken,
-			&i.LeaseExpiresAt,
-			&i.JobType,
-			&i.JobConfig,
-		); err != nil {
+		var execution_id uuid.UUID
+		if err := rows.Scan(&execution_id); err != nil {
 			return nil, err
 		}
-		items = append(items, i)
+		items = append(items, execution_id)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -126,9 +116,9 @@ WITH added AS (
   FROM added
   RETURNING ee.execution_event_id, ee.execution_id, ee.status, ee.created_at
 )
-SELECT execution_id, job_id, job_owner_id, job_revision_id, trigger_type, current_status, attempt, lease_token, lease_expires_at, next_run_at, result, error_message, created_at, updated_at, job_type, job_config, job_retry_max_attempts, job_retry_backoff_type, job_retry_initial_delay_ms, job_retry_max_delay_ms
-FROM job.execution_detail
-WHERE execution_id = (SELECT execution_id FROM added_event)
+SELECT
+  execution_id
+FROM added_event
 `
 
 type CreateExecutionForCurrentJobParams struct {
@@ -137,35 +127,15 @@ type CreateExecutionForCurrentJobParams struct {
 	OwnerID     uuid.UUID
 }
 
-func (q *Queries) CreateExecutionForCurrentJob(ctx context.Context, arg CreateExecutionForCurrentJobParams) (Execution, error) {
+func (q *Queries) CreateExecutionForCurrentJob(ctx context.Context, arg CreateExecutionForCurrentJobParams) (uuid.UUID, error) {
 	row := q.db.QueryRow(ctx, createExecutionForCurrentJob, arg.TriggerType, arg.JobID, arg.OwnerID)
-	var i Execution
-	err := row.Scan(
-		&i.ExecutionID,
-		&i.JobID,
-		&i.JobOwnerID,
-		&i.JobRevisionID,
-		&i.TriggerType,
-		&i.CurrentStatus,
-		&i.Attempt,
-		&i.LeaseToken,
-		&i.LeaseExpiresAt,
-		&i.NextRunAt,
-		&i.Result,
-		&i.ErrorMessage,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.JobType,
-		&i.JobConfig,
-		&i.JobRetryMaxAttempts,
-		&i.JobRetryBackoffType,
-		&i.JobRetryInitialDelayMs,
-		&i.JobRetryMaxDelayMs,
-	)
-	return i, err
+	var execution_id uuid.UUID
+	err := row.Scan(&execution_id)
+	return execution_id, err
 }
 
 const createRetryForUnsuccessfulExecution = `-- name: CreateRetryForUnsuccessfulExecution :one
+
 WITH added AS (
   INSERT INTO job.execution AS e (
     job_id
@@ -203,9 +173,9 @@ WITH added AS (
   FROM added
   RETURNING ee.execution_event_id, ee.execution_id, ee.status, ee.created_at
 )
-SELECT execution_id, job_id, job_owner_id, job_revision_id, trigger_type, current_status, attempt, lease_token, lease_expires_at, next_run_at, result, error_message, created_at, updated_at, job_type, job_config, job_retry_max_attempts, job_retry_backoff_type, job_retry_initial_delay_ms, job_retry_max_delay_ms
-FROM job.execution_detail
-WHERE execution_id = (SELECT execution_id FROM added_event)
+SELECT
+  execution_id
+FROM added_event
 `
 
 type CreateRetryForUnsuccessfulExecutionParams struct {
@@ -213,32 +183,12 @@ type CreateRetryForUnsuccessfulExecutionParams struct {
 	ExecutionID uuid.UUID
 }
 
-func (q *Queries) CreateRetryForUnsuccessfulExecution(ctx context.Context, arg CreateRetryForUnsuccessfulExecutionParams) (Execution, error) {
+// for ExecutionQueryService
+func (q *Queries) CreateRetryForUnsuccessfulExecution(ctx context.Context, arg CreateRetryForUnsuccessfulExecutionParams) (uuid.UUID, error) {
 	row := q.db.QueryRow(ctx, createRetryForUnsuccessfulExecution, arg.NextRunAt, arg.ExecutionID)
-	var i Execution
-	err := row.Scan(
-		&i.ExecutionID,
-		&i.JobID,
-		&i.JobOwnerID,
-		&i.JobRevisionID,
-		&i.TriggerType,
-		&i.CurrentStatus,
-		&i.Attempt,
-		&i.LeaseToken,
-		&i.LeaseExpiresAt,
-		&i.NextRunAt,
-		&i.Result,
-		&i.ErrorMessage,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.JobType,
-		&i.JobConfig,
-		&i.JobRetryMaxAttempts,
-		&i.JobRetryBackoffType,
-		&i.JobRetryInitialDelayMs,
-		&i.JobRetryMaxDelayMs,
-	)
-	return i, err
+	var execution_id uuid.UUID
+	err := row.Scan(&execution_id)
+	return execution_id, err
 }
 
 const getExecutionDetail = `-- name: GetExecutionDetail :one
@@ -281,6 +231,79 @@ func (q *Queries) GetExecutionDetail(ctx context.Context, arg GetExecutionDetail
 		&i.JobRetryMaxDelayMs,
 	)
 	return i, err
+}
+
+const getExecutionDetailDirect = `-- name: GetExecutionDetailDirect :one
+SELECT execution_id, job_id, job_owner_id, job_revision_id, trigger_type, current_status, attempt, lease_token, lease_expires_at, next_run_at, result, error_message, created_at, updated_at, job_type, job_config, job_retry_max_attempts, job_retry_backoff_type, job_retry_initial_delay_ms, job_retry_max_delay_ms
+FROM job.execution_detail AS e
+WHERE
+  e.execution_id = $1
+`
+
+func (q *Queries) GetExecutionDetailDirect(ctx context.Context, executionID uuid.UUID) (Execution, error) {
+	row := q.db.QueryRow(ctx, getExecutionDetailDirect, executionID)
+	var i Execution
+	err := row.Scan(
+		&i.ExecutionID,
+		&i.JobID,
+		&i.JobOwnerID,
+		&i.JobRevisionID,
+		&i.TriggerType,
+		&i.CurrentStatus,
+		&i.Attempt,
+		&i.LeaseToken,
+		&i.LeaseExpiresAt,
+		&i.NextRunAt,
+		&i.Result,
+		&i.ErrorMessage,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.JobType,
+		&i.JobConfig,
+		&i.JobRetryMaxAttempts,
+		&i.JobRetryBackoffType,
+		&i.JobRetryInitialDelayMs,
+		&i.JobRetryMaxDelayMs,
+	)
+	return i, err
+}
+
+const listExecutionClaimDetails = `-- name: ListExecutionClaimDetails :many
+SELECT execution_id, job_id, job_revision_id, attempt, lease_token, lease_expires_at, job_type, job_config, created_at
+FROM job.execution_claim_detail AS e
+WHERE
+  e.execution_id = ANY($1::uuid[])
+ORDER BY e.created_at ASC, e.execution_id ASC
+`
+
+func (q *Queries) ListExecutionClaimDetails(ctx context.Context, executionIds []uuid.UUID) ([]JobExecutionClaimDetail, error) {
+	rows, err := q.db.Query(ctx, listExecutionClaimDetails, executionIds)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []JobExecutionClaimDetail{}
+	for rows.Next() {
+		var i JobExecutionClaimDetail
+		if err := rows.Scan(
+			&i.ExecutionID,
+			&i.JobID,
+			&i.JobRevisionID,
+			&i.Attempt,
+			&i.LeaseToken,
+			&i.LeaseExpiresAt,
+			&i.JobType,
+			&i.JobConfig,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listExecutionEvents = `-- name: ListExecutionEvents :many
@@ -470,9 +493,9 @@ WITH updated AS (
   FROM updated AS u
   RETURNING ee.execution_event_id, ee.execution_id, ee.status, ee.created_at
 )
-SELECT execution_id, job_id, job_owner_id, job_revision_id, trigger_type, current_status, attempt, lease_token, lease_expires_at, next_run_at, result, error_message, created_at, updated_at, job_type, job_config, job_retry_max_attempts, job_retry_backoff_type, job_retry_initial_delay_ms, job_retry_max_delay_ms
-FROM job.execution_detail
-WHERE execution_id = (SELECT execution_id FROM added_event)
+SELECT
+  execution_id
+FROM added_event
 `
 
 type ReportExecutionResultParams struct {
@@ -483,7 +506,7 @@ type ReportExecutionResultParams struct {
 	LeaseToken   *uuid.UUID
 }
 
-func (q *Queries) ReportExecutionResult(ctx context.Context, arg ReportExecutionResultParams) (Execution, error) {
+func (q *Queries) ReportExecutionResult(ctx context.Context, arg ReportExecutionResultParams) (uuid.UUID, error) {
 	row := q.db.QueryRow(ctx, reportExecutionResult,
 		arg.Status,
 		arg.Result,
@@ -491,28 +514,7 @@ func (q *Queries) ReportExecutionResult(ctx context.Context, arg ReportExecution
 		arg.ExecutionID,
 		arg.LeaseToken,
 	)
-	var i Execution
-	err := row.Scan(
-		&i.ExecutionID,
-		&i.JobID,
-		&i.JobOwnerID,
-		&i.JobRevisionID,
-		&i.TriggerType,
-		&i.CurrentStatus,
-		&i.Attempt,
-		&i.LeaseToken,
-		&i.LeaseExpiresAt,
-		&i.NextRunAt,
-		&i.Result,
-		&i.ErrorMessage,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.JobType,
-		&i.JobConfig,
-		&i.JobRetryMaxAttempts,
-		&i.JobRetryBackoffType,
-		&i.JobRetryInitialDelayMs,
-		&i.JobRetryMaxDelayMs,
-	)
-	return i, err
+	var execution_id uuid.UUID
+	err := row.Scan(&execution_id)
+	return execution_id, err
 }

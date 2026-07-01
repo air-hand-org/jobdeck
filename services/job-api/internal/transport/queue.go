@@ -6,6 +6,7 @@ import (
 	"jobdeck/services/job-api/internal/app"
 	"jobdeck/services/job-api/internal/domain"
 	"jobdeck/services/job-api/internal/transform"
+	"log"
 
 	"github.com/samber/lo"
 	"google.golang.org/grpc/codes"
@@ -13,7 +14,7 @@ import (
 )
 
 type executionQueueServiceServer struct {
-	u app.ExecutionUsecase
+	u app.ExecutionQueueUsecase
 
 	jobv1.UnsafeExecutionQueueServiceServer
 }
@@ -23,7 +24,8 @@ var _ jobv1.ExecutionQueueServiceServer = (*executionQueueServiceServer)(nil)
 func (s *executionQueueServiceServer) ClaimExecutions(ctx context.Context, req *jobv1.ClaimExecutionsRequest) (*jobv1.ClaimExecutionsResponse, error) {
 	claims, err := s.u.ClaimExecutions(ctx, req.GetMaxCount())
 	if err != nil {
-		return nil, err
+		log.Printf("%+v", err)
+		return nil, status.Error(codes.Internal, "failed to claim executions")
 	}
 	claimsProto, err := lo.MapErr(claims, func(claim domain.ClaimedExecution, _ int) (*jobv1.ClaimedExecution, error) {
 		return transform.ClaimedExecutionToProto(claim)
@@ -66,6 +68,6 @@ func (s *executionQueueServiceServer) ReportExecutionResult(ctx context.Context,
 	return &jobv1.ReportExecutionResultResponse{}, nil
 }
 
-func NewExecutionQueueServiceServer(u *app.ExecutionUsecase) *executionQueueServiceServer {
+func NewExecutionQueueServiceServer(u *app.ExecutionQueueUsecase) *executionQueueServiceServer {
 	return &executionQueueServiceServer{u: *u}
 }

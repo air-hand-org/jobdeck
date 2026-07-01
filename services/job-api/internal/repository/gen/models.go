@@ -72,6 +72,7 @@ type JobExecutionClaimDetail struct {
 	LeaseExpiresAt pgtype.Timestamptz
 	JobType        string
 	JobConfig      []byte
+	CreatedAt      pgtype.Timestamptz
 }
 
 type JobExecutionEvent struct {

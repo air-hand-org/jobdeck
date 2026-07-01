@@ -132,6 +132,12 @@
     - decide how leases, backpressure, worker shutdown, and reconnect behavior work on the stream.
     - keep execution reporting explicit so retries and result persistence remain owned by job-api.
   - [ ] implement the Go worker HTTP execution path without retry first
+  - [ ] keep service-to-service transport simple at first:
+    - start with direct gRPC for `job-worker -> job-api` and the future Blazor BFF -> `job-api`.
+    - add explicit client-side retry/backoff for transient gRPC errors such as `UNAVAILABLE` and `DEADLINE_EXCEEDED` if needed.
+    - keep `ReportExecutionResult` retry conservative and rely on lease/idempotency checks.
+    - evaluate Envoy later if HTTP/2 connection management or protocol compatibility becomes painful.
+    - consider Dapr service invocation only after Dapr is already needed for pub/sub/outbox/service discovery.
   - [ ] persist execution events, results, errors, timing, and bounded worker log output
   - [ ] expose execution history and worker logs through query APIs
   - [ ] add retry behavior and multi-worker double-execution protection

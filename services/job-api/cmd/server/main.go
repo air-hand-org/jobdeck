@@ -8,6 +8,8 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	jobv1 "jobdeck/gen/jobdeck/job/v1"
@@ -15,6 +17,7 @@ import (
 	"jobdeck/services/job-api/internal/repository"
 	"jobdeck/services/job-api/internal/transport"
 
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	healthgrpc "google.golang.org/grpc/health/grpc_health_v1"
@@ -24,18 +27,46 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var (
-	sleep  = time.Second * 5
-	system = "" // empty string represents the health of the system
-)
+func runHealthCheck(ctx context.Context, h *health.Server, pool *pgxpool.Pool) {
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+
+	check := func() {
+		pingCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
+		defer cancel()
+
+		if err := pool.Ping(pingCtx); err != nil {
+			h.SetServingStatus("", healthgrpc.HealthCheckResponse_NOT_SERVING)
+			return
+		}
+
+		h.SetServingStatus("", healthgrpc.HealthCheckResponse_SERVING)
+	}
+
+	check()
+
+	for {
+		select {
+		case <-ctx.Done():
+			h.SetServingStatus("", healthpb.HealthCheckResponse_NOT_SERVING)
+			return
+		case <-ticker.C:
+			check()
+		}
+	}
+}
 
 func main() {
+	signalCtx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer cancel()
+
 	grpcPort := os.Getenv("GRPC_PORT")
 	if grpcPort == "" {
 		grpcPort = "9090"
 	}
+
 	connStr := os.Getenv("POSTGRESDB_URI")
-	pool, err := pgxpool.New(context.Background(), connStr)
+	pool, err := pgxpool.New(signalCtx, connStr)
 	if err != nil {
 		log.Fatalf("failed to connect postgres %v", err)
 	}
@@ -47,33 +78,29 @@ func main() {
 	healthcheck := health.NewServer()
 	healthgrpc.RegisterHealthServer(s, healthcheck)
 	jobv1.RegisterJobServiceServer(s, transport.NewJobServiceServer(app.NewJobUsecase(store)))
-	jobv1.RegisterExecutionQueueServiceServer(s, transport.NewExecutionQueueServiceServer(app.NewExecutionUsecase(store)))
+	jobv1.RegisterExecutionQueueServiceServer(s, transport.NewExecutionQueueServiceServer(app.NewExecutionQueueUsecase(store)))
 	jobv1.RegisterExecutionServiceServer(s, transport.NewExecutionServiceServer(app.NewExecutionUsecase(store)))
 	reflection.Register(s)
 
-	// FIXME
-	go func() {
-		next := healthpb.HealthCheckResponse_SERVING
+	g, ctx := errgroup.WithContext(signalCtx)
 
-		for {
-			healthcheck.SetServingStatus(system, next)
+	g.Go(func() error {
+		runHealthCheck(ctx, healthcheck, pool)
+		return nil
+	})
 
-			if next == healthpb.HealthCheckResponse_SERVING {
-				next = healthpb.HealthCheckResponse_NOT_SERVING
-			} else {
-				next = healthpb.HealthCheckResponse_SERVING
-			}
-
-			time.Sleep(sleep)
+	g.Go(func() error {
+		lis, err := net.Listen("tcp", fmt.Sprintf(":%s", grpcPort))
+		if err != nil {
+			return err
 		}
-	}()
+		if err := s.Serve(lis); err != nil {
+			return err
+		}
+		return nil
+	})
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", grpcPort))
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+	if err := g.Wait(); err != nil {
+		log.Fatalf("%+v", err)
 	}
 }

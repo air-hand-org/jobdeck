@@ -7,7 +7,6 @@ import (
 	"context"
 	"jobdeck/services/job-api/internal/domain"
 	"sync"
-	"time"
 )
 
 // Ensure, that ExecutionRepositoryMock does implement ExecutionRepository.
@@ -20,23 +19,14 @@ var _ ExecutionRepository = &ExecutionRepositoryMock{}
 //
 //		// make and configure a mocked ExecutionRepository
 //		mockedExecutionRepository := &ExecutionRepositoryMock{
-//			ClaimsFunc: func(ctx context.Context, max_count int32) ([]domain.ClaimedExecution, error) {
-//				panic("mock out the Claims method")
-//			},
 //			CreateForCurrentJobFunc: func(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, trigger domain.ExecutionTrigger) (domain.Execution, error) {
 //				panic("mock out the CreateForCurrentJob method")
-//			},
-//			CreateRetryUnsuccessfulFunc: func(ctx context.Context, execution_id domain.ExecutionId, next_run_at time.Time) (domain.Execution, error) {
-//				panic("mock out the CreateRetryUnsuccessful method")
 //			},
 //			FindByIdFunc: func(ctx context.Context, owner_id domain.UserId, execution_id domain.ExecutionId) (domain.Execution, error) {
 //				panic("mock out the FindById method")
 //			},
 //			ListByJobFunc: func(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, page_size int32, page_token string) (ListExecutionsResult, error) {
 //				panic("mock out the ListByJob method")
-//			},
-//			ReportResultFunc: func(ctx context.Context, execution_id domain.ExecutionId, status domain.ExecutionStatus, lease_token domain.LeaseToken, result domain.ExecutionResult) (domain.Execution, error) {
-//				panic("mock out the ReportResult method")
 //			},
 //		}
 //
@@ -45,14 +35,8 @@ var _ ExecutionRepository = &ExecutionRepositoryMock{}
 //
 //	}
 type ExecutionRepositoryMock struct {
-	// ClaimsFunc mocks the Claims method.
-	ClaimsFunc func(ctx context.Context, max_count int32) ([]domain.ClaimedExecution, error)
-
 	// CreateForCurrentJobFunc mocks the CreateForCurrentJob method.
 	CreateForCurrentJobFunc func(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, trigger domain.ExecutionTrigger) (domain.Execution, error)
-
-	// CreateRetryUnsuccessfulFunc mocks the CreateRetryUnsuccessful method.
-	CreateRetryUnsuccessfulFunc func(ctx context.Context, execution_id domain.ExecutionId, next_run_at time.Time) (domain.Execution, error)
 
 	// FindByIdFunc mocks the FindById method.
 	FindByIdFunc func(ctx context.Context, owner_id domain.UserId, execution_id domain.ExecutionId) (domain.Execution, error)
@@ -60,18 +44,8 @@ type ExecutionRepositoryMock struct {
 	// ListByJobFunc mocks the ListByJob method.
 	ListByJobFunc func(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, page_size int32, page_token string) (ListExecutionsResult, error)
 
-	// ReportResultFunc mocks the ReportResult method.
-	ReportResultFunc func(ctx context.Context, execution_id domain.ExecutionId, status domain.ExecutionStatus, lease_token domain.LeaseToken, result domain.ExecutionResult) (domain.Execution, error)
-
 	// calls tracks calls to the methods.
 	calls struct {
-		// Claims holds details about calls to the Claims method.
-		Claims []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// Max_count is the max_count argument value.
-			Max_count int32
-		}
 		// CreateForCurrentJob holds details about calls to the CreateForCurrentJob method.
 		CreateForCurrentJob []struct {
 			// Ctx is the ctx argument value.
@@ -82,15 +56,6 @@ type ExecutionRepositoryMock struct {
 			Job_id domain.JobId
 			// Trigger is the trigger argument value.
 			Trigger domain.ExecutionTrigger
-		}
-		// CreateRetryUnsuccessful holds details about calls to the CreateRetryUnsuccessful method.
-		CreateRetryUnsuccessful []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// Execution_id is the execution_id argument value.
-			Execution_id domain.ExecutionId
-			// Next_run_at is the next_run_at argument value.
-			Next_run_at time.Time
 		}
 		// FindById holds details about calls to the FindById method.
 		FindById []struct {
@@ -114,62 +79,10 @@ type ExecutionRepositoryMock struct {
 			// Page_token is the page_token argument value.
 			Page_token string
 		}
-		// ReportResult holds details about calls to the ReportResult method.
-		ReportResult []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// Execution_id is the execution_id argument value.
-			Execution_id domain.ExecutionId
-			// Status is the status argument value.
-			Status domain.ExecutionStatus
-			// Lease_token is the lease_token argument value.
-			Lease_token domain.LeaseToken
-			// Result is the result argument value.
-			Result domain.ExecutionResult
-		}
 	}
-	lockClaims                  sync.RWMutex
-	lockCreateForCurrentJob     sync.RWMutex
-	lockCreateRetryUnsuccessful sync.RWMutex
-	lockFindById                sync.RWMutex
-	lockListByJob               sync.RWMutex
-	lockReportResult            sync.RWMutex
-}
-
-// Claims calls ClaimsFunc.
-func (mock *ExecutionRepositoryMock) Claims(ctx context.Context, max_count int32) ([]domain.ClaimedExecution, error) {
-	if mock.ClaimsFunc == nil {
-		panic("ExecutionRepositoryMock.ClaimsFunc: method is nil but ExecutionRepository.Claims was just called")
-	}
-	callInfo := struct {
-		Ctx       context.Context
-		Max_count int32
-	}{
-		Ctx:       ctx,
-		Max_count: max_count,
-	}
-	mock.lockClaims.Lock()
-	mock.calls.Claims = append(mock.calls.Claims, callInfo)
-	mock.lockClaims.Unlock()
-	return mock.ClaimsFunc(ctx, max_count)
-}
-
-// ClaimsCalls gets all the calls that were made to Claims.
-// Check the length with:
-//
-//	len(mockedExecutionRepository.ClaimsCalls())
-func (mock *ExecutionRepositoryMock) ClaimsCalls() []struct {
-	Ctx       context.Context
-	Max_count int32
-} {
-	var calls []struct {
-		Ctx       context.Context
-		Max_count int32
-	}
-	mock.lockClaims.RLock()
-	calls = mock.calls.Claims
-	mock.lockClaims.RUnlock()
-	return calls
+	lockCreateForCurrentJob sync.RWMutex
+	lockFindById            sync.RWMutex
+	lockListByJob           sync.RWMutex
 }
 
 // CreateForCurrentJob calls CreateForCurrentJobFunc.
@@ -213,46 +126,6 @@ func (mock *ExecutionRepositoryMock) CreateForCurrentJobCalls() []struct {
 	mock.lockCreateForCurrentJob.RLock()
 	calls = mock.calls.CreateForCurrentJob
 	mock.lockCreateForCurrentJob.RUnlock()
-	return calls
-}
-
-// CreateRetryUnsuccessful calls CreateRetryUnsuccessfulFunc.
-func (mock *ExecutionRepositoryMock) CreateRetryUnsuccessful(ctx context.Context, execution_id domain.ExecutionId, next_run_at time.Time) (domain.Execution, error) {
-	if mock.CreateRetryUnsuccessfulFunc == nil {
-		panic("ExecutionRepositoryMock.CreateRetryUnsuccessfulFunc: method is nil but ExecutionRepository.CreateRetryUnsuccessful was just called")
-	}
-	callInfo := struct {
-		Ctx          context.Context
-		Execution_id domain.ExecutionId
-		Next_run_at  time.Time
-	}{
-		Ctx:          ctx,
-		Execution_id: execution_id,
-		Next_run_at:  next_run_at,
-	}
-	mock.lockCreateRetryUnsuccessful.Lock()
-	mock.calls.CreateRetryUnsuccessful = append(mock.calls.CreateRetryUnsuccessful, callInfo)
-	mock.lockCreateRetryUnsuccessful.Unlock()
-	return mock.CreateRetryUnsuccessfulFunc(ctx, execution_id, next_run_at)
-}
-
-// CreateRetryUnsuccessfulCalls gets all the calls that were made to CreateRetryUnsuccessful.
-// Check the length with:
-//
-//	len(mockedExecutionRepository.CreateRetryUnsuccessfulCalls())
-func (mock *ExecutionRepositoryMock) CreateRetryUnsuccessfulCalls() []struct {
-	Ctx          context.Context
-	Execution_id domain.ExecutionId
-	Next_run_at  time.Time
-} {
-	var calls []struct {
-		Ctx          context.Context
-		Execution_id domain.ExecutionId
-		Next_run_at  time.Time
-	}
-	mock.lockCreateRetryUnsuccessful.RLock()
-	calls = mock.calls.CreateRetryUnsuccessful
-	mock.lockCreateRetryUnsuccessful.RUnlock()
 	return calls
 }
 
@@ -341,53 +214,5 @@ func (mock *ExecutionRepositoryMock) ListByJobCalls() []struct {
 	mock.lockListByJob.RLock()
 	calls = mock.calls.ListByJob
 	mock.lockListByJob.RUnlock()
-	return calls
-}
-
-// ReportResult calls ReportResultFunc.
-func (mock *ExecutionRepositoryMock) ReportResult(ctx context.Context, execution_id domain.ExecutionId, status domain.ExecutionStatus, lease_token domain.LeaseToken, result domain.ExecutionResult) (domain.Execution, error) {
-	if mock.ReportResultFunc == nil {
-		panic("ExecutionRepositoryMock.ReportResultFunc: method is nil but ExecutionRepository.ReportResult was just called")
-	}
-	callInfo := struct {
-		Ctx          context.Context
-		Execution_id domain.ExecutionId
-		Status       domain.ExecutionStatus
-		Lease_token  domain.LeaseToken
-		Result       domain.ExecutionResult
-	}{
-		Ctx:          ctx,
-		Execution_id: execution_id,
-		Status:       status,
-		Lease_token:  lease_token,
-		Result:       result,
-	}
-	mock.lockReportResult.Lock()
-	mock.calls.ReportResult = append(mock.calls.ReportResult, callInfo)
-	mock.lockReportResult.Unlock()
-	return mock.ReportResultFunc(ctx, execution_id, status, lease_token, result)
-}
-
-// ReportResultCalls gets all the calls that were made to ReportResult.
-// Check the length with:
-//
-//	len(mockedExecutionRepository.ReportResultCalls())
-func (mock *ExecutionRepositoryMock) ReportResultCalls() []struct {
-	Ctx          context.Context
-	Execution_id domain.ExecutionId
-	Status       domain.ExecutionStatus
-	Lease_token  domain.LeaseToken
-	Result       domain.ExecutionResult
-} {
-	var calls []struct {
-		Ctx          context.Context
-		Execution_id domain.ExecutionId
-		Status       domain.ExecutionStatus
-		Lease_token  domain.LeaseToken
-		Result       domain.ExecutionResult
-	}
-	mock.lockReportResult.RLock()
-	calls = mock.calls.ReportResult
-	mock.lockReportResult.RUnlock()
 	return calls
 }
