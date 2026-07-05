@@ -28,5 +28,6 @@ migration-test:
 	@./tests/migration-test.sh
 
 .PHONY: run
+run: export DEBUG ?= false # (true/false)
 run:
 	@cd apphosts && aspire run

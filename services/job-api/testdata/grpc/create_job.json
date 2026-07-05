@@ -1,6 +1,5 @@
 {
   "spec": {
-    "name": "Example health check",
     "type": "JOB_TYPE_HTTP_REQUEST",
     "http": {
       "method": "HTTP_METHOD_GET",
@@ -46,5 +45,6 @@
       "initialDelay": "1s",
       "maxDelay": "5s"
     }
-  }
+  },
+  "name": "Example health check"
 }

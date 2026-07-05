@@ -3,6 +3,7 @@ go 1.26.4
 use (
 	.
 	./services/job-api
+	./services/job-worker
 )
 
 replace google.golang.org/genproto => google.golang.org/genproto v0.0.0-20260615183401-62b3387ff324

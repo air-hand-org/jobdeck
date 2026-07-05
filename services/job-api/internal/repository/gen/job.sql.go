@@ -58,9 +58,9 @@ cr AS (
     FROM r
     RETURNING job_id, revision_id
 )
-SELECT job_id, owner_id, enabled, name, created_at, updated_at, type, config, retry_max_attempts, retry_backoff_type, retry_initial_delay_ms, retry_max_delay_ms
-FROM job.job_detail
-WHERE job_id = (SELECT job_id FROM cr)
+SELECT
+  job_id
+FROM cr
 `
 
 type CreateJobParams struct {
@@ -74,7 +74,7 @@ type CreateJobParams struct {
 	RetryMaxDelayMs     int64
 }
 
-func (q *Queries) CreateJob(ctx context.Context, arg CreateJobParams) (Job, error) {
+func (q *Queries) CreateJob(ctx context.Context, arg CreateJobParams) (uuid.UUID, error) {
 	row := q.db.QueryRow(ctx, createJob,
 		arg.OwnerID,
 		arg.Name,
@@ -85,22 +85,9 @@ func (q *Queries) CreateJob(ctx context.Context, arg CreateJobParams) (Job, erro
 		arg.RetryInitialDelayMs,
 		arg.RetryMaxDelayMs,
 	)
-	var i Job
-	err := row.Scan(
-		&i.JobID,
-		&i.OwnerID,
-		&i.Enabled,
-		&i.Name,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.Type,
-		&i.Config,
-		&i.RetryMaxAttempts,
-		&i.RetryBackoffType,
-		&i.RetryInitialDelayMs,
-		&i.RetryMaxDelayMs,
-	)
-	return i, err
+	var job_id uuid.UUID
+	err := row.Scan(&job_id)
+	return job_id, err
 }
 
 const deleteJob = `-- name: DeleteJob :execrows
@@ -287,9 +274,9 @@ WITH updated AS (
         AND j.owner_id = $3
     RETURNING job_id, owner_id, enabled, name, created_at, updated_at
 )
-SELECT job_id, owner_id, enabled, name, created_at, updated_at, type, config, retry_max_attempts, retry_backoff_type, retry_initial_delay_ms, retry_max_delay_ms
-FROM job.job_detail
-WHERE job_id = (SELECT job_id FROM updated)
+SELECT
+  u.job_id
+FROM updated AS u
 `
 
 type SetJobEnabledParams struct {
@@ -298,24 +285,11 @@ type SetJobEnabledParams struct {
 	OwnerID uuid.UUID
 }
 
-func (q *Queries) SetJobEnabled(ctx context.Context, arg SetJobEnabledParams) (Job, error) {
+func (q *Queries) SetJobEnabled(ctx context.Context, arg SetJobEnabledParams) (uuid.UUID, error) {
 	row := q.db.QueryRow(ctx, setJobEnabled, arg.Enabled, arg.JobID, arg.OwnerID)
-	var i Job
-	err := row.Scan(
-		&i.JobID,
-		&i.OwnerID,
-		&i.Enabled,
-		&i.Name,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.Type,
-		&i.Config,
-		&i.RetryMaxAttempts,
-		&i.RetryBackoffType,
-		&i.RetryInitialDelayMs,
-		&i.RetryMaxDelayMs,
-	)
-	return i, err
+	var job_id uuid.UUID
+	err := row.Scan(&job_id)
+	return job_id, err
 }
 
 const updateJobSpec = `-- name: UpdateJobSpec :one
@@ -365,11 +339,11 @@ WITH touched_job AS (
     SET revision_id = r.revision_id
     FROM r
     WHERE cr.job_id = r.job_id
-    RETURNING r.job_id, r.revision_id, cr.job_id, cr.revision_id
+    RETURNING cr.job_id, cr.revision_id
 )
-SELECT job_id, owner_id, enabled, name, created_at, updated_at, type, config, retry_max_attempts, retry_backoff_type, retry_initial_delay_ms, retry_max_delay_ms
-FROM job.job_detail
-WHERE job_id = (SELECT job_id FROM updated_current)
+SELECT
+  u.job_id
+FROM updated_current AS u
 `
 
 type UpdateJobSpecParams struct {
@@ -383,7 +357,7 @@ type UpdateJobSpecParams struct {
 	RetryMaxDelayMs     int64
 }
 
-func (q *Queries) UpdateJobSpec(ctx context.Context, arg UpdateJobSpecParams) (Job, error) {
+func (q *Queries) UpdateJobSpec(ctx context.Context, arg UpdateJobSpecParams) (uuid.UUID, error) {
 	row := q.db.QueryRow(ctx, updateJobSpec,
 		arg.JobID,
 		arg.OwnerID,
@@ -394,20 +368,7 @@ func (q *Queries) UpdateJobSpec(ctx context.Context, arg UpdateJobSpecParams) (J
 		arg.RetryInitialDelayMs,
 		arg.RetryMaxDelayMs,
 	)
-	var i Job
-	err := row.Scan(
-		&i.JobID,
-		&i.OwnerID,
-		&i.Enabled,
-		&i.Name,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.Type,
-		&i.Config,
-		&i.RetryMaxAttempts,
-		&i.RetryBackoffType,
-		&i.RetryInitialDelayMs,
-		&i.RetryMaxDelayMs,
-	)
-	return i, err
+	var job_id uuid.UUID
+	err := row.Scan(&job_id)
+	return job_id, err
 }

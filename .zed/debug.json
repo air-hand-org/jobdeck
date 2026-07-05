@@ -1,0 +1,24 @@
+[
+  {
+    "label": "attach job-api by remote",
+    "adapter": "Delve",
+    "request": "attach",
+    "mode": "remote",
+    "tcp_connection": {
+      "host": "127.0.0.1",
+      "port": 2345
+    },
+    "stopOnEntry": false
+  },
+  {
+  "label": "attach job-worker by remote",
+    "adapter": "Delve",
+    "request": "attach",
+    "mode": "remote",
+    "tcp_connection": {
+      "host": "127.0.0.1",
+      "port": 2346
+    },
+    "stopOnEntry": false
+  }
+]

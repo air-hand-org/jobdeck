@@ -9,19 +9,20 @@ import (
 	jobdb "jobdeck/services/job-api/internal/repository/gen"
 
 	"github.com/cockroachdb/errors"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/samber/lo"
 )
 
 type jobQuerier interface {
-	CreateJob(ctx context.Context, arg jobdb.CreateJobParams) (jobdb.Job, error)
+	CreateJob(ctx context.Context, arg jobdb.CreateJobParams) (uuid.UUID, error)
 	DeleteJob(ctx context.Context, arg jobdb.DeleteJobParams) (int64, error)
 	GetJob(ctx context.Context, arg jobdb.GetJobParams) (jobdb.Job, error)
 	ListJobsAfter(ctx context.Context, arg jobdb.ListJobsAfterParams) ([]jobdb.Job, error)
 	ListJobsFirstPage(ctx context.Context, arg jobdb.ListJobsFirstPageParams) ([]jobdb.Job, error)
 	RenameJob(ctx context.Context, arg jobdb.RenameJobParams) (int64, error)
-	SetJobEnabled(ctx context.Context, arg jobdb.SetJobEnabledParams) (jobdb.Job, error)
-	UpdateJobSpec(ctx context.Context, arg jobdb.UpdateJobSpecParams) (jobdb.Job, error)
+	SetJobEnabled(ctx context.Context, arg jobdb.SetJobEnabledParams) (uuid.UUID, error)
+	UpdateJobSpec(ctx context.Context, arg jobdb.UpdateJobSpecParams) (uuid.UUID, error)
 }
 
 var _ jobQuerier = (*jobdb.Queries)(nil)
@@ -41,7 +42,7 @@ func (r *jobRepository) Create(ctx context.Context, owner_id domain.UserId, name
 	if err != nil {
 		return domain.Job{}, err
 	}
-	job, err := r.q.CreateJob(ctx, jobdb.CreateJobParams{
+	job_id, err := r.q.CreateJob(ctx, jobdb.CreateJobParams{
 		OwnerID:             owner_id,
 		Name:                name,
 		Type:                string(spec.Type),
@@ -51,12 +52,11 @@ func (r *jobRepository) Create(ctx context.Context, owner_id domain.UserId, name
 		RetryInitialDelayMs: spec.RetryPolicy.InitialDelay.Milliseconds(),
 		RetryMaxDelayMs:     spec.RetryPolicy.MaxDelay.Milliseconds(),
 	})
-
 	if err != nil {
 		return domain.Job{}, err
 	}
 
-	return jobFromDB(job)
+	return r.FindById(ctx, owner_id, job_id)
 }
 
 func (r *jobRepository) UpdateSpec(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, spec domain.JobSpec) (domain.Job, error) {
@@ -64,7 +64,7 @@ func (r *jobRepository) UpdateSpec(ctx context.Context, owner_id domain.UserId, 
 	if err != nil {
 		return domain.Job{}, err
 	}
-	j, err := r.q.UpdateJobSpec(ctx, jobdb.UpdateJobSpecParams{
+	_, err = r.q.UpdateJobSpec(ctx, jobdb.UpdateJobSpecParams{
 		Type:   string(spec.Type),
 		Config: cfg,
 
@@ -81,7 +81,7 @@ func (r *jobRepository) UpdateSpec(ctx context.Context, owner_id domain.UserId, 
 		}
 		return domain.Job{}, err
 	}
-	return jobFromDB(j)
+	return r.FindById(ctx, owner_id, job_id)
 }
 
 func (r *jobRepository) Rename(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, name string) error {
@@ -100,7 +100,7 @@ func (r *jobRepository) Rename(ctx context.Context, owner_id domain.UserId, job_
 }
 
 func (r *jobRepository) SetEnabled(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, enabled bool) (domain.Job, error) {
-	j, err := r.q.SetJobEnabled(ctx, jobdb.SetJobEnabledParams{
+	_, err := r.q.SetJobEnabled(ctx, jobdb.SetJobEnabledParams{
 		Enabled: enabled,
 		JobID:   job_id,
 		OwnerID: owner_id,
@@ -111,7 +111,7 @@ func (r *jobRepository) SetEnabled(ctx context.Context, owner_id domain.UserId, 
 		}
 		return domain.Job{}, err
 	}
-	return jobFromDB(j)
+	return r.FindById(ctx, owner_id, job_id)
 }
 
 func (r *jobRepository) Delete(ctx context.Context, owner_id domain.UserId, job_id domain.JobId) error {

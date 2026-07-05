@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"time"
 
 	"jobdeck/services/job-api/internal/domain"
 )
@@ -15,10 +14,6 @@ type ListExecutionsResult struct {
 //go:generate moq -out gen_execution_repository_moq_test.go . ExecutionRepository
 type ExecutionRepository interface {
 	CreateForCurrentJob(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, trigger domain.ExecutionTrigger) (domain.Execution, error)
-	CreateRetryUnsuccessful(ctx context.Context, execution_id domain.ExecutionId, next_run_at time.Time) (domain.Execution, error)
-
-	Claims(ctx context.Context, max_count int32) ([]domain.ClaimedExecution, error)
-	ReportResult(ctx context.Context, execution_id domain.ExecutionId, status domain.ExecutionStatus, lease_token domain.LeaseToken, result domain.ExecutionResult) (domain.Execution, error)
 
 	FindById(ctx context.Context, owner_id domain.UserId, execution_id domain.ExecutionId) (domain.Execution, error)
 	ListByJob(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, page_size int32, page_token string) (ListExecutionsResult, error)

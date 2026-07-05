@@ -11,22 +11,25 @@ import (
 )
 
 type Querier interface {
-	ClaimExecutions(ctx context.Context, arg ClaimExecutionsParams) ([]JobExecutionClaimDetail, error)
-	CreateExecutionForCurrentJob(ctx context.Context, arg CreateExecutionForCurrentJobParams) (Execution, error)
-	CreateJob(ctx context.Context, arg CreateJobParams) (Job, error)
-	CreateRetryForUnsuccessfulExecution(ctx context.Context, arg CreateRetryForUnsuccessfulExecutionParams) (Execution, error)
+	ClaimExecutions(ctx context.Context, arg ClaimExecutionsParams) ([]uuid.UUID, error)
+	CreateExecutionForCurrentJob(ctx context.Context, arg CreateExecutionForCurrentJobParams) (uuid.UUID, error)
+	CreateJob(ctx context.Context, arg CreateJobParams) (uuid.UUID, error)
+	// for ExecutionQueryService
+	CreateRetryForUnsuccessfulExecution(ctx context.Context, arg CreateRetryForUnsuccessfulExecutionParams) (uuid.UUID, error)
 	DeleteJob(ctx context.Context, arg DeleteJobParams) (int64, error)
 	GetExecutionDetail(ctx context.Context, arg GetExecutionDetailParams) (Execution, error)
+	GetExecutionDetailDirect(ctx context.Context, executionID uuid.UUID) (Execution, error)
 	GetJob(ctx context.Context, arg GetJobParams) (Job, error)
+	ListExecutionClaimDetails(ctx context.Context, executionIds []uuid.UUID) ([]JobExecutionClaimDetail, error)
 	ListExecutionEvents(ctx context.Context, executionID uuid.UUID) ([]JobExecutionEvent, error)
 	ListExecutionsAfter(ctx context.Context, arg ListExecutionsAfterParams) ([]Execution, error)
 	ListExecutionsFirstPage(ctx context.Context, arg ListExecutionsFirstPageParams) ([]Execution, error)
 	ListJobsAfter(ctx context.Context, arg ListJobsAfterParams) ([]Job, error)
 	ListJobsFirstPage(ctx context.Context, arg ListJobsFirstPageParams) ([]Job, error)
 	RenameJob(ctx context.Context, arg RenameJobParams) (int64, error)
-	ReportExecutionResult(ctx context.Context, arg ReportExecutionResultParams) (Execution, error)
-	SetJobEnabled(ctx context.Context, arg SetJobEnabledParams) (Job, error)
-	UpdateJobSpec(ctx context.Context, arg UpdateJobSpecParams) (Job, error)
+	ReportExecutionResult(ctx context.Context, arg ReportExecutionResultParams) (uuid.UUID, error)
+	SetJobEnabled(ctx context.Context, arg SetJobEnabledParams) (uuid.UUID, error)
+	UpdateJobSpec(ctx context.Context, arg UpdateJobSpecParams) (uuid.UUID, error)
 }
 
 var _ Querier = (*Queries)(nil)
