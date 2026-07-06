@@ -17,6 +17,8 @@ import (
 	"jobdeck/services/job-api/internal/repository"
 	"jobdeck/services/job-api/internal/transport"
 
+	"buf.build/go/protovalidate"
+	protovalidate_middleware "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/protovalidate"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -74,7 +76,14 @@ func main() {
 
 	store := repository.NewStore(pool)
 
-	s := grpc.NewServer()
+	validator, err := protovalidate.New()
+	if err != nil {
+		log.Fatalf("failed to new proto validate")
+	}
+
+	s := grpc.NewServer(
+		grpc.UnaryInterceptor(protovalidate_middleware.UnaryServerInterceptor(validator)),
+	)
 	healthcheck := health.NewServer()
 	healthgrpc.RegisterHealthServer(s, healthcheck)
 	jobv1.RegisterJobServiceServer(s, transport.NewJobServiceServer(app.NewJobUsecase(store)))
