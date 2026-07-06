@@ -59,10 +59,30 @@ message ExecutionResult {
 }
 
 message HttpExecutionResult {
-  int32 status_code = 1 [(buf.validate.field).int32 = {
-    gte: 100
-    lte: 999
+  int32 status_code = 1;
+  HttpError error = 2;
+
+  option (buf.validate.message).cel = {
+    id: "http_result_response_or_error"
+    message: "either status_code or error must be set"
+    expression:
+      "(this.status_code >= 100 && this.status_code <= 999 && !has(this.error))"
+      "|| (this.status_code == 0 && has(this.error))"
+  };
+}
+
+message HttpError {
+  HttpErrorType type = 1 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
   }];
+  string message = 2;
+}
+
+enum HttpErrorType {
+  HTTP_ERROR_TYPE_UNSPECIFIED = 0;
+  HTTP_ERROR_TYPE_TIMEOUT = 1;
+  HTTP_ERROR_TYPE_NETWORK = 2;
 }
 
 service ExecutionService {

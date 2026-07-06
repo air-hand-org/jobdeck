@@ -199,7 +199,6 @@ type ReportExecutionResultRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ExecutionId   string                 `protobuf:"bytes,1,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
 	LeaseToken    string                 `protobuf:"bytes,2,opt,name=lease_token,json=leaseToken,proto3" json:"lease_token,omitempty"`
-	Status        ExecutionStatus        `protobuf:"varint,3,opt,name=status,proto3,enum=jobdeck.job.v1.ExecutionStatus" json:"status,omitempty"`
 	Result        *ExecutionResult       `protobuf:"bytes,4,opt,name=result,proto3" json:"result,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -247,13 +246,6 @@ func (x *ReportExecutionResultRequest) GetLeaseToken() string {
 		return x.LeaseToken
 	}
 	return ""
-}
-
-func (x *ReportExecutionResultRequest) GetStatus() ExecutionStatus {
-	if x != nil {
-		return x.Status
-	}
-	return ExecutionStatus_EXECUTION_STATUS_UNSPECIFIED
 }
 
 func (x *ReportExecutionResultRequest) GetResult() *ExecutionResult {
@@ -317,14 +309,12 @@ const file_jobdeck_job_v1_queue_proto_rawDesc = "" +
 	"\x17ClaimExecutionsResponse\x12@\n" +
 	"\n" +
 	"executions\x18\x01 \x03(\v2 .jobdeck.job.v1.ClaimedExecutionR\n" +
-	"executions\"\x8b\x02\n" +
+	"executions\"\xd4\x01\n" +
 	"\x1cReportExecutionResultRequest\x12+\n" +
 	"\fexecution_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vexecutionId\x12(\n" +
 	"\vlease_token\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\n" +
-	"leaseToken\x12C\n" +
-	"\x06status\x18\x03 \x01(\x0e2\x1f.jobdeck.job.v1.ExecutionStatusB\n" +
-	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\x06status\x12?\n" +
-	"\x06result\x18\x04 \x01(\v2\x1f.jobdeck.job.v1.ExecutionResultB\x06\xbaH\x03\xc8\x01\x01R\x06resultJ\x04\b\x05\x10\x06R\bduration\"0\n" +
+	"leaseToken\x12?\n" +
+	"\x06result\x18\x04 \x01(\v2\x1f.jobdeck.job.v1.ExecutionResultB\x06\xbaH\x03\xc8\x01\x01R\x06resultJ\x04\b\x03\x10\x04J\x04\b\x05\x10\x06R\x06statusR\bduration\"0\n" +
 	"\x1dReportExecutionResultResponseJ\x04\b\x01\x10\x02R\texecution2\xf1\x01\n" +
 	"\x15ExecutionQueueService\x12b\n" +
 	"\x0fClaimExecutions\x12&.jobdeck.job.v1.ClaimExecutionsRequest\x1a'.jobdeck.job.v1.ClaimExecutionsResponse\x12t\n" +
@@ -353,24 +343,22 @@ var file_jobdeck_job_v1_queue_proto_goTypes = []any{
 	(*ReportExecutionResultResponse)(nil), // 4: jobdeck.job.v1.ReportExecutionResultResponse
 	(*timestamppb.Timestamp)(nil),         // 5: google.protobuf.Timestamp
 	(*JobSpec)(nil),                       // 6: jobdeck.job.v1.JobSpec
-	(ExecutionStatus)(0),                  // 7: jobdeck.job.v1.ExecutionStatus
-	(*ExecutionResult)(nil),               // 8: jobdeck.job.v1.ExecutionResult
+	(*ExecutionResult)(nil),               // 7: jobdeck.job.v1.ExecutionResult
 }
 var file_jobdeck_job_v1_queue_proto_depIdxs = []int32{
 	5, // 0: jobdeck.job.v1.ClaimedExecution.lease_expires_at:type_name -> google.protobuf.Timestamp
 	6, // 1: jobdeck.job.v1.ClaimedExecution.job_spec:type_name -> jobdeck.job.v1.JobSpec
 	0, // 2: jobdeck.job.v1.ClaimExecutionsResponse.executions:type_name -> jobdeck.job.v1.ClaimedExecution
-	7, // 3: jobdeck.job.v1.ReportExecutionResultRequest.status:type_name -> jobdeck.job.v1.ExecutionStatus
-	8, // 4: jobdeck.job.v1.ReportExecutionResultRequest.result:type_name -> jobdeck.job.v1.ExecutionResult
-	1, // 5: jobdeck.job.v1.ExecutionQueueService.ClaimExecutions:input_type -> jobdeck.job.v1.ClaimExecutionsRequest
-	3, // 6: jobdeck.job.v1.ExecutionQueueService.ReportExecutionResult:input_type -> jobdeck.job.v1.ReportExecutionResultRequest
-	2, // 7: jobdeck.job.v1.ExecutionQueueService.ClaimExecutions:output_type -> jobdeck.job.v1.ClaimExecutionsResponse
-	4, // 8: jobdeck.job.v1.ExecutionQueueService.ReportExecutionResult:output_type -> jobdeck.job.v1.ReportExecutionResultResponse
-	7, // [7:9] is the sub-list for method output_type
-	5, // [5:7] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	7, // 3: jobdeck.job.v1.ReportExecutionResultRequest.result:type_name -> jobdeck.job.v1.ExecutionResult
+	1, // 4: jobdeck.job.v1.ExecutionQueueService.ClaimExecutions:input_type -> jobdeck.job.v1.ClaimExecutionsRequest
+	3, // 5: jobdeck.job.v1.ExecutionQueueService.ReportExecutionResult:input_type -> jobdeck.job.v1.ReportExecutionResultRequest
+	2, // 6: jobdeck.job.v1.ExecutionQueueService.ClaimExecutions:output_type -> jobdeck.job.v1.ClaimExecutionsResponse
+	4, // 7: jobdeck.job.v1.ExecutionQueueService.ReportExecutionResult:output_type -> jobdeck.job.v1.ReportExecutionResultResponse
+	6, // [6:8] is the sub-list for method output_type
+	4, // [4:6] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_jobdeck_job_v1_queue_proto_init() }

@@ -37,15 +37,11 @@ message ClaimExecutionsResponse {
 }
 
 message ReportExecutionResultRequest {
-  reserved 5;
-  reserved "duration";
+  reserved 3, 5;
+  reserved "status", "duration";
 
   string execution_id = 1 [(buf.validate.field).string.uuid = true];
   string lease_token = 2 [(buf.validate.field).string.min_len = 1];
-  ExecutionStatus status = 3 [(buf.validate.field).enum = {
-    defined_only: true
-    not_in: [0]
-  }];
   ExecutionResult result = 4 [(buf.validate.field).required = true];
 }
 
