@@ -116,6 +116,12 @@
 - [ ] Implement in this order:
   - [x] migration and domain model foundation
   - [x] PostgreSQL and gRPC Job CRUD
+  - [x] implement request/create execution
+  - [x] implement queue claim/report
+  - [x] implement the Go worker HTTP execution path without retry first
+  - [x] add worker startup health wait and per-RPC timeout handling
+  - [x] add a smoke script for job execution queueing:
+    - `tests/job-execution-smoke-test.sh`
   - [ ] add focused job-api tests:
     - domain JSON round-trip and invalid value cases
     - proto/domain transforms
@@ -123,9 +129,18 @@
   - [ ] add a minimal GitHub Actions workflow:
     - `go test ./...` for each Go module
     - `buf lint`
-  - [ ] merge the Job CRUD implementation
-  - [ ] implement request/create execution
-  - [ ] implement queue claim/report
+  - [ ] merge the job-worker vertical slice before adding more behavior:
+    - job-api queue use case/repository split
+    - execution claim/report SQL
+    - job-worker claim/execute/report loop
+    - Aspire local debug support
+    - job execution smoke script
+  - [ ] add proto validation and gRPC validation interceptors as the next small PR:
+    - validate UUID strings and required fields at the gRPC boundary
+    - validate pagination limits before use case calls
+    - return `InvalidArgument` for validation failures
+    - remove per-handler nil request checks once interceptor coverage is in place
+    - keep rich error details as a follow-up if the first pass should stay small
   - [ ] evaluate bidirectional streaming for job-api/job-worker queue exchange:
     - keep the first implementation simple with unary `ClaimExecutions` / `ReportExecutionResult`.
     - prototype a bidirectional stream where job-worker requests/renews work and job-api sends claimed executions.
@@ -150,6 +165,7 @@
     - make scheduler projection updates idempotent and tolerate at-least-once delivery
     - consider reconciliation later so missed delete/update events do not leave stale scheduled jobs
   - [ ] build the Blazor BFF/UI:
+    - keep the first UI small and operational, not a marketing/landing page
     - Job CRUD
     - manual execution
     - execution status and history

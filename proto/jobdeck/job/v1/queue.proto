@@ -2,18 +2,19 @@ syntax = "proto3";
 
 package jobdeck.job.v1;
 
+import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
 import "jobdeck/job/v1/execution.proto";
 import "jobdeck/job/v1/job.proto";
 
 message ClaimedExecution {
-  string execution_id = 1;
-  string lease_token = 2;
+  string execution_id = 1 [(buf.validate.field).string.uuid = true];
+  string lease_token = 2 [(buf.validate.field).string.min_len = 1];
   google.protobuf.Timestamp lease_expires_at = 3;
 
-  int32 attempt = 4;
-  JobSpec job_spec = 5;
-  string job_id = 6;
+  int32 attempt = 4 [(buf.validate.field).int32.gte = 1];
+  JobSpec job_spec = 5 [(buf.validate.field).required = true];
+  string job_id = 6 [(buf.validate.field).string.uuid = true];
 }
 
 service ExecutionQueueService {
@@ -25,7 +26,10 @@ message ClaimExecutionsRequest {
   reserved 2;
   reserved "lease_duration";
 
-  int32 max_count = 1;
+  int32 max_count = 1 [(buf.validate.field).int32 = {
+    gte: 1
+    lte: 100
+  }];
 }
 
 message ClaimExecutionsResponse {
@@ -36,10 +40,13 @@ message ReportExecutionResultRequest {
   reserved 5;
   reserved "duration";
 
-  string execution_id = 1;
-  string lease_token = 2;
-  ExecutionStatus status = 3;
-  ExecutionResult result = 4;
+  string execution_id = 1 [(buf.validate.field).string.uuid = true];
+  string lease_token = 2 [(buf.validate.field).string.min_len = 1];
+  ExecutionStatus status = 3 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  ExecutionResult result = 4 [(buf.validate.field).required = true];
 }
 
 message ReportExecutionResultResponse {

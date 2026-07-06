@@ -7,6 +7,7 @@
 package jobv1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	durationpb "google.golang.org/protobuf/types/known/durationpb"
@@ -1270,81 +1271,86 @@ var File_jobdeck_job_v1_job_proto protoreflect.FileDescriptor
 
 const file_jobdeck_job_v1_job_proto_rawDesc = "" +
 	"\n" +
-	"\x18jobdeck/job/v1/job.proto\x12\x0ejobdeck.job.v1\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc1\x01\n" +
-	"\aJobSpec\x12+\n" +
-	"\x04type\x18\x02 \x01(\x0e2\x17.jobdeck.job.v1.JobTypeR\x04type\x123\n" +
+	"\x18jobdeck/job/v1/job.proto\x12\x0ejobdeck.job.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xdc\x01\n" +
+	"\aJobSpec\x127\n" +
+	"\x04type\x18\x02 \x01(\x0e2\x17.jobdeck.job.v1.JobTypeB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\x04type\x123\n" +
 	"\x04http\x18\n" +
-	" \x01(\v2\x1d.jobdeck.job.v1.HttpJobConfigH\x00R\x04http\x12>\n" +
-	"\fretry_policy\x18\x14 \x01(\v2\x1b.jobdeck.job.v1.RetryPolicyR\vretryPolicyB\b\n" +
-	"\x06configJ\x04\b\x01\x10\x02R\x04name\"\x81\x02\n" +
-	"\x03Job\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\tR\aownerId\x12\x18\n" +
-	"\aenabled\x18\x03 \x01(\bR\aenabled\x12\x12\n" +
-	"\x04name\x18\x04 \x01(\tR\x04name\x12+\n" +
+	" \x01(\v2\x1d.jobdeck.job.v1.HttpJobConfigH\x00R\x04http\x12F\n" +
+	"\fretry_policy\x18\x14 \x01(\v2\x1b.jobdeck.job.v1.RetryPolicyB\x06\xbaH\x03\xc8\x01\x01R\vretryPolicyB\x0f\n" +
+	"\x06config\x12\x05\xbaH\x02\b\x01J\x04\b\x01\x10\x02R\x04name\"\xa8\x02\n" +
+	"\x03Job\x12\x18\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12#\n" +
+	"\bowner_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\aownerId\x12\x18\n" +
+	"\aenabled\x18\x03 \x01(\bR\aenabled\x12\x1d\n" +
+	"\x04name\x18\x04 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18FR\x04name\x123\n" +
 	"\x04spec\x18\n" +
-	" \x01(\v2\x17.jobdeck.job.v1.JobSpecR\x04spec\x129\n" +
+	" \x01(\v2\x17.jobdeck.job.v1.JobSpecB\x06\xbaH\x03\xc8\x01\x01R\x04spec\x129\n" +
 	"\n" +
 	"created_at\x18\x14 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x15 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"5\n" +
-	"\x0fStatusCodeRange\x12\x12\n" +
-	"\x04from\x18\x01 \x01(\x05R\x04from\x12\x0e\n" +
-	"\x02to\x18\x02 \x01(\x05R\x02to\"\\\n" +
-	"\vStatusCodes\x12\x14\n" +
-	"\x05codes\x18\x01 \x03(\x05R\x05codes\x127\n" +
-	"\x06ranges\x18\x02 \x03(\v2\x1f.jobdeck.job.v1.StatusCodeRangeR\x06ranges\"\xb6\x04\n" +
-	"\rHttpJobConfig\x122\n" +
-	"\x06method\x18\x01 \x01(\x0e2\x1a.jobdeck.job.v1.HttpMethodR\x06method\x12\x10\n" +
-	"\x03url\x18\x02 \x01(\tR\x03url\x124\n" +
+	"updated_at\x18\x15 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x92\x01\n" +
+	"\x0fStatusCodeRange\x12\x1b\n" +
+	"\x04from\x18\x01 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\x04from\x12\x17\n" +
+	"\x02to\x18\x02 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\x02to:I\xbaHF\x1aD\n" +
+	"\x12from-lower-than-to\x12\x19from must be less than to\x1a\x13this.from < this.to\"j\n" +
+	"\vStatusCodes\x12\"\n" +
+	"\x05codes\x18\x01 \x03(\x05B\f\xbaH\t\x92\x01\x06\"\x04\x1a\x02(\x01R\x05codes\x127\n" +
+	"\x06ranges\x18\x02 \x03(\v2\x1f.jobdeck.job.v1.StatusCodeRangeR\x06ranges\"\xd7\x04\n" +
+	"\rHttpJobConfig\x12>\n" +
+	"\x06method\x18\x01 \x01(\x0e2\x1a.jobdeck.job.v1.HttpMethodB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\x06method\x12\x1c\n" +
+	"\x03url\x18\x02 \x01(\tB\n" +
+	"\xbaH\ar\x05\x10\x01\x88\x01\x01R\x03url\x124\n" +
 	"\aheaders\x18\x03 \x03(\v2\x1a.jobdeck.job.v1.HttpHeaderR\aheaders\x12\x12\n" +
 	"\x04body\x18\x04 \x01(\fR\x04body\x123\n" +
 	"\atimeout\x18\x05 \x01(\v2\x19.google.protobuf.DurationR\atimeout\x12O\n" +
-	"\x15expected_status_codes\x18\x06 \x01(\v2\x1b.jobdeck.job.v1.StatusCodesR\x13expectedStatusCodes\x125\n" +
-	"\x17max_response_body_bytes\x18\b \x01(\x03R\x14maxResponseBodyBytes\x12)\n" +
+	"\x15expected_status_codes\x18\x06 \x01(\v2\x1b.jobdeck.job.v1.StatusCodesR\x13expectedStatusCodes\x12>\n" +
+	"\x17max_response_body_bytes\x18\b \x01(\x03B\a\xbaH\x04\"\x02(\x00R\x14maxResponseBodyBytes\x12)\n" +
 	"\x10follow_redirects\x18\t \x01(\bR\x0ffollowRedirects\x12(\n" +
 	"\x10retry_on_timeout\x18\n" +
 	" \x01(\bR\x0eretryOnTimeout\x123\n" +
 	"\x16retry_on_network_error\x18\v \x01(\bR\x13retryOnNetworkError\x12N\n" +
-	"\x15retry_on_status_codes\x18\f \x01(\v2\x1b.jobdeck.job.v1.StatusCodesR\x12retryOnStatusCodes\"6\n" +
+	"\x15retry_on_status_codes\x18\f \x01(\v2\x1b.jobdeck.job.v1.StatusCodesR\x12retryOnStatusCodes\"J\n" +
 	"\n" +
-	"HttpHeader\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value\"\xe8\x01\n" +
-	"\vRetryPolicy\x12!\n" +
-	"\fmax_attempts\x18\x01 \x01(\x05R\vmaxAttempts\x12>\n" +
-	"\fbackoff_type\x18\x02 \x01(\x0e2\x1b.jobdeck.job.v1.BackoffTypeR\vbackoffType\x12>\n" +
+	"HttpHeader\x12\x1c\n" +
+	"\x04name\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xc0\x01\x01R\x04name\x12\x1e\n" +
+	"\x05value\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xc0\x01\x02R\x05value\"\xfd\x01\n" +
+	"\vRetryPolicy\x12*\n" +
+	"\fmax_attempts\x18\x01 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\vmaxAttempts\x12J\n" +
+	"\fbackoff_type\x18\x02 \x01(\x0e2\x1b.jobdeck.job.v1.BackoffTypeB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\vbackoffType\x12>\n" +
 	"\rinitial_delay\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\finitialDelay\x126\n" +
-	"\tmax_delay\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\bmaxDelay\"S\n" +
-	"\x10CreateJobRequest\x12+\n" +
-	"\x04spec\x18\x01 \x01(\v2\x17.jobdeck.job.v1.JobSpecR\x04spec\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\":\n" +
+	"\tmax_delay\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\bmaxDelay\"f\n" +
+	"\x10CreateJobRequest\x123\n" +
+	"\x04spec\x18\x01 \x01(\v2\x17.jobdeck.job.v1.JobSpecB\x06\xbaH\x03\xc8\x01\x01R\x04spec\x12\x1d\n" +
+	"\x04name\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18FR\x04name\":\n" +
 	"\x11CreateJobResponse\x12%\n" +
-	"\x03job\x18\x01 \x01(\v2\x13.jobdeck.job.v1.JobR\x03job\"&\n" +
-	"\rGetJobRequest\x12\x15\n" +
-	"\x06job_id\x18\x01 \x01(\tR\x05jobId\"7\n" +
+	"\x03job\x18\x01 \x01(\v2\x13.jobdeck.job.v1.JobR\x03job\"0\n" +
+	"\rGetJobRequest\x12\x1f\n" +
+	"\x06job_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x05jobId\"7\n" +
 	"\x0eGetJobResponse\x12%\n" +
-	"\x03job\x18\x01 \x01(\v2\x13.jobdeck.job.v1.JobR\x03job\"M\n" +
-	"\x0fListJobsRequest\x12\x1b\n" +
-	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
+	"\x03job\x18\x01 \x01(\v2\x13.jobdeck.job.v1.JobR\x03job\"X\n" +
+	"\x0fListJobsRequest\x12&\n" +
+	"\tpage_size\x18\x01 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x01R\bpageSize\x12\x1d\n" +
 	"\n" +
 	"page_token\x18\x02 \x01(\tR\tpageToken\"c\n" +
 	"\x10ListJobsResponse\x12'\n" +
 	"\x04jobs\x18\x01 \x03(\v2\x13.jobdeck.job.v1.JobR\x04jobs\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"y\n" +
-	"\x10UpdateJobRequest\x12\x15\n" +
-	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12+\n" +
-	"\x04spec\x18\x03 \x01(\v2\x17.jobdeck.job.v1.JobSpecR\x04spec\x12\x12\n" +
-	"\x04name\x18\x04 \x01(\tR\x04nameJ\x04\b\x02\x10\x03R\aenabled\":\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"\x96\x01\n" +
+	"\x10UpdateJobRequest\x12\x1f\n" +
+	"\x06job_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x05jobId\x123\n" +
+	"\x04spec\x18\x03 \x01(\v2\x17.jobdeck.job.v1.JobSpecB\x06\xbaH\x03\xc8\x01\x01R\x04spec\x12\x1d\n" +
+	"\x04name\x18\x04 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18FR\x04nameJ\x04\b\x02\x10\x03R\aenabled\":\n" +
 	"\x11UpdateJobResponse\x12%\n" +
-	"\x03job\x18\x01 \x01(\v2\x13.jobdeck.job.v1.JobR\x03job\"G\n" +
-	"\x14SetJobEnabledRequest\x12\x15\n" +
-	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x18\n" +
+	"\x03job\x18\x01 \x01(\v2\x13.jobdeck.job.v1.JobR\x03job\"Q\n" +
+	"\x14SetJobEnabledRequest\x12\x1f\n" +
+	"\x06job_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x05jobId\x12\x18\n" +
 	"\aenabled\x18\x02 \x01(\bR\aenabled\">\n" +
 	"\x15SetJobEnabledResponse\x12%\n" +
-	"\x03job\x18\x01 \x01(\v2\x13.jobdeck.job.v1.JobR\x03job\")\n" +
-	"\x10DeleteJobRequest\x12\x15\n" +
-	"\x06job_id\x18\x01 \x01(\tR\x05jobId\"\x13\n" +
+	"\x03job\x18\x01 \x01(\v2\x13.jobdeck.job.v1.JobR\x03job\"3\n" +
+	"\x10DeleteJobRequest\x12\x1f\n" +
+	"\x06job_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x05jobId\"\x13\n" +
 	"\x11DeleteJobResponse*>\n" +
 	"\aJobType\x12\x18\n" +
 	"\x14JOB_TYPE_UNSPECIFIED\x10\x00\x12\x19\n" +
