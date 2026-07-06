@@ -16,6 +16,7 @@ import (
 	"jobdeck/services/job-api/internal/app"
 	"jobdeck/services/job-api/internal/repository"
 	"jobdeck/services/job-api/internal/transport"
+	"jobdeck/services/job-api/internal/transport/interceptor"
 
 	"buf.build/go/protovalidate"
 	protovalidate_middleware "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/protovalidate"
@@ -82,7 +83,10 @@ func main() {
 	}
 
 	s := grpc.NewServer(
-		grpc.UnaryInterceptor(protovalidate_middleware.UnaryServerInterceptor(validator)),
+		grpc.ChainUnaryInterceptor(
+			interceptor.RejectNilRequestUnaryServerInterceptor(),
+			protovalidate_middleware.UnaryServerInterceptor(validator),
+		),
 	)
 	healthcheck := health.NewServer()
 	healthgrpc.RegisterHealthServer(s, healthcheck)
