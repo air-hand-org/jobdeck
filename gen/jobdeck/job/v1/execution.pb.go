@@ -692,46 +692,50 @@ var File_jobdeck_job_v1_execution_proto protoreflect.FileDescriptor
 
 const file_jobdeck_job_v1_execution_proto_rawDesc = "" +
 	"\n" +
-	"\x1ejobdeck/job/v1/execution.proto\x12\x0ejobdeck.job.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe9\x02\n" +
+	"\x1ejobdeck/job/v1/execution.proto\x12\x0ejobdeck.job.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x93\x03\n" +
 	"\tExecution\x12\x18\n" +
 	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12\x1f\n" +
-	"\x06job_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x05jobId\x127\n" +
-	"\x06status\x18\x03 \x01(\x0e2\x1f.jobdeck.job.v1.ExecutionStatusR\x06status\x12:\n" +
-	"\atrigger\x18\x04 \x01(\x0e2 .jobdeck.job.v1.ExecutionTriggerR\atrigger\x126\n" +
-	"\x06events\x18\x05 \x03(\v2\x1e.jobdeck.job.v1.ExecutionEventR\x06events\x12\x18\n" +
-	"\aattempt\x18\x06 \x01(\x05R\aattempt\x12!\n" +
-	"\fmax_attempts\x18\a \x01(\x05R\vmaxAttempts\x127\n" +
+	"\x06job_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x05jobId\x12C\n" +
+	"\x06status\x18\x03 \x01(\x0e2\x1f.jobdeck.job.v1.ExecutionStatusB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\x06status\x12F\n" +
+	"\atrigger\x18\x04 \x01(\x0e2 .jobdeck.job.v1.ExecutionTriggerB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\atrigger\x126\n" +
+	"\x06events\x18\x05 \x03(\v2\x1e.jobdeck.job.v1.ExecutionEventR\x06events\x12!\n" +
+	"\aattempt\x18\x06 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\aattempt\x12*\n" +
+	"\fmax_attempts\x18\a \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\vmaxAttempts\x127\n" +
 	"\x06result\x18\n" +
-	" \x01(\v2\x1f.jobdeck.job.v1.ExecutionResultR\x06result\"\x84\x01\n" +
-	"\x0eExecutionEvent\x127\n" +
-	"\x06status\x18\x01 \x01(\x0e2\x1f.jobdeck.job.v1.ExecutionStatusR\x06status\x129\n" +
+	" \x01(\v2\x1f.jobdeck.job.v1.ExecutionResultR\x06result\"\x90\x01\n" +
+	"\x0eExecutionEvent\x12C\n" +
+	"\x06status\x18\x01 \x01(\x0e2\x1f.jobdeck.job.v1.ExecutionStatusB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\x06status\x129\n" +
 	"\n" +
 	"created_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"{\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\x82\x01\n" +
 	"\x0fExecutionResult\x129\n" +
 	"\x04http\x18\x01 \x01(\v2#.jobdeck.job.v1.HttpExecutionResultH\x00R\x04http\x12#\n" +
 	"\rerror_message\x18\n" +
-	" \x01(\tR\ferrorMessageB\b\n" +
-	"\x06result\"6\n" +
-	"\x13HttpExecutionResult\x12\x1f\n" +
-	"\vstatus_code\x18\x01 \x01(\x05R\n" +
-	"statusCode\"8\n" +
-	"\x13GetExecutionRequest\x12!\n" +
-	"\fexecution_id\x18\x01 \x01(\tR\vexecutionId\"O\n" +
+	" \x01(\tR\ferrorMessageB\x0f\n" +
+	"\x06result\x12\x05\xbaH\x02\b\x01\"B\n" +
+	"\x13HttpExecutionResult\x12+\n" +
+	"\vstatus_code\x18\x01 \x01(\x05B\n" +
+	"\xbaH\a\x1a\x05\x18\xe7\a(dR\n" +
+	"statusCode\"B\n" +
+	"\x13GetExecutionRequest\x12+\n" +
+	"\fexecution_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vexecutionId\"O\n" +
 	"\x14GetExecutionResponse\x127\n" +
-	"\texecution\x18\x01 \x01(\v2\x19.jobdeck.job.v1.ExecutionR\texecution\"j\n" +
-	"\x15ListExecutionsRequest\x12\x15\n" +
-	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x1b\n" +
-	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\x12\x1d\n" +
+	"\texecution\x18\x01 \x01(\v2\x19.jobdeck.job.v1.ExecutionR\texecution\"\x7f\n" +
+	"\x15ListExecutionsRequest\x12\x1f\n" +
+	"\x06job_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x05jobId\x12&\n" +
+	"\tpage_size\x18\x03 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x01R\bpageSize\x12\x1d\n" +
 	"\n" +
 	"page_token\x18\x04 \x01(\tR\tpageToken\"{\n" +
 	"\x16ListExecutionsResponse\x129\n" +
 	"\n" +
 	"executions\x18\x01 \x03(\v2\x19.jobdeck.job.v1.ExecutionR\n" +
 	"executions\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"+\n" +
-	"\x12DoExecutionRequest\x12\x15\n" +
-	"\x06job_id\x18\x01 \x01(\tR\x05jobId\"N\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"5\n" +
+	"\x12DoExecutionRequest\x12\x1f\n" +
+	"\x06job_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x05jobId\"N\n" +
 	"\x13DoExecutionResponse\x127\n" +
 	"\texecution\x18\x01 \x01(\v2\x19.jobdeck.job.v1.ExecutionR\texecution*\xeb\x01\n" +
 	"\x0fExecutionStatus\x12 \n" +

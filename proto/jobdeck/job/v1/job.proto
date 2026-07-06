@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package jobdeck.job.v1;
 
+import "buf/validate/validate.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 
@@ -9,22 +10,30 @@ message JobSpec {
   reserved 1;
   reserved "name";
 
-  JobType type = 2;
+  JobType type = 2 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
 
   oneof config {
+    option (buf.validate.oneof).required = true;
+
     HttpJobConfig http = 10;
   }
 
-  RetryPolicy retry_policy = 20;
+  RetryPolicy retry_policy = 20 [(buf.validate.field).required = true];
 }
 
 message Job {
-  string id = 1;
-  string owner_id = 2;
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  string owner_id = 2 [(buf.validate.field).string.uuid = true];
   bool enabled = 3;
-  string name = 4;
+  string name = 4 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 70
+  }];
 
-  JobSpec spec = 10;
+  JobSpec spec = 10 [(buf.validate.field).required = true];
 
   google.protobuf.Timestamp created_at = 20;
   google.protobuf.Timestamp updated_at = 21;
@@ -46,24 +55,36 @@ enum HttpMethod {
 }
 
 message StatusCodeRange {
-  int32 from = 1;
-  int32 to = 2;
+  int32 from = 1 [(buf.validate.field).int32.gte = 1];
+  int32 to = 2 [(buf.validate.field).int32.gte = 1];
+
+  option (buf.validate.message).cel = {
+    id: "from-lower-than-to"
+    message: "from must be less than to"
+    expression: "this.from < this.to"
+  };
 }
 
 message StatusCodes {
-  repeated int32 codes = 1;
+  repeated int32 codes = 1 [(buf.validate.field).repeated.items.int32.gte = 1];
   repeated StatusCodeRange ranges = 2;
 }
 
 message HttpJobConfig {
-  HttpMethod method = 1;
-  string url = 2;
+  HttpMethod method = 1 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  string url = 2 [(buf.validate.field).string = {
+    min_len: 1
+    uri: true
+  }];
   repeated HttpHeader headers = 3;
   bytes body = 4;
 
   google.protobuf.Duration timeout = 5;
   StatusCodes expected_status_codes = 6;
-  int64 max_response_body_bytes = 8;
+  int64 max_response_body_bytes = 8 [(buf.validate.field).int64.gte = 0];
   bool follow_redirects = 9;
 
   bool retry_on_timeout = 10;
@@ -73,14 +94,17 @@ message HttpJobConfig {
 }
 
 message HttpHeader {
-  string name = 1;
-  string value = 2;
+  string name = 1 [(buf.validate.field).string.well_known_regex = KNOWN_REGEX_HTTP_HEADER_NAME];
+  string value = 2 [(buf.validate.field).string.well_known_regex = KNOWN_REGEX_HTTP_HEADER_VALUE];
 }
 
 message RetryPolicy {
-  int32 max_attempts = 1;
+  int32 max_attempts = 1 [(buf.validate.field).int32.gte = 1];
 
-  BackoffType backoff_type = 2;
+  BackoffType backoff_type = 2 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
   google.protobuf.Duration initial_delay = 3;
   google.protobuf.Duration max_delay = 4;
 }
@@ -93,8 +117,11 @@ enum BackoffType {
 }
 
 message CreateJobRequest {
-  JobSpec spec = 1;
-  string name = 2;
+  JobSpec spec = 1 [(buf.validate.field).required = true];
+  string name = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 70
+  }];
 }
 
 message CreateJobResponse {
@@ -102,7 +129,7 @@ message CreateJobResponse {
 }
 
 message GetJobRequest {
-  string job_id = 1;
+  string job_id = 1 [(buf.validate.field).string.uuid = true];
 }
 
 message GetJobResponse {
@@ -110,7 +137,10 @@ message GetJobResponse {
 }
 
 message ListJobsRequest {
-  int32 page_size = 1;
+  int32 page_size = 1 [(buf.validate.field).int32 = {
+    gte: 1
+    lte: 100
+  }];
   string page_token = 2;
 }
 
@@ -123,9 +153,12 @@ message UpdateJobRequest {
   reserved 2;
   reserved "enabled";
 
-  string job_id = 1;
-  JobSpec spec = 3;
-  string name = 4;
+  string job_id = 1 [(buf.validate.field).string.uuid = true];
+  JobSpec spec = 3 [(buf.validate.field).required = true];
+  string name = 4 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 70
+  }];
 }
 
 message UpdateJobResponse {
@@ -133,7 +166,7 @@ message UpdateJobResponse {
 }
 
 message SetJobEnabledRequest {
-  string job_id = 1;
+  string job_id = 1 [(buf.validate.field).string.uuid = true];
   bool enabled = 2;
 }
 
@@ -142,7 +175,7 @@ message SetJobEnabledResponse {
 }
 
 message DeleteJobRequest {
-  string job_id = 1;
+  string job_id = 1 [(buf.validate.field).string.uuid = true];
 }
 
 message DeleteJobResponse {}

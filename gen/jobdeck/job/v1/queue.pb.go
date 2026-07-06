@@ -7,6 +7,7 @@
 package jobv1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
@@ -302,27 +303,28 @@ var File_jobdeck_job_v1_queue_proto protoreflect.FileDescriptor
 
 const file_jobdeck_job_v1_queue_proto_rawDesc = "" +
 	"\n" +
-	"\x1ajobdeck/job/v1/queue.proto\x12\x0ejobdeck.job.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1ejobdeck/job/v1/execution.proto\x1a\x18jobdeck/job/v1/job.proto\"\x81\x02\n" +
-	"\x10ClaimedExecution\x12!\n" +
-	"\fexecution_id\x18\x01 \x01(\tR\vexecutionId\x12\x1f\n" +
-	"\vlease_token\x18\x02 \x01(\tR\n" +
+	"\x1ajobdeck/job/v1/queue.proto\x12\x0ejobdeck.job.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1ejobdeck/job/v1/execution.proto\x1a\x18jobdeck/job/v1/job.proto\"\xaf\x02\n" +
+	"\x10ClaimedExecution\x12+\n" +
+	"\fexecution_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vexecutionId\x12(\n" +
+	"\vlease_token\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\n" +
 	"leaseToken\x12D\n" +
-	"\x10lease_expires_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x0eleaseExpiresAt\x12\x18\n" +
-	"\aattempt\x18\x04 \x01(\x05R\aattempt\x122\n" +
-	"\bjob_spec\x18\x05 \x01(\v2\x17.jobdeck.job.v1.JobSpecR\ajobSpec\x12\x15\n" +
-	"\x06job_id\x18\x06 \x01(\tR\x05jobId\"K\n" +
-	"\x16ClaimExecutionsRequest\x12\x1b\n" +
-	"\tmax_count\x18\x01 \x01(\x05R\bmaxCountJ\x04\b\x02\x10\x03R\x0elease_duration\"[\n" +
+	"\x10lease_expires_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x0eleaseExpiresAt\x12!\n" +
+	"\aattempt\x18\x04 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\aattempt\x12:\n" +
+	"\bjob_spec\x18\x05 \x01(\v2\x17.jobdeck.job.v1.JobSpecB\x06\xbaH\x03\xc8\x01\x01R\ajobSpec\x12\x1f\n" +
+	"\x06job_id\x18\x06 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x05jobId\"V\n" +
+	"\x16ClaimExecutionsRequest\x12&\n" +
+	"\tmax_count\x18\x01 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x01R\bmaxCountJ\x04\b\x02\x10\x03R\x0elease_duration\"[\n" +
 	"\x17ClaimExecutionsResponse\x12@\n" +
 	"\n" +
 	"executions\x18\x01 \x03(\v2 .jobdeck.job.v1.ClaimedExecutionR\n" +
-	"executions\"\xe4\x01\n" +
-	"\x1cReportExecutionResultRequest\x12!\n" +
-	"\fexecution_id\x18\x01 \x01(\tR\vexecutionId\x12\x1f\n" +
-	"\vlease_token\x18\x02 \x01(\tR\n" +
-	"leaseToken\x127\n" +
-	"\x06status\x18\x03 \x01(\x0e2\x1f.jobdeck.job.v1.ExecutionStatusR\x06status\x127\n" +
-	"\x06result\x18\x04 \x01(\v2\x1f.jobdeck.job.v1.ExecutionResultR\x06resultJ\x04\b\x05\x10\x06R\bduration\"0\n" +
+	"executions\"\x8b\x02\n" +
+	"\x1cReportExecutionResultRequest\x12+\n" +
+	"\fexecution_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vexecutionId\x12(\n" +
+	"\vlease_token\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\n" +
+	"leaseToken\x12C\n" +
+	"\x06status\x18\x03 \x01(\x0e2\x1f.jobdeck.job.v1.ExecutionStatusB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\x06status\x12?\n" +
+	"\x06result\x18\x04 \x01(\v2\x1f.jobdeck.job.v1.ExecutionResultB\x06\xbaH\x03\xc8\x01\x01R\x06resultJ\x04\b\x05\x10\x06R\bduration\"0\n" +
 	"\x1dReportExecutionResultResponseJ\x04\b\x01\x10\x02R\texecution2\xf1\x01\n" +
 	"\x15ExecutionQueueService\x12b\n" +
 	"\x0fClaimExecutions\x12&.jobdeck.job.v1.ClaimExecutionsRequest\x1a'.jobdeck.job.v1.ClaimExecutionsResponse\x12t\n" +

@@ -8,13 +8,19 @@ import "google/protobuf/timestamp.proto";
 message Execution {
   string id = 1 [(buf.validate.field).string.uuid = true];
   string job_id = 2 [(buf.validate.field).string.uuid = true];
-  ExecutionStatus status = 3;
+  ExecutionStatus status = 3 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
 
-  ExecutionTrigger trigger = 4;
+  ExecutionTrigger trigger = 4 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
   repeated ExecutionEvent events = 5;
 
-  int32 attempt = 6;
-  int32 max_attempts = 7;
+  int32 attempt = 6 [(buf.validate.field).int32.gte = 1];
+  int32 max_attempts = 7 [(buf.validate.field).int32.gte = 1];
 
   ExecutionResult result = 10;
 }
@@ -30,7 +36,10 @@ enum ExecutionStatus {
 }
 
 message ExecutionEvent {
-  ExecutionStatus status = 1;
+  ExecutionStatus status = 1 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
   google.protobuf.Timestamp created_at = 10;
 }
 
@@ -41,6 +50,8 @@ enum ExecutionTrigger {
 
 message ExecutionResult {
   oneof result {
+    option (buf.validate.oneof).required = true;
+
     HttpExecutionResult http = 1;
   }
 
@@ -48,7 +59,10 @@ message ExecutionResult {
 }
 
 message HttpExecutionResult {
-  int32 status_code = 1;
+  int32 status_code = 1 [(buf.validate.field).int32 = {
+    gte: 100
+    lte: 999
+  }];
 }
 
 service ExecutionService {
@@ -62,7 +76,7 @@ service ExecutionService {
 }
 
 message GetExecutionRequest {
-  string execution_id = 1;
+  string execution_id = 1 [(buf.validate.field).string.uuid = true];
 }
 
 message GetExecutionResponse {
@@ -70,8 +84,11 @@ message GetExecutionResponse {
 }
 
 message ListExecutionsRequest {
-  string job_id = 1;
-  int32 page_size = 3;
+  string job_id = 1 [(buf.validate.field).string.uuid = true];
+  int32 page_size = 3 [(buf.validate.field).int32 = {
+    gte: 1
+    lte: 100
+  }];
   string page_token = 4;
 }
 
@@ -81,7 +98,7 @@ message ListExecutionsResponse {
 }
 
 message DoExecutionRequest {
-  string job_id = 1;
+  string job_id = 1 [(buf.validate.field).string.uuid = true];
 }
 
 message DoExecutionResponse {
