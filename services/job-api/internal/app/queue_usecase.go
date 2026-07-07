@@ -40,26 +40,33 @@ func (u *ExecutionQueueUsecase) ClaimExecutions(ctx context.Context, max_count i
 
 type ReportExecutionResultCommand struct {
 	ExecutionId     domain.ExecutionId
-	ExecutionStatus domain.ExecutionStatus
 	ExecutionResult domain.ExecutionResult
 	LeaseToken      domain.LeaseToken
 }
 
 func (u *ExecutionQueueUsecase) ReportExecutionResult(ctx context.Context, command ReportExecutionResultCommand) error {
 	return u.s.WithinExecutionQueueTx(ctx, func(ctx context.Context, queues ExecutionQueueRepository) error {
-		e, err := queues.ReportResult(ctx, command.ExecutionId, command.ExecutionStatus, command.LeaseToken, command.ExecutionResult)
+		e, err := queues.GetReportTarget(ctx, command.ExecutionId, command.LeaseToken)
 		if err != nil {
 			return err
 		}
 
-		// TODO: Retry
-		retry := false
+		status, err := e.DetermineStatus(command.ExecutionResult)
+		if err != nil {
+			return err
+		}
+
+		e, err = queues.ReportResult(ctx, command.ExecutionId, status, command.LeaseToken, command.ExecutionResult)
+		if err != nil {
+			return err
+		}
+
+		retry := e.ShouldRetry()
 		if !retry {
 			return nil
 		}
-		// FIXME
-		next_run_at := time.Now().Add(10 * time.Second)
 
+		next_run_at := e.NextRetryRunAt(time.Now())
 		_, err = queues.CreateRetryUnsuccessful(ctx, e.Id, next_run_at)
 		if err != nil {
 			return err

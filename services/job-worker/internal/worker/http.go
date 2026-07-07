@@ -6,6 +6,7 @@ import (
 	"io"
 	jobv1 "jobdeck/gen/jobdeck/job/v1"
 	"jobdeck/services/job-worker/internal/app"
+	"net"
 	"net/http"
 
 	"github.com/cockroachdb/errors"
@@ -38,8 +39,21 @@ func (e *httpExecutor) Exec(ctx context.Context, item app.WorkItem) (app.WorkRes
 	}
 	res, err := e.client.Do(req)
 	if err != nil {
-		// TODO
-		return app.WorkResult{}, errors.Wrap(err, "failed to http request")
+		err_type := classifyHttpError(err)
+		return app.WorkResult{
+			ExecutionID: item.Execution.ExecutionId,
+			LeaseToken:  item.Execution.LeaseToken,
+			Result: &jobv1.ExecutionResult{
+				Result: &jobv1.ExecutionResult_Http{
+					Http: &jobv1.HttpExecutionResult{
+						Error: &jobv1.HttpError{
+							Type:    err_type,
+							Message: err.Error(),
+						},
+					},
+				},
+			},
+		}, nil
 	}
 	defer res.Body.Close()
 	// b, err := io.ReadAll(res.Body)
@@ -50,16 +64,31 @@ func (e *httpExecutor) Exec(ctx context.Context, item app.WorkItem) (app.WorkRes
 	return app.WorkResult{
 		ExecutionID: item.Execution.ExecutionId,
 		LeaseToken:  item.Execution.LeaseToken,
-		Status:      jobv1.ExecutionStatus_EXECUTION_STATUS_SUCCEEDED, // todo
 		Result: &jobv1.ExecutionResult{
 			Result: &jobv1.ExecutionResult_Http{
 				Http: &jobv1.HttpExecutionResult{
 					StatusCode: int32(res.StatusCode),
 				},
 			},
-			ErrorMessage: "",
 		},
 	}, nil
+}
+
+func classifyHttpError(err error) jobv1.HttpErrorType {
+	if err == nil {
+		return jobv1.HttpErrorType_HTTP_ERROR_TYPE_UNSPECIFIED
+	}
+
+	if errors.Is(err, context.DeadlineExceeded) {
+		return jobv1.HttpErrorType_HTTP_ERROR_TYPE_TIMEOUT
+	}
+
+	var netErr net.Error
+	if errors.As(err, &netErr) && netErr.Timeout() {
+		return jobv1.HttpErrorType_HTTP_ERROR_TYPE_TIMEOUT
+	}
+
+	return jobv1.HttpErrorType_HTTP_ERROR_TYPE_NETWORK
 }
 
 func methodAllowsBody(m jobv1.HttpMethod) bool {
@@ -92,6 +121,8 @@ func httpMethodFromProto(m jobv1.HttpMethod) (string, error) {
 	}
 }
 
+var errRedirectsDisabled = errors.New("redirects disabled")
+
 func newHttpExecutor(item app.WorkItem) *httpExecutor {
 	job_config := item.Execution.GetJobSpec().GetHttp()
 	return &httpExecutor{
@@ -99,7 +130,7 @@ func newHttpExecutor(item app.WorkItem) *httpExecutor {
 			Timeout: job_config.GetTimeout().AsDuration(),
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
 				if !job_config.GetFollowRedirects() {
-					return errors.New("deny to redirect")
+					return errRedirectsDisabled
 				}
 				return nil
 			},

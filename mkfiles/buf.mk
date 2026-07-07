@@ -5,7 +5,7 @@ buf-generate:
 
 .PHONY: buf-lint
 buf-lint:
-	@buf lint
+	@buf format --diff --exit-code && buf lint
 
 .PHONY: buf-fmt
 buf-fmt:

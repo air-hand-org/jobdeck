@@ -13,8 +13,8 @@ const (
 	EXECUTION_STATUS_RUNNING   ExecutionStatus = "RUNNING"
 	EXECUTION_STATUS_SUCCEEDED ExecutionStatus = "SUCCEEDED"
 	EXECUTION_STATUS_FAILED    ExecutionStatus = "FAILED"
-	EXECUTION_STATUS_TIMED_OUT ExecutionStatus = "TIMED_OUT"
-	EXECUTION_STATUS_CANCELLED ExecutionStatus = "CANCELLED"
+	EXECUTION_STATUS_TIMED_OUT ExecutionStatus = "TIMED_OUT" // running, but too long until reported
+	EXECUTION_STATUS_CANCELLED ExecutionStatus = "CANCELLED" // cancelled before running
 )
 
 func (s ExecutionStatus) Valid() bool {
@@ -55,8 +55,30 @@ type Result interface {
 	Result()
 }
 
+type HttpErrorType string
+
+const (
+	HTTP_ERROR_TYPE_TIMEOUT HttpErrorType = "TIMEOUT"
+	HTTP_ERROR_TYPE_NETWORK HttpErrorType = "NETWORK"
+)
+
+func (t HttpErrorType) Valid() bool {
+	switch t {
+	case HTTP_ERROR_TYPE_TIMEOUT, HTTP_ERROR_TYPE_NETWORK:
+		return true
+	default:
+		return false
+	}
+}
+
+type HttpError struct {
+	Type    HttpErrorType `json:"type"`
+	Message string        `json:"message"`
+}
+
 type HttpExecutionResult struct {
-	StatusCode int32 `json:"status_code"`
+	StatusCode int32      `json:"status_code"`
+	Error      *HttpError `json:"error"`
 }
 
 func (r *HttpExecutionResult) Result() {}
@@ -101,11 +123,16 @@ type Execution struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-func (e *Execution) GetResult() *ExecutionResult {
-	if e == nil {
-		return nil
-	}
-	return e.Result
+func (e Execution) DetermineStatus(result ExecutionResult) (ExecutionStatus, error) {
+	return determineExecutionStatus(e.JobSpec, result)
+}
+
+func (e Execution) ShouldRetry() bool {
+	return shouldRetry(e.Status, e.Attempt, e.JobSpec, e.Result)
+}
+
+func (e Execution) NextRetryRunAt(now time.Time) time.Time {
+	return now.Add(computeRetryDelay(e.JobSpec.RetryPolicy, e.Attempt))
 }
 
 type ClaimedExecution struct {

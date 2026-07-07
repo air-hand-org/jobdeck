@@ -156,6 +156,17 @@
   - [ ] persist execution events, results, errors, timing, and bounded worker log output
   - [ ] expose execution history and worker logs through query APIs
   - [ ] add retry behavior and multi-worker double-execution protection
+  - [ ] define `lease_expires_at` decision logic for claimed executions:
+    - decide the default lease duration owned by `job-api`, not by worker request input.
+    - compute `lease_expires_at` when `ClaimExecutions` moves executions from `QUEUED` to `RUNNING`.
+    - keep worker-side HTTP timeout separate from execution lease timeout.
+    - decide whether lease renewal is needed before adding long-running job types.
+    - let a future reaper mark stale `RUNNING` executions as `TIMED_OUT` after a conservative grace period.
+  - [ ] add `BACKOFF_TYPE_LINEAR` in a follow-up retry PR:
+    - keep `BACKOFF_TYPE_FIXED` as a constant `initial_delay` retry delay.
+    - make `BACKOFF_TYPE_LINEAR` increase from `initial_delay` to `max_delay` based on attempt count.
+    - keep unknown backoff types falling back to fixed delay for forward compatibility.
+    - validate or reject `max_delay < initial_delay`.
   - [ ] design scheduler-service as a separate service boundary:
     - keep `job-api` DB as the source of truth for job definitions
     - give scheduler-service its own DB for scheduling projections/read models

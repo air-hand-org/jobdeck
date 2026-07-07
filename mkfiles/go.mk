@@ -18,7 +18,7 @@ go-fmt:
 
 .PHONY: go-lint
 go-lint:
-	@golangci-lint run
+	@golangci-lint fmt ./... --diff && golangci-lint run
 
 .PHONY: go-test
 go-test:

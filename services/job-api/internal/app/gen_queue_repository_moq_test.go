@@ -26,6 +26,9 @@ var _ ExecutionQueueRepository = &ExecutionQueueRepositoryMock{}
 //			CreateRetryUnsuccessfulFunc: func(ctx context.Context, execution_id domain.ExecutionId, next_run_at time.Time) (domain.Execution, error) {
 //				panic("mock out the CreateRetryUnsuccessful method")
 //			},
+//			GetReportTargetFunc: func(ctx context.Context, execution_id domain.ExecutionId, lease_token domain.LeaseToken) (domain.Execution, error) {
+//				panic("mock out the GetReportTarget method")
+//			},
 //			ReportResultFunc: func(ctx context.Context, execution_id domain.ExecutionId, status domain.ExecutionStatus, lease_token domain.LeaseToken, result domain.ExecutionResult) (domain.Execution, error) {
 //				panic("mock out the ReportResult method")
 //			},
@@ -41,6 +44,9 @@ type ExecutionQueueRepositoryMock struct {
 
 	// CreateRetryUnsuccessfulFunc mocks the CreateRetryUnsuccessful method.
 	CreateRetryUnsuccessfulFunc func(ctx context.Context, execution_id domain.ExecutionId, next_run_at time.Time) (domain.Execution, error)
+
+	// GetReportTargetFunc mocks the GetReportTarget method.
+	GetReportTargetFunc func(ctx context.Context, execution_id domain.ExecutionId, lease_token domain.LeaseToken) (domain.Execution, error)
 
 	// ReportResultFunc mocks the ReportResult method.
 	ReportResultFunc func(ctx context.Context, execution_id domain.ExecutionId, status domain.ExecutionStatus, lease_token domain.LeaseToken, result domain.ExecutionResult) (domain.Execution, error)
@@ -63,6 +69,15 @@ type ExecutionQueueRepositoryMock struct {
 			// Next_run_at is the next_run_at argument value.
 			Next_run_at time.Time
 		}
+		// GetReportTarget holds details about calls to the GetReportTarget method.
+		GetReportTarget []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Execution_id is the execution_id argument value.
+			Execution_id domain.ExecutionId
+			// Lease_token is the lease_token argument value.
+			Lease_token domain.LeaseToken
+		}
 		// ReportResult holds details about calls to the ReportResult method.
 		ReportResult []struct {
 			// Ctx is the ctx argument value.
@@ -79,6 +94,7 @@ type ExecutionQueueRepositoryMock struct {
 	}
 	lockClaims                  sync.RWMutex
 	lockCreateRetryUnsuccessful sync.RWMutex
+	lockGetReportTarget         sync.RWMutex
 	lockReportResult            sync.RWMutex
 }
 
@@ -155,6 +171,46 @@ func (mock *ExecutionQueueRepositoryMock) CreateRetryUnsuccessfulCalls() []struc
 	mock.lockCreateRetryUnsuccessful.RLock()
 	calls = mock.calls.CreateRetryUnsuccessful
 	mock.lockCreateRetryUnsuccessful.RUnlock()
+	return calls
+}
+
+// GetReportTarget calls GetReportTargetFunc.
+func (mock *ExecutionQueueRepositoryMock) GetReportTarget(ctx context.Context, execution_id domain.ExecutionId, lease_token domain.LeaseToken) (domain.Execution, error) {
+	if mock.GetReportTargetFunc == nil {
+		panic("ExecutionQueueRepositoryMock.GetReportTargetFunc: method is nil but ExecutionQueueRepository.GetReportTarget was just called")
+	}
+	callInfo := struct {
+		Ctx          context.Context
+		Execution_id domain.ExecutionId
+		Lease_token  domain.LeaseToken
+	}{
+		Ctx:          ctx,
+		Execution_id: execution_id,
+		Lease_token:  lease_token,
+	}
+	mock.lockGetReportTarget.Lock()
+	mock.calls.GetReportTarget = append(mock.calls.GetReportTarget, callInfo)
+	mock.lockGetReportTarget.Unlock()
+	return mock.GetReportTargetFunc(ctx, execution_id, lease_token)
+}
+
+// GetReportTargetCalls gets all the calls that were made to GetReportTarget.
+// Check the length with:
+//
+//	len(mockedExecutionQueueRepository.GetReportTargetCalls())
+func (mock *ExecutionQueueRepositoryMock) GetReportTargetCalls() []struct {
+	Ctx          context.Context
+	Execution_id domain.ExecutionId
+	Lease_token  domain.LeaseToken
+} {
+	var calls []struct {
+		Ctx          context.Context
+		Execution_id domain.ExecutionId
+		Lease_token  domain.LeaseToken
+	}
+	mock.lockGetReportTarget.RLock()
+	calls = mock.calls.GetReportTarget
+	mock.lockGetReportTarget.RUnlock()
 	return calls
 }
 

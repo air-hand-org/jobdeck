@@ -108,7 +108,6 @@ func (c *Claimer) report(ctx context.Context, res app.WorkResult) error {
 	_, err := c.client.ReportExecutionResult(reqCtx, &jobv1.ReportExecutionResultRequest{
 		ExecutionId: res.ExecutionID,
 		LeaseToken:  res.LeaseToken,
-		Status:      res.Status,
 		Result:      res.Result,
 	})
 	if err != nil {

@@ -182,7 +182,7 @@ WITH updated AS (
     AND
     e.lease_token = sqlc.arg(lease_token)
     AND
-    e.lease_expires_at > NOW()
+    e.status = 'RUNNING'
   RETURNING e.*
 )
 , added_event AS (
