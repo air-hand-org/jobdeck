@@ -2,6 +2,7 @@ all: setup build
 
 include ./mkfiles/buf.mk
 include ./mkfiles/go.mk
+include ./mkfiles/cs.mk
 
 .PHONY: setup
 setup:
@@ -12,7 +13,7 @@ generate: buf-generate
 	@sqlc generate
 
 .PHONY: build
-build: generate go-build
+build: generate go-build cs-build
 
 .PHONY: fmt
 fmt: buf-fmt go-fmt
@@ -26,7 +27,7 @@ check-clean:
 	@test -z "$$(git status --porcelain)"
 
 .PHONY: test
-test: go-test migration-test
+test: go-test migration-test cs-test
 
 .PHONY: migration-test
 migration-test:

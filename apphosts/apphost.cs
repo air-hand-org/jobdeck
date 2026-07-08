@@ -1,3 +1,4 @@
+#:package Aspire.Hosting.Blazor@13.4.6-preview.1.26319.6
 #:package Aspire.Hosting.Docker@13.4.6
 #:package Aspire.Hosting.Go@13.4.6-preview.1.26319.6
 #:package Aspire.Hosting.Kubernetes@13.4.6-preview.1.26319.6
@@ -148,5 +149,16 @@ if (string.Equals(builder.Configuration["DEBUG"], "true", StringComparison.Ordin
       service.Name = "job-worker";
     });
 }
+
+var ui = builder.AddProject("ui", "../services/ui/ui.csproj")
+  .WithExternalHttpEndpoints()
+  .WithEnvironment(context => {
+    context.EnvironmentVariables["JOB_API_GRPC_ENDPOINT"] = jobApiGrpcEndpoint.Property(EndpointProperty.Url);
+  })
+  // .WaitFor(job_api)
+  .PublishAsDockerComposeService((resource, service) => {
+    service.Name = "ui";
+  })
+;
 
 builder.Build().Run();
