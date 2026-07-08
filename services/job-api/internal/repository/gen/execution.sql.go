@@ -35,7 +35,7 @@ WITH claimed AS (
     , lease_expires_at = $2
   FROM claimed AS c
   WHERE e.execution_id = c.execution_id
-  RETURNING e.execution_id, e.job_id, e.trigger_type, e.status, e.attempt, e.lease_token, e.lease_expires_at, e.next_run_at, e.result, e.error_message, e.created_at, e.updated_at, e.job_revision_id
+  RETURNING e.execution_id, e.job_id, e.trigger_type, e.status, e.attempt, e.lease_token, e.lease_expires_at, e.next_run_at, e.result, e.created_at, e.updated_at, e.job_revision_id
 )
 , added_event AS (
   INSERT INTO job.execution_event AS ee (
@@ -103,7 +103,7 @@ WITH added AS (
     j.owner_id = $3
     AND
     j.enabled = TRUE
-  RETURNING e.execution_id, e.job_id, e.trigger_type, e.status, e.attempt, e.lease_token, e.lease_expires_at, e.next_run_at, e.result, e.error_message, e.created_at, e.updated_at, e.job_revision_id
+  RETURNING e.execution_id, e.job_id, e.trigger_type, e.status, e.attempt, e.lease_token, e.lease_expires_at, e.next_run_at, e.result, e.created_at, e.updated_at, e.job_revision_id
 )
 , added_event AS (
   INSERT INTO job.execution_event AS ee (
@@ -160,7 +160,7 @@ WITH added AS (
     cp.attempt < r.retry_max_attempts
     AND
     cp.status IN ('FAILED', 'TIMED_OUT', 'CANCELLED')
-  RETURNING e.execution_id, e.job_id, e.trigger_type, e.status, e.attempt, e.lease_token, e.lease_expires_at, e.next_run_at, e.result, e.error_message, e.created_at, e.updated_at, e.job_revision_id
+  RETURNING e.execution_id, e.job_id, e.trigger_type, e.status, e.attempt, e.lease_token, e.lease_expires_at, e.next_run_at, e.result, e.created_at, e.updated_at, e.job_revision_id
 )
 , added_event AS (
   INSERT INTO job.execution_event AS ee (
@@ -192,7 +192,7 @@ func (q *Queries) CreateRetryForUnsuccessfulExecution(ctx context.Context, arg C
 }
 
 const getExecutionDetail = `-- name: GetExecutionDetail :one
-SELECT execution_id, job_id, job_owner_id, job_revision_id, trigger_type, current_status, attempt, lease_token, lease_expires_at, next_run_at, result, error_message, created_at, updated_at, job_type, job_config, job_retry_max_attempts, job_retry_backoff_type, job_retry_initial_delay_ms, job_retry_max_delay_ms
+SELECT execution_id, job_id, job_owner_id, job_revision_id, trigger_type, current_status, attempt, lease_token, lease_expires_at, next_run_at, result, created_at, updated_at, job_type, job_config, job_retry_max_attempts, job_retry_backoff_type, job_retry_initial_delay_ms, job_retry_max_delay_ms
 FROM job.execution_detail AS e
 WHERE
   e.execution_id = $1
@@ -220,7 +220,6 @@ func (q *Queries) GetExecutionDetail(ctx context.Context, arg GetExecutionDetail
 		&i.LeaseExpiresAt,
 		&i.NextRunAt,
 		&i.Result,
-		&i.ErrorMessage,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.JobType,
@@ -234,7 +233,7 @@ func (q *Queries) GetExecutionDetail(ctx context.Context, arg GetExecutionDetail
 }
 
 const getExecutionDetailDirect = `-- name: GetExecutionDetailDirect :one
-SELECT execution_id, job_id, job_owner_id, job_revision_id, trigger_type, current_status, attempt, lease_token, lease_expires_at, next_run_at, result, error_message, created_at, updated_at, job_type, job_config, job_retry_max_attempts, job_retry_backoff_type, job_retry_initial_delay_ms, job_retry_max_delay_ms
+SELECT execution_id, job_id, job_owner_id, job_revision_id, trigger_type, current_status, attempt, lease_token, lease_expires_at, next_run_at, result, created_at, updated_at, job_type, job_config, job_retry_max_attempts, job_retry_backoff_type, job_retry_initial_delay_ms, job_retry_max_delay_ms
 FROM job.execution_detail AS e
 WHERE
   e.execution_id = $1
@@ -255,7 +254,6 @@ func (q *Queries) GetExecutionDetailDirect(ctx context.Context, executionID uuid
 		&i.LeaseExpiresAt,
 		&i.NextRunAt,
 		&i.Result,
-		&i.ErrorMessage,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.JobType,
@@ -340,7 +338,7 @@ func (q *Queries) ListExecutionEvents(ctx context.Context, executionID uuid.UUID
 }
 
 const listExecutionsAfter = `-- name: ListExecutionsAfter :many
-SELECT execution_id, job_id, job_owner_id, job_revision_id, trigger_type, current_status, attempt, lease_token, lease_expires_at, next_run_at, result, error_message, created_at, updated_at, job_type, job_config, job_retry_max_attempts, job_retry_backoff_type, job_retry_initial_delay_ms, job_retry_max_delay_ms
+SELECT execution_id, job_id, job_owner_id, job_revision_id, trigger_type, current_status, attempt, lease_token, lease_expires_at, next_run_at, result, created_at, updated_at, job_type, job_config, job_retry_max_attempts, job_retry_backoff_type, job_retry_initial_delay_ms, job_retry_max_delay_ms
 FROM job.execution_detail AS e
 WHERE
   e.job_id = $1
@@ -389,7 +387,6 @@ func (q *Queries) ListExecutionsAfter(ctx context.Context, arg ListExecutionsAft
 			&i.LeaseExpiresAt,
 			&i.NextRunAt,
 			&i.Result,
-			&i.ErrorMessage,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.JobType,
@@ -410,7 +407,7 @@ func (q *Queries) ListExecutionsAfter(ctx context.Context, arg ListExecutionsAft
 }
 
 const listExecutionsFirstPage = `-- name: ListExecutionsFirstPage :many
-SELECT execution_id, job_id, job_owner_id, job_revision_id, trigger_type, current_status, attempt, lease_token, lease_expires_at, next_run_at, result, error_message, created_at, updated_at, job_type, job_config, job_retry_max_attempts, job_retry_backoff_type, job_retry_initial_delay_ms, job_retry_max_delay_ms
+SELECT execution_id, job_id, job_owner_id, job_revision_id, trigger_type, current_status, attempt, lease_token, lease_expires_at, next_run_at, result, created_at, updated_at, job_type, job_config, job_retry_max_attempts, job_retry_backoff_type, job_retry_initial_delay_ms, job_retry_max_delay_ms
 FROM job.execution_detail AS e
 WHERE
   e.job_id = $1
@@ -447,7 +444,6 @@ func (q *Queries) ListExecutionsFirstPage(ctx context.Context, arg ListExecution
 			&i.LeaseExpiresAt,
 			&i.NextRunAt,
 			&i.Result,
-			&i.ErrorMessage,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.JobType,
@@ -473,14 +469,13 @@ WITH updated AS (
   SET
     status = $1
     , result = $2
-    , error_message = $3
   WHERE
-    e.execution_id = $4
+    e.execution_id = $3
     AND
-    e.lease_token = $5
+    e.lease_token = $4
     AND
     e.status = 'RUNNING'
-  RETURNING e.execution_id, e.job_id, e.trigger_type, e.status, e.attempt, e.lease_token, e.lease_expires_at, e.next_run_at, e.result, e.error_message, e.created_at, e.updated_at, e.job_revision_id
+  RETURNING e.execution_id, e.job_id, e.trigger_type, e.status, e.attempt, e.lease_token, e.lease_expires_at, e.next_run_at, e.result, e.created_at, e.updated_at, e.job_revision_id
 )
 , added_event AS (
   INSERT INTO job.execution_event AS ee (
@@ -499,18 +494,16 @@ FROM added_event
 `
 
 type ReportExecutionResultParams struct {
-	Status       string
-	Result       []byte
-	ErrorMessage pgtype.Text
-	ExecutionID  uuid.UUID
-	LeaseToken   *uuid.UUID
+	Status      string
+	Result      []byte
+	ExecutionID uuid.UUID
+	LeaseToken  *uuid.UUID
 }
 
 func (q *Queries) ReportExecutionResult(ctx context.Context, arg ReportExecutionResultParams) (uuid.UUID, error) {
 	row := q.db.QueryRow(ctx, reportExecutionResult,
 		arg.Status,
 		arg.Result,
-		arg.ErrorMessage,
 		arg.ExecutionID,
 		arg.LeaseToken,
 	)

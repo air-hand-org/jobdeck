@@ -38,57 +38,57 @@ namespace Jobdeck.Job.V1 {
             "ZWN1dGlvblJlc3VsdFIGcmVzdWx0IpABCg5FeGVjdXRpb25FdmVudBJDCgZz",
             "dGF0dXMYASABKA4yHy5qb2JkZWNrLmpvYi52MS5FeGVjdXRpb25TdGF0dXNC",
             "CrpIB4IBBBABIABSBnN0YXR1cxI5CgpjcmVhdGVkX2F0GAogASgLMhouZ29v",
-            "Z2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJY3JlYXRlZEF0IoIBCg9FeGVjdXRp",
-            "b25SZXN1bHQSOQoEaHR0cBgBIAEoCzIjLmpvYmRlY2suam9iLnYxLkh0dHBF",
-            "eGVjdXRpb25SZXN1bHRIAFIEaHR0cBIjCg1lcnJvcl9tZXNzYWdlGAogASgJ",
-            "UgxlcnJvck1lc3NhZ2VCDwoGcmVzdWx0EgW6SAIIASKwAgoTSHR0cEV4ZWN1",
-            "dGlvblJlc3VsdBIfCgtzdGF0dXNfY29kZRgBIAEoBVIKc3RhdHVzQ29kZRIv",
-            "CgVlcnJvchgCIAEoCzIZLmpvYmRlY2suam9iLnYxLkh0dHBFcnJvclIFZXJy",
-            "b3I6xgG6SMIBGr8BCh1odHRwX3Jlc3VsdF9yZXNwb25zZV9vcl9lcnJvchIn",
-            "ZWl0aGVyIHN0YXR1c19jb2RlIG9yIGVycm9yIG11c3QgYmUgc2V0GnUodGhp",
-            "cy5zdGF0dXNfY29kZSA+PSAxMDAgJiYgdGhpcy5zdGF0dXNfY29kZSA8PSA5",
-            "OTkgJiYgIWhhcyh0aGlzLmVycm9yKSl8fCAodGhpcy5zdGF0dXNfY29kZSA9",
-            "PSAwICYmIGhhcyh0aGlzLmVycm9yKSkiZAoJSHR0cEVycm9yEj0KBHR5cGUY",
-            "ASABKA4yHS5qb2JkZWNrLmpvYi52MS5IdHRwRXJyb3JUeXBlQgq6SAeCAQQQ",
-            "ASAAUgR0eXBlEhgKB21lc3NhZ2UYAiABKAlSB21lc3NhZ2UiQgoTR2V0RXhl",
-            "Y3V0aW9uUmVxdWVzdBIrCgxleGVjdXRpb25faWQYASABKAlCCLpIBXIDsAEB",
-            "UgtleGVjdXRpb25JZCJPChRHZXRFeGVjdXRpb25SZXNwb25zZRI3CglleGVj",
-            "dXRpb24YASABKAsyGS5qb2JkZWNrLmpvYi52MS5FeGVjdXRpb25SCWV4ZWN1",
-            "dGlvbiJ/ChVMaXN0RXhlY3V0aW9uc1JlcXVlc3QSHwoGam9iX2lkGAEgASgJ",
-            "Qgi6SAVyA7ABAVIFam9iSWQSJgoJcGFnZV9zaXplGAMgASgFQgm6SAYaBBhk",
-            "KAFSCHBhZ2VTaXplEh0KCnBhZ2VfdG9rZW4YBCABKAlSCXBhZ2VUb2tlbiJ7",
-            "ChZMaXN0RXhlY3V0aW9uc1Jlc3BvbnNlEjkKCmV4ZWN1dGlvbnMYASADKAsy",
-            "GS5qb2JkZWNrLmpvYi52MS5FeGVjdXRpb25SCmV4ZWN1dGlvbnMSJgoPbmV4",
-            "dF9wYWdlX3Rva2VuGAIgASgJUg1uZXh0UGFnZVRva2VuIjUKEkRvRXhlY3V0",
-            "aW9uUmVxdWVzdBIfCgZqb2JfaWQYASABKAlCCLpIBXIDsAEBUgVqb2JJZCJO",
-            "ChNEb0V4ZWN1dGlvblJlc3BvbnNlEjcKCWV4ZWN1dGlvbhgBIAEoCzIZLmpv",
-            "YmRlY2suam9iLnYxLkV4ZWN1dGlvblIJZXhlY3V0aW9uKusBCg9FeGVjdXRp",
-            "b25TdGF0dXMSIAocRVhFQ1VUSU9OX1NUQVRVU19VTlNQRUNJRklFRBAAEhsK",
-            "F0VYRUNVVElPTl9TVEFUVVNfUVVFVUVEEAESHAoYRVhFQ1VUSU9OX1NUQVRV",
-            "U19SVU5OSU5HEAISHgoaRVhFQ1VUSU9OX1NUQVRVU19TVUNDRUVERUQQAxIb",
-            "ChdFWEVDVVRJT05fU1RBVFVTX0ZBSUxFRBAEEh4KGkVYRUNVVElPTl9TVEFU",
-            "VVNfVElNRURfT1VUEAUSHgoaRVhFQ1VUSU9OX1NUQVRVU19DQU5DRUxMRUQQ",
-            "BipTChBFeGVjdXRpb25UcmlnZ2VyEiEKHUVYRUNVVElPTl9UUklHR0VSX1VO",
-            "U1BFQ0lGSUVEEAASHAoYRVhFQ1VUSU9OX1RSSUdHRVJfTUFOVUFMEAEqagoN",
-            "SHR0cEVycm9yVHlwZRIfChtIVFRQX0VSUk9SX1RZUEVfVU5TUEVDSUZJRUQQ",
-            "ABIbChdIVFRQX0VSUk9SX1RZUEVfVElNRU9VVBABEhsKF0hUVFBfRVJST1Jf",
-            "VFlQRV9ORVRXT1JLEAIysAIKEEV4ZWN1dGlvblNlcnZpY2USXgoMR2V0RXhl",
-            "Y3V0aW9uEiMuam9iZGVjay5qb2IudjEuR2V0RXhlY3V0aW9uUmVxdWVzdBok",
-            "LmpvYmRlY2suam9iLnYxLkdldEV4ZWN1dGlvblJlc3BvbnNlIgOQAgESZAoO",
-            "TGlzdEV4ZWN1dGlvbnMSJS5qb2JkZWNrLmpvYi52MS5MaXN0RXhlY3V0aW9u",
-            "c1JlcXVlc3QaJi5qb2JkZWNrLmpvYi52MS5MaXN0RXhlY3V0aW9uc1Jlc3Bv",
-            "bnNlIgOQAgESVgoLRG9FeGVjdXRpb24SIi5qb2JkZWNrLmpvYi52MS5Eb0V4",
-            "ZWN1dGlvblJlcXVlc3QaIy5qb2JkZWNrLmpvYi52MS5Eb0V4ZWN1dGlvblJl",
-            "c3BvbnNlQqABChJjb20uam9iZGVjay5qb2IudjFCDkV4ZWN1dGlvblByb3Rv",
-            "UAFaIGpvYmRlY2svZ2VuL2pvYmRlY2svam9iL3YxO2pvYnYxogIDSkpYqgIO",
-            "Sm9iZGVjay5Kb2IuVjHKAg5Kb2JkZWNrXEpvYlxWMeICGkpvYmRlY2tcSm9i",
-            "XFYxXEdQQk1ldGFkYXRh6gIQSm9iZGVjazo6Sm9iOjpWMWIGcHJvdG8z"));
+            "Z2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJY3JlYXRlZEF0InIKD0V4ZWN1dGlv",
+            "blJlc3VsdBI5CgRodHRwGAEgASgLMiMuam9iZGVjay5qb2IudjEuSHR0cEV4",
+            "ZWN1dGlvblJlc3VsdEgAUgRodHRwQg8KBnJlc3VsdBIFukgCCAFKBAgKEAtS",
+            "DWVycm9yX21lc3NhZ2UisAIKE0h0dHBFeGVjdXRpb25SZXN1bHQSHwoLc3Rh",
+            "dHVzX2NvZGUYASABKAVSCnN0YXR1c0NvZGUSLwoFZXJyb3IYAiABKAsyGS5q",
+            "b2JkZWNrLmpvYi52MS5IdHRwRXJyb3JSBWVycm9yOsYBukjCARq/AQodaHR0",
+            "cF9yZXN1bHRfcmVzcG9uc2Vfb3JfZXJyb3ISJ2VpdGhlciBzdGF0dXNfY29k",
+            "ZSBvciBlcnJvciBtdXN0IGJlIHNldBp1KHRoaXMuc3RhdHVzX2NvZGUgPj0g",
+            "MTAwICYmIHRoaXMuc3RhdHVzX2NvZGUgPD0gOTk5ICYmICFoYXModGhpcy5l",
+            "cnJvcikpfHwgKHRoaXMuc3RhdHVzX2NvZGUgPT0gMCAmJiBoYXModGhpcy5l",
+            "cnJvcikpImQKCUh0dHBFcnJvchI9CgR0eXBlGAEgASgOMh0uam9iZGVjay5q",
+            "b2IudjEuSHR0cEVycm9yVHlwZUIKukgHggEEEAEgAFIEdHlwZRIYCgdtZXNz",
+            "YWdlGAIgASgJUgdtZXNzYWdlIkIKE0dldEV4ZWN1dGlvblJlcXVlc3QSKwoM",
+            "ZXhlY3V0aW9uX2lkGAEgASgJQgi6SAVyA7ABAVILZXhlY3V0aW9uSWQiTwoU",
+            "R2V0RXhlY3V0aW9uUmVzcG9uc2USNwoJZXhlY3V0aW9uGAEgASgLMhkuam9i",
+            "ZGVjay5qb2IudjEuRXhlY3V0aW9uUglleGVjdXRpb24ifwoVTGlzdEV4ZWN1",
+            "dGlvbnNSZXF1ZXN0Eh8KBmpvYl9pZBgBIAEoCUIIukgFcgOwAQFSBWpvYklk",
+            "EiYKCXBhZ2Vfc2l6ZRgDIAEoBUIJukgGGgQYZCgBUghwYWdlU2l6ZRIdCgpw",
+            "YWdlX3Rva2VuGAQgASgJUglwYWdlVG9rZW4iewoWTGlzdEV4ZWN1dGlvbnNS",
+            "ZXNwb25zZRI5CgpleGVjdXRpb25zGAEgAygLMhkuam9iZGVjay5qb2IudjEu",
+            "RXhlY3V0aW9uUgpleGVjdXRpb25zEiYKD25leHRfcGFnZV90b2tlbhgCIAEo",
+            "CVINbmV4dFBhZ2VUb2tlbiI1ChJEb0V4ZWN1dGlvblJlcXVlc3QSHwoGam9i",
+            "X2lkGAEgASgJQgi6SAVyA7ABAVIFam9iSWQiTgoTRG9FeGVjdXRpb25SZXNw",
+            "b25zZRI3CglleGVjdXRpb24YASABKAsyGS5qb2JkZWNrLmpvYi52MS5FeGVj",
+            "dXRpb25SCWV4ZWN1dGlvbirrAQoPRXhlY3V0aW9uU3RhdHVzEiAKHEVYRUNV",
+            "VElPTl9TVEFUVVNfVU5TUEVDSUZJRUQQABIbChdFWEVDVVRJT05fU1RBVFVT",
+            "X1FVRVVFRBABEhwKGEVYRUNVVElPTl9TVEFUVVNfUlVOTklORxACEh4KGkVY",
+            "RUNVVElPTl9TVEFUVVNfU1VDQ0VFREVEEAMSGwoXRVhFQ1VUSU9OX1NUQVRV",
+            "U19GQUlMRUQQBBIeChpFWEVDVVRJT05fU1RBVFVTX1RJTUVEX09VVBAFEh4K",
+            "GkVYRUNVVElPTl9TVEFUVVNfQ0FOQ0VMTEVEEAYqUwoQRXhlY3V0aW9uVHJp",
+            "Z2dlchIhCh1FWEVDVVRJT05fVFJJR0dFUl9VTlNQRUNJRklFRBAAEhwKGEVY",
+            "RUNVVElPTl9UUklHR0VSX01BTlVBTBABKmoKDUh0dHBFcnJvclR5cGUSHwob",
+            "SFRUUF9FUlJPUl9UWVBFX1VOU1BFQ0lGSUVEEAASGwoXSFRUUF9FUlJPUl9U",
+            "WVBFX1RJTUVPVVQQARIbChdIVFRQX0VSUk9SX1RZUEVfTkVUV09SSxACMrAC",
+            "ChBFeGVjdXRpb25TZXJ2aWNlEl4KDEdldEV4ZWN1dGlvbhIjLmpvYmRlY2su",
+            "am9iLnYxLkdldEV4ZWN1dGlvblJlcXVlc3QaJC5qb2JkZWNrLmpvYi52MS5H",
+            "ZXRFeGVjdXRpb25SZXNwb25zZSIDkAIBEmQKDkxpc3RFeGVjdXRpb25zEiUu",
+            "am9iZGVjay5qb2IudjEuTGlzdEV4ZWN1dGlvbnNSZXF1ZXN0GiYuam9iZGVj",
+            "ay5qb2IudjEuTGlzdEV4ZWN1dGlvbnNSZXNwb25zZSIDkAIBElYKC0RvRXhl",
+            "Y3V0aW9uEiIuam9iZGVjay5qb2IudjEuRG9FeGVjdXRpb25SZXF1ZXN0GiMu",
+            "am9iZGVjay5qb2IudjEuRG9FeGVjdXRpb25SZXNwb25zZUKgAQoSY29tLmpv",
+            "YmRlY2suam9iLnYxQg5FeGVjdXRpb25Qcm90b1ABWiBqb2JkZWNrL2dlbi9q",
+            "b2JkZWNrL2pvYi92MTtqb2J2MaICA0pKWKoCDkpvYmRlY2suSm9iLlYxygIO",
+            "Sm9iZGVja1xKb2JcVjHiAhpKb2JkZWNrXEpvYlxWMVxHUEJNZXRhZGF0YeoC",
+            "EEpvYmRlY2s6OkpvYjo6VjFiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Buf.Validate.ValidateReflection.Descriptor, global::Google.Protobuf.WellKnownTypes.TimestampReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Jobdeck.Job.V1.ExecutionStatus), typeof(global::Jobdeck.Job.V1.ExecutionTrigger), typeof(global::Jobdeck.Job.V1.HttpErrorType), }, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.Execution), global::Jobdeck.Job.V1.Execution.Parser, new[]{ "Id", "JobId", "Status", "Trigger", "Events", "Attempt", "MaxAttempts", "Result" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.ExecutionEvent), global::Jobdeck.Job.V1.ExecutionEvent.Parser, new[]{ "Status", "CreatedAt" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.ExecutionResult), global::Jobdeck.Job.V1.ExecutionResult.Parser, new[]{ "Http", "ErrorMessage" }, new[]{ "Result" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.ExecutionResult), global::Jobdeck.Job.V1.ExecutionResult.Parser, new[]{ "Http" }, new[]{ "Result" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.HttpExecutionResult), global::Jobdeck.Job.V1.HttpExecutionResult.Parser, new[]{ "StatusCode", "Error" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.HttpError), global::Jobdeck.Job.V1.HttpError.Parser, new[]{ "Type", "Message" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.GetExecutionRequest), global::Jobdeck.Job.V1.GetExecutionRequest.Parser, new[]{ "ExecutionId" }, null, null, null, null),
@@ -861,7 +861,6 @@ namespace Jobdeck.Job.V1 {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public ExecutionResult(ExecutionResult other) : this() {
-      errorMessage_ = other.errorMessage_;
       switch (other.ResultCase) {
         case ResultOneofCase.Http:
           Http = other.Http.Clone();
@@ -886,18 +885,6 @@ namespace Jobdeck.Job.V1 {
       set {
         result_ = value;
         resultCase_ = value == null ? ResultOneofCase.None : ResultOneofCase.Http;
-      }
-    }
-
-    /// <summary>Field number for the "error_message" field.</summary>
-    public const int ErrorMessageFieldNumber = 10;
-    private string errorMessage_ = "";
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public string ErrorMessage {
-      get { return errorMessage_; }
-      set {
-        errorMessage_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
@@ -937,7 +924,6 @@ namespace Jobdeck.Job.V1 {
         return true;
       }
       if (!object.Equals(Http, other.Http)) return false;
-      if (ErrorMessage != other.ErrorMessage) return false;
       if (ResultCase != other.ResultCase) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -947,7 +933,6 @@ namespace Jobdeck.Job.V1 {
     public override int GetHashCode() {
       int hash = 1;
       if (resultCase_ == ResultOneofCase.Http) hash ^= Http.GetHashCode();
-      if (ErrorMessage.Length != 0) hash ^= ErrorMessage.GetHashCode();
       hash ^= (int) resultCase_;
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -971,10 +956,6 @@ namespace Jobdeck.Job.V1 {
         output.WriteRawTag(10);
         output.WriteMessage(Http);
       }
-      if (ErrorMessage.Length != 0) {
-        output.WriteRawTag(82);
-        output.WriteString(ErrorMessage);
-      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -989,10 +970,6 @@ namespace Jobdeck.Job.V1 {
         output.WriteRawTag(10);
         output.WriteMessage(Http);
       }
-      if (ErrorMessage.Length != 0) {
-        output.WriteRawTag(82);
-        output.WriteString(ErrorMessage);
-      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -1006,9 +983,6 @@ namespace Jobdeck.Job.V1 {
       if (resultCase_ == ResultOneofCase.Http) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(Http);
       }
-      if (ErrorMessage.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(ErrorMessage);
-      }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -1020,9 +994,6 @@ namespace Jobdeck.Job.V1 {
     public void MergeFrom(ExecutionResult other) {
       if (other == null) {
         return;
-      }
-      if (other.ErrorMessage.Length != 0) {
-        ErrorMessage = other.ErrorMessage;
       }
       switch (other.ResultCase) {
         case ResultOneofCase.Http:
@@ -1061,10 +1032,6 @@ namespace Jobdeck.Job.V1 {
             Http = subBuilder;
             break;
           }
-          case 82: {
-            ErrorMessage = input.ReadString();
-            break;
-          }
         }
       }
     #endif
@@ -1091,10 +1058,6 @@ namespace Jobdeck.Job.V1 {
             }
             input.ReadMessage(subBuilder);
             Http = subBuilder;
-            break;
-          }
-          case 82: {
-            ErrorMessage = input.ReadString();
             break;
           }
         }

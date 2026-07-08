@@ -86,8 +86,7 @@ func (r *HttpExecutionResult) Result() {}
 var _ Result = (*HttpExecutionResult)(nil)
 
 type ExecutionResult struct {
-	Result       Result `json:"result"`
-	ErrorMessage string `json:"error_message"`
+	Result Result `json:"result"`
 }
 
 func (r ExecutionResult) HttpResult() *HttpExecutionResult {

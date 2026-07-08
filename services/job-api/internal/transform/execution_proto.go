@@ -26,29 +26,34 @@ func executionEventToProto(e domain.ExecutionEvent) *jobv1.ExecutionEvent {
 }
 
 func httpExecutionResultToProto(r domain.HttpExecutionResult) *jobv1.HttpExecutionResult {
+	var httpErr *jobv1.HttpError
+	if r.Error != nil {
+		httpErr = &jobv1.HttpError{
+			Type:    httpErrorTypeToProto(r.Error.Type),
+			Message: r.Error.Message,
+		}
+	}
 	return &jobv1.HttpExecutionResult{
 		StatusCode: r.StatusCode,
+		Error:      httpErr,
 	}
 }
 
 func executionResultToProto(job_type domain.JobType, result domain.ExecutionResult) (*jobv1.ExecutionResult, error) {
-	resultProto := &jobv1.ExecutionResult{
-		ErrorMessage: result.ErrorMessage,
-	}
 	switch job_type {
 	case domain.JOB_TYPE_HTTP_REQUEST:
 		httpResult := result.HttpResult()
 		if httpResult == nil {
 			return nil, errors.New("http execution result is required")
 		}
-		resultProto.Result = &jobv1.ExecutionResult_Http{
-			Http: httpExecutionResultToProto(*httpResult),
-		}
+		return &jobv1.ExecutionResult{
+			Result: &jobv1.ExecutionResult_Http{
+				Http: httpExecutionResultToProto(*httpResult),
+			},
+		}, nil
 	default:
 		return nil, errors.Newf("unsupported job type: %v", job_type)
 	}
-
-	return resultProto, nil
 }
 
 func ExecutionToProto(e domain.Execution) (*jobv1.Execution, error) {

@@ -88,11 +88,10 @@ func (r *executionQueueRepository) ReportResult(ctx context.Context, execution_i
 		return domain.Execution{}, err
 	}
 	_, err = r.q.ReportExecutionResult(ctx, jobdb.ReportExecutionResultParams{
-		ExecutionID:  execution_id,
-		LeaseToken:   &lease_token,
-		Status:       string(status),
-		ErrorMessage: textToPGType(result.ErrorMessage),
-		Result:       res,
+		ExecutionID: execution_id,
+		LeaseToken:  &lease_token,
+		Status:      string(status),
+		Result:      res,
 	})
 	if err != nil {
 		return domain.Execution{}, err

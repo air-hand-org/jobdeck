@@ -176,7 +176,6 @@ WITH updated AS (
   SET
     status = sqlc.arg(status)
     , result = sqlc.arg(result)
-    , error_message = sqlc.arg(error_message)
   WHERE
     e.execution_id = sqlc.arg(execution_id)
     AND

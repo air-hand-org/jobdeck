@@ -141,8 +141,7 @@ func executionFromDB(e jobdb.Execution) (domain.Execution, error) {
 			return domain.Execution{}, err
 		}
 		result = &domain.ExecutionResult{
-			Result:       res,
-			ErrorMessage: e.ErrorMessage.String,
+			Result: res,
 		}
 	}
 	leaseToken := domain.LeaseToken{}

@@ -49,13 +49,14 @@ enum ExecutionTrigger {
 }
 
 message ExecutionResult {
+  reserved 10;
+  reserved "error_message";
+
   oneof result {
     option (buf.validate.oneof).required = true;
 
     HttpExecutionResult http = 1;
   }
-
-  string error_message = 10;
 }
 
 message HttpExecutionResult {
