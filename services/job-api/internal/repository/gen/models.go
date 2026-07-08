@@ -21,7 +21,6 @@ type Execution struct {
 	LeaseExpiresAt         pgtype.Timestamptz
 	NextRunAt              pgtype.Timestamptz
 	Result                 []byte
-	ErrorMessage           pgtype.Text
 	CreatedAt              pgtype.Timestamptz
 	UpdatedAt              pgtype.Timestamptz
 	JobType                string
@@ -57,7 +56,6 @@ type JobExecution struct {
 	LeaseExpiresAt pgtype.Timestamptz
 	NextRunAt      pgtype.Timestamptz
 	Result         []byte
-	ErrorMessage   pgtype.Text
 	CreatedAt      pgtype.Timestamptz
 	UpdatedAt      pgtype.Timestamptz
 	JobRevisionID  uuid.UUID

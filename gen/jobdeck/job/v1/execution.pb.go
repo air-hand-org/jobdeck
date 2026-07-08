@@ -337,7 +337,6 @@ type ExecutionResult struct {
 	//
 	//	*ExecutionResult_Http
 	Result        isExecutionResult_Result `protobuf_oneof:"result"`
-	ErrorMessage  string                   `protobuf:"bytes,10,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -386,13 +385,6 @@ func (x *ExecutionResult) GetHttp() *HttpExecutionResult {
 		}
 	}
 	return nil
-}
-
-func (x *ExecutionResult) GetErrorMessage() string {
-	if x != nil {
-		return x.ErrorMessage
-	}
-	return ""
 }
 
 type isExecutionResult_Result interface {
@@ -819,12 +811,11 @@ const file_jobdeck_job_v1_execution_proto_rawDesc = "" +
 	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\x06status\x129\n" +
 	"\n" +
 	"created_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\x82\x01\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"r\n" +
 	"\x0fExecutionResult\x129\n" +
-	"\x04http\x18\x01 \x01(\v2#.jobdeck.job.v1.HttpExecutionResultH\x00R\x04http\x12#\n" +
-	"\rerror_message\x18\n" +
-	" \x01(\tR\ferrorMessageB\x0f\n" +
-	"\x06result\x12\x05\xbaH\x02\b\x01\"\xb0\x02\n" +
+	"\x04http\x18\x01 \x01(\v2#.jobdeck.job.v1.HttpExecutionResultH\x00R\x04httpB\x0f\n" +
+	"\x06result\x12\x05\xbaH\x02\b\x01J\x04\b\n" +
+	"\x10\vR\rerror_message\"\xb0\x02\n" +
 	"\x13HttpExecutionResult\x12\x1f\n" +
 	"\vstatus_code\x18\x01 \x01(\x05R\n" +
 	"statusCode\x12/\n" +

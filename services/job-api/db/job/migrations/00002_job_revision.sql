@@ -162,14 +162,14 @@ ON job.execution(status, next_run_at)
 ;
 
 -- +goose Down
-DROP INDEX execution_status_next_run_at_idx;
+DROP INDEX job.execution_status_next_run_at_idx;
 DROP VIEW job.execution_claim_detail;
 DROP VIEW job.execution_detail_with_events;
 DROP VIEW job.execution_detail;
 
 DROP VIEW job.job_detail;
 
-DROP INDEX job_created_at_job_id;
+DROP INDEX job.job_created_at_job_id;
 
 ALTER TABLE job.job
   ADD COLUMN type VARCHAR(30)

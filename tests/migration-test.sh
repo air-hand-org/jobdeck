@@ -19,7 +19,7 @@ trap cleanup EXIT
 
 port=""
 for _ in {1..30}; do
-  port="$(docker port "${container}" 5432/tcp | sed 's/.*://')"
+  port="$(docker port "${container}" 5432/tcp | awk -F: '{print $NF}')"
   if [[ -n "${port}" ]] && docker exec "${container}" pg_isready -U postgres -d jobdeck >/dev/null 2>&1; then
     break
   fi
@@ -31,7 +31,18 @@ if ! docker exec "${container}" pg_isready -U postgres -d jobdeck >/dev/null 2>&
   exit 1
 fi
 
+export POSTGRESDB_URI="postgres://postgres:postgres@127.0.0.1:${port}/jobdeck?sslmode=disable"
 (
   cd services/job-api
-  POSTGRESDB_URI="postgres://postgres:postgres@127.0.0.1:${port}/jobdeck?sslmode=disable" go run ./cmd/migrator
+  go run ./cmd/migrator
+)
+
+(
+  cd services/job-api
+  go run ./cmd/migrator -down-to-0
+)
+
+(
+  cd services/job-api
+  go run ./cmd/migrator
 )

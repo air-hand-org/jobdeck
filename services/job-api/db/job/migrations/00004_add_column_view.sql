@@ -15,7 +15,9 @@ INNER JOIN job.job_revision AS r ON e.job_id = r.job_id AND e.job_revision_id = 
 ;
 
 -- +goose Down
-CREATE OR REPLACE VIEW job.execution_claim_detail AS
+DROP VIEW job.execution_claim_detail;
+
+CREATE  VIEW job.execution_claim_detail AS
 SELECT
   e.execution_id
   , e.job_id

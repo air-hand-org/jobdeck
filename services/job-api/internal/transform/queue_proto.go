@@ -54,7 +54,6 @@ func ExecutionResultFromProto(p *jobv1.ExecutionResult) (domain.ExecutionResult,
 				StatusCode: r.Http.GetStatusCode(),
 				Error:      httpErr,
 			},
-			ErrorMessage: p.GetErrorMessage(),
 		}, nil
 	default:
 		return domain.ExecutionResult{}, errors.New("unsupported execution result")

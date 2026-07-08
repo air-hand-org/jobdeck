@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"flag"
 	"log"
 	"os"
 
@@ -11,7 +12,22 @@ import (
 	migrations "jobdeck/services/job-api/db/job"
 )
 
+type config struct {
+	downTo0 bool
+}
+
+func parseFlags() config {
+	var cfg config
+
+	flag.BoolVar(&cfg.downTo0, "down-to-0", false, "down to 0")
+	flag.Parse()
+
+	return cfg
+}
+
 func main() {
+	cfg := parseFlags()
+
 	connStr := os.Getenv("POSTGRESDB_URI")
 	if connStr == "" {
 		log.Fatal("POSTGRESDB_URI is required")
@@ -30,7 +46,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := goose.Up(db, "migrations"); err != nil {
-		log.Fatal(err)
+	if cfg.downTo0 {
+		if err := goose.DownTo(db, "migrations", 0); err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		if err := goose.Up(db, "migrations"); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
