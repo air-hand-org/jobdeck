@@ -1315,13 +1315,14 @@ const file_jobdeck_job_v1_job_proto_rawDesc = "" +
 	"\n" +
 	"HttpHeader\x12\x1c\n" +
 	"\x04name\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xc0\x01\x01R\x04name\x12\x1e\n" +
-	"\x05value\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xc0\x01\x02R\x05value\"\xfd\x01\n" +
+	"\x05value\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xc0\x01\x02R\x05value\"\xf2\x02\n" +
 	"\vRetryPolicy\x12*\n" +
 	"\fmax_attempts\x18\x01 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\vmaxAttempts\x12J\n" +
 	"\fbackoff_type\x18\x02 \x01(\x0e2\x1b.jobdeck.job.v1.BackoffTypeB\n" +
 	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\vbackoffType\x12>\n" +
 	"\rinitial_delay\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\finitialDelay\x126\n" +
-	"\tmax_delay\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\bmaxDelay\"f\n" +
+	"\tmax_delay\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\bmaxDelay:s\xbaHp\x1an\n" +
+	"\x1ainitial-delay-le-max-delay\x12*initial delay must be less equal max delay\x1a$this.initial_delay <= this.max_delay\"f\n" +
 	"\x10CreateJobRequest\x123\n" +
 	"\x04spec\x18\x01 \x01(\v2\x17.jobdeck.job.v1.JobSpecB\x06\xbaH\x03\xc8\x01\x01R\x04spec\x12\x1d\n" +
 	"\x04name\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18FR\x04name\":\n" +

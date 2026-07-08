@@ -69,6 +69,19 @@ func (r *executionQueueRepository) Claims(ctx context.Context, max_count int32) 
 	})
 }
 
+func (r *executionQueueRepository) GetReportTarget(ctx context.Context, execution_id domain.ExecutionId, lease_token domain.LeaseToken) (domain.Execution, error) {
+	exec, err := r.findById(ctx, execution_id)
+	if err != nil {
+		return domain.Execution{}, err
+	}
+
+	if exec.Status != domain.EXECUTION_STATUS_RUNNING || exec.LeaseToken != lease_token {
+		return domain.Execution{}, domain.ErrExecutionNotReportable
+	}
+
+	return exec, nil
+}
+
 func (r *executionQueueRepository) ReportResult(ctx context.Context, execution_id domain.ExecutionId, status domain.ExecutionStatus, lease_token domain.LeaseToken, result domain.ExecutionResult) (domain.Execution, error) {
 	res, err := json.Marshal(result.Result)
 	if err != nil {

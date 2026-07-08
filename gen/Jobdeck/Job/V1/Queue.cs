@@ -38,30 +38,29 @@ namespace Jobdeck.Job.V1 {
             "dBImCgltYXhfY291bnQYASABKAVCCbpIBhoEGGQoAVIIbWF4Q291bnRKBAgC",
             "EANSDmxlYXNlX2R1cmF0aW9uIlsKF0NsYWltRXhlY3V0aW9uc1Jlc3BvbnNl",
             "EkAKCmV4ZWN1dGlvbnMYASADKAsyIC5qb2JkZWNrLmpvYi52MS5DbGFpbWVk",
-            "RXhlY3V0aW9uUgpleGVjdXRpb25zIosCChxSZXBvcnRFeGVjdXRpb25SZXN1",
+            "RXhlY3V0aW9uUgpleGVjdXRpb25zItQBChxSZXBvcnRFeGVjdXRpb25SZXN1",
             "bHRSZXF1ZXN0EisKDGV4ZWN1dGlvbl9pZBgBIAEoCUIIukgFcgOwAQFSC2V4",
             "ZWN1dGlvbklkEigKC2xlYXNlX3Rva2VuGAIgASgJQge6SARyAhABUgpsZWFz",
-            "ZVRva2VuEkMKBnN0YXR1cxgDIAEoDjIfLmpvYmRlY2suam9iLnYxLkV4ZWN1",
-            "dGlvblN0YXR1c0IKukgHggEEEAEgAFIGc3RhdHVzEj8KBnJlc3VsdBgEIAEo",
-            "CzIfLmpvYmRlY2suam9iLnYxLkV4ZWN1dGlvblJlc3VsdEIGukgDyAEBUgZy",
-            "ZXN1bHRKBAgFEAZSCGR1cmF0aW9uIjAKHVJlcG9ydEV4ZWN1dGlvblJlc3Vs",
-            "dFJlc3BvbnNlSgQIARACUglleGVjdXRpb24y8QEKFUV4ZWN1dGlvblF1ZXVl",
-            "U2VydmljZRJiCg9DbGFpbUV4ZWN1dGlvbnMSJi5qb2JkZWNrLmpvYi52MS5D",
-            "bGFpbUV4ZWN1dGlvbnNSZXF1ZXN0Gicuam9iZGVjay5qb2IudjEuQ2xhaW1F",
-            "eGVjdXRpb25zUmVzcG9uc2USdAoVUmVwb3J0RXhlY3V0aW9uUmVzdWx0Eiwu",
-            "am9iZGVjay5qb2IudjEuUmVwb3J0RXhlY3V0aW9uUmVzdWx0UmVxdWVzdBot",
-            "LmpvYmRlY2suam9iLnYxLlJlcG9ydEV4ZWN1dGlvblJlc3VsdFJlc3BvbnNl",
-            "QpwBChJjb20uam9iZGVjay5qb2IudjFCClF1ZXVlUHJvdG9QAVogam9iZGVj",
-            "ay9nZW4vam9iZGVjay9qb2IvdjE7am9idjGiAgNKSliqAg5Kb2JkZWNrLkpv",
-            "Yi5WMcoCDkpvYmRlY2tcSm9iXFYx4gIaSm9iZGVja1xKb2JcVjFcR1BCTWV0",
-            "YWRhdGHqAhBKb2JkZWNrOjpKb2I6OlYxYgZwcm90bzM="));
+            "ZVRva2VuEj8KBnJlc3VsdBgEIAEoCzIfLmpvYmRlY2suam9iLnYxLkV4ZWN1",
+            "dGlvblJlc3VsdEIGukgDyAEBUgZyZXN1bHRKBAgDEARKBAgFEAZSBnN0YXR1",
+            "c1IIZHVyYXRpb24iMAodUmVwb3J0RXhlY3V0aW9uUmVzdWx0UmVzcG9uc2VK",
+            "BAgBEAJSCWV4ZWN1dGlvbjLxAQoVRXhlY3V0aW9uUXVldWVTZXJ2aWNlEmIK",
+            "D0NsYWltRXhlY3V0aW9ucxImLmpvYmRlY2suam9iLnYxLkNsYWltRXhlY3V0",
+            "aW9uc1JlcXVlc3QaJy5qb2JkZWNrLmpvYi52MS5DbGFpbUV4ZWN1dGlvbnNS",
+            "ZXNwb25zZRJ0ChVSZXBvcnRFeGVjdXRpb25SZXN1bHQSLC5qb2JkZWNrLmpv",
+            "Yi52MS5SZXBvcnRFeGVjdXRpb25SZXN1bHRSZXF1ZXN0Gi0uam9iZGVjay5q",
+            "b2IudjEuUmVwb3J0RXhlY3V0aW9uUmVzdWx0UmVzcG9uc2VCnAEKEmNvbS5q",
+            "b2JkZWNrLmpvYi52MUIKUXVldWVQcm90b1ABWiBqb2JkZWNrL2dlbi9qb2Jk",
+            "ZWNrL2pvYi92MTtqb2J2MaICA0pKWKoCDkpvYmRlY2suSm9iLlYxygIOSm9i",
+            "ZGVja1xKb2JcVjHiAhpKb2JkZWNrXEpvYlxWMVxHUEJNZXRhZGF0YeoCEEpv",
+            "YmRlY2s6OkpvYjo6VjFiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Buf.Validate.ValidateReflection.Descriptor, global::Google.Protobuf.WellKnownTypes.TimestampReflection.Descriptor, global::Jobdeck.Job.V1.ExecutionReflection.Descriptor, global::Jobdeck.Job.V1.JobReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.ClaimedExecution), global::Jobdeck.Job.V1.ClaimedExecution.Parser, new[]{ "ExecutionId", "LeaseToken", "LeaseExpiresAt", "Attempt", "JobSpec", "JobId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.ClaimExecutionsRequest), global::Jobdeck.Job.V1.ClaimExecutionsRequest.Parser, new[]{ "MaxCount" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.ClaimExecutionsResponse), global::Jobdeck.Job.V1.ClaimExecutionsResponse.Parser, new[]{ "Executions" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.ReportExecutionResultRequest), global::Jobdeck.Job.V1.ReportExecutionResultRequest.Parser, new[]{ "ExecutionId", "LeaseToken", "Status", "Result" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.ReportExecutionResultRequest), global::Jobdeck.Job.V1.ReportExecutionResultRequest.Parser, new[]{ "ExecutionId", "LeaseToken", "Result" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.ReportExecutionResultResponse), global::Jobdeck.Job.V1.ReportExecutionResultResponse.Parser, null, null, null, null, null)
           }));
     }
@@ -892,7 +891,6 @@ namespace Jobdeck.Job.V1 {
     public ReportExecutionResultRequest(ReportExecutionResultRequest other) : this() {
       executionId_ = other.executionId_;
       leaseToken_ = other.leaseToken_;
-      status_ = other.status_;
       result_ = other.result_ != null ? other.result_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
@@ -927,18 +925,6 @@ namespace Jobdeck.Job.V1 {
       }
     }
 
-    /// <summary>Field number for the "status" field.</summary>
-    public const int StatusFieldNumber = 3;
-    private global::Jobdeck.Job.V1.ExecutionStatus status_ = global::Jobdeck.Job.V1.ExecutionStatus.Unspecified;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public global::Jobdeck.Job.V1.ExecutionStatus Status {
-      get { return status_; }
-      set {
-        status_ = value;
-      }
-    }
-
     /// <summary>Field number for the "result" field.</summary>
     public const int ResultFieldNumber = 4;
     private global::Jobdeck.Job.V1.ExecutionResult result_;
@@ -968,7 +954,6 @@ namespace Jobdeck.Job.V1 {
       }
       if (ExecutionId != other.ExecutionId) return false;
       if (LeaseToken != other.LeaseToken) return false;
-      if (Status != other.Status) return false;
       if (!object.Equals(Result, other.Result)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -979,7 +964,6 @@ namespace Jobdeck.Job.V1 {
       int hash = 1;
       if (ExecutionId.Length != 0) hash ^= ExecutionId.GetHashCode();
       if (LeaseToken.Length != 0) hash ^= LeaseToken.GetHashCode();
-      if (Status != global::Jobdeck.Job.V1.ExecutionStatus.Unspecified) hash ^= Status.GetHashCode();
       if (result_ != null) hash ^= Result.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -1007,10 +991,6 @@ namespace Jobdeck.Job.V1 {
         output.WriteRawTag(18);
         output.WriteString(LeaseToken);
       }
-      if (Status != global::Jobdeck.Job.V1.ExecutionStatus.Unspecified) {
-        output.WriteRawTag(24);
-        output.WriteEnum((int) Status);
-      }
       if (result_ != null) {
         output.WriteRawTag(34);
         output.WriteMessage(Result);
@@ -1033,10 +1013,6 @@ namespace Jobdeck.Job.V1 {
         output.WriteRawTag(18);
         output.WriteString(LeaseToken);
       }
-      if (Status != global::Jobdeck.Job.V1.ExecutionStatus.Unspecified) {
-        output.WriteRawTag(24);
-        output.WriteEnum((int) Status);
-      }
       if (result_ != null) {
         output.WriteRawTag(34);
         output.WriteMessage(Result);
@@ -1056,9 +1032,6 @@ namespace Jobdeck.Job.V1 {
       }
       if (LeaseToken.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(LeaseToken);
-      }
-      if (Status != global::Jobdeck.Job.V1.ExecutionStatus.Unspecified) {
-        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Status);
       }
       if (result_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(Result);
@@ -1080,9 +1053,6 @@ namespace Jobdeck.Job.V1 {
       }
       if (other.LeaseToken.Length != 0) {
         LeaseToken = other.LeaseToken;
-      }
-      if (other.Status != global::Jobdeck.Job.V1.ExecutionStatus.Unspecified) {
-        Status = other.Status;
       }
       if (other.result_ != null) {
         if (result_ == null) {
@@ -1117,10 +1087,6 @@ namespace Jobdeck.Job.V1 {
             LeaseToken = input.ReadString();
             break;
           }
-          case 24: {
-            Status = (global::Jobdeck.Job.V1.ExecutionStatus) input.ReadEnum();
-            break;
-          }
           case 34: {
             if (result_ == null) {
               Result = new global::Jobdeck.Job.V1.ExecutionResult();
@@ -1153,10 +1119,6 @@ namespace Jobdeck.Job.V1 {
           }
           case 18: {
             LeaseToken = input.ReadString();
-            break;
-          }
-          case 24: {
-            Status = (global::Jobdeck.Job.V1.ExecutionStatus) input.ReadEnum();
             break;
           }
           case 34: {

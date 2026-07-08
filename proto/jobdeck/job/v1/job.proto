@@ -107,6 +107,12 @@ message RetryPolicy {
   }];
   google.protobuf.Duration initial_delay = 3;
   google.protobuf.Duration max_delay = 4;
+
+  option (buf.validate.message).cel = {
+    id: "initial-delay-le-max-delay"
+    message: "initial delay must be less equal max delay"
+    expression: "this.initial_delay <= this.max_delay"
+  };
 }
 
 enum BackoffType {

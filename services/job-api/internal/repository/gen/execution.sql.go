@@ -479,7 +479,7 @@ WITH updated AS (
     AND
     e.lease_token = $5
     AND
-    e.lease_expires_at > NOW()
+    e.status = 'RUNNING'
   RETURNING e.execution_id, e.job_id, e.trigger_type, e.status, e.attempt, e.lease_token, e.lease_expires_at, e.next_run_at, e.result, e.error_message, e.created_at, e.updated_at, e.job_revision_id
 )
 , added_event AS (

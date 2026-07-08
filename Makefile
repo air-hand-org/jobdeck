@@ -20,6 +20,11 @@ fmt: buf-fmt go-fmt
 .PHONY: lint
 lint: buf-lint go-lint
 
+.PHONY: check-clean
+check-clean:
+	@git status --short
+	@test -z "$$(git status --porcelain)"
+
 .PHONY: test
 test: go-test migration-test
 

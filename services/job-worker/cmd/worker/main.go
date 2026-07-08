@@ -34,17 +34,20 @@ func parseFlags() config {
 }
 
 func waitForServing(ctx context.Context, conn *grpc.ClientConn) error {
+	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+	defer cancel()
+
 	client := health_grpc.NewHealthClient(conn)
 
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 
 	for {
-		rpcCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
+		rpcCtx, rpcCancel := context.WithTimeout(ctx, 2*time.Second)
 		res, err := client.Check(rpcCtx, &healthpb.HealthCheckRequest{
 			Service: "",
 		})
-		cancel()
+		rpcCancel()
 
 		if err == nil && res.GetStatus() == health_grpc.HealthCheckResponse_SERVING {
 			return nil
@@ -100,7 +103,7 @@ func main() {
 		conn.Connect()
 
 		if err := waitForServing(ctx, conn); err != nil {
-			return errors.Wrap(err, "failed to wait for serving api")
+			return errors.Wrap(err, "job-api did not become serving")
 		}
 
 		claimer := claimer.NewClaimer(conn, int(cfg.workerCount), 20*time.Second)

@@ -43,10 +43,6 @@ func (s *executionQueueServiceServer) ReportExecutionResult(ctx context.Context,
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "failed to transform execution id: %v", err)
 	}
-	exec_status, err := transform.ExecutionStatusFromProto(req.GetStatus())
-	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "failed to transform status: %v", err)
-	}
 	exec_result, err := transform.ExecutionResultFromProto(req.GetResult())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "failed to transform result: %v", err)
@@ -57,7 +53,6 @@ func (s *executionQueueServiceServer) ReportExecutionResult(ctx context.Context,
 	}
 	cmd := app.ReportExecutionResultCommand{
 		ExecutionId:     exec_id,
-		ExecutionStatus: exec_status,
 		ExecutionResult: exec_result,
 		LeaseToken:      lease_token,
 	}
