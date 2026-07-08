@@ -9,8 +9,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/samber/lo"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 // TODO: impl auth
@@ -25,10 +23,6 @@ type jobServiceServer struct {
 var _ jobv1.JobServiceServer = (*jobServiceServer)(nil)
 
 func (s *jobServiceServer) CreateJob(ctx context.Context, req *jobv1.CreateJobRequest) (*jobv1.CreateJobResponse, error) {
-	// TODO: move check to interceptor
-	if req == nil {
-		return nil, status.Errorf(codes.InvalidArgument, "req is required")
-	}
 	spec, err := transform.JobSpecFromProto(req.Spec)
 	if err != nil {
 		return nil, err
@@ -47,9 +41,6 @@ func (s *jobServiceServer) CreateJob(ctx context.Context, req *jobv1.CreateJobRe
 }
 
 func (s *jobServiceServer) UpdateJob(ctx context.Context, req *jobv1.UpdateJobRequest) (*jobv1.UpdateJobResponse, error) {
-	if req == nil {
-		return nil, status.Errorf(codes.InvalidArgument, "req is required")
-	}
 	job_id, err := transform.JobIdFromProto(req.GetJobId())
 	if err != nil {
 		return nil, err
@@ -72,9 +63,6 @@ func (s *jobServiceServer) UpdateJob(ctx context.Context, req *jobv1.UpdateJobRe
 }
 
 func (s *jobServiceServer) SetJobEnabled(ctx context.Context, req *jobv1.SetJobEnabledRequest) (*jobv1.SetJobEnabledResponse, error) {
-	if req == nil {
-		return nil, status.Errorf(codes.InvalidArgument, "req is required")
-	}
 	job_id, err := transform.JobIdFromProto(req.GetJobId())
 	if err != nil {
 		return nil, err
@@ -94,9 +82,6 @@ func (s *jobServiceServer) SetJobEnabled(ctx context.Context, req *jobv1.SetJobE
 }
 
 func (s *jobServiceServer) DeleteJob(ctx context.Context, req *jobv1.DeleteJobRequest) (*jobv1.DeleteJobResponse, error) {
-	if req == nil {
-		return nil, status.Errorf(codes.InvalidArgument, "req is required")
-	}
 	job_id, err := transform.JobIdFromProto(req.GetJobId())
 	if err != nil {
 		return nil, err
@@ -109,9 +94,6 @@ func (s *jobServiceServer) DeleteJob(ctx context.Context, req *jobv1.DeleteJobRe
 }
 
 func (s *jobServiceServer) GetJob(ctx context.Context, req *jobv1.GetJobRequest) (*jobv1.GetJobResponse, error) {
-	if req == nil {
-		return nil, status.Errorf(codes.InvalidArgument, "req is required")
-	}
 	job_id, err := transform.JobIdFromProto(req.GetJobId())
 	if err != nil {
 		return nil, err
@@ -127,9 +109,6 @@ func (s *jobServiceServer) GetJob(ctx context.Context, req *jobv1.GetJobRequest)
 }
 
 func (s *jobServiceServer) ListJobs(ctx context.Context, req *jobv1.ListJobsRequest) (*jobv1.ListJobsResponse, error) {
-	if req == nil {
-		return nil, status.Errorf(codes.InvalidArgument, "req is required")
-	}
 	result, err := s.u.ListJobs(ctx, ownerId, req.GetPageSize(), req.GetPageToken())
 	if err != nil {
 		return nil, err
