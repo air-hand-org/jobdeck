@@ -181,8 +181,6 @@ WITH updated AS (
     e.execution_id = sqlc.arg(execution_id)
     AND
     e.lease_token = sqlc.arg(lease_token)
-    AND
-    e.lease_expires_at > NOW()
   RETURNING e.*
 )
 , added_event AS (
