@@ -1,7 +1,7 @@
 package transform
 
 import (
-	jobv1 "jobdeck/gen/jobdeck/job/v1"
+	jobv1 "jobdeck/gen/go/jobdeck/job/v1"
 	"jobdeck/services/job-api/internal/domain"
 
 	"github.com/cockroachdb/errors"
@@ -78,5 +78,7 @@ func ExecutionToProto(e domain.Execution) (*jobv1.Execution, error) {
 		Attempt:     e.Attempt,
 		MaxAttempts: e.MaxAttempts,
 		Result:      result,
+		CreatedAt:   timestamppb.New(e.CreatedAt),
+		UpdatedAt:   timestamppb.New(e.UpdatedAt),
 	}, nil
 }

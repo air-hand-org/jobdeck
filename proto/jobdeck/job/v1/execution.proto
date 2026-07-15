@@ -23,6 +23,9 @@ message Execution {
   int32 max_attempts = 7 [(buf.validate.field).int32.gte = 1];
 
   ExecutionResult result = 10;
+
+  google.protobuf.Timestamp created_at = 20;
+  google.protobuf.Timestamp updated_at = 21;
 }
 
 enum ExecutionStatus {

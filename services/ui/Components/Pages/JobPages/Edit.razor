@@ -1,0 +1,52 @@
+@page "/jobs/{JobId}/edit"
+@rendermode InteractiveServer
+@using ui.Models
+@using ui.Client
+@using Jobdeck.Job.V1
+@inject JobApiClient JobApiClient
+@inject NavigationManager NavigationManager
+
+<div class="row">
+  <div class="col-md-4">
+    <HttpJobForm Model="@_model" OnValidSubmit="@UpdateJob" FormName="UpdateJob" SubmitText="Update" ErrorMessage="@_errorMessage" />
+  </div>
+</div>
+
+<div>
+  <a href="/jobs">Back to list</a>
+</div>
+
+@code {
+  [Parameter]
+  public string JobId {get; set;} = "";
+
+  private HttpJobFormModel _model = new();
+  private string? _errorMessage;
+
+  protected override async Task OnInitializedAsync()
+  {
+    _errorMessage = null;
+
+    var result = await JobApiClient.GetJobAsync(JobId);
+    if (!result.IsSuccess)
+    {
+      _errorMessage = result.Error;
+      return;
+    }
+
+    _model = HttpJobFormModel.FromProto(result.Value!);
+  }
+
+  private async Task UpdateJob()
+  {
+    _errorMessage = null;
+    var result = await JobApiClient.UpdateJobAsync(JobId, _model);
+    if (!result.IsSuccess)
+    {
+      _errorMessage = result.Error;
+      return;
+    }
+
+    NavigationManager.Refresh();
+  }
+}

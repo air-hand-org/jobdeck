@@ -1,0 +1,71 @@
+@page "/jobs/{JobId}/delete"
+@rendermode InteractiveServer
+@using Jobdeck.Job.V1
+@using ui.Client
+@inject JobApiClient JobApiClient
+@inject ILogger<Delete> Logger
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete Job</PageTitle>
+
+<h1>Delete Job</h1>
+
+<p>
+  <a href="/jobs">Back to list</a>
+</p>
+
+@if (_job is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <p>Are you sure you want to delete this job?</p>
+
+    <dl>
+        <dt>Name</dt>
+        <dd>@_job.Name</dd>
+
+        <dt>ID</dt>
+        <dd>@_job.Id</dd>
+    </dl>
+
+    @if (_errorMessage is not null)
+    {
+        <div class="alert alert-danger">@_errorMessage</div>
+    }
+
+    <button class="btn btn-danger" @onclick="DeleteJob">Delete</button>
+}
+
+@code {
+    [Parameter]
+    public string JobId {get; set;} = "";
+
+    private Job? _job;
+
+    private string? _errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await JobApiClient.GetJobAsync(JobId);
+        if (!result.IsSuccess)
+        {
+            NavigationManager.NavigateTo("/jobs");
+            return;
+        }
+        _job = result.Value!;
+    }
+
+    private async Task DeleteJob()
+    {
+        _errorMessage = null;
+        var result = await JobApiClient.DeleteJobAsync(JobId);
+        if (!result.IsSuccess)
+        {
+            _errorMessage = result.Error;
+            return;
+        }
+        NavigationManager.NavigateTo("/jobs");
+    }
+}

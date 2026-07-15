@@ -2,7 +2,7 @@ package claimer
 
 import (
 	"context"
-	jobv1 "jobdeck/gen/jobdeck/job/v1"
+	jobv1 "jobdeck/gen/go/jobdeck/job/v1"
 	"jobdeck/services/job-worker/internal/app"
 	"time"
 

@@ -1,0 +1,41 @@
+@page "/jobs"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Jobdeck.Job.V1
+@using ui.Client
+@inject JobApiClient JobApiClient
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+  <a href="/jobs/new">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="_jobs.AsQueryable()">
+  <PropertyColumn Property="job => job.Name" Title="Name" />
+  <PropertyColumn Property="job => job.Enabled" Title="Enabled" />
+
+  <TemplateColumn Context="job" Title="Links">
+    <a href="@($"/jobs/{job.Id}")">Details</a> |
+    <a href="@($"/jobs/{job.Id}/edit")">Edit</a> |
+    <a href="@($"/jobs/{job.Id}/delete")">Delete</a> |
+    <a href="@($"/jobs/{job.Id}/executions")">Executions</a>
+  </TemplateColumn>
+</QuickGrid>
+
+@code {
+  private List<Job> _jobs = [];
+
+  protected override async Task OnInitializedAsync()
+  {
+    var result = await JobApiClient.ListJobsAsync(pageSize: 100);
+    if (!result.IsSuccess)
+    {
+        return;
+    }
+
+    _jobs = [.. result.Value!.Jobs];
+  }
+}

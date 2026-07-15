@@ -1,7 +1,6 @@
 all: setup build
 
-include ./mkfiles/buf.mk
-include ./mkfiles/go.mk
+include ./mkfiles/*.mk
 
 .PHONY: setup
 setup:
@@ -12,7 +11,7 @@ generate: buf-generate
 	@sqlc generate
 
 .PHONY: build
-build: generate go-build
+build: generate go-build cs-build
 
 .PHONY: fmt
 fmt: buf-fmt go-fmt
@@ -26,13 +25,8 @@ check-clean:
 	@test -z "$$(git status --porcelain)"
 
 .PHONY: test
-test: go-test migration-test
+test: go-test migration-test cs-test
 
 .PHONY: migration-test
 migration-test:
 	@./tests/migration-test.sh
-
-.PHONY: run
-run: export DEBUG ?= false # (true/false)
-run:
-	@cd apphosts && aspire run

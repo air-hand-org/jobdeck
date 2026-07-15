@@ -1,0 +1,16 @@
+@page "/jobs/{JobId}"
+@rendermode InteractiveServer
+
+<PageTitle>Job detail</PageTitle>
+
+<h1>Job detail</h1>
+
+<p>
+    TODO: show job history and current. Links to edit, delete, request execution
+</p>
+
+@code
+{
+    [Parameter]
+    public string JobId {get; set;} = "";
+}
