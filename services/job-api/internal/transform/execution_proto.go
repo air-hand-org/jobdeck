@@ -78,7 +78,7 @@ func ExecutionToProto(e domain.Execution) (*jobv1.Execution, error) {
 		Attempt:     e.Attempt,
 		MaxAttempts: e.MaxAttempts,
 		Result:      result,
-		CreatedAt: timestamppb.New(e.CreatedAt),
-		UpdatedAt: timestamppb.New(e.UpdatedAt),
+		CreatedAt:   timestamppb.New(e.CreatedAt),
+		UpdatedAt:   timestamppb.New(e.UpdatedAt),
 	}, nil
 }
