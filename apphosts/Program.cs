@@ -1,10 +1,3 @@
-#:package Aspire.Hosting.Blazor@13.4.6-preview.1.26319.6
-#:package Aspire.Hosting.Docker@13.4.6
-#:package Aspire.Hosting.Go@13.4.6-preview.1.26319.6
-#:package Aspire.Hosting.Kubernetes@13.4.6-preview.1.26319.6
-#:package Aspire.Hosting.PostgreSQL@13.4.6
-#:sdk Aspire.AppHost.Sdk@13.4.6+4f218933552e18ff2874d1b6d5dc3fe671e3b6d9
-
 using Aspire.Hosting.ApplicationModel;
 
 var builder = DistributedApplication.CreateBuilder(args);
