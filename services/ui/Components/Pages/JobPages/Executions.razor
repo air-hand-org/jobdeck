@@ -1,0 +1,91 @@
+@page "/jobs/{JobId}/executions"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Google.Protobuf
+@using Jobdeck.Job.V1
+@using ui.Client
+@inject ExecutionApiClient ExecutionApiClient
+@inject NavigationManager NavigationManager
+@inject ILogger<Executions> Logger
+
+<PageTitle>Runs</PageTitle>
+
+<h1>Runs</h1>
+
+<p>
+  <a href="/jobs">Back to list</a>
+</p>
+
+<div>
+  <p>@_errorMessage</p>
+  <p>
+    <button type="button" class="btn btn-primary" @onclick="RequestExecution">Request to run the job</button>
+  </p>
+</div>
+
+<QuickGrid Class="table" Items="_execs.AsQueryable()">
+  <PropertyColumn Property="exec => exec.Id" Title="Id" />
+  <PropertyColumn Property="exec => exec.Attempt" Title="Attempt" />
+  <PropertyColumn Property="exec => exec.Status" Title="Status" />
+  <PropertyColumn Property="exec => FormatDateTime(exec.CreatedAt.ToDateTime())" Title="CreatedAt" />
+  <PropertyColumn Property="exec => FormatDateTime(exec.UpdatedAt.ToDateTime())" Title="UpdatedAt" />
+  <TemplateColumn Context="exec" Title="Result">
+    <pre class="bg-light border rounded p-2 small mb-0">
+        @FormatResult(exec)
+    </pre>
+  </TemplateColumn>
+</QuickGrid>
+
+@code {
+  [Parameter]
+  public string JobId {get; set;} = "";
+
+  private List<Execution> _execs = [];
+  private string? _errorMessage;
+
+  protected override async Task OnInitializedAsync()
+  {
+    await LoadExecutionsAsync();
+  }
+
+  private async Task LoadExecutionsAsync()
+  {
+    _errorMessage = null;
+
+    var result = await ExecutionApiClient.ListExecutionsAsync(jobId: JobId, pageSize: 100);
+    if (!result.IsSuccess)
+    {
+        _errorMessage = result.Error;
+        return;
+    }
+
+    _execs = [.. result.Value!.Executions];
+  }
+
+  private string FormatDateTime(DateTime dt)
+  {
+    return dt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
+  }
+
+  private string FormatResult(Execution execution)
+  {
+    if (execution.Result is null)
+    {
+        return "-";
+    }
+    return JsonFormatter.Default.Format(execution.Result);
+  }
+
+  private async Task RequestExecution()
+  {
+    _errorMessage = null;
+    var result = await ExecutionApiClient.DoExecutionAsync(JobId);
+    if (!result.IsSuccess)
+    {
+        _errorMessage = result.Error;
+        return;
+    }
+
+    await LoadExecutionsAsync();
+  }
+}

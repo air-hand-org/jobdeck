@@ -1,0 +1,39 @@
+@page "/jobs/new"
+@rendermode InteractiveServer
+@using ui.Models
+@using ui.Client
+@inject JobApiClient JobApiClient
+@inject NavigationManager NavigationManager
+
+<PageTitle>New</PageTitle>
+
+<h1>New Job</h1>
+
+<div class="row">
+  <div class="col-md-4">
+    <HttpJobForm Model="@_model" OnValidSubmit="@CreateJob" FormName="CreateJob" SubmitText="Create" ErrorMessage="@_errorMessage" />
+  </div>
+</div>
+
+<div>
+  <a href="/jobs">Back to list</a>
+</div>
+
+@code {
+  private HttpJobFormModel _model = new();
+  private string? _errorMessage;
+
+  private async Task CreateJob()
+  {
+    _errorMessage = null;
+
+    var result = await JobApiClient.CreateJobAsync(_model);
+    if (!result.IsSuccess)
+    {
+        _errorMessage = result.Error;
+        return;
+    }
+
+    NavigationManager.NavigateTo("/jobs");
+  }
+}

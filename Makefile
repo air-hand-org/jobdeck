@@ -1,8 +1,6 @@
 all: setup build
 
-include ./mkfiles/buf.mk
-include ./mkfiles/go.mk
-include ./mkfiles/cs.mk
+include ./mkfiles/*.mk
 
 .PHONY: setup
 setup:
@@ -32,8 +30,3 @@ test: go-test migration-test cs-test
 .PHONY: migration-test
 migration-test:
 	@./tests/migration-test.sh
-
-.PHONY: run
-run: export DEBUG ?= false # (true/false)
-run:
-	@cd apphosts && aspire run

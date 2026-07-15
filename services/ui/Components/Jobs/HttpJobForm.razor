@@ -1,0 +1,165 @@
+@using ui.Models
+@using Jobdeck.Job.V1
+@using JobdeckHttpMethod = Jobdeck.Job.V1.HttpMethod
+
+<EditForm Model="@Model" OnValidSubmit="@HandleValidSubmit" FormName="@FormName">
+  <DataAnnotationsValidator />
+  <ValidationSummary class="text-danger" role="alert"/>
+  @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+  {
+    <div class="alert alert-danger" role="alert">
+        <p>@ErrorMessage</p>
+    </div>
+  }
+  <div class="mb-3">
+    <label for="name" class="form-label">Name:</label>
+    <InputText id="name" @bind-Value="Model.Name" class="form-control" />
+    <ValidationMessage For="() => Model.Name" class="text-danger" />
+  </div>
+  <div class="mb-3">
+    <label for="url" class="form-label">Request URL:</label>
+    <InputText id="url" type="url" @bind-Value="Model.Url" class="form-control" />
+    <ValidationMessage For="() => Model.Url" class="text-danger" />
+  </div>
+  <div class="mb-3">
+    <label for="method" class="form-label">Request Method:</label>
+    <InputSelect id="method" @bind-Value="Model.Method" class="form-select">
+      <option value="@JobdeckHttpMethod.Unspecified">Select method</option>
+      @foreach (var method in Enum.GetValues<JobdeckHttpMethod>()
+        .Where(x => x != JobdeckHttpMethod.Unspecified))
+      {
+        <option value="@method">@DisplayHttpMethod(method)</option>
+      }
+    </InputSelect>
+    <ValidationMessage For="@(() => Model.Method)" class="text-danger" />
+  </div>
+
+  <div class="mb-3">
+    <label for="expected-status-codes" class="form-label">Expected status codes:</label>
+    @for (var i = 0; i < Model.ExpectedStatusCodes.Count; i++)
+    {
+      var index = i;
+      <div class="d-flex gap-2 mb-2">
+        <InputNumber class="form-control" @bind-Value="Model.ExpectedStatusCodes[index]" />
+        <button type="button" class="btn btn-outline-danger" @onclick="() => RemoveStatusCode(index)">
+          Remove
+        </button>
+      </div>
+    }
+    <button type="button" class="btn btn-outline-secondary" @onclick="AddStatusCode">
+      Add status code
+    </button>
+    <ValidationMessage For="@(() => Model.ExpectedStatusCodes)" />
+  </div>
+  <div class="mb-3">
+    <label for="timeout-seconds" class="form-label">Timeout(sec):</label>
+    <InputNumber id="timeout-seconds" @bind-Value="Model.TimeoutSeconds" class="form-control" />
+    <ValidationMessage For="() => Model.TimeoutSeconds" class="text-danger" />
+  </div>
+  <div class="form-check mb-3">
+    <label for="follow-redirects" class="form-check-label">Follow redirects?:</label>
+    <InputCheckbox id="follow-redirects" @bind-Value="Model.FollowRedirects" class="form-check-input" />
+    <ValidationMessage For="() => Model.FollowRedirects" class="text-danger" />
+  </div>
+  <div class="form-check mb-3">
+    <label for="retry-on-timeout" class="form-check-label">Retry on timeout?:</label>
+    <InputCheckbox id="retry-on-timeout" @bind-Value="Model.RetryOnTimeout" class="form-check-input" />
+    <ValidationMessage For="() => Model.RetryOnTimeout" class="text-danger" />
+  </div>
+  <div class="form-check mb-3">
+    <label for="retry-on-network-error" class="form-check-label">Retry on network error?:</label>
+    <InputCheckbox id="retry-on-network-error" @bind-Value="Model.RetryOnNetworkError" class="form-check-input" />
+    <ValidationMessage For="() => Model.RetryOnNetworkError" class="text-danger" />
+  </div>
+  <div class="mb-3">
+    <label for="retry-on-status-codes" class="form-label">Retry status codes:</label>
+    @for (var i = 0; i < Model.RetryOnStatusCodes.Count; i++)
+    {
+      var index = i;
+      <div class="d-flex gap-2 mb-2">
+        <InputNumber class="form-control" @bind-Value="Model.RetryOnStatusCodes[index]" />
+        <button type="button" class="btn btn-outline-danger" @onclick="() => RemoveRetryStatusCode(index)">
+          Remove
+        </button>
+      </div>
+    }
+    <button type="button" class="btn btn-outline-secondary" @onclick="AddRetryStatusCode">
+      Add retry status code
+    </button>
+    <ValidationMessage For="@(() => Model.RetryOnStatusCodes)" />
+  </div>
+  <div class="mb-3">
+    <label for="max-attempts" class="form-label">Max attempts:</label>
+    <InputNumber id="max-attempts" @bind-Value="Model.MaxAttempts" class="form-control" />
+    <ValidationMessage For="() => Model.MaxAttempts" class="text-danger" />
+  </div>
+  <div class="mb-3">
+    <label for="initial-delay-seconds" class="form-label">Initial delay(sec):</label>
+    <InputNumber id="initial-delay-seconds" @bind-Value="Model.InitialDelaySeconds" class="form-control" />
+    <ValidationMessage For="() => Model.InitialDelaySeconds" class="text-danger" />
+  </div>
+  <div class="mb-3">
+    <label for="max-delay-seconds" class="form-label">Max delay(sec):</label>
+    <InputNumber id="max-delay-seconds" @bind-Value="Model.MaxDelaySeconds" class="form-control" />
+    <ValidationMessage For="() => Model.MaxDelaySeconds" class="text-danger" />
+  </div>
+
+  <button type="submit" class="btn btn-primary">@SubmitText</button>
+</EditForm>
+
+@code {
+  [Parameter, EditorRequired]
+  public HttpJobFormModel Model { get; set; } = default!;
+
+  [Parameter, EditorRequired]
+  public EventCallback OnValidSubmit {get; set;}
+
+  [Parameter, EditorRequired]
+  public string FormName {get; set;}
+
+  [Parameter]
+  public string SubmitText {get; set;} = "Save";
+
+  [Parameter]
+  public string? ErrorMessage {get; set;}
+
+  private async Task HandleValidSubmit(EditContext _)
+  {
+    await OnValidSubmit.InvokeAsync();
+  }
+
+  private static string DisplayHttpMethod(JobdeckHttpMethod method)
+  {
+    return method switch {
+      _ => method.ToString()
+    };
+  }
+
+  private void AddStatusCode()
+  {
+    Model.ExpectedStatusCodes.Add(200);
+  }
+
+  private void RemoveStatusCode(int index)
+  {
+    if (Model.ExpectedStatusCodes.Count <= 1)
+    {
+      return;
+    }
+    Model.ExpectedStatusCodes.RemoveAt(index);
+  }
+
+  private void AddRetryStatusCode()
+  {
+    Model.RetryOnStatusCodes.Add(504);
+  }
+
+  private void RemoveRetryStatusCode(int index)
+  {
+    if (Model.RetryOnStatusCodes.Count <= 0)
+    {
+      return;
+    }
+    Model.RetryOnStatusCodes.RemoveAt(index);
+  }
+}
