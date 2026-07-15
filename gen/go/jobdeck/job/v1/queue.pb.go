@@ -318,9 +318,9 @@ const file_jobdeck_job_v1_queue_proto_rawDesc = "" +
 	"\x1dReportExecutionResultResponseJ\x04\b\x01\x10\x02R\texecution2\xf1\x01\n" +
 	"\x15ExecutionQueueService\x12b\n" +
 	"\x0fClaimExecutions\x12&.jobdeck.job.v1.ClaimExecutionsRequest\x1a'.jobdeck.job.v1.ClaimExecutionsResponse\x12t\n" +
-	"\x15ReportExecutionResult\x12,.jobdeck.job.v1.ReportExecutionResultRequest\x1a-.jobdeck.job.v1.ReportExecutionResultResponseB\x9c\x01\n" +
+	"\x15ReportExecutionResult\x12,.jobdeck.job.v1.ReportExecutionResultRequest\x1a-.jobdeck.job.v1.ReportExecutionResultResponseB\x9f\x01\n" +
 	"\x12com.jobdeck.job.v1B\n" +
-	"QueueProtoP\x01Z jobdeck/gen/jobdeck/job/v1;jobv1\xa2\x02\x03JJX\xaa\x02\x0eJobdeck.Job.V1\xca\x02\x0eJobdeck\\Job\\V1\xe2\x02\x1aJobdeck\\Job\\V1\\GPBMetadata\xea\x02\x10Jobdeck::Job::V1b\x06proto3"
+	"QueueProtoP\x01Z#jobdeck/gen/go/jobdeck/job/v1;jobv1\xa2\x02\x03JJX\xaa\x02\x0eJobdeck.Job.V1\xca\x02\x0eJobdeck\\Job\\V1\xe2\x02\x1aJobdeck\\Job\\V1\\GPBMetadata\xea\x02\x10Jobdeck::Job::V1b\x06proto3"
 
 var (
 	file_jobdeck_job_v1_queue_proto_rawDescOnce sync.Once

@@ -189,6 +189,8 @@ type Execution struct {
 	Attempt       int32                  `protobuf:"varint,6,opt,name=attempt,proto3" json:"attempt,omitempty"`
 	MaxAttempts   int32                  `protobuf:"varint,7,opt,name=max_attempts,json=maxAttempts,proto3" json:"max_attempts,omitempty"`
 	Result        *ExecutionResult       `protobuf:"bytes,10,opt,name=result,proto3" json:"result,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,20,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,21,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -275,6 +277,20 @@ func (x *Execution) GetMaxAttempts() int32 {
 func (x *Execution) GetResult() *ExecutionResult {
 	if x != nil {
 		return x.Result
+	}
+	return nil
+}
+
+func (x *Execution) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *Execution) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
 	}
 	return nil
 }
@@ -793,7 +809,7 @@ var File_jobdeck_job_v1_execution_proto protoreflect.FileDescriptor
 
 const file_jobdeck_job_v1_execution_proto_rawDesc = "" +
 	"\n" +
-	"\x1ejobdeck/job/v1/execution.proto\x12\x0ejobdeck.job.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x93\x03\n" +
+	"\x1ejobdeck/job/v1/execution.proto\x12\x0ejobdeck.job.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x89\x04\n" +
 	"\tExecution\x12\x18\n" +
 	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12\x1f\n" +
 	"\x06job_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x05jobId\x12C\n" +
@@ -805,7 +821,11 @@ const file_jobdeck_job_v1_execution_proto_rawDesc = "" +
 	"\aattempt\x18\x06 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\aattempt\x12*\n" +
 	"\fmax_attempts\x18\a \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\vmaxAttempts\x127\n" +
 	"\x06result\x18\n" +
-	" \x01(\v2\x1f.jobdeck.job.v1.ExecutionResultR\x06result\"\x90\x01\n" +
+	" \x01(\v2\x1f.jobdeck.job.v1.ExecutionResultR\x06result\x129\n" +
+	"\n" +
+	"created_at\x18\x14 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\x15 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x90\x01\n" +
 	"\x0eExecutionEvent\x12C\n" +
 	"\x06status\x18\x01 \x01(\x0e2\x1f.jobdeck.job.v1.ExecutionStatusB\n" +
 	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\x06status\x129\n" +
@@ -861,8 +881,8 @@ const file_jobdeck_job_v1_execution_proto_rawDesc = "" +
 	"\x10ExecutionService\x12^\n" +
 	"\fGetExecution\x12#.jobdeck.job.v1.GetExecutionRequest\x1a$.jobdeck.job.v1.GetExecutionResponse\"\x03\x90\x02\x01\x12d\n" +
 	"\x0eListExecutions\x12%.jobdeck.job.v1.ListExecutionsRequest\x1a&.jobdeck.job.v1.ListExecutionsResponse\"\x03\x90\x02\x01\x12V\n" +
-	"\vDoExecution\x12\".jobdeck.job.v1.DoExecutionRequest\x1a#.jobdeck.job.v1.DoExecutionResponseB\xa0\x01\n" +
-	"\x12com.jobdeck.job.v1B\x0eExecutionProtoP\x01Z jobdeck/gen/jobdeck/job/v1;jobv1\xa2\x02\x03JJX\xaa\x02\x0eJobdeck.Job.V1\xca\x02\x0eJobdeck\\Job\\V1\xe2\x02\x1aJobdeck\\Job\\V1\\GPBMetadata\xea\x02\x10Jobdeck::Job::V1b\x06proto3"
+	"\vDoExecution\x12\".jobdeck.job.v1.DoExecutionRequest\x1a#.jobdeck.job.v1.DoExecutionResponseB\xa3\x01\n" +
+	"\x12com.jobdeck.job.v1B\x0eExecutionProtoP\x01Z#jobdeck/gen/go/jobdeck/job/v1;jobv1\xa2\x02\x03JJX\xaa\x02\x0eJobdeck.Job.V1\xca\x02\x0eJobdeck\\Job\\V1\xe2\x02\x1aJobdeck\\Job\\V1\\GPBMetadata\xea\x02\x10Jobdeck::Job::V1b\x06proto3"
 
 var (
 	file_jobdeck_job_v1_execution_proto_rawDescOnce sync.Once
@@ -900,25 +920,27 @@ var file_jobdeck_job_v1_execution_proto_depIdxs = []int32{
 	1,  // 1: jobdeck.job.v1.Execution.trigger:type_name -> jobdeck.job.v1.ExecutionTrigger
 	4,  // 2: jobdeck.job.v1.Execution.events:type_name -> jobdeck.job.v1.ExecutionEvent
 	5,  // 3: jobdeck.job.v1.Execution.result:type_name -> jobdeck.job.v1.ExecutionResult
-	0,  // 4: jobdeck.job.v1.ExecutionEvent.status:type_name -> jobdeck.job.v1.ExecutionStatus
-	14, // 5: jobdeck.job.v1.ExecutionEvent.created_at:type_name -> google.protobuf.Timestamp
-	6,  // 6: jobdeck.job.v1.ExecutionResult.http:type_name -> jobdeck.job.v1.HttpExecutionResult
-	7,  // 7: jobdeck.job.v1.HttpExecutionResult.error:type_name -> jobdeck.job.v1.HttpError
-	2,  // 8: jobdeck.job.v1.HttpError.type:type_name -> jobdeck.job.v1.HttpErrorType
-	3,  // 9: jobdeck.job.v1.GetExecutionResponse.execution:type_name -> jobdeck.job.v1.Execution
-	3,  // 10: jobdeck.job.v1.ListExecutionsResponse.executions:type_name -> jobdeck.job.v1.Execution
-	3,  // 11: jobdeck.job.v1.DoExecutionResponse.execution:type_name -> jobdeck.job.v1.Execution
-	8,  // 12: jobdeck.job.v1.ExecutionService.GetExecution:input_type -> jobdeck.job.v1.GetExecutionRequest
-	10, // 13: jobdeck.job.v1.ExecutionService.ListExecutions:input_type -> jobdeck.job.v1.ListExecutionsRequest
-	12, // 14: jobdeck.job.v1.ExecutionService.DoExecution:input_type -> jobdeck.job.v1.DoExecutionRequest
-	9,  // 15: jobdeck.job.v1.ExecutionService.GetExecution:output_type -> jobdeck.job.v1.GetExecutionResponse
-	11, // 16: jobdeck.job.v1.ExecutionService.ListExecutions:output_type -> jobdeck.job.v1.ListExecutionsResponse
-	13, // 17: jobdeck.job.v1.ExecutionService.DoExecution:output_type -> jobdeck.job.v1.DoExecutionResponse
-	15, // [15:18] is the sub-list for method output_type
-	12, // [12:15] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	14, // 4: jobdeck.job.v1.Execution.created_at:type_name -> google.protobuf.Timestamp
+	14, // 5: jobdeck.job.v1.Execution.updated_at:type_name -> google.protobuf.Timestamp
+	0,  // 6: jobdeck.job.v1.ExecutionEvent.status:type_name -> jobdeck.job.v1.ExecutionStatus
+	14, // 7: jobdeck.job.v1.ExecutionEvent.created_at:type_name -> google.protobuf.Timestamp
+	6,  // 8: jobdeck.job.v1.ExecutionResult.http:type_name -> jobdeck.job.v1.HttpExecutionResult
+	7,  // 9: jobdeck.job.v1.HttpExecutionResult.error:type_name -> jobdeck.job.v1.HttpError
+	2,  // 10: jobdeck.job.v1.HttpError.type:type_name -> jobdeck.job.v1.HttpErrorType
+	3,  // 11: jobdeck.job.v1.GetExecutionResponse.execution:type_name -> jobdeck.job.v1.Execution
+	3,  // 12: jobdeck.job.v1.ListExecutionsResponse.executions:type_name -> jobdeck.job.v1.Execution
+	3,  // 13: jobdeck.job.v1.DoExecutionResponse.execution:type_name -> jobdeck.job.v1.Execution
+	8,  // 14: jobdeck.job.v1.ExecutionService.GetExecution:input_type -> jobdeck.job.v1.GetExecutionRequest
+	10, // 15: jobdeck.job.v1.ExecutionService.ListExecutions:input_type -> jobdeck.job.v1.ListExecutionsRequest
+	12, // 16: jobdeck.job.v1.ExecutionService.DoExecution:input_type -> jobdeck.job.v1.DoExecutionRequest
+	9,  // 17: jobdeck.job.v1.ExecutionService.GetExecution:output_type -> jobdeck.job.v1.GetExecutionResponse
+	11, // 18: jobdeck.job.v1.ExecutionService.ListExecutions:output_type -> jobdeck.job.v1.ListExecutionsResponse
+	13, // 19: jobdeck.job.v1.ExecutionService.DoExecution:output_type -> jobdeck.job.v1.DoExecutionResponse
+	17, // [17:20] is the sub-list for method output_type
+	14, // [14:17] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_jobdeck_job_v1_execution_proto_init() }

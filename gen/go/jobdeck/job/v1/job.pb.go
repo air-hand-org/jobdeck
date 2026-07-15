@@ -1375,8 +1375,8 @@ const file_jobdeck_job_v1_job_proto_rawDesc = "" +
 	"\rSetJobEnabled\x12$.jobdeck.job.v1.SetJobEnabledRequest\x1a%.jobdeck.job.v1.SetJobEnabledResponse\x12P\n" +
 	"\tDeleteJob\x12 .jobdeck.job.v1.DeleteJobRequest\x1a!.jobdeck.job.v1.DeleteJobResponse\x12L\n" +
 	"\x06GetJob\x12\x1d.jobdeck.job.v1.GetJobRequest\x1a\x1e.jobdeck.job.v1.GetJobResponse\"\x03\x90\x02\x01\x12R\n" +
-	"\bListJobs\x12\x1f.jobdeck.job.v1.ListJobsRequest\x1a .jobdeck.job.v1.ListJobsResponse\"\x03\x90\x02\x01B\x9a\x01\n" +
-	"\x12com.jobdeck.job.v1B\bJobProtoP\x01Z jobdeck/gen/jobdeck/job/v1;jobv1\xa2\x02\x03JJX\xaa\x02\x0eJobdeck.Job.V1\xca\x02\x0eJobdeck\\Job\\V1\xe2\x02\x1aJobdeck\\Job\\V1\\GPBMetadata\xea\x02\x10Jobdeck::Job::V1b\x06proto3"
+	"\bListJobs\x12\x1f.jobdeck.job.v1.ListJobsRequest\x1a .jobdeck.job.v1.ListJobsResponse\"\x03\x90\x02\x01B\x9d\x01\n" +
+	"\x12com.jobdeck.job.v1B\bJobProtoP\x01Z#jobdeck/gen/go/jobdeck/job/v1;jobv1\xa2\x02\x03JJX\xaa\x02\x0eJobdeck.Job.V1\xca\x02\x0eJobdeck\\Job\\V1\xe2\x02\x1aJobdeck\\Job\\V1\\GPBMetadata\xea\x02\x10Jobdeck::Job::V1b\x06proto3"
 
 var (
 	file_jobdeck_job_v1_job_proto_rawDescOnce sync.Once

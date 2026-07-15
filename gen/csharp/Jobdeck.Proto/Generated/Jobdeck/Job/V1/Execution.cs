@@ -26,7 +26,7 @@ namespace Jobdeck.Job.V1 {
           string.Concat(
             "Ch5qb2JkZWNrL2pvYi92MS9leGVjdXRpb24ucHJvdG8SDmpvYmRlY2suam9i",
             "LnYxGhtidWYvdmFsaWRhdGUvdmFsaWRhdGUucHJvdG8aH2dvb2dsZS9wcm90",
-            "b2J1Zi90aW1lc3RhbXAucHJvdG8ikwMKCUV4ZWN1dGlvbhIYCgJpZBgBIAEo",
+            "b2J1Zi90aW1lc3RhbXAucHJvdG8iiQQKCUV4ZWN1dGlvbhIYCgJpZBgBIAEo",
             "CUIIukgFcgOwAQFSAmlkEh8KBmpvYl9pZBgCIAEoCUIIukgFcgOwAQFSBWpv",
             "YklkEkMKBnN0YXR1cxgDIAEoDjIfLmpvYmRlY2suam9iLnYxLkV4ZWN1dGlv",
             "blN0YXR1c0IKukgHggEEEAEgAFIGc3RhdHVzEkYKB3RyaWdnZXIYBCABKA4y",
@@ -35,58 +35,61 @@ namespace Jobdeck.Job.V1 {
             "ZWN1dGlvbkV2ZW50UgZldmVudHMSIQoHYXR0ZW1wdBgGIAEoBUIHukgEGgIo",
             "AVIHYXR0ZW1wdBIqCgxtYXhfYXR0ZW1wdHMYByABKAVCB7pIBBoCKAFSC21h",
             "eEF0dGVtcHRzEjcKBnJlc3VsdBgKIAEoCzIfLmpvYmRlY2suam9iLnYxLkV4",
-            "ZWN1dGlvblJlc3VsdFIGcmVzdWx0IpABCg5FeGVjdXRpb25FdmVudBJDCgZz",
-            "dGF0dXMYASABKA4yHy5qb2JkZWNrLmpvYi52MS5FeGVjdXRpb25TdGF0dXNC",
-            "CrpIB4IBBBABIABSBnN0YXR1cxI5CgpjcmVhdGVkX2F0GAogASgLMhouZ29v",
-            "Z2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJY3JlYXRlZEF0InIKD0V4ZWN1dGlv",
-            "blJlc3VsdBI5CgRodHRwGAEgASgLMiMuam9iZGVjay5qb2IudjEuSHR0cEV4",
-            "ZWN1dGlvblJlc3VsdEgAUgRodHRwQg8KBnJlc3VsdBIFukgCCAFKBAgKEAtS",
-            "DWVycm9yX21lc3NhZ2UisAIKE0h0dHBFeGVjdXRpb25SZXN1bHQSHwoLc3Rh",
-            "dHVzX2NvZGUYASABKAVSCnN0YXR1c0NvZGUSLwoFZXJyb3IYAiABKAsyGS5q",
-            "b2JkZWNrLmpvYi52MS5IdHRwRXJyb3JSBWVycm9yOsYBukjCARq/AQodaHR0",
-            "cF9yZXN1bHRfcmVzcG9uc2Vfb3JfZXJyb3ISJ2VpdGhlciBzdGF0dXNfY29k",
-            "ZSBvciBlcnJvciBtdXN0IGJlIHNldBp1KHRoaXMuc3RhdHVzX2NvZGUgPj0g",
-            "MTAwICYmIHRoaXMuc3RhdHVzX2NvZGUgPD0gOTk5ICYmICFoYXModGhpcy5l",
-            "cnJvcikpfHwgKHRoaXMuc3RhdHVzX2NvZGUgPT0gMCAmJiBoYXModGhpcy5l",
-            "cnJvcikpImQKCUh0dHBFcnJvchI9CgR0eXBlGAEgASgOMh0uam9iZGVjay5q",
-            "b2IudjEuSHR0cEVycm9yVHlwZUIKukgHggEEEAEgAFIEdHlwZRIYCgdtZXNz",
-            "YWdlGAIgASgJUgdtZXNzYWdlIkIKE0dldEV4ZWN1dGlvblJlcXVlc3QSKwoM",
-            "ZXhlY3V0aW9uX2lkGAEgASgJQgi6SAVyA7ABAVILZXhlY3V0aW9uSWQiTwoU",
-            "R2V0RXhlY3V0aW9uUmVzcG9uc2USNwoJZXhlY3V0aW9uGAEgASgLMhkuam9i",
-            "ZGVjay5qb2IudjEuRXhlY3V0aW9uUglleGVjdXRpb24ifwoVTGlzdEV4ZWN1",
-            "dGlvbnNSZXF1ZXN0Eh8KBmpvYl9pZBgBIAEoCUIIukgFcgOwAQFSBWpvYklk",
-            "EiYKCXBhZ2Vfc2l6ZRgDIAEoBUIJukgGGgQYZCgBUghwYWdlU2l6ZRIdCgpw",
-            "YWdlX3Rva2VuGAQgASgJUglwYWdlVG9rZW4iewoWTGlzdEV4ZWN1dGlvbnNS",
-            "ZXNwb25zZRI5CgpleGVjdXRpb25zGAEgAygLMhkuam9iZGVjay5qb2IudjEu",
-            "RXhlY3V0aW9uUgpleGVjdXRpb25zEiYKD25leHRfcGFnZV90b2tlbhgCIAEo",
-            "CVINbmV4dFBhZ2VUb2tlbiI1ChJEb0V4ZWN1dGlvblJlcXVlc3QSHwoGam9i",
-            "X2lkGAEgASgJQgi6SAVyA7ABAVIFam9iSWQiTgoTRG9FeGVjdXRpb25SZXNw",
-            "b25zZRI3CglleGVjdXRpb24YASABKAsyGS5qb2JkZWNrLmpvYi52MS5FeGVj",
-            "dXRpb25SCWV4ZWN1dGlvbirrAQoPRXhlY3V0aW9uU3RhdHVzEiAKHEVYRUNV",
-            "VElPTl9TVEFUVVNfVU5TUEVDSUZJRUQQABIbChdFWEVDVVRJT05fU1RBVFVT",
-            "X1FVRVVFRBABEhwKGEVYRUNVVElPTl9TVEFUVVNfUlVOTklORxACEh4KGkVY",
-            "RUNVVElPTl9TVEFUVVNfU1VDQ0VFREVEEAMSGwoXRVhFQ1VUSU9OX1NUQVRV",
-            "U19GQUlMRUQQBBIeChpFWEVDVVRJT05fU1RBVFVTX1RJTUVEX09VVBAFEh4K",
-            "GkVYRUNVVElPTl9TVEFUVVNfQ0FOQ0VMTEVEEAYqUwoQRXhlY3V0aW9uVHJp",
-            "Z2dlchIhCh1FWEVDVVRJT05fVFJJR0dFUl9VTlNQRUNJRklFRBAAEhwKGEVY",
-            "RUNVVElPTl9UUklHR0VSX01BTlVBTBABKmoKDUh0dHBFcnJvclR5cGUSHwob",
-            "SFRUUF9FUlJPUl9UWVBFX1VOU1BFQ0lGSUVEEAASGwoXSFRUUF9FUlJPUl9U",
-            "WVBFX1RJTUVPVVQQARIbChdIVFRQX0VSUk9SX1RZUEVfTkVUV09SSxACMrAC",
-            "ChBFeGVjdXRpb25TZXJ2aWNlEl4KDEdldEV4ZWN1dGlvbhIjLmpvYmRlY2su",
-            "am9iLnYxLkdldEV4ZWN1dGlvblJlcXVlc3QaJC5qb2JkZWNrLmpvYi52MS5H",
-            "ZXRFeGVjdXRpb25SZXNwb25zZSIDkAIBEmQKDkxpc3RFeGVjdXRpb25zEiUu",
-            "am9iZGVjay5qb2IudjEuTGlzdEV4ZWN1dGlvbnNSZXF1ZXN0GiYuam9iZGVj",
-            "ay5qb2IudjEuTGlzdEV4ZWN1dGlvbnNSZXNwb25zZSIDkAIBElYKC0RvRXhl",
-            "Y3V0aW9uEiIuam9iZGVjay5qb2IudjEuRG9FeGVjdXRpb25SZXF1ZXN0GiMu",
-            "am9iZGVjay5qb2IudjEuRG9FeGVjdXRpb25SZXNwb25zZUKgAQoSY29tLmpv",
-            "YmRlY2suam9iLnYxQg5FeGVjdXRpb25Qcm90b1ABWiBqb2JkZWNrL2dlbi9q",
-            "b2JkZWNrL2pvYi92MTtqb2J2MaICA0pKWKoCDkpvYmRlY2suSm9iLlYxygIO",
-            "Sm9iZGVja1xKb2JcVjHiAhpKb2JkZWNrXEpvYlxWMVxHUEJNZXRhZGF0YeoC",
-            "EEpvYmRlY2s6OkpvYjo6VjFiBnByb3RvMw=="));
+            "ZWN1dGlvblJlc3VsdFIGcmVzdWx0EjkKCmNyZWF0ZWRfYXQYFCABKAsyGi5n",
+            "b29nbGUucHJvdG9idWYuVGltZXN0YW1wUgljcmVhdGVkQXQSOQoKdXBkYXRl",
+            "ZF9hdBgVIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSCXVwZGF0",
+            "ZWRBdCKQAQoORXhlY3V0aW9uRXZlbnQSQwoGc3RhdHVzGAEgASgOMh8uam9i",
+            "ZGVjay5qb2IudjEuRXhlY3V0aW9uU3RhdHVzQgq6SAeCAQQQASAAUgZzdGF0",
+            "dXMSOQoKY3JlYXRlZF9hdBgKIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1l",
+            "c3RhbXBSCWNyZWF0ZWRBdCJyCg9FeGVjdXRpb25SZXN1bHQSOQoEaHR0cBgB",
+            "IAEoCzIjLmpvYmRlY2suam9iLnYxLkh0dHBFeGVjdXRpb25SZXN1bHRIAFIE",
+            "aHR0cEIPCgZyZXN1bHQSBbpIAggBSgQIChALUg1lcnJvcl9tZXNzYWdlIrAC",
+            "ChNIdHRwRXhlY3V0aW9uUmVzdWx0Eh8KC3N0YXR1c19jb2RlGAEgASgFUgpz",
+            "dGF0dXNDb2RlEi8KBWVycm9yGAIgASgLMhkuam9iZGVjay5qb2IudjEuSHR0",
+            "cEVycm9yUgVlcnJvcjrGAbpIwgEavwEKHWh0dHBfcmVzdWx0X3Jlc3BvbnNl",
+            "X29yX2Vycm9yEidlaXRoZXIgc3RhdHVzX2NvZGUgb3IgZXJyb3IgbXVzdCBi",
+            "ZSBzZXQadSh0aGlzLnN0YXR1c19jb2RlID49IDEwMCAmJiB0aGlzLnN0YXR1",
+            "c19jb2RlIDw9IDk5OSAmJiAhaGFzKHRoaXMuZXJyb3IpKXx8ICh0aGlzLnN0",
+            "YXR1c19jb2RlID09IDAgJiYgaGFzKHRoaXMuZXJyb3IpKSJkCglIdHRwRXJy",
+            "b3ISPQoEdHlwZRgBIAEoDjIdLmpvYmRlY2suam9iLnYxLkh0dHBFcnJvclR5",
+            "cGVCCrpIB4IBBBABIABSBHR5cGUSGAoHbWVzc2FnZRgCIAEoCVIHbWVzc2Fn",
+            "ZSJCChNHZXRFeGVjdXRpb25SZXF1ZXN0EisKDGV4ZWN1dGlvbl9pZBgBIAEo",
+            "CUIIukgFcgOwAQFSC2V4ZWN1dGlvbklkIk8KFEdldEV4ZWN1dGlvblJlc3Bv",
+            "bnNlEjcKCWV4ZWN1dGlvbhgBIAEoCzIZLmpvYmRlY2suam9iLnYxLkV4ZWN1",
+            "dGlvblIJZXhlY3V0aW9uIn8KFUxpc3RFeGVjdXRpb25zUmVxdWVzdBIfCgZq",
+            "b2JfaWQYASABKAlCCLpIBXIDsAEBUgVqb2JJZBImCglwYWdlX3NpemUYAyAB",
+            "KAVCCbpIBhoEGGQoAVIIcGFnZVNpemUSHQoKcGFnZV90b2tlbhgEIAEoCVIJ",
+            "cGFnZVRva2VuInsKFkxpc3RFeGVjdXRpb25zUmVzcG9uc2USOQoKZXhlY3V0",
+            "aW9ucxgBIAMoCzIZLmpvYmRlY2suam9iLnYxLkV4ZWN1dGlvblIKZXhlY3V0",
+            "aW9ucxImCg9uZXh0X3BhZ2VfdG9rZW4YAiABKAlSDW5leHRQYWdlVG9rZW4i",
+            "NQoSRG9FeGVjdXRpb25SZXF1ZXN0Eh8KBmpvYl9pZBgBIAEoCUIIukgFcgOw",
+            "AQFSBWpvYklkIk4KE0RvRXhlY3V0aW9uUmVzcG9uc2USNwoJZXhlY3V0aW9u",
+            "GAEgASgLMhkuam9iZGVjay5qb2IudjEuRXhlY3V0aW9uUglleGVjdXRpb24q",
+            "6wEKD0V4ZWN1dGlvblN0YXR1cxIgChxFWEVDVVRJT05fU1RBVFVTX1VOU1BF",
+            "Q0lGSUVEEAASGwoXRVhFQ1VUSU9OX1NUQVRVU19RVUVVRUQQARIcChhFWEVD",
+            "VVRJT05fU1RBVFVTX1JVTk5JTkcQAhIeChpFWEVDVVRJT05fU1RBVFVTX1NV",
+            "Q0NFRURFRBADEhsKF0VYRUNVVElPTl9TVEFUVVNfRkFJTEVEEAQSHgoaRVhF",
+            "Q1VUSU9OX1NUQVRVU19USU1FRF9PVVQQBRIeChpFWEVDVVRJT05fU1RBVFVT",
+            "X0NBTkNFTExFRBAGKlMKEEV4ZWN1dGlvblRyaWdnZXISIQodRVhFQ1VUSU9O",
+            "X1RSSUdHRVJfVU5TUEVDSUZJRUQQABIcChhFWEVDVVRJT05fVFJJR0dFUl9N",
+            "QU5VQUwQASpqCg1IdHRwRXJyb3JUeXBlEh8KG0hUVFBfRVJST1JfVFlQRV9V",
+            "TlNQRUNJRklFRBAAEhsKF0hUVFBfRVJST1JfVFlQRV9USU1FT1VUEAESGwoX",
+            "SFRUUF9FUlJPUl9UWVBFX05FVFdPUksQAjKwAgoQRXhlY3V0aW9uU2Vydmlj",
+            "ZRJeCgxHZXRFeGVjdXRpb24SIy5qb2JkZWNrLmpvYi52MS5HZXRFeGVjdXRp",
+            "b25SZXF1ZXN0GiQuam9iZGVjay5qb2IudjEuR2V0RXhlY3V0aW9uUmVzcG9u",
+            "c2UiA5ACARJkCg5MaXN0RXhlY3V0aW9ucxIlLmpvYmRlY2suam9iLnYxLkxp",
+            "c3RFeGVjdXRpb25zUmVxdWVzdBomLmpvYmRlY2suam9iLnYxLkxpc3RFeGVj",
+            "dXRpb25zUmVzcG9uc2UiA5ACARJWCgtEb0V4ZWN1dGlvbhIiLmpvYmRlY2su",
+            "am9iLnYxLkRvRXhlY3V0aW9uUmVxdWVzdBojLmpvYmRlY2suam9iLnYxLkRv",
+            "RXhlY3V0aW9uUmVzcG9uc2VCowEKEmNvbS5qb2JkZWNrLmpvYi52MUIORXhl",
+            "Y3V0aW9uUHJvdG9QAVojam9iZGVjay9nZW4vZ28vam9iZGVjay9qb2IvdjE7",
+            "am9idjGiAgNKSliqAg5Kb2JkZWNrLkpvYi5WMcoCDkpvYmRlY2tcSm9iXFYx",
+            "4gIaSm9iZGVja1xKb2JcVjFcR1BCTWV0YWRhdGHqAhBKb2JkZWNrOjpKb2I6",
+            "OlYxYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Buf.Validate.ValidateReflection.Descriptor, global::Google.Protobuf.WellKnownTypes.TimestampReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Jobdeck.Job.V1.ExecutionStatus), typeof(global::Jobdeck.Job.V1.ExecutionTrigger), typeof(global::Jobdeck.Job.V1.HttpErrorType), }, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.Execution), global::Jobdeck.Job.V1.Execution.Parser, new[]{ "Id", "JobId", "Status", "Trigger", "Events", "Attempt", "MaxAttempts", "Result" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.Execution), global::Jobdeck.Job.V1.Execution.Parser, new[]{ "Id", "JobId", "Status", "Trigger", "Events", "Attempt", "MaxAttempts", "Result", "CreatedAt", "UpdatedAt" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.ExecutionEvent), global::Jobdeck.Job.V1.ExecutionEvent.Parser, new[]{ "Status", "CreatedAt" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.ExecutionResult), global::Jobdeck.Job.V1.ExecutionResult.Parser, new[]{ "Http" }, new[]{ "Result" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.HttpExecutionResult), global::Jobdeck.Job.V1.HttpExecutionResult.Parser, new[]{ "StatusCode", "Error" }, null, null, null, null),
@@ -170,6 +173,8 @@ namespace Jobdeck.Job.V1 {
       attempt_ = other.attempt_;
       maxAttempts_ = other.maxAttempts_;
       result_ = other.result_ != null ? other.result_.Clone() : null;
+      createdAt_ = other.createdAt_ != null ? other.createdAt_.Clone() : null;
+      updatedAt_ = other.updatedAt_ != null ? other.updatedAt_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -274,6 +279,30 @@ namespace Jobdeck.Job.V1 {
       }
     }
 
+    /// <summary>Field number for the "created_at" field.</summary>
+    public const int CreatedAtFieldNumber = 20;
+    private global::Google.Protobuf.WellKnownTypes.Timestamp createdAt_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Google.Protobuf.WellKnownTypes.Timestamp CreatedAt {
+      get { return createdAt_; }
+      set {
+        createdAt_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "updated_at" field.</summary>
+    public const int UpdatedAtFieldNumber = 21;
+    private global::Google.Protobuf.WellKnownTypes.Timestamp updatedAt_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Google.Protobuf.WellKnownTypes.Timestamp UpdatedAt {
+      get { return updatedAt_; }
+      set {
+        updatedAt_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -297,6 +326,8 @@ namespace Jobdeck.Job.V1 {
       if (Attempt != other.Attempt) return false;
       if (MaxAttempts != other.MaxAttempts) return false;
       if (!object.Equals(Result, other.Result)) return false;
+      if (!object.Equals(CreatedAt, other.CreatedAt)) return false;
+      if (!object.Equals(UpdatedAt, other.UpdatedAt)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -312,6 +343,8 @@ namespace Jobdeck.Job.V1 {
       if (Attempt != 0) hash ^= Attempt.GetHashCode();
       if (MaxAttempts != 0) hash ^= MaxAttempts.GetHashCode();
       if (result_ != null) hash ^= Result.GetHashCode();
+      if (createdAt_ != null) hash ^= CreatedAt.GetHashCode();
+      if (updatedAt_ != null) hash ^= UpdatedAt.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -359,6 +392,14 @@ namespace Jobdeck.Job.V1 {
         output.WriteRawTag(82);
         output.WriteMessage(Result);
       }
+      if (createdAt_ != null) {
+        output.WriteRawTag(162, 1);
+        output.WriteMessage(CreatedAt);
+      }
+      if (updatedAt_ != null) {
+        output.WriteRawTag(170, 1);
+        output.WriteMessage(UpdatedAt);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -398,6 +439,14 @@ namespace Jobdeck.Job.V1 {
         output.WriteRawTag(82);
         output.WriteMessage(Result);
       }
+      if (createdAt_ != null) {
+        output.WriteRawTag(162, 1);
+        output.WriteMessage(CreatedAt);
+      }
+      if (updatedAt_ != null) {
+        output.WriteRawTag(170, 1);
+        output.WriteMessage(UpdatedAt);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -429,6 +478,12 @@ namespace Jobdeck.Job.V1 {
       }
       if (result_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(Result);
+      }
+      if (createdAt_ != null) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(CreatedAt);
+      }
+      if (updatedAt_ != null) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(UpdatedAt);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -466,6 +521,18 @@ namespace Jobdeck.Job.V1 {
           Result = new global::Jobdeck.Job.V1.ExecutionResult();
         }
         Result.MergeFrom(other.Result);
+      }
+      if (other.createdAt_ != null) {
+        if (createdAt_ == null) {
+          CreatedAt = new global::Google.Protobuf.WellKnownTypes.Timestamp();
+        }
+        CreatedAt.MergeFrom(other.CreatedAt);
+      }
+      if (other.updatedAt_ != null) {
+        if (updatedAt_ == null) {
+          UpdatedAt = new global::Google.Protobuf.WellKnownTypes.Timestamp();
+        }
+        UpdatedAt.MergeFrom(other.UpdatedAt);
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -521,6 +588,20 @@ namespace Jobdeck.Job.V1 {
             input.ReadMessage(Result);
             break;
           }
+          case 162: {
+            if (createdAt_ == null) {
+              CreatedAt = new global::Google.Protobuf.WellKnownTypes.Timestamp();
+            }
+            input.ReadMessage(CreatedAt);
+            break;
+          }
+          case 170: {
+            if (updatedAt_ == null) {
+              UpdatedAt = new global::Google.Protobuf.WellKnownTypes.Timestamp();
+            }
+            input.ReadMessage(UpdatedAt);
+            break;
+          }
         }
       }
     #endif
@@ -573,6 +654,20 @@ namespace Jobdeck.Job.V1 {
               Result = new global::Jobdeck.Job.V1.ExecutionResult();
             }
             input.ReadMessage(Result);
+            break;
+          }
+          case 162: {
+            if (createdAt_ == null) {
+              CreatedAt = new global::Google.Protobuf.WellKnownTypes.Timestamp();
+            }
+            input.ReadMessage(CreatedAt);
+            break;
+          }
+          case 170: {
+            if (updatedAt_ == null) {
+              UpdatedAt = new global::Google.Protobuf.WellKnownTypes.Timestamp();
+            }
+            input.ReadMessage(UpdatedAt);
             break;
           }
         }

@@ -2,7 +2,7 @@ package transport
 
 import (
 	"context"
-	jobv1 "jobdeck/gen/jobdeck/job/v1"
+	jobv1 "jobdeck/gen/go/jobdeck/job/v1"
 	"jobdeck/services/job-api/internal/app"
 	"jobdeck/services/job-api/internal/domain"
 	"jobdeck/services/job-api/internal/transform"
