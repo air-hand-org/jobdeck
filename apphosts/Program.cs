@@ -35,7 +35,10 @@ var migration = builder.AddGoApp(
 
 EndpointReference jobApiGrpcEndpoint;
 
-if (string.Equals(builder.Configuration["DEBUG"], "true", StringComparison.OrdinalIgnoreCase))
+var IS_DEBUG = string.Equals(builder.Configuration["DEBUG"], "true", StringComparison.OrdinalIgnoreCase);
+
+// TODO: use WithDelveServer after v13.5
+if (IS_DEBUG)
 {
   var job_api = builder.AddExecutable(
       "job-api",
@@ -60,12 +63,14 @@ if (string.Equals(builder.Configuration["DEBUG"], "true", StringComparison.Ordin
         isProxied: false
     )
     .WithReference(db)
-    .WithEnvironment(context => {
+    .WithEnvironment(context =>
+    {
       context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
     })
     .WaitFor(db)
     .WaitForCompletion(migration)
-    .PublishAsDockerComposeService((resource, service) => {
+    .PublishAsDockerComposeService((resource, service) =>
+    {
       service.Name = "job-api";
     });
 
@@ -78,7 +83,7 @@ else
       appDirectory: "../services/job-api",
       packagePath: "./cmd/server"
     )
-//    .WithDelveServer(port: 2345) // --only-same-user=false needed
+    //    .WithDelveServer(port: 2345) // --only-same-user=false needed
     .WithHttpEndpoint(
         port: 9090,
         targetPort: 9090,
@@ -87,19 +92,21 @@ else
         isProxied: false
     )
     .WithReference(db)
-    .WithEnvironment(context => {
+    .WithEnvironment(context =>
+    {
       context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
     })
     .WaitFor(db)
     .WaitForCompletion(migration)
-    .PublishAsDockerComposeService((resource, service) => {
+    .PublishAsDockerComposeService((resource, service) =>
+    {
       service.Name = "job-api";
     });
 
   jobApiGrpcEndpoint = job_api.GetEndpoint("grpc");
 }
 
-if (string.Equals(builder.Configuration["DEBUG"], "true", StringComparison.OrdinalIgnoreCase))
+if (IS_DEBUG)
 {
   var job_worker = builder.AddExecutable(
       "job-worker",
@@ -118,7 +125,7 @@ if (string.Equals(builder.Configuration["DEBUG"], "true", StringComparison.Ordin
       , "--"
       , "-worker", "3"
     )
-  //  .WithReference(job_api) // ExecutableReference is not supported.
+    .WithReference(jobApiGrpcEndpoint)
     .WithEnvironment(context => {
       context.EnvironmentVariables["JOB_API_SERVER_URI"] = jobApiGrpcEndpoint.Property(EndpointProperty.HostAndPort);
     })
@@ -133,11 +140,12 @@ if (string.Equals(builder.Configuration["DEBUG"], "true", StringComparison.Ordin
       packagePath: "./cmd/worker"
     )
     .WithAppArgs("-worker", "3")
-  //  .WithReference(job_api) // ExecutableReference is not supported.
+    //.WithReference(job_api) // WARN: ExecutableReference is not supported.
+    .WithReference(jobApiGrpcEndpoint)
     .WithEnvironment(context => {
       context.EnvironmentVariables["JOB_API_SERVER_URI"] = jobApiGrpcEndpoint.Property(EndpointProperty.HostAndPort);
     })
-    // .WaitFor(job_api)
+    //.WaitFor(job_api)
     .PublishAsDockerComposeService((resource, service) => {
       service.Name = "job-worker";
     });
@@ -145,11 +153,14 @@ if (string.Equals(builder.Configuration["DEBUG"], "true", StringComparison.Ordin
 
 var ui = builder.AddProject("ui", "../services/ui/ui.csproj")
   .WithExternalHttpEndpoints()
-  .WithEnvironment(context => {
+  .WithReference(jobApiGrpcEndpoint)
+  .WithEnvironment(context =>
+  {
     context.EnvironmentVariables["JOB_API_GRPC_ENDPOINT"] = jobApiGrpcEndpoint.Property(EndpointProperty.Url);
   })
   // .WaitFor(job_api)
-  .PublishAsDockerComposeService((resource, service) => {
+  .PublishAsDockerComposeService((resource, service) =>
+  {
     service.Name = "ui";
   })
 ;
