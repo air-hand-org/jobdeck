@@ -4,13 +4,15 @@
 @using Google.Protobuf
 @using Jobdeck.Job.V1
 @using ui.Client
+@inject JobApiClient JobApiClient
 @inject ExecutionApiClient ExecutionApiClient
 @inject NavigationManager NavigationManager
 @inject ILogger<Executions> Logger
+@implements IAsyncDisposable
 
-<PageTitle>Runs</PageTitle>
+<PageTitle>Executions</PageTitle>
 
-<h1>Runs</h1>
+<h1>Executions: @_job?.Name</h1>
 
 <p>
   <a href="/jobs">Back to list</a>
@@ -40,12 +42,69 @@
   [Parameter]
   public string JobId {get; set;} = "";
 
+  private Job? _job;
   private List<Execution> _execs = [];
   private string? _errorMessage;
 
+  private readonly CancellationTokenSource _cts = new();
+  private Task? _refreshTask;
+
   protected override async Task OnInitializedAsync()
   {
+    var result = await JobApiClient.GetJobAsync(JobId);
+    if (!result.IsSuccess)
+    {
+        NavigationManager.NavigateTo("/jobs");
+        return;
+    }
+
+    _job = result.Value!;
     await LoadExecutionsAsync();
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (!firstRender)
+    {
+        return;
+    }
+
+    _refreshTask = RefreshLoopAsync(_cts.Token);
+  }
+
+  private async Task RefreshLoopAsync(CancellationToken token)
+  {
+    using var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+
+    try
+    {
+        while (await timer.WaitForNextTickAsync(token))
+        {
+            await InvokeAsync(async() =>
+            {
+                await LoadExecutionsAsync();
+                // Re-rendering request to blazor
+                StateHasChanged();
+            });
+        }
+    }
+    catch (OperationCanceledException)
+        when (token.IsCancellationRequested)
+    {
+        Logger.LogInformation("cancelled");
+    }
+  }
+
+  public async ValueTask DisposeAsync()
+  {
+    await _cts.CancelAsync();
+
+    if (_refreshTask is not null)
+    {
+        await _refreshTask;
+    }
+
+    _cts.Dispose();
   }
 
   private async Task LoadExecutionsAsync()
