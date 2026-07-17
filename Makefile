@@ -14,10 +14,10 @@ generate: buf-generate
 build: generate go-build cs-build
 
 .PHONY: fmt
-fmt: buf-fmt go-fmt
+fmt: buf-fmt go-fmt cs-fmt
 
 .PHONY: lint
-lint: buf-lint go-lint
+lint: buf-lint go-lint cs-lint
 
 .PHONY: check-clean
 check-clean:
