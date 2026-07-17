@@ -129,6 +129,9 @@
   - [ ] add a minimal GitHub Actions workflow:
     - `go test ./...` for each Go module
     - `buf lint`
+  - [ ] Enable staticcheck `ST1003` and convert existing Go identifiers to mixedCaps:
+    - keep SQL and JSON names in snake_case where their conventions require it.
+    - enable the non-default check after the existing snake_case identifiers are renamed.
   - [ ] merge the job-worker vertical slice before adding more behavior:
     - job-api queue use case/repository split
     - execution claim/report SQL

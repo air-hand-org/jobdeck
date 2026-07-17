@@ -28,7 +28,7 @@ type executionRepository struct {
 
 var _ app.ExecutionRepository = (*executionRepository)(nil)
 
-func (r *executionRepository) CreateForCurrentJob(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, trigger domain.ExecutionTrigger) (domain.Execution, error) {
+func (r *executionRepository) CreateForCurrentJob(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId, trigger domain.ExecutionTrigger) (domain.Execution, error) {
 	exec_id, err := r.q.CreateExecutionForCurrentJob(ctx, jobdb.CreateExecutionForCurrentJobParams{
 		TriggerType: string(trigger),
 		JobID:       job_id,
@@ -40,7 +40,7 @@ func (r *executionRepository) CreateForCurrentJob(ctx context.Context, owner_id 
 	return r.FindById(ctx, owner_id, exec_id)
 }
 
-func (r *executionRepository) FindById(ctx context.Context, owner_id domain.UserId, execution_id domain.ExecutionId) (domain.Execution, error) {
+func (r *executionRepository) FindById(ctx context.Context, owner_id domain.ActorId, execution_id domain.ExecutionId) (domain.Execution, error) {
 	exec, err := r.q.GetExecutionDetail(ctx, jobdb.GetExecutionDetailParams{
 		ExecutionID: execution_id,
 		OwnerID:     owner_id,
@@ -67,7 +67,7 @@ func (r *executionRepository) FindById(ctx context.Context, owner_id domain.User
 	return execution, nil
 }
 
-func (r *executionRepository) ListByJob(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, page_size int32, page_token string) (app.ListExecutionsResult, error) {
+func (r *executionRepository) ListByJob(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId, page_size int32, page_token string) (app.ListExecutionsResult, error) {
 	var (
 		execs []jobdb.Execution
 		err   error

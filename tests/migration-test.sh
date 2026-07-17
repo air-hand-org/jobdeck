@@ -2,6 +2,7 @@
 set -euo pipefail
 
 POSTGRES_IMAGE="${POSTGRES_IMAGE:-postgres:18}"
+export TARGET_SERVICE="${TARGET_SERVICE:-job-api}"
 
 container="$(
   docker run -d --rm \
@@ -33,16 +34,16 @@ fi
 
 export POSTGRESDB_URI="postgres://postgres:postgres@127.0.0.1:${port}/jobdeck?sslmode=disable"
 (
-  cd services/job-api
+  cd services/${TARGET_SERVICE}
   go run ./cmd/migrator
 )
 
 (
-  cd services/job-api
+  cd services/${TARGET_SERVICE}
   go run ./cmd/migrator -down-to-0
 )
 
 (
-  cd services/job-api
+  cd services/${TARGET_SERVICE}
   go run ./cmd/migrator
 )

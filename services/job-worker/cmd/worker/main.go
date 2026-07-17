@@ -4,8 +4,10 @@ import (
 	"context"
 	"flag"
 	"jobdeck/services/job-worker/internal/app"
+	"jobdeck/services/job-worker/internal/auth"
 	"jobdeck/services/job-worker/internal/claimer"
 	"jobdeck/services/job-worker/internal/telemetry"
+	"jobdeck/services/job-worker/internal/transport/interceptor"
 	"jobdeck/services/job-worker/internal/worker"
 	"log"
 	"os"
@@ -100,11 +102,11 @@ func main() {
 	}
 
 	g.Go(func() error {
-		server_uri, found := os.LookupEnv("JOB_API_SERVER_URI")
+		auth_uri, found := os.LookupEnv("AUTH_SERVER_URI")
 		if !found {
-			return errors.New("JOB_API_SERVER_URI is required")
+			return errors.New("AUTH_SERVER_URI is required")
 		}
-		conn, err := grpc.NewClient(server_uri,
+		auth_conn, err := grpc.NewClient(auth_uri,
 			grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
 			grpc.WithTransportCredentials(
 				insecure.NewCredentials(),
@@ -114,16 +116,48 @@ func main() {
 			),
 		)
 		if err != nil {
+			return err
+		}
+		defer auth_conn.Close()
+		auth_conn.Connect()
+		if err := waitForServing(ctx, auth_conn); err != nil {
+			return errors.Wrap(err, "auth did not become serving")
+		}
+
+		token_source, err := auth.NewTokenSource(auth_conn, func() time.Time {
+			return time.Now()
+		}, os.Getenv("AUTH_CLIENT_ID"), os.Getenv("AUTH_CLIENT_SECRET"))
+		if err != nil {
+			return err
+		}
+
+		job_api_uri, found := os.LookupEnv("JOB_API_SERVER_URI")
+		if !found {
+			return errors.New("JOB_API_SERVER_URI is required")
+		}
+		api_conn, err := grpc.NewClient(job_api_uri,
+			grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+			grpc.WithTransportCredentials(
+				insecure.NewCredentials(),
+			),
+			grpc.WithDefaultCallOptions(
+				grpc.WaitForReady(true),
+			),
+			grpc.WithChainUnaryInterceptor(
+				interceptor.AuthUnaryInterceptor(token_source),
+			),
+		)
+		if err != nil {
 			return errors.Wrap(err, "failed to new grpc client")
 		}
-		defer conn.Close()
-		conn.Connect()
+		defer api_conn.Close()
+		api_conn.Connect()
 
-		if err := waitForServing(ctx, conn); err != nil {
+		if err := waitForServing(ctx, api_conn); err != nil {
 			return errors.Wrap(err, "job-api did not become serving")
 		}
 
-		claimer := claimer.NewClaimer(conn, int(cfg.workerCount), 20*time.Second)
+		claimer := claimer.NewClaimer(api_conn, int(cfg.workerCount), 20*time.Second)
 		return claimer.Run(ctx, items, results)
 	})
 

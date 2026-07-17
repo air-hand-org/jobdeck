@@ -89,16 +89,6 @@ enum HttpErrorType {
   HTTP_ERROR_TYPE_NETWORK = 2;
 }
 
-service ExecutionService {
-  rpc GetExecution(GetExecutionRequest) returns (GetExecutionResponse) {
-    option idempotency_level = NO_SIDE_EFFECTS;
-  }
-  rpc ListExecutions(ListExecutionsRequest) returns (ListExecutionsResponse) {
-    option idempotency_level = NO_SIDE_EFFECTS;
-  }
-  rpc DoExecution(DoExecutionRequest) returns (DoExecutionResponse);
-}
-
 message GetExecutionRequest {
   string execution_id = 1 [(buf.validate.field).string.uuid = true];
 }
@@ -127,4 +117,14 @@ message DoExecutionRequest {
 
 message DoExecutionResponse {
   Execution execution = 1;
+}
+
+service ExecutionService {
+  rpc GetExecution(GetExecutionRequest) returns (GetExecutionResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc ListExecutions(ListExecutionsRequest) returns (ListExecutionsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc DoExecution(DoExecutionRequest) returns (DoExecutionResponse);
 }

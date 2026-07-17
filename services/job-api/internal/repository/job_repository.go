@@ -37,7 +37,7 @@ func newJobRepository(q jobQuerier) *jobRepository {
 
 var _ app.JobRepository = (*jobRepository)(nil)
 
-func (r *jobRepository) Create(ctx context.Context, owner_id domain.UserId, name string, spec domain.JobSpec) (domain.Job, error) {
+func (r *jobRepository) Create(ctx context.Context, owner_id domain.ActorId, name string, spec domain.JobSpec) (domain.Job, error) {
 	cfg, err := json.Marshal(spec.Config)
 	if err != nil {
 		return domain.Job{}, err
@@ -59,7 +59,7 @@ func (r *jobRepository) Create(ctx context.Context, owner_id domain.UserId, name
 	return r.FindById(ctx, owner_id, job_id)
 }
 
-func (r *jobRepository) UpdateSpec(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, spec domain.JobSpec) (domain.Job, error) {
+func (r *jobRepository) UpdateSpec(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId, spec domain.JobSpec) (domain.Job, error) {
 	cfg, err := json.Marshal(spec.Config)
 	if err != nil {
 		return domain.Job{}, err
@@ -84,7 +84,7 @@ func (r *jobRepository) UpdateSpec(ctx context.Context, owner_id domain.UserId, 
 	return r.FindById(ctx, owner_id, job_id)
 }
 
-func (r *jobRepository) Rename(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, name string) error {
+func (r *jobRepository) Rename(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId, name string) error {
 	cnt, err := r.q.RenameJob(ctx, jobdb.RenameJobParams{
 		Name:    name,
 		JobID:   job_id,
@@ -99,7 +99,7 @@ func (r *jobRepository) Rename(ctx context.Context, owner_id domain.UserId, job_
 	return nil
 }
 
-func (r *jobRepository) SetEnabled(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, enabled bool) (domain.Job, error) {
+func (r *jobRepository) SetEnabled(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId, enabled bool) (domain.Job, error) {
 	_, err := r.q.SetJobEnabled(ctx, jobdb.SetJobEnabledParams{
 		Enabled: enabled,
 		JobID:   job_id,
@@ -114,7 +114,7 @@ func (r *jobRepository) SetEnabled(ctx context.Context, owner_id domain.UserId, 
 	return r.FindById(ctx, owner_id, job_id)
 }
 
-func (r *jobRepository) Delete(ctx context.Context, owner_id domain.UserId, job_id domain.JobId) error {
+func (r *jobRepository) Delete(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId) error {
 	affected, err := r.q.DeleteJob(ctx, jobdb.DeleteJobParams{
 		JobID:   job_id,
 		OwnerID: owner_id,
@@ -131,7 +131,7 @@ func (r *jobRepository) Delete(ctx context.Context, owner_id domain.UserId, job_
 	return nil
 }
 
-func (r *jobRepository) FindById(ctx context.Context, owner_id domain.UserId, job_id domain.JobId) (domain.Job, error) {
+func (r *jobRepository) FindById(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId) (domain.Job, error) {
 	j, err := r.q.GetJob(ctx, jobdb.GetJobParams{
 		JobID:   job_id,
 		OwnerID: owner_id,
@@ -145,7 +145,7 @@ func (r *jobRepository) FindById(ctx context.Context, owner_id domain.UserId, jo
 	return jobFromDB(j)
 }
 
-func (r *jobRepository) ListByOwner(ctx context.Context, owner_id domain.UserId, page_size int32, page_token string) (app.ListJobsResult, error) {
+func (r *jobRepository) ListByOwner(ctx context.Context, owner_id domain.ActorId, page_size int32, page_token string) (app.ListJobsResult, error) {
 	var (
 		jobs []jobdb.Job
 		err  error

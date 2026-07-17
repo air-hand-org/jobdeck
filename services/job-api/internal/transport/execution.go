@@ -4,6 +4,7 @@ import (
 	"context"
 	jobv1 "jobdeck/gen/go/jobdeck/job/v1"
 	"jobdeck/services/job-api/internal/app"
+	"jobdeck/services/job-api/internal/auth"
 	"jobdeck/services/job-api/internal/domain"
 	"jobdeck/services/job-api/internal/transform"
 
@@ -23,7 +24,11 @@ func (s *executionServiceServer) GetExecution(ctx context.Context, req *jobv1.Ge
 	if err != nil {
 		return nil, err
 	}
-	exec, err := s.u.GetExecution(ctx, ownerId, exec_id)
+	actor, ok := auth.GetActorContext(ctx)
+	if !ok {
+		return nil, domain.ErrUnauthenticated
+	}
+	exec, err := s.u.GetExecution(ctx, actor, exec_id)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +46,11 @@ func (s *executionServiceServer) ListExecutions(ctx context.Context, req *jobv1.
 	if err != nil {
 		return nil, err
 	}
-	result, err := s.u.ListExecutions(ctx, ownerId, job_id, req.GetPageSize(), req.GetPageToken())
+	actor, ok := auth.GetActorContext(ctx)
+	if !ok {
+		return nil, domain.ErrUnauthenticated
+	}
+	result, err := s.u.ListExecutions(ctx, actor, job_id, req.GetPageSize(), req.GetPageToken())
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +71,11 @@ func (s *executionServiceServer) DoExecution(ctx context.Context, req *jobv1.DoE
 	if err != nil {
 		return nil, err
 	}
-	exec, err := s.u.RequestExecution(ctx, ownerId, job_id, domain.EXECUTION_TRIGGER_MANUAL)
+	actor, ok := auth.GetActorContext(ctx)
+	if !ok {
+		return nil, domain.ErrUnauthenticated
+	}
+	exec, err := s.u.RequestExecution(ctx, actor, job_id, domain.EXECUTION_TRIGGER_MANUAL)
 	if err != nil {
 		return nil, err
 	}

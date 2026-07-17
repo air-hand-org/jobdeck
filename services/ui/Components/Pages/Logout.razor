@@ -1,0 +1,40 @@
+@page "/account/logout"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using Microsoft.AspNetCore.Components.Authorization;
+@using ui.Session
+@inject AuthenticationStateProvider StateProvider
+@inject ISessionStore Sessions
+@inject NavigationManager Navigation
+
+<PageTitle>Logout</PageTitle>
+
+<h1>Logout</h1>
+
+@code {
+    [CascadingParameter]
+    private HttpContext HttpContext {get; set;} = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+      await LogoutAsync();
+    }
+
+    private async Task LogoutAsync()
+    {
+      var state = await StateProvider.GetAuthenticationStateAsync();
+      var sid = state.User.FindFirstValue("sid");
+      if (!Guid.TryParse(sid, out var sessionId))
+      {
+        // FIXME: error handling
+        return;
+      }
+      await Sessions.RemoveSessionAsync(sessionId, HttpContext.RequestAborted);
+
+      // TODO: check this correctly
+      await HttpContext.SignOutAsync();
+
+      Navigation.NavigateTo("/account/login", forceLoad: true);
+    }
+}

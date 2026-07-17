@@ -3,6 +3,8 @@ package app
 import (
 	"context"
 	"jobdeck/services/job-api/internal/domain"
+
+	"github.com/cockroachdb/errors"
 )
 
 //go:generate moq -out gen_job_store_moq_test.go . JobStore
@@ -15,10 +17,13 @@ type JobUsecase struct {
 	s JobStore
 }
 
-func (u *JobUsecase) CreateJob(ctx context.Context, owner_id domain.UserId, name string, spec domain.JobSpec) (domain.Job, error) {
+func (u *JobUsecase) CreateJob(ctx context.Context, actor domain.Actor, name string, spec domain.JobSpec) (domain.Job, error) {
+	if !actor.Role.HasCapability(domain.CapJobWrite) {
+		return domain.Job{}, errors.Wrapf(domain.ErrPermissionDenied, "actor %s has no cap %s", actor.ID, domain.CapJobWrite)
+	}
 	var job domain.Job
 	err := u.s.WithinJobTx(ctx, func(ctx context.Context, jobs JobRepository) error {
-		j, err := jobs.Create(ctx, owner_id, name, spec)
+		j, err := jobs.Create(ctx, actor.ID, name, spec)
 		if err != nil {
 			return err
 		}
@@ -28,14 +33,17 @@ func (u *JobUsecase) CreateJob(ctx context.Context, owner_id domain.UserId, name
 	return job, err
 }
 
-func (u *JobUsecase) UpdateJobMetadata(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, name string, spec domain.JobSpec) (domain.Job, error) {
+func (u *JobUsecase) UpdateJobMetadata(ctx context.Context, actor domain.Actor, job_id domain.JobId, name string, spec domain.JobSpec) (domain.Job, error) {
+	if !actor.Role.HasCapability(domain.CapJobWrite) {
+		return domain.Job{}, errors.Wrapf(domain.ErrPermissionDenied, "actor %s has no cap %s", actor.ID, domain.CapJobWrite)
+	}
 	var job domain.Job
 	err := u.s.WithinJobTx(ctx, func(ctx context.Context, jobs JobRepository) error {
-		err := jobs.Rename(ctx, owner_id, job_id, name)
+		err := jobs.Rename(ctx, actor.ID, job_id, name)
 		if err != nil {
 			return err
 		}
-		j, err := jobs.UpdateSpec(ctx, owner_id, job_id, spec)
+		j, err := jobs.UpdateSpec(ctx, actor.ID, job_id, spec)
 		if err != nil {
 			return err
 		}
@@ -45,10 +53,13 @@ func (u *JobUsecase) UpdateJobMetadata(ctx context.Context, owner_id domain.User
 	return job, err
 }
 
-func (u *JobUsecase) SetJobEnabled(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, enabled bool) (domain.Job, error) {
+func (u *JobUsecase) SetJobEnabled(ctx context.Context, actor domain.Actor, job_id domain.JobId, enabled bool) (domain.Job, error) {
+	if !actor.Role.HasCapability(domain.CapJobWrite) {
+		return domain.Job{}, errors.Wrapf(domain.ErrPermissionDenied, "actor %s has no cap %s", actor.ID, domain.CapJobWrite)
+	}
 	var job domain.Job
 	err := u.s.WithinJobTx(ctx, func(ctx context.Context, jobs JobRepository) error {
-		j, err := jobs.SetEnabled(ctx, owner_id, job_id, enabled)
+		j, err := jobs.SetEnabled(ctx, actor.ID, job_id, enabled)
 		if err != nil {
 			return err
 		}
@@ -58,18 +69,27 @@ func (u *JobUsecase) SetJobEnabled(ctx context.Context, owner_id domain.UserId, 
 	return job, err
 }
 
-func (u *JobUsecase) DeleteJob(ctx context.Context, owner_id domain.UserId, job_id domain.JobId) error {
+func (u *JobUsecase) DeleteJob(ctx context.Context, actor domain.Actor, job_id domain.JobId) error {
+	if !actor.Role.HasCapability(domain.CapJobWrite) {
+		return errors.Wrapf(domain.ErrPermissionDenied, "actor %s has no cap %s", actor.ID, domain.CapJobWrite)
+	}
 	return u.s.WithinJobTx(ctx, func(ctx context.Context, jobs JobRepository) error {
-		return jobs.Delete(ctx, owner_id, job_id)
+		return jobs.Delete(ctx, actor.ID, job_id)
 	})
 }
 
-func (u *JobUsecase) GetJob(ctx context.Context, owner_id domain.UserId, job_id domain.JobId) (domain.Job, error) {
-	return u.s.Jobs().FindById(ctx, owner_id, job_id)
+func (u *JobUsecase) GetJob(ctx context.Context, actor domain.Actor, job_id domain.JobId) (domain.Job, error) {
+	if !actor.Role.HasCapability(domain.CapJobRead) {
+		return domain.Job{}, errors.Wrapf(domain.ErrPermissionDenied, "actor %s has no cap %s", actor.ID, domain.CapJobRead)
+	}
+	return u.s.Jobs().FindById(ctx, actor.ID, job_id)
 }
 
-func (u *JobUsecase) ListJobs(ctx context.Context, owner_id domain.UserId, page_size int32, page_token string) (ListJobsResult, error) {
-	return u.s.Jobs().ListByOwner(ctx, owner_id, page_size, page_token)
+func (u *JobUsecase) ListJobs(ctx context.Context, actor domain.Actor, page_size int32, page_token string) (ListJobsResult, error) {
+	if !actor.Role.HasCapability(domain.CapJobRead) {
+		return ListJobsResult{}, errors.Wrapf(domain.ErrPermissionDenied, "actor %s has no cap %s", actor.ID, domain.CapJobRead)
+	}
+	return u.s.Jobs().ListByOwner(ctx, actor.ID, page_size, page_token)
 }
 
 func NewJobUsecase(s JobStore) *JobUsecase {

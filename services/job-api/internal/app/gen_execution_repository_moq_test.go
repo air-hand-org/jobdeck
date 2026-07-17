@@ -19,13 +19,13 @@ var _ ExecutionRepository = &ExecutionRepositoryMock{}
 //
 //		// make and configure a mocked ExecutionRepository
 //		mockedExecutionRepository := &ExecutionRepositoryMock{
-//			CreateForCurrentJobFunc: func(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, trigger domain.ExecutionTrigger) (domain.Execution, error) {
+//			CreateForCurrentJobFunc: func(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId, trigger domain.ExecutionTrigger) (domain.Execution, error) {
 //				panic("mock out the CreateForCurrentJob method")
 //			},
-//			FindByIdFunc: func(ctx context.Context, owner_id domain.UserId, execution_id domain.ExecutionId) (domain.Execution, error) {
+//			FindByIdFunc: func(ctx context.Context, owner_id domain.ActorId, execution_id domain.ExecutionId) (domain.Execution, error) {
 //				panic("mock out the FindById method")
 //			},
-//			ListByJobFunc: func(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, page_size int32, page_token string) (ListExecutionsResult, error) {
+//			ListByJobFunc: func(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId, page_size int32, page_token string) (ListExecutionsResult, error) {
 //				panic("mock out the ListByJob method")
 //			},
 //		}
@@ -36,13 +36,13 @@ var _ ExecutionRepository = &ExecutionRepositoryMock{}
 //	}
 type ExecutionRepositoryMock struct {
 	// CreateForCurrentJobFunc mocks the CreateForCurrentJob method.
-	CreateForCurrentJobFunc func(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, trigger domain.ExecutionTrigger) (domain.Execution, error)
+	CreateForCurrentJobFunc func(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId, trigger domain.ExecutionTrigger) (domain.Execution, error)
 
 	// FindByIdFunc mocks the FindById method.
-	FindByIdFunc func(ctx context.Context, owner_id domain.UserId, execution_id domain.ExecutionId) (domain.Execution, error)
+	FindByIdFunc func(ctx context.Context, owner_id domain.ActorId, execution_id domain.ExecutionId) (domain.Execution, error)
 
 	// ListByJobFunc mocks the ListByJob method.
-	ListByJobFunc func(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, page_size int32, page_token string) (ListExecutionsResult, error)
+	ListByJobFunc func(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId, page_size int32, page_token string) (ListExecutionsResult, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -51,7 +51,7 @@ type ExecutionRepositoryMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Owner_id is the owner_id argument value.
-			Owner_id domain.UserId
+			Owner_id domain.ActorId
 			// Job_id is the job_id argument value.
 			Job_id domain.JobId
 			// Trigger is the trigger argument value.
@@ -62,7 +62,7 @@ type ExecutionRepositoryMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Owner_id is the owner_id argument value.
-			Owner_id domain.UserId
+			Owner_id domain.ActorId
 			// Execution_id is the execution_id argument value.
 			Execution_id domain.ExecutionId
 		}
@@ -71,7 +71,7 @@ type ExecutionRepositoryMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Owner_id is the owner_id argument value.
-			Owner_id domain.UserId
+			Owner_id domain.ActorId
 			// Job_id is the job_id argument value.
 			Job_id domain.JobId
 			// Page_size is the page_size argument value.
@@ -86,13 +86,13 @@ type ExecutionRepositoryMock struct {
 }
 
 // CreateForCurrentJob calls CreateForCurrentJobFunc.
-func (mock *ExecutionRepositoryMock) CreateForCurrentJob(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, trigger domain.ExecutionTrigger) (domain.Execution, error) {
+func (mock *ExecutionRepositoryMock) CreateForCurrentJob(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId, trigger domain.ExecutionTrigger) (domain.Execution, error) {
 	if mock.CreateForCurrentJobFunc == nil {
 		panic("ExecutionRepositoryMock.CreateForCurrentJobFunc: method is nil but ExecutionRepository.CreateForCurrentJob was just called")
 	}
 	callInfo := struct {
 		Ctx      context.Context
-		Owner_id domain.UserId
+		Owner_id domain.ActorId
 		Job_id   domain.JobId
 		Trigger  domain.ExecutionTrigger
 	}{
@@ -113,13 +113,13 @@ func (mock *ExecutionRepositoryMock) CreateForCurrentJob(ctx context.Context, ow
 //	len(mockedExecutionRepository.CreateForCurrentJobCalls())
 func (mock *ExecutionRepositoryMock) CreateForCurrentJobCalls() []struct {
 	Ctx      context.Context
-	Owner_id domain.UserId
+	Owner_id domain.ActorId
 	Job_id   domain.JobId
 	Trigger  domain.ExecutionTrigger
 } {
 	var calls []struct {
 		Ctx      context.Context
-		Owner_id domain.UserId
+		Owner_id domain.ActorId
 		Job_id   domain.JobId
 		Trigger  domain.ExecutionTrigger
 	}
@@ -130,13 +130,13 @@ func (mock *ExecutionRepositoryMock) CreateForCurrentJobCalls() []struct {
 }
 
 // FindById calls FindByIdFunc.
-func (mock *ExecutionRepositoryMock) FindById(ctx context.Context, owner_id domain.UserId, execution_id domain.ExecutionId) (domain.Execution, error) {
+func (mock *ExecutionRepositoryMock) FindById(ctx context.Context, owner_id domain.ActorId, execution_id domain.ExecutionId) (domain.Execution, error) {
 	if mock.FindByIdFunc == nil {
 		panic("ExecutionRepositoryMock.FindByIdFunc: method is nil but ExecutionRepository.FindById was just called")
 	}
 	callInfo := struct {
 		Ctx          context.Context
-		Owner_id     domain.UserId
+		Owner_id     domain.ActorId
 		Execution_id domain.ExecutionId
 	}{
 		Ctx:          ctx,
@@ -155,12 +155,12 @@ func (mock *ExecutionRepositoryMock) FindById(ctx context.Context, owner_id doma
 //	len(mockedExecutionRepository.FindByIdCalls())
 func (mock *ExecutionRepositoryMock) FindByIdCalls() []struct {
 	Ctx          context.Context
-	Owner_id     domain.UserId
+	Owner_id     domain.ActorId
 	Execution_id domain.ExecutionId
 } {
 	var calls []struct {
 		Ctx          context.Context
-		Owner_id     domain.UserId
+		Owner_id     domain.ActorId
 		Execution_id domain.ExecutionId
 	}
 	mock.lockFindById.RLock()
@@ -170,13 +170,13 @@ func (mock *ExecutionRepositoryMock) FindByIdCalls() []struct {
 }
 
 // ListByJob calls ListByJobFunc.
-func (mock *ExecutionRepositoryMock) ListByJob(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, page_size int32, page_token string) (ListExecutionsResult, error) {
+func (mock *ExecutionRepositoryMock) ListByJob(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId, page_size int32, page_token string) (ListExecutionsResult, error) {
 	if mock.ListByJobFunc == nil {
 		panic("ExecutionRepositoryMock.ListByJobFunc: method is nil but ExecutionRepository.ListByJob was just called")
 	}
 	callInfo := struct {
 		Ctx        context.Context
-		Owner_id   domain.UserId
+		Owner_id   domain.ActorId
 		Job_id     domain.JobId
 		Page_size  int32
 		Page_token string
@@ -199,14 +199,14 @@ func (mock *ExecutionRepositoryMock) ListByJob(ctx context.Context, owner_id dom
 //	len(mockedExecutionRepository.ListByJobCalls())
 func (mock *ExecutionRepositoryMock) ListByJobCalls() []struct {
 	Ctx        context.Context
-	Owner_id   domain.UserId
+	Owner_id   domain.ActorId
 	Job_id     domain.JobId
 	Page_size  int32
 	Page_token string
 } {
 	var calls []struct {
 		Ctx        context.Context
-		Owner_id   domain.UserId
+		Owner_id   domain.ActorId
 		Job_id     domain.JobId
 		Page_size  int32
 		Page_token string
