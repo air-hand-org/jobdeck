@@ -15,21 +15,22 @@ public sealed class HttpJobFormModel : IValidatableObject
 
   [Required]
   [Url]
-  public string? Url {get; set;}
+  public string? Url { get; set; }
 
   [NotUnspecifiedEnum(ErrorMessage = "HTTP method is required.")]
-  public JobdeckHttpMethod Method {get; set;} = JobdeckHttpMethod.Unspecified;
+  public JobdeckHttpMethod Method { get; set; } = JobdeckHttpMethod.Unspecified;
 
   public List<int> ExpectedStatusCodes { get; set; } = [200];
 
   [Required]
-  public long TimeoutSeconds { get; set; }
+  [Range(1, long.MaxValue, ErrorMessage = "Timeout must be at least 1 second.")]
+  public long TimeoutSeconds { get; set; } = 1;
 
   [Required]
   public bool FollowRedirects { get; set; }
 
   [Required]
-  public bool RetryOnTimeout {get; set;}
+  public bool RetryOnTimeout { get; set; }
 
   [Required]
   public bool RetryOnNetworkError { get; set; }

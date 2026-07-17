@@ -5,6 +5,7 @@ import (
 	"flag"
 	"jobdeck/services/job-worker/internal/app"
 	"jobdeck/services/job-worker/internal/claimer"
+	"jobdeck/services/job-worker/internal/telemetry"
 	"jobdeck/services/job-worker/internal/worker"
 	"log"
 	"os"
@@ -13,6 +14,7 @@ import (
 	"time"
 
 	"github.com/cockroachdb/errors"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -67,15 +69,29 @@ func main() {
 	signalCtx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	jobs := make(chan app.WorkItem, cfg.workerCount)
-	defer close(jobs)
-	results := make(chan app.WorkResult, cfg.workerCount)
+	shutdownTelemetry, err := telemetry.Init(signalCtx, "job-worker")
+	if err != nil {
+		log.Fatalf("initialize telemetry: %v", err)
+	}
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := shutdownTelemetry(ctx); err != nil {
+			log.Printf("shutdown telemetry: %v", err)
+		}
+	}()
+
+	items := make(chan app.QueuedItem, cfg.workerCount)
+	defer close(items)
+	results := make(chan app.QueuedResult, cfg.workerCount)
 	defer close(results)
 
 	g, ctx := errgroup.WithContext(signalCtx)
 	for i := 0; i < int(cfg.workerCount); i++ {
 		g.Go(func() error {
-			err := worker.Run(ctx, i, jobs, results)
+			worker := worker.NewWorker()
+			err := worker.Run(ctx, i, items, results)
 			if err != nil {
 				return errors.Wrapf(err, "failed to worker run [%d]", i)
 			}
@@ -89,6 +105,7 @@ func main() {
 			return errors.New("JOB_API_SERVER_URI is required")
 		}
 		conn, err := grpc.NewClient(server_uri,
+			grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
 			grpc.WithTransportCredentials(
 				insecure.NewCredentials(),
 			),
@@ -107,7 +124,7 @@ func main() {
 		}
 
 		claimer := claimer.NewClaimer(conn, int(cfg.workerCount), 20*time.Second)
-		return claimer.Run(ctx, jobs, results)
+		return claimer.Run(ctx, items, results)
 	})
 
 	if err := g.Wait(); err != nil {

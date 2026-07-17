@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using Grpc.Core;
 using Jobdeck.Job.V1;
+using ui.Telemetry;
 
 namespace ui.Client;
 
@@ -12,6 +14,9 @@ public sealed class ExecutionApiClient(ExecutionService.ExecutionServiceClient e
 
   public async Task<ApiResult> DoExecutionAsync(string jobId)
   {
+    using var activity = UiTelemetry.Source.StartActivity("execution.do", ActivityKind.Internal);
+    activity?.SetTag("jobdeck.execution.job_id", jobId);
+
     try
     {
       await execs.DoExecutionAsync(new DoExecutionRequest
@@ -27,17 +32,24 @@ public sealed class ExecutionApiClient(ExecutionService.ExecutionServiceClient e
         ex.StatusCode == StatusCode.NotFound
     )
     {
+      activity?.SetStatus(ActivityStatusCode.Error, ex.Status.Detail);
+      activity?.AddException(ex);
       return ApiResult.Failure(ex.Status.Detail);
     }
     catch (RpcException ex)
     {
       logger.LogWarning(ex, "Execution API request failed");
+      activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+      activity?.AddException(ex);
       return ApiResult.Failure("Failed to call Execution API.");
     }
   }
 
   public async Task<ApiResult<ListExecutionsResult>> ListExecutionsAsync(string jobId, int pageSize, string pageToken = "")
   {
+    using var activity = UiTelemetry.Source.StartActivity("execution.list", ActivityKind.Internal);
+    activity?.SetTag("jobdeck.execution.job_id", jobId);
+
     try
     {
       var response = await execs.ListExecutionsAsync(new ListExecutionsRequest
@@ -57,11 +69,15 @@ public sealed class ExecutionApiClient(ExecutionService.ExecutionServiceClient e
         ex.StatusCode == StatusCode.NotFound
     )
     {
+      activity?.SetStatus(ActivityStatusCode.Error, ex.Status.Detail);
+      activity?.AddException(ex);
       return ApiResult<ListExecutionsResult>.Failure(ex.Status.Detail);
     }
     catch (RpcException ex)
     {
       logger.LogWarning(ex, "Execution API request failed");
+      activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+      activity?.AddException(ex);
       return ApiResult<ListExecutionsResult>.Failure("Failed to call Execution API.");
     }
   }

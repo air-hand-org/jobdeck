@@ -82,7 +82,10 @@ message HttpJobConfig {
   repeated HttpHeader headers = 3;
   bytes body = 4;
 
-  google.protobuf.Duration timeout = 5;
+  google.protobuf.Duration timeout = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).duration.gte = {seconds: 1}
+  ];
   StatusCodes expected_status_codes = 6;
   int64 max_response_body_bytes = 8 [(buf.validate.field).int64.gte = 0];
   bool follow_redirects = 9;

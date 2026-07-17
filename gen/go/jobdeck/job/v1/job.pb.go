@@ -1296,15 +1296,16 @@ const file_jobdeck_job_v1_job_proto_rawDesc = "" +
 	"\x12from-lower-than-to\x12\x19from must be less than to\x1a\x13this.from < this.to\"j\n" +
 	"\vStatusCodes\x12\"\n" +
 	"\x05codes\x18\x01 \x03(\x05B\f\xbaH\t\x92\x01\x06\"\x04\x1a\x02(\x01R\x05codes\x127\n" +
-	"\x06ranges\x18\x02 \x03(\v2\x1f.jobdeck.job.v1.StatusCodeRangeR\x06ranges\"\xd7\x04\n" +
+	"\x06ranges\x18\x02 \x03(\v2\x1f.jobdeck.job.v1.StatusCodeRangeR\x06ranges\"\xe6\x04\n" +
 	"\rHttpJobConfig\x12>\n" +
 	"\x06method\x18\x01 \x01(\x0e2\x1a.jobdeck.job.v1.HttpMethodB\n" +
 	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\x06method\x12\x1c\n" +
 	"\x03url\x18\x02 \x01(\tB\n" +
 	"\xbaH\ar\x05\x10\x01\x88\x01\x01R\x03url\x124\n" +
 	"\aheaders\x18\x03 \x03(\v2\x1a.jobdeck.job.v1.HttpHeaderR\aheaders\x12\x12\n" +
-	"\x04body\x18\x04 \x01(\fR\x04body\x123\n" +
-	"\atimeout\x18\x05 \x01(\v2\x19.google.protobuf.DurationR\atimeout\x12O\n" +
+	"\x04body\x18\x04 \x01(\fR\x04body\x12B\n" +
+	"\atimeout\x18\x05 \x01(\v2\x19.google.protobuf.DurationB\r\xbaH\n" +
+	"\xc8\x01\x01\xaa\x01\x042\x02\b\x01R\atimeout\x12O\n" +
 	"\x15expected_status_codes\x18\x06 \x01(\v2\x1b.jobdeck.job.v1.StatusCodesR\x13expectedStatusCodes\x12>\n" +
 	"\x17max_response_body_bytes\x18\b \x01(\x03B\a\xbaH\x04\"\x02(\x00R\x14maxResponseBodyBytes\x12)\n" +
 	"\x10follow_redirects\x18\t \x01(\bR\x0ffollowRedirects\x12(\n" +

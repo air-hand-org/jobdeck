@@ -62,6 +62,7 @@ func (e *httpExecutor) Exec(ctx context.Context, item app.WorkItem) (app.WorkRes
 	// }
 
 	return app.WorkResult{
+
 		ExecutionID: item.Execution.ExecutionId,
 		LeaseToken:  item.Execution.LeaseToken,
 		Result: &jobv1.ExecutionResult{

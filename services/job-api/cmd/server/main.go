@@ -15,11 +15,13 @@ import (
 	jobv1 "jobdeck/gen/go/jobdeck/job/v1"
 	"jobdeck/services/job-api/internal/app"
 	"jobdeck/services/job-api/internal/repository"
+	"jobdeck/services/job-api/internal/telemetry"
 	"jobdeck/services/job-api/internal/transport"
 	"jobdeck/services/job-api/internal/transport/interceptor"
 
 	"buf.build/go/protovalidate"
 	protovalidate_middleware "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/protovalidate"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -27,6 +29,7 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 
+	"github.com/exaring/otelpgx"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -68,8 +71,26 @@ func main() {
 		grpcPort = "9090"
 	}
 
+	shutdownTelemetry, err := telemetry.Init(signalCtx, "job-api")
+	if err != nil {
+		log.Fatalf("initialize telemetry: %v", err)
+	}
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := shutdownTelemetry(ctx); err != nil {
+			log.Printf("shutdown telemetry: %v", err)
+		}
+	}()
+
 	connStr := os.Getenv("POSTGRESDB_URI")
-	pool, err := pgxpool.New(signalCtx, connStr)
+	cfg, err := pgxpool.ParseConfig(connStr)
+	if err != nil {
+		log.Fatalf("failed to parse conn string %v", err)
+	}
+	cfg.ConnConfig.Tracer = otelpgx.NewTracer()
+	pool, err := pgxpool.NewWithConfig(signalCtx, cfg)
 	if err != nil {
 		log.Fatalf("failed to connect postgres %v", err)
 	}
@@ -83,6 +104,7 @@ func main() {
 	}
 
 	s := grpc.NewServer(
+		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 		grpc.ChainUnaryInterceptor(
 			interceptor.RejectNilRequestUnaryServerInterceptor(),
 			protovalidate_middleware.UnaryServerInterceptor(validator),
