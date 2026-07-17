@@ -1,7 +1,10 @@
 using ui.Components;
 using ui.Client;
+using ui.Telemetry;
 using Grpc.Net.Client;
 using Jobdeck.Job.V1;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,15 +12,33 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
   .AddInteractiveServerComponents()
   ;
-builder.Services.AddSingleton(sp => {
+builder.Services.AddOpenTelemetry()
+  .ConfigureResource(resource => resource.AddService("jobdeck-ui"))
+  .WithTracing(tracing =>
+  {
+    tracing
+      .AddAspNetCoreInstrumentation()
+      .AddGrpcClientInstrumentation()
+      .AddSource(UiTelemetry.ActivitySourceName);
+
+    if (!string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]))
+    {
+      tracing.AddOtlpExporter();
+    }
+  })
+  ;
+builder.Services.AddSingleton(sp =>
+{
   var address = builder.Configuration["JOB_API_GRPC_ENDPOINT"] ?? throw new InvalidOperationException("JOB_API_GRPC_ENDPOINT is required");
   return GrpcChannel.ForAddress(address);
 });
-builder.Services.AddSingleton(sp => {
+builder.Services.AddSingleton(sp =>
+{
   var channel = sp.GetRequiredService<GrpcChannel>();
   return new JobService.JobServiceClient(channel);
 });
-builder.Services.AddSingleton(sp => {
+builder.Services.AddSingleton(sp =>
+{
   var channel = sp.GetRequiredService<GrpcChannel>();
   return new ExecutionService.ExecutionServiceClient(channel);
 });
@@ -29,9 +50,9 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+  app.UseExceptionHandler("/Error", createScopeForErrors: true);
+  // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+  app.UseHsts();
 }
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
