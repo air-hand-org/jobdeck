@@ -21,7 +21,7 @@ type ExecutionQueueUsecase struct {
 
 func (u *ExecutionQueueUsecase) ClaimExecutions(ctx context.Context, actor domain.Actor, max_count int32) ([]domain.ClaimedExecution, error) {
 	if !actor.Role.HasCapability(domain.CapQueueClaim) {
-		return nil, errors.Newf("actor %s has no cap %s", actor.ID, domain.CapQueueClaim)
+		return nil, errors.Wrapf(domain.ErrPermissionDenied, "actor %s has no cap %s", actor.ID, domain.CapQueueClaim)
 	}
 	if max_count <= 0 {
 		return nil, fmt.Errorf("max_count must be positive: %v", max_count)

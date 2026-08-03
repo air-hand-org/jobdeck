@@ -1,6 +1,6 @@
 namespace ui.Session;
 
-public sealed record Session(
+public sealed record UISession(
     Guid SessionId,
     string AccessToken,
     // TODO

@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"net"
 	"os"
 	"os/signal"
@@ -129,6 +130,7 @@ func main() {
 				},
 			),
 			protovalidate_middleware.UnaryServerInterceptor(validator),
+			interceptor.LoggingErrorUnaryServerInterceptor(slog.Default()),
 		),
 	)
 	healthcheck := health.NewServer()

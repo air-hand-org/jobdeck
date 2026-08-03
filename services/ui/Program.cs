@@ -67,8 +67,9 @@ builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddMemoryCache();
-builder.Services.AddSingleton<ISessionStore, MemorySessionStore>();
+builder.Services.AddSingleton<IUISessionStore, MemoryUISessionStore>();
 builder.Services.AddScoped<AccessTokenAccessor>();
+builder.Services.AddScoped<UIAuthenticationService>();
 
 
 var app = builder.Build();
@@ -83,9 +84,9 @@ if (!app.Environment.IsDevelopment())
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
-app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

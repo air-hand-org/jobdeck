@@ -1,40 +1,31 @@
 @page "/account/logout"
-@using System.Security.Claims
-@using Microsoft.AspNetCore.Authentication
-@using Microsoft.AspNetCore.Authentication.Cookies
-@using Microsoft.AspNetCore.Components.Authorization;
-@using ui.Session
-@inject AuthenticationStateProvider StateProvider
-@inject ISessionStore Sessions
+@using ui.Auth
+@using ui.Models
+@inject UIAuthenticationService Auth
 @inject NavigationManager Navigation
 
 <PageTitle>Logout</PageTitle>
 
 <h1>Logout</h1>
 
+<EditForm Model="@Model" FormName="logout" OnValidSubmit="LogoutAsync">
+    <p>Log out?</p>
+    <button type="submit" class="btn btn-danger">Logout</button>
+    <a href="/">Cancel</a>
+</EditForm>
+
 @code {
     [CascadingParameter]
     private HttpContext HttpContext {get; set;} = default!;
 
-    protected override async Task OnInitializedAsync()
-    {
-      await LogoutAsync();
-    }
+    // MEMO: To avoid use directly nullable param with SupplyParameterFromForm
+    [SupplyParameterFromForm(Name = nameof(Model))]
+    private LogoutFormModel? FormModel {get; set;}
+    private LogoutFormModel Model => FormModel ??= new();
 
     private async Task LogoutAsync()
     {
-      var state = await StateProvider.GetAuthenticationStateAsync();
-      var sid = state.User.FindFirstValue("sid");
-      if (!Guid.TryParse(sid, out var sessionId))
-      {
-        // FIXME: error handling
-        return;
-      }
-      await Sessions.RemoveSessionAsync(sessionId, HttpContext.RequestAborted);
-
-      // TODO: check this correctly
-      await HttpContext.SignOutAsync();
-
+      await Auth.LogoutAsync(HttpContext, HttpContext.RequestAborted);
       Navigation.NavigateTo("/account/login", forceLoad: true);
     }
 }

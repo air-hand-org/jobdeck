@@ -4,7 +4,7 @@ using ui.Session;
 
 namespace ui.Auth;
 
-public sealed class AccessTokenAccessor(AuthenticationStateProvider provider, ISessionStore sessions)
+public sealed class AccessTokenAccessor(AuthenticationStateProvider provider, IUISessionStore sessions)
 {
     public async Task<string?> GetAsync(CancellationToken cancellationToken = default)
     {

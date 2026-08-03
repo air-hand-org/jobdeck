@@ -8,7 +8,6 @@ var workerClientSecret = builder.AddParameter("job-worker-client-secret", secret
 var workerClientSecretHash = builder.AddParameter("job-worker-client-secret-hash", secret: true);
 var workerClientId = "job-worker";
 var testUserSecretHash = builder.AddParameter("test-user-client-secret-hash", secret: true);
-var apiAuthMode = "OPTIONAL"; // fallback
 
 var compose = builder.AddDockerComposeEnvironment("compose")
   .WithProperties(env => {
@@ -69,6 +68,8 @@ EndpointReference authGrpcEndpoint;
 var IS_DEBUG = string.Equals(builder.Configuration["DEBUG"], "true", StringComparison.OrdinalIgnoreCase);
 
 var enableGrpcReflection = builder.Configuration["GRPC_REFLECTION_ENABLED"] ?? "true";
+
+var apiAuthMode = builder.Configuration["API_AUTH_MODE"] ?? "OPTIONAL"; // fallback
 
 // TODO: use WithDelveServer after v13.5
 if (IS_DEBUG)

@@ -7,7 +7,6 @@ import (
 	"jobdeck/services/job-api/internal/auth"
 	"jobdeck/services/job-api/internal/domain"
 	"jobdeck/services/job-api/internal/transform"
-	"log"
 
 	"github.com/samber/lo"
 	"google.golang.org/grpc/codes"
@@ -29,8 +28,7 @@ func (s *executionQueueServiceServer) ClaimExecutions(ctx context.Context, req *
 	}
 	claims, err := s.u.ClaimExecutions(ctx, actor, req.GetMaxCount())
 	if err != nil {
-		log.Printf("%+v", err)
-		return nil, status.Error(codes.Internal, "failed to claim executions")
+		return nil, err
 	}
 	claimsProto, err := lo.MapErr(claims, func(claim domain.ClaimedExecution, _ int) (*jobv1.ClaimedExecution, error) {
 		return transform.ClaimedExecutionToProto(claim)

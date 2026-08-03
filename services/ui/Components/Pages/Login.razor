@@ -1,12 +1,7 @@
 @page "/account/login"
-@using System.Security.Claims
-@using Microsoft.AspNetCore.Authentication
-@using Microsoft.AspNetCore.Authentication.Cookies
-@using ui.Client
+@using ui.Auth
 @using ui.Models
-@using ui.Session
-@inject AuthApiClient AuthApi
-@inject ISessionStore Sessions
+@inject UIAuthenticationService Auth
 @inject NavigationManager Navigation
 
 <PageTitle>Login</PageTitle>
@@ -39,57 +34,27 @@
     [CascadingParameter]
     private HttpContext HttpContext {get; set;} = default!;
 
-    [SupplyParameterFromForm]
-    private LoginFormModel Model {get; set;} = new();
+    // MEMO: To avoid use directly nullable param with SupplyParameterFromForm
+    [SupplyParameterFromForm(Name = nameof(Model))]
+    private LoginFormModel? FormModel {get; set;}
+    private LoginFormModel Model => FormModel ??= new();
 
     private string? errorMessage;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-      errorMessage = null;
+        errorMessage = null;
     }
 
     private async Task LoginAsync()
     {
       errorMessage = null;
-      var result = await AuthApi.AuthenticateLocalClientAsync(Model, HttpContext.RequestAborted);
+      var result = await Auth.LoginAsync(Model, HttpContext, HttpContext.RequestAborted);
       if (!result.IsSuccess)
       {
         errorMessage = result.Error;
         return;
       }
-
-      var token = result.Value;
-      if (token is null)
-      {
-        errorMessage = "Failed to get token";
-        return;
-      }
-      var session = new Session(
-        Guid.NewGuid(),
-        token.AccessToken,
-        DateTimeOffset.UtcNow.AddSeconds(token.ExpiresInSeconds)
-      );
-      await Sessions.SetSessionAsync(session, HttpContext.RequestAborted);
-
-      var principal = new ClaimsPrincipal(
-        new ClaimsIdentity(
-            new[] { new Claim("sid", session.SessionId.ToString()) },
-            CookieAuthenticationDefaults.AuthenticationScheme
-        )
-      );
-      var properties = new AuthenticationProperties
-      {
-        ExpiresUtc = session.AccessTokenExpiresAt,
-        IsPersistent = false,
-        AllowRefresh = false,
-      };
-      await HttpContext.SignInAsync(
-        CookieAuthenticationDefaults.AuthenticationScheme,
-        principal,
-        properties
-      );
-
       Navigation.NavigateTo("/", forceLoad: true);
     }
 }
