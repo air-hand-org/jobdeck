@@ -11,13 +11,12 @@ import (
 )
 
 type JobId = uuid.UUID
-type UserId = uuid.UUID
 
 type Job struct {
-	Id      JobId  `json:"id"`
-	OwnerId UserId `json:"owner_id"`
-	Enabled bool   `json:"enabled"`
-	Name    string `json:"name"`
+	Id      JobId   `json:"id"`
+	OwnerId ActorId `json:"owner_id"`
+	Enabled bool    `json:"enabled"`
+	Name    string  `json:"name"`
 
 	Spec JobSpec `json:"spec"`
 

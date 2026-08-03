@@ -46,6 +46,30 @@ type Job struct {
 	RetryMaxDelayMs     int64
 }
 
+type JobActor struct {
+	ActorID uuid.UUID
+	Type    string
+	Active  bool
+	Role    pgtype.Text
+}
+
+type JobActorProjection struct {
+	ActorID   uuid.UUID
+	Type      string
+	Active    bool
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+}
+
+type JobActorRole struct {
+	Role string
+}
+
+type JobActorRoleAssignment struct {
+	ActorID uuid.UUID
+	Role    string
+}
+
 type JobExecution struct {
 	ExecutionID    uuid.UUID
 	JobID          uuid.UUID

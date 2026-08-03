@@ -12,11 +12,13 @@ import (
 
 type Querier interface {
 	ClaimExecutions(ctx context.Context, arg ClaimExecutionsParams) ([]uuid.UUID, error)
+	CreateActor(ctx context.Context, arg CreateActorParams) (uuid.UUID, error)
 	CreateExecutionForCurrentJob(ctx context.Context, arg CreateExecutionForCurrentJobParams) (uuid.UUID, error)
 	CreateJob(ctx context.Context, arg CreateJobParams) (uuid.UUID, error)
 	// for ExecutionQueryService
 	CreateRetryForUnsuccessfulExecution(ctx context.Context, arg CreateRetryForUnsuccessfulExecutionParams) (uuid.UUID, error)
 	DeleteJob(ctx context.Context, arg DeleteJobParams) (int64, error)
+	GetActor(ctx context.Context, actorID uuid.UUID) (JobActor, error)
 	GetExecutionDetail(ctx context.Context, arg GetExecutionDetailParams) (Execution, error)
 	GetExecutionDetailDirect(ctx context.Context, executionID uuid.UUID) (Execution, error)
 	GetJob(ctx context.Context, arg GetJobParams) (Job, error)

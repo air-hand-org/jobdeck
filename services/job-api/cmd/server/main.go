@@ -6,21 +6,27 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"net"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
 	jobv1 "jobdeck/gen/go/jobdeck/job/v1"
 	"jobdeck/services/job-api/internal/app"
+	"jobdeck/services/job-api/internal/auth"
+	"jobdeck/services/job-api/internal/domain"
 	"jobdeck/services/job-api/internal/repository"
 	"jobdeck/services/job-api/internal/telemetry"
 	"jobdeck/services/job-api/internal/transport"
 	"jobdeck/services/job-api/internal/transport/interceptor"
 
 	"buf.build/go/protovalidate"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors"
 	protovalidate_middleware "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/protovalidate"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/selector"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
@@ -103,11 +109,28 @@ func main() {
 		log.Fatalf("failed to new proto validate")
 	}
 
+	verifier, err := auth.NewJWTVerifier(os.Getenv("AUTH_JWT_PUBLIC_KEY"))
+	if err != nil {
+		log.Fatalf("failed to new jwt verifier: %v", err)
+	}
+
+	authenticator := app.NewTokenAuthenticatorService(store, verifier)
+
 	s := grpc.NewServer(
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 		grpc.ChainUnaryInterceptor(
+			interceptor.ErrorMappingUnaryServerInterceptor(),
 			interceptor.RejectNilRequestUnaryServerInterceptor(),
+			interceptor.AuthenticationInterceptor(
+				selector.MatchFunc(func(_ context.Context, callMeta interceptors.CallMeta) bool {
+					return callMeta.FullMethod() != "/grpc.health.v1.Health/Check"
+				}),
+				func(ctx context.Context, rawToken string) (domain.Actor, error) {
+					return authenticator.Authenticate(ctx, rawToken)
+				},
+			),
 			protovalidate_middleware.UnaryServerInterceptor(validator),
+			interceptor.LoggingErrorUnaryServerInterceptor(slog.Default()),
 		),
 	)
 	healthcheck := health.NewServer()
@@ -115,7 +138,9 @@ func main() {
 	jobv1.RegisterJobServiceServer(s, transport.NewJobServiceServer(app.NewJobUsecase(store)))
 	jobv1.RegisterExecutionQueueServiceServer(s, transport.NewExecutionQueueServiceServer(app.NewExecutionQueueUsecase(store)))
 	jobv1.RegisterExecutionServiceServer(s, transport.NewExecutionServiceServer(app.NewExecutionUsecase(store)))
-	reflection.Register(s)
+	if strings.EqualFold(os.Getenv("GRPC_REFLECTION_ENABLED"), "true") {
+		reflection.Register(s)
+	}
 
 	g, ctx := errgroup.WithContext(signalCtx)
 

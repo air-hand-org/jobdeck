@@ -2,6 +2,13 @@ using Aspire.Hosting.ApplicationModel;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
+var authJwtPrivateKey = builder.AddParameter("auth-jwt-private-key", secret: true);
+var authJwtPublicKey = builder.AddParameter("auth-jwt-public-key", secret: false);
+var workerClientSecret = builder.AddParameter("job-worker-client-secret", secret: true);
+var workerClientSecretHash = builder.AddParameter("job-worker-client-secret-hash", secret: true);
+var workerClientId = "job-worker";
+var testUserSecretHash = builder.AddParameter("test-user-client-secret-hash", secret: true);
+
 var compose = builder.AddDockerComposeEnvironment("compose")
   .WithProperties(env => {
     env.DashboardEnabled = true;
@@ -16,28 +23,127 @@ var postgres = builder.AddPostgres("postgres")
     service.Name = "db";
   })
   ;
-var db = postgres.AddDatabase("jobdeck");
-var migration = builder.AddGoApp(
+var job_db = postgres.AddDatabase("jobdeck");
+var job_db_migration = builder.AddGoApp(
     name: "job-db-migrator",
     appDirectory: "../services/job-api",
     packagePath: "./cmd/migrator"
   )
-  .WithReference(db)
-  .WithEnvironment(context => {
-    context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
+  .WithReference(job_db)
+  .WithEnvironment(context =>
+  {
+    context.EnvironmentVariables["POSTGRESDB_URI"] = job_db.Resource.UriExpression;
   })
-  .WaitFor(db)
-  .PublishAsDockerComposeService((resource, service) => {
-    service.Name = "migration";
+  .WaitFor(job_db)
+  .PublishAsDockerComposeService((resource, service) =>
+  {
+    service.Name = "job-db-migrator";
   })
   ;
 
+var auth_db = postgres.AddDatabase("jobdeck-auth");
+var auth_db_migration = builder.AddGoApp(
+    name: "auth-db-migrator",
+    appDirectory: "../services/auth",
+    packagePath: "./cmd/migrator"
+  )
+  .WithReference(auth_db)
+  .WithEnvironment(context =>
+  {
+    context.EnvironmentVariables["POSTGRESDB_URI"] = auth_db.Resource.UriExpression;
+    context.EnvironmentVariables["AUTH_JOB_WORKER_SECRET_HASH"] = workerClientSecretHash;
+    context.EnvironmentVariables["AUTH_JOB_WORKER_CLIENT_ID"] = workerClientId;
+    context.EnvironmentVariables["AUTH_TEST_USER_SECRET_HASH"] = testUserSecretHash;
+  })
+  .WaitFor(auth_db)
+  .PublishAsDockerComposeService((resource, service) =>
+  {
+    service.Name = "auth-db-migrator";
+  })
+  ;
 
 EndpointReference jobApiGrpcEndpoint;
+EndpointReference authGrpcEndpoint;
 
 var IS_DEBUG = string.Equals(builder.Configuration["DEBUG"], "true", StringComparison.OrdinalIgnoreCase);
 
+var enableGrpcReflection = builder.Configuration["GRPC_REFLECTION_ENABLED"] ?? "true";
+
+var apiAuthMode = builder.Configuration["API_AUTH_MODE"] ?? "OPTIONAL"; // fallback
+
 // TODO: use WithDelveServer after v13.5
+if (IS_DEBUG)
+{
+  var auth = builder.AddExecutable(
+      "auth",
+      "dlv",
+      "../services/auth",
+      "debug",
+      "./cmd/server",
+      "--headless",
+      "--api-version=2",
+      "--listen=127.0.0.1:2347",
+      "--accept-multiclient",
+      "--log",
+      "--log-output=rpc,dap,debugger",
+      "--only-same-user=false" // need by Zed on WSL2?
+      , "--continue"
+    )
+    .WithHttpEndpoint(
+        port: 9091,
+        targetPort: 9091,
+        name: "grpc",
+        env: "GRPC_PORT",
+        isProxied: false
+    )
+    .WithReference(auth_db)
+    .WithEnvironment(context =>
+    {
+      context.EnvironmentVariables["POSTGRESDB_URI"] = auth_db.Resource.UriExpression;
+      context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = enableGrpcReflection;
+      context.EnvironmentVariables["AUTH_JWT_PRIVATE_KEY"] = authJwtPrivateKey;
+    })
+    .WaitFor(auth_db)
+    .WaitForCompletion(auth_db_migration)
+    .PublishAsDockerComposeService((resource, service) =>
+    {
+      service.Name = "auth";
+    });
+
+  authGrpcEndpoint = auth.GetEndpoint("grpc");
+}
+else
+{
+  var auth = builder.AddGoApp(
+      name: "auth",
+      appDirectory: "../services/auth",
+      packagePath: "./cmd/server"
+    )
+    //    .WithDelveServer(port: 2345) // --only-same-user=false needed
+    .WithHttpEndpoint(
+        port: 9091,
+        targetPort: 9091,
+        name: "grpc",
+        env: "GRPC_PORT",
+        isProxied: false
+    )
+    .WithReference(auth_db)
+    .WithEnvironment(context =>
+    {
+      context.EnvironmentVariables["POSTGRESDB_URI"] = auth_db.Resource.UriExpression;
+      context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = enableGrpcReflection;
+      context.EnvironmentVariables["AUTH_JWT_PRIVATE_KEY"] = authJwtPrivateKey;
+    })
+    .WaitFor(auth_db)
+    .WaitForCompletion(auth_db_migration)
+    .PublishAsDockerComposeService((resource, service) =>
+    {
+      service.Name = "auth";
+    });
+
+  authGrpcEndpoint = auth.GetEndpoint("grpc");
+}
+
 if (IS_DEBUG)
 {
   var job_api = builder.AddExecutable(
@@ -62,13 +168,16 @@ if (IS_DEBUG)
         env: "GRPC_PORT",
         isProxied: false
     )
-    .WithReference(db)
+    .WithReference(job_db)
     .WithEnvironment(context =>
     {
-      context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
+      context.EnvironmentVariables["POSTGRESDB_URI"] = job_db.Resource.UriExpression;
+      context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = enableGrpcReflection;
+      context.EnvironmentVariables["AUTH_JWT_PUBLIC_KEY"] = authJwtPublicKey;
+      context.EnvironmentVariables["API_AUTH_MODE"] = apiAuthMode;
     })
-    .WaitFor(db)
-    .WaitForCompletion(migration)
+    .WaitFor(job_db)
+    .WaitForCompletion(job_db_migration)
     .PublishAsDockerComposeService((resource, service) =>
     {
       service.Name = "job-api";
@@ -91,13 +200,16 @@ else
         env: "GRPC_PORT",
         isProxied: false
     )
-    .WithReference(db)
+    .WithReference(job_db)
     .WithEnvironment(context =>
     {
-      context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
+      context.EnvironmentVariables["POSTGRESDB_URI"] = job_db.Resource.UriExpression;
+      context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = enableGrpcReflection;
+      context.EnvironmentVariables["AUTH_JWT_PUBLIC_KEY"] = authJwtPublicKey;
+      context.EnvironmentVariables["API_AUTH_MODE"] = apiAuthMode;
     })
-    .WaitFor(db)
-    .WaitForCompletion(migration)
+    .WaitFor(job_db)
+    .WaitForCompletion(job_db_migration)
     .PublishAsDockerComposeService((resource, service) =>
     {
       service.Name = "job-api";
@@ -126,8 +238,12 @@ if (IS_DEBUG)
       , "-worker", "3"
     )
     .WithReference(jobApiGrpcEndpoint)
+    .WithReference(authGrpcEndpoint)
     .WithEnvironment(context => {
       context.EnvironmentVariables["JOB_API_SERVER_URI"] = jobApiGrpcEndpoint.Property(EndpointProperty.HostAndPort);
+      context.EnvironmentVariables["AUTH_SERVER_URI"] = authGrpcEndpoint.Property(EndpointProperty.HostAndPort);
+      context.EnvironmentVariables["AUTH_CLIENT_ID"] = workerClientId;
+      context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
     })
     // .WaitFor(job_api)
     .PublishAsDockerComposeService((resource, service) => {
@@ -142,8 +258,12 @@ if (IS_DEBUG)
     .WithAppArgs("-worker", "3")
     //.WithReference(job_api) // WARN: ExecutableReference is not supported.
     .WithReference(jobApiGrpcEndpoint)
+    .WithReference(authGrpcEndpoint)
     .WithEnvironment(context => {
       context.EnvironmentVariables["JOB_API_SERVER_URI"] = jobApiGrpcEndpoint.Property(EndpointProperty.HostAndPort);
+      context.EnvironmentVariables["AUTH_SERVER_URI"] = authGrpcEndpoint.Property(EndpointProperty.HostAndPort);
+      context.EnvironmentVariables["AUTH_CLIENT_ID"] = "job-worker";
+      context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
     })
     //.WaitFor(job_api)
     .PublishAsDockerComposeService((resource, service) => {
@@ -154,9 +274,10 @@ if (IS_DEBUG)
 var ui = builder.AddProject("ui", "../services/ui/ui.csproj")
   .WithExternalHttpEndpoints()
   .WithReference(jobApiGrpcEndpoint)
-  .WithEnvironment(context =>
-  {
+  .WithReference(authGrpcEndpoint)
+  .WithEnvironment(context => {
     context.EnvironmentVariables["JOB_API_GRPC_ENDPOINT"] = jobApiGrpcEndpoint.Property(EndpointProperty.Url);
+    context.EnvironmentVariables["AUTH_GRPC_ENDPOINT"] = authGrpcEndpoint.Property(EndpointProperty.Url);
   })
   // .WaitFor(job_api)
   .PublishAsDockerComposeService((resource, service) =>

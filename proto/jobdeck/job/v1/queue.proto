@@ -17,11 +17,6 @@ message ClaimedExecution {
   string job_id = 6 [(buf.validate.field).string.uuid = true];
 }
 
-service ExecutionQueueService {
-  rpc ClaimExecutions(ClaimExecutionsRequest) returns (ClaimExecutionsResponse);
-  rpc ReportExecutionResult(ReportExecutionResultRequest) returns (ReportExecutionResultResponse);
-}
-
 message ClaimExecutionsRequest {
   reserved 2;
   reserved "lease_duration";
@@ -48,4 +43,9 @@ message ReportExecutionResultRequest {
 message ReportExecutionResultResponse {
   reserved "execution";
   reserved 1;
+}
+
+service ExecutionQueueService {
+  rpc ClaimExecutions(ClaimExecutionsRequest) returns (ClaimExecutionsResponse);
+  rpc ReportExecutionResult(ReportExecutionResultRequest) returns (ReportExecutionResultResponse);
 }

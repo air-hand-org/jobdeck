@@ -1,0 +1,60 @@
+@page "/account/login"
+@using ui.Auth
+@using ui.Models
+@inject UIAuthenticationService Auth
+@inject NavigationManager Navigation
+
+<PageTitle>Login</PageTitle>
+
+<h1>Login page</h1>
+
+<EditForm Model="@Model" OnValidSubmit="@LoginAsync" FormName="login">
+  <DataAnnotationsValidator />
+  <ValidationSummary class="text-danger" role="alert"/>
+  @if (!string.IsNullOrWhiteSpace(errorMessage))
+  {
+    <div class="alert alert-danger" role="alert">
+        <p>@errorMessage</p>
+    </div>
+  }
+  <div class="mb-3">
+    <label for="name" class="form-label">Id:</label>
+    <InputText id="name" @bind-Value="Model.Id" class="form-control" />
+    <ValidationMessage For="() => Model.Id" class="text-danger" />
+  </div>
+  <div class="mb-3">
+    <label for="password" class="form-label">Password:</label>
+    <InputText id="password" type="password" @bind-Value="Model.Password" class="form-control" />
+    <ValidationMessage For="() => Model.Password" class="text-danger" />
+  </div>
+  <button type="submit" class="btn btn-primary">Login</button>
+</EditForm>
+
+@code {
+    [CascadingParameter]
+    private HttpContext HttpContext {get; set;} = default!;
+
+    // MEMO: To avoid use directly nullable param with SupplyParameterFromForm
+    [SupplyParameterFromForm(Name = nameof(Model))]
+    private LoginFormModel? FormModel {get; set;}
+    private LoginFormModel Model => FormModel ??= new();
+
+    private string? errorMessage;
+
+    protected override void OnInitialized()
+    {
+        errorMessage = null;
+    }
+
+    private async Task LoginAsync()
+    {
+      errorMessage = null;
+      var result = await Auth.LoginAsync(Model, HttpContext, HttpContext.RequestAborted);
+      if (!result.IsSuccess)
+      {
+        errorMessage = result.Error;
+        return;
+      }
+      Navigation.NavigateTo("/", forceLoad: true);
+    }
+}

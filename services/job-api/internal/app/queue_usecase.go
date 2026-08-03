@@ -19,7 +19,10 @@ type ExecutionQueueUsecase struct {
 	s ExecutionQueueStore
 }
 
-func (u *ExecutionQueueUsecase) ClaimExecutions(ctx context.Context, max_count int32) ([]domain.ClaimedExecution, error) {
+func (u *ExecutionQueueUsecase) ClaimExecutions(ctx context.Context, actor domain.Actor, max_count int32) ([]domain.ClaimedExecution, error) {
+	if !actor.Role.HasCapability(domain.CapQueueClaim) {
+		return nil, errors.Wrapf(domain.ErrPermissionDenied, "actor %s has no cap %s", actor.ID, domain.CapQueueClaim)
+	}
 	if max_count <= 0 {
 		return nil, fmt.Errorf("max_count must be positive: %v", max_count)
 	}
@@ -44,7 +47,10 @@ type ReportExecutionResultCommand struct {
 	LeaseToken      domain.LeaseToken
 }
 
-func (u *ExecutionQueueUsecase) ReportExecutionResult(ctx context.Context, command ReportExecutionResultCommand) error {
+func (u *ExecutionQueueUsecase) ReportExecutionResult(ctx context.Context, actor domain.Actor, command ReportExecutionResultCommand) error {
+	if !actor.Role.HasCapability(domain.CapQueueReport) {
+		return errors.Wrapf(domain.ErrPermissionDenied, "actor %s has no cap %s", actor.ID, domain.CapQueueReport)
+	}
 	return u.s.WithinExecutionQueueTx(ctx, func(ctx context.Context, queues ExecutionQueueRepository) error {
 		e, err := queues.GetReportTarget(ctx, command.ExecutionId, command.LeaseToken)
 		if err != nil {

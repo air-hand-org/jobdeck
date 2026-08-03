@@ -20,6 +20,7 @@ func NewStore(p *pgxpool.Pool) *Store {
 var _ app.JobStore = (*Store)(nil)
 var _ app.ExecutionStore = (*Store)(nil)
 var _ app.ExecutionQueueStore = (*Store)(nil)
+var _ app.ActorStore = (*Store)(nil)
 
 func (s *Store) Jobs() app.JobRepository {
 	return newJobRepository(s.q)
@@ -70,6 +71,24 @@ func (s *Store) WithinExecutionQueueTx(ctx context.Context, fn func(ctx context.
 
 	queues := newExecutionQueueRepository(s.q.WithTx(tx))
 	if err := fn(ctx, queues); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
+}
+
+func (s *Store) Actors() app.ActorRepository {
+	return newActorRepository(s.q)
+}
+
+func (s *Store) WithinActorTx(ctx context.Context, fn func(ctx context.Context, actors app.ActorRepository) error) error {
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	actors := newActorRepository(s.q.WithTx(tx))
+	if err := fn(ctx, actors); err != nil {
 		return err
 	}
 	return tx.Commit(ctx)

@@ -19,25 +19,25 @@ var _ JobRepository = &JobRepositoryMock{}
 //
 //		// make and configure a mocked JobRepository
 //		mockedJobRepository := &JobRepositoryMock{
-//			CreateFunc: func(ctx context.Context, owner_id domain.UserId, name string, spec domain.JobSpec) (domain.Job, error) {
+//			CreateFunc: func(ctx context.Context, owner_id domain.ActorId, name string, spec domain.JobSpec) (domain.Job, error) {
 //				panic("mock out the Create method")
 //			},
-//			DeleteFunc: func(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId) error {
+//			DeleteFunc: func(contextMoqParam context.Context, v1 domain.ActorId, v2 domain.JobId) error {
 //				panic("mock out the Delete method")
 //			},
-//			FindByIdFunc: func(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId) (domain.Job, error) {
+//			FindByIdFunc: func(contextMoqParam context.Context, v1 domain.ActorId, v2 domain.JobId) (domain.Job, error) {
 //				panic("mock out the FindById method")
 //			},
-//			ListByOwnerFunc: func(ctx context.Context, owner_id domain.UserId, page_size int32, page_token string) (ListJobsResult, error) {
+//			ListByOwnerFunc: func(ctx context.Context, owner_id domain.ActorId, page_size int32, page_token string) (ListJobsResult, error) {
 //				panic("mock out the ListByOwner method")
 //			},
-//			RenameFunc: func(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, name string) error {
+//			RenameFunc: func(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId, name string) error {
 //				panic("mock out the Rename method")
 //			},
-//			SetEnabledFunc: func(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId, b bool) (domain.Job, error) {
+//			SetEnabledFunc: func(contextMoqParam context.Context, v1 domain.ActorId, v2 domain.JobId, b bool) (domain.Job, error) {
 //				panic("mock out the SetEnabled method")
 //			},
-//			UpdateSpecFunc: func(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId, jobSpec domain.JobSpec) (domain.Job, error) {
+//			UpdateSpecFunc: func(contextMoqParam context.Context, v1 domain.ActorId, v2 domain.JobId, jobSpec domain.JobSpec) (domain.Job, error) {
 //				panic("mock out the UpdateSpec method")
 //			},
 //		}
@@ -48,25 +48,25 @@ var _ JobRepository = &JobRepositoryMock{}
 //	}
 type JobRepositoryMock struct {
 	// CreateFunc mocks the Create method.
-	CreateFunc func(ctx context.Context, owner_id domain.UserId, name string, spec domain.JobSpec) (domain.Job, error)
+	CreateFunc func(ctx context.Context, owner_id domain.ActorId, name string, spec domain.JobSpec) (domain.Job, error)
 
 	// DeleteFunc mocks the Delete method.
-	DeleteFunc func(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId) error
+	DeleteFunc func(contextMoqParam context.Context, v1 domain.ActorId, v2 domain.JobId) error
 
 	// FindByIdFunc mocks the FindById method.
-	FindByIdFunc func(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId) (domain.Job, error)
+	FindByIdFunc func(contextMoqParam context.Context, v1 domain.ActorId, v2 domain.JobId) (domain.Job, error)
 
 	// ListByOwnerFunc mocks the ListByOwner method.
-	ListByOwnerFunc func(ctx context.Context, owner_id domain.UserId, page_size int32, page_token string) (ListJobsResult, error)
+	ListByOwnerFunc func(ctx context.Context, owner_id domain.ActorId, page_size int32, page_token string) (ListJobsResult, error)
 
 	// RenameFunc mocks the Rename method.
-	RenameFunc func(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, name string) error
+	RenameFunc func(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId, name string) error
 
 	// SetEnabledFunc mocks the SetEnabled method.
-	SetEnabledFunc func(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId, b bool) (domain.Job, error)
+	SetEnabledFunc func(contextMoqParam context.Context, v1 domain.ActorId, v2 domain.JobId, b bool) (domain.Job, error)
 
 	// UpdateSpecFunc mocks the UpdateSpec method.
-	UpdateSpecFunc func(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId, jobSpec domain.JobSpec) (domain.Job, error)
+	UpdateSpecFunc func(contextMoqParam context.Context, v1 domain.ActorId, v2 domain.JobId, jobSpec domain.JobSpec) (domain.Job, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -75,7 +75,7 @@ type JobRepositoryMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Owner_id is the owner_id argument value.
-			Owner_id domain.UserId
+			Owner_id domain.ActorId
 			// Name is the name argument value.
 			Name string
 			// Spec is the spec argument value.
@@ -86,7 +86,7 @@ type JobRepositoryMock struct {
 			// ContextMoqParam is the contextMoqParam argument value.
 			ContextMoqParam context.Context
 			// V1 is the v1 argument value.
-			V1 domain.UserId
+			V1 domain.ActorId
 			// V2 is the v2 argument value.
 			V2 domain.JobId
 		}
@@ -95,7 +95,7 @@ type JobRepositoryMock struct {
 			// ContextMoqParam is the contextMoqParam argument value.
 			ContextMoqParam context.Context
 			// V1 is the v1 argument value.
-			V1 domain.UserId
+			V1 domain.ActorId
 			// V2 is the v2 argument value.
 			V2 domain.JobId
 		}
@@ -104,7 +104,7 @@ type JobRepositoryMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Owner_id is the owner_id argument value.
-			Owner_id domain.UserId
+			Owner_id domain.ActorId
 			// Page_size is the page_size argument value.
 			Page_size int32
 			// Page_token is the page_token argument value.
@@ -115,7 +115,7 @@ type JobRepositoryMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Owner_id is the owner_id argument value.
-			Owner_id domain.UserId
+			Owner_id domain.ActorId
 			// Job_id is the job_id argument value.
 			Job_id domain.JobId
 			// Name is the name argument value.
@@ -126,7 +126,7 @@ type JobRepositoryMock struct {
 			// ContextMoqParam is the contextMoqParam argument value.
 			ContextMoqParam context.Context
 			// V1 is the v1 argument value.
-			V1 domain.UserId
+			V1 domain.ActorId
 			// V2 is the v2 argument value.
 			V2 domain.JobId
 			// B is the b argument value.
@@ -137,7 +137,7 @@ type JobRepositoryMock struct {
 			// ContextMoqParam is the contextMoqParam argument value.
 			ContextMoqParam context.Context
 			// V1 is the v1 argument value.
-			V1 domain.UserId
+			V1 domain.ActorId
 			// V2 is the v2 argument value.
 			V2 domain.JobId
 			// JobSpec is the jobSpec argument value.
@@ -154,13 +154,13 @@ type JobRepositoryMock struct {
 }
 
 // Create calls CreateFunc.
-func (mock *JobRepositoryMock) Create(ctx context.Context, owner_id domain.UserId, name string, spec domain.JobSpec) (domain.Job, error) {
+func (mock *JobRepositoryMock) Create(ctx context.Context, owner_id domain.ActorId, name string, spec domain.JobSpec) (domain.Job, error) {
 	if mock.CreateFunc == nil {
 		panic("JobRepositoryMock.CreateFunc: method is nil but JobRepository.Create was just called")
 	}
 	callInfo := struct {
 		Ctx      context.Context
-		Owner_id domain.UserId
+		Owner_id domain.ActorId
 		Name     string
 		Spec     domain.JobSpec
 	}{
@@ -181,13 +181,13 @@ func (mock *JobRepositoryMock) Create(ctx context.Context, owner_id domain.UserI
 //	len(mockedJobRepository.CreateCalls())
 func (mock *JobRepositoryMock) CreateCalls() []struct {
 	Ctx      context.Context
-	Owner_id domain.UserId
+	Owner_id domain.ActorId
 	Name     string
 	Spec     domain.JobSpec
 } {
 	var calls []struct {
 		Ctx      context.Context
-		Owner_id domain.UserId
+		Owner_id domain.ActorId
 		Name     string
 		Spec     domain.JobSpec
 	}
@@ -198,13 +198,13 @@ func (mock *JobRepositoryMock) CreateCalls() []struct {
 }
 
 // Delete calls DeleteFunc.
-func (mock *JobRepositoryMock) Delete(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId) error {
+func (mock *JobRepositoryMock) Delete(contextMoqParam context.Context, v1 domain.ActorId, v2 domain.JobId) error {
 	if mock.DeleteFunc == nil {
 		panic("JobRepositoryMock.DeleteFunc: method is nil but JobRepository.Delete was just called")
 	}
 	callInfo := struct {
 		ContextMoqParam context.Context
-		V1              domain.UserId
+		V1              domain.ActorId
 		V2              domain.JobId
 	}{
 		ContextMoqParam: contextMoqParam,
@@ -223,12 +223,12 @@ func (mock *JobRepositoryMock) Delete(contextMoqParam context.Context, v1 domain
 //	len(mockedJobRepository.DeleteCalls())
 func (mock *JobRepositoryMock) DeleteCalls() []struct {
 	ContextMoqParam context.Context
-	V1              domain.UserId
+	V1              domain.ActorId
 	V2              domain.JobId
 } {
 	var calls []struct {
 		ContextMoqParam context.Context
-		V1              domain.UserId
+		V1              domain.ActorId
 		V2              domain.JobId
 	}
 	mock.lockDelete.RLock()
@@ -238,13 +238,13 @@ func (mock *JobRepositoryMock) DeleteCalls() []struct {
 }
 
 // FindById calls FindByIdFunc.
-func (mock *JobRepositoryMock) FindById(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId) (domain.Job, error) {
+func (mock *JobRepositoryMock) FindById(contextMoqParam context.Context, v1 domain.ActorId, v2 domain.JobId) (domain.Job, error) {
 	if mock.FindByIdFunc == nil {
 		panic("JobRepositoryMock.FindByIdFunc: method is nil but JobRepository.FindById was just called")
 	}
 	callInfo := struct {
 		ContextMoqParam context.Context
-		V1              domain.UserId
+		V1              domain.ActorId
 		V2              domain.JobId
 	}{
 		ContextMoqParam: contextMoqParam,
@@ -263,12 +263,12 @@ func (mock *JobRepositoryMock) FindById(contextMoqParam context.Context, v1 doma
 //	len(mockedJobRepository.FindByIdCalls())
 func (mock *JobRepositoryMock) FindByIdCalls() []struct {
 	ContextMoqParam context.Context
-	V1              domain.UserId
+	V1              domain.ActorId
 	V2              domain.JobId
 } {
 	var calls []struct {
 		ContextMoqParam context.Context
-		V1              domain.UserId
+		V1              domain.ActorId
 		V2              domain.JobId
 	}
 	mock.lockFindById.RLock()
@@ -278,13 +278,13 @@ func (mock *JobRepositoryMock) FindByIdCalls() []struct {
 }
 
 // ListByOwner calls ListByOwnerFunc.
-func (mock *JobRepositoryMock) ListByOwner(ctx context.Context, owner_id domain.UserId, page_size int32, page_token string) (ListJobsResult, error) {
+func (mock *JobRepositoryMock) ListByOwner(ctx context.Context, owner_id domain.ActorId, page_size int32, page_token string) (ListJobsResult, error) {
 	if mock.ListByOwnerFunc == nil {
 		panic("JobRepositoryMock.ListByOwnerFunc: method is nil but JobRepository.ListByOwner was just called")
 	}
 	callInfo := struct {
 		Ctx        context.Context
-		Owner_id   domain.UserId
+		Owner_id   domain.ActorId
 		Page_size  int32
 		Page_token string
 	}{
@@ -305,13 +305,13 @@ func (mock *JobRepositoryMock) ListByOwner(ctx context.Context, owner_id domain.
 //	len(mockedJobRepository.ListByOwnerCalls())
 func (mock *JobRepositoryMock) ListByOwnerCalls() []struct {
 	Ctx        context.Context
-	Owner_id   domain.UserId
+	Owner_id   domain.ActorId
 	Page_size  int32
 	Page_token string
 } {
 	var calls []struct {
 		Ctx        context.Context
-		Owner_id   domain.UserId
+		Owner_id   domain.ActorId
 		Page_size  int32
 		Page_token string
 	}
@@ -322,13 +322,13 @@ func (mock *JobRepositoryMock) ListByOwnerCalls() []struct {
 }
 
 // Rename calls RenameFunc.
-func (mock *JobRepositoryMock) Rename(ctx context.Context, owner_id domain.UserId, job_id domain.JobId, name string) error {
+func (mock *JobRepositoryMock) Rename(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId, name string) error {
 	if mock.RenameFunc == nil {
 		panic("JobRepositoryMock.RenameFunc: method is nil but JobRepository.Rename was just called")
 	}
 	callInfo := struct {
 		Ctx      context.Context
-		Owner_id domain.UserId
+		Owner_id domain.ActorId
 		Job_id   domain.JobId
 		Name     string
 	}{
@@ -349,13 +349,13 @@ func (mock *JobRepositoryMock) Rename(ctx context.Context, owner_id domain.UserI
 //	len(mockedJobRepository.RenameCalls())
 func (mock *JobRepositoryMock) RenameCalls() []struct {
 	Ctx      context.Context
-	Owner_id domain.UserId
+	Owner_id domain.ActorId
 	Job_id   domain.JobId
 	Name     string
 } {
 	var calls []struct {
 		Ctx      context.Context
-		Owner_id domain.UserId
+		Owner_id domain.ActorId
 		Job_id   domain.JobId
 		Name     string
 	}
@@ -366,13 +366,13 @@ func (mock *JobRepositoryMock) RenameCalls() []struct {
 }
 
 // SetEnabled calls SetEnabledFunc.
-func (mock *JobRepositoryMock) SetEnabled(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId, b bool) (domain.Job, error) {
+func (mock *JobRepositoryMock) SetEnabled(contextMoqParam context.Context, v1 domain.ActorId, v2 domain.JobId, b bool) (domain.Job, error) {
 	if mock.SetEnabledFunc == nil {
 		panic("JobRepositoryMock.SetEnabledFunc: method is nil but JobRepository.SetEnabled was just called")
 	}
 	callInfo := struct {
 		ContextMoqParam context.Context
-		V1              domain.UserId
+		V1              domain.ActorId
 		V2              domain.JobId
 		B               bool
 	}{
@@ -393,13 +393,13 @@ func (mock *JobRepositoryMock) SetEnabled(contextMoqParam context.Context, v1 do
 //	len(mockedJobRepository.SetEnabledCalls())
 func (mock *JobRepositoryMock) SetEnabledCalls() []struct {
 	ContextMoqParam context.Context
-	V1              domain.UserId
+	V1              domain.ActorId
 	V2              domain.JobId
 	B               bool
 } {
 	var calls []struct {
 		ContextMoqParam context.Context
-		V1              domain.UserId
+		V1              domain.ActorId
 		V2              domain.JobId
 		B               bool
 	}
@@ -410,13 +410,13 @@ func (mock *JobRepositoryMock) SetEnabledCalls() []struct {
 }
 
 // UpdateSpec calls UpdateSpecFunc.
-func (mock *JobRepositoryMock) UpdateSpec(contextMoqParam context.Context, v1 domain.UserId, v2 domain.JobId, jobSpec domain.JobSpec) (domain.Job, error) {
+func (mock *JobRepositoryMock) UpdateSpec(contextMoqParam context.Context, v1 domain.ActorId, v2 domain.JobId, jobSpec domain.JobSpec) (domain.Job, error) {
 	if mock.UpdateSpecFunc == nil {
 		panic("JobRepositoryMock.UpdateSpecFunc: method is nil but JobRepository.UpdateSpec was just called")
 	}
 	callInfo := struct {
 		ContextMoqParam context.Context
-		V1              domain.UserId
+		V1              domain.ActorId
 		V2              domain.JobId
 		JobSpec         domain.JobSpec
 	}{
@@ -437,13 +437,13 @@ func (mock *JobRepositoryMock) UpdateSpec(contextMoqParam context.Context, v1 do
 //	len(mockedJobRepository.UpdateSpecCalls())
 func (mock *JobRepositoryMock) UpdateSpecCalls() []struct {
 	ContextMoqParam context.Context
-	V1              domain.UserId
+	V1              domain.ActorId
 	V2              domain.JobId
 	JobSpec         domain.JobSpec
 } {
 	var calls []struct {
 		ContextMoqParam context.Context
-		V1              domain.UserId
+		V1              domain.ActorId
 		V2              domain.JobId
 		JobSpec         domain.JobSpec
 	}

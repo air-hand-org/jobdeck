@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package jobdeck.auth.v1;
+
+import "buf/validate/validate.proto";
+
+enum ActorType {
+  ACTOR_TYPE_UNSPECIFIED = 0;
+  ACTOR_TYPE_USER = 1;
+  ACTOR_TYPE_SERVICE = 2;
+}
+
+message Actor {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  ActorType type = 2 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  bool active = 3;
+  string name = 4;
+}
+
+message GetCurrentActorRequest {}
+
+message GetCurrentActorResponse {
+  Actor actor = 1;
+}
+
+service ActorService {
+  rpc GetCurrentActor(GetCurrentActorRequest) returns (GetCurrentActorResponse);
+}

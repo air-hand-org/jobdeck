@@ -4,15 +4,12 @@ import (
 	"context"
 	jobv1 "jobdeck/gen/go/jobdeck/job/v1"
 	"jobdeck/services/job-api/internal/app"
+	"jobdeck/services/job-api/internal/auth"
 	"jobdeck/services/job-api/internal/domain"
 	"jobdeck/services/job-api/internal/transform"
 
-	"github.com/google/uuid"
 	"github.com/samber/lo"
 )
-
-// TODO: impl auth
-var ownerId domain.UserId = uuid.Max
 
 type jobServiceServer struct {
 	u app.JobUsecase
@@ -27,7 +24,11 @@ func (s *jobServiceServer) CreateJob(ctx context.Context, req *jobv1.CreateJobRe
 	if err != nil {
 		return nil, err
 	}
-	job, err := s.u.CreateJob(ctx, ownerId, req.GetName(), spec)
+	actor, ok := auth.GetActorContext(ctx)
+	if !ok {
+		return nil, domain.ErrUnauthenticated
+	}
+	job, err := s.u.CreateJob(ctx, actor, req.GetName(), spec)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +50,11 @@ func (s *jobServiceServer) UpdateJob(ctx context.Context, req *jobv1.UpdateJobRe
 	if err != nil {
 		return nil, err
 	}
-	job, err := s.u.UpdateJobMetadata(ctx, ownerId, job_id, req.GetName(), spec)
+	actor, ok := auth.GetActorContext(ctx)
+	if !ok {
+		return nil, domain.ErrUnauthenticated
+	}
+	job, err := s.u.UpdateJobMetadata(ctx, actor, job_id, req.GetName(), spec)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +73,11 @@ func (s *jobServiceServer) SetJobEnabled(ctx context.Context, req *jobv1.SetJobE
 		return nil, err
 	}
 
-	job, err := s.u.SetJobEnabled(ctx, ownerId, job_id, req.GetEnabled())
+	actor, ok := auth.GetActorContext(ctx)
+	if !ok {
+		return nil, domain.ErrUnauthenticated
+	}
+	job, err := s.u.SetJobEnabled(ctx, actor, job_id, req.GetEnabled())
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +95,11 @@ func (s *jobServiceServer) DeleteJob(ctx context.Context, req *jobv1.DeleteJobRe
 	if err != nil {
 		return nil, err
 	}
-	err = s.u.DeleteJob(ctx, ownerId, job_id)
+	actor, ok := auth.GetActorContext(ctx)
+	if !ok {
+		return nil, domain.ErrUnauthenticated
+	}
+	err = s.u.DeleteJob(ctx, actor, job_id)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +111,11 @@ func (s *jobServiceServer) GetJob(ctx context.Context, req *jobv1.GetJobRequest)
 	if err != nil {
 		return nil, err
 	}
-	job, err := s.u.GetJob(ctx, ownerId, job_id)
+	actor, ok := auth.GetActorContext(ctx)
+	if !ok {
+		return nil, domain.ErrUnauthenticated
+	}
+	job, err := s.u.GetJob(ctx, actor, job_id)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +126,11 @@ func (s *jobServiceServer) GetJob(ctx context.Context, req *jobv1.GetJobRequest)
 }
 
 func (s *jobServiceServer) ListJobs(ctx context.Context, req *jobv1.ListJobsRequest) (*jobv1.ListJobsResponse, error) {
-	result, err := s.u.ListJobs(ctx, ownerId, req.GetPageSize(), req.GetPageToken())
+	actor, ok := auth.GetActorContext(ctx)
+	if !ok {
+		return nil, domain.ErrUnauthenticated
+	}
+	result, err := s.u.ListJobs(ctx, actor, req.GetPageSize(), req.GetPageToken())
 	if err != nil {
 		return nil, err
 	}

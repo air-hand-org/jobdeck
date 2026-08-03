@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package jobdeck.auth.v1;
+
+import "buf/validate/validate.proto";
+
+message AuthenticateLocalClientRequest {
+  string client_id = 1;
+  string client_secret = 2;
+  string audience = 3;
+}
+
+message ExchangeGoogleIdTokenRequest {
+  string id_token = 1;
+  string audience = 2;
+}
+
+message Token {
+  string access_token = 1;
+  string token_type = 2; // "Bearer"
+  int64 expires_in_seconds = 3;
+}
+
+message AuthenticateLocalClientResponse {
+  Token token = 1;
+}
+
+message ExchangeGoogleIdTokenResponse {
+  Token token = 1;
+}
+
+service AuthService {
+  rpc AuthenticateLocalClient(AuthenticateLocalClientRequest) returns (AuthenticateLocalClientResponse);
+  rpc ExchangeGoogleIdToken(ExchangeGoogleIdTokenRequest) returns (ExchangeGoogleIdTokenResponse);
+}

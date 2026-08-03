@@ -4,11 +4,16 @@ linters:
   enable:
     - govet
     - revive
+    - testifylint
   exclusions:
     paths:
       - gen/
       - gen_*\.go
-      - _test\.go
+    rules:
+      - path: _test\.go
+        linters:
+          - govet
+          - revive
 
 formatters:
   enable:

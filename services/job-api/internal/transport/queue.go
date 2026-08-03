@@ -4,9 +4,9 @@ import (
 	"context"
 	jobv1 "jobdeck/gen/go/jobdeck/job/v1"
 	"jobdeck/services/job-api/internal/app"
+	"jobdeck/services/job-api/internal/auth"
 	"jobdeck/services/job-api/internal/domain"
 	"jobdeck/services/job-api/internal/transform"
-	"log"
 
 	"github.com/samber/lo"
 	"google.golang.org/grpc/codes"
@@ -22,10 +22,13 @@ type executionQueueServiceServer struct {
 var _ jobv1.ExecutionQueueServiceServer = (*executionQueueServiceServer)(nil)
 
 func (s *executionQueueServiceServer) ClaimExecutions(ctx context.Context, req *jobv1.ClaimExecutionsRequest) (*jobv1.ClaimExecutionsResponse, error) {
-	claims, err := s.u.ClaimExecutions(ctx, req.GetMaxCount())
+	actor, ok := auth.GetActorContext(ctx)
+	if !ok {
+		return nil, domain.ErrUnauthenticated
+	}
+	claims, err := s.u.ClaimExecutions(ctx, actor, req.GetMaxCount())
 	if err != nil {
-		log.Printf("%+v", err)
-		return nil, status.Error(codes.Internal, "failed to claim executions")
+		return nil, err
 	}
 	claimsProto, err := lo.MapErr(claims, func(claim domain.ClaimedExecution, _ int) (*jobv1.ClaimedExecution, error) {
 		return transform.ClaimedExecutionToProto(claim)
@@ -51,12 +54,16 @@ func (s *executionQueueServiceServer) ReportExecutionResult(ctx context.Context,
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "failed to transform token: %v", err)
 	}
+	actor, ok := auth.GetActorContext(ctx)
+	if !ok {
+		return nil, domain.ErrUnauthenticated
+	}
 	cmd := app.ReportExecutionResultCommand{
 		ExecutionId:     exec_id,
 		ExecutionResult: exec_result,
 		LeaseToken:      lease_token,
 	}
-	err = s.u.ReportExecutionResult(ctx, cmd)
+	err = s.u.ReportExecutionResult(ctx, actor, cmd)
 	if err != nil {
 		return nil, err
 	}

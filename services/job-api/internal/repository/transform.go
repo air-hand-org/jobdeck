@@ -208,3 +208,12 @@ func executionEventsFromDB(events []jobdb.JobExecutionEvent) ([]domain.Execution
 		}, nil
 	})
 }
+
+func actorFromDB(actor jobdb.JobActor) (domain.Actor, error) {
+	return domain.NewActor(
+		actor.ActorID,
+		actor.Active,
+		domain.ActorType(actor.Type),
+		domain.RoleName(actor.Role.String),
+	)
+}
