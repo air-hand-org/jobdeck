@@ -30,8 +30,13 @@
     var result = await JobApiClient.GetJobAsync(JobId);
     if (!result.IsSuccess)
     {
-      _errorMessage = result.Error;
-      return;
+        if (result.Error!.Code == ApiErrorCode.Unauthenticated)
+        {
+            NavigationManager.NavigateTo("/account/login", forceLoad: true);
+        } else {
+            _errorMessage = result.Error.Message;
+        }
+        return;
     }
 
     _model = HttpJobFormModel.FromProto(result.Value!);
@@ -43,8 +48,13 @@
     var result = await JobApiClient.UpdateJobAsync(JobId, _model);
     if (!result.IsSuccess)
     {
-      _errorMessage = result.Error;
-      return;
+        if (result.Error!.Code == ApiErrorCode.Unauthenticated)
+        {
+            NavigationManager.NavigateTo("/account/login", forceLoad: true);
+        } else {
+            _errorMessage = result.Error.Message;
+        }
+        return;
     }
 
     NavigationManager.Refresh();

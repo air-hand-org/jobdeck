@@ -14,7 +14,7 @@ public sealed class UIAuthenticationService(AuthApiClient authApi, IUISessionSto
         var result = await authApi.AuthenticateLocalClientAsync(model, cancellationToken);
         if (!result.IsSuccess || result.Value is null)
         {
-            return ApiResult.Failure(result.Error ?? "Login failed");
+            return ApiResult.Failure(result.Error ?? new ApiError(ApiErrorCode.Unauthenticated, "Login failed"));
         }
 
         var token = result.Value;

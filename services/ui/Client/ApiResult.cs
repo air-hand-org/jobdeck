@@ -9,7 +9,7 @@ public enum ApiErrorCode
     Internal,
 }
 
-public sealed record ApiError(ApiErrorCode Code, string Error)
+public sealed record ApiError(ApiErrorCode Code, string Message)
 {
     public static ApiError FromRPCException(RpcException ex)
     {

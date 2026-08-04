@@ -52,7 +52,7 @@
       var result = await Auth.LoginAsync(Model, HttpContext, HttpContext.RequestAborted);
       if (!result.IsSuccess)
       {
-        errorMessage = result.Error;
+        errorMessage = result.Error!.Message;
         return;
       }
       Navigation.NavigateTo("/", forceLoad: true);
