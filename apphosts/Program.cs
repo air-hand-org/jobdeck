@@ -275,14 +275,31 @@ var ui = builder.AddProject("ui", "../services/ui/ui.csproj")
   .WithExternalHttpEndpoints()
   .WithReference(jobApiGrpcEndpoint)
   .WithReference(authGrpcEndpoint)
-  .WithEnvironment(context => {
-    context.EnvironmentVariables["JOB_API_GRPC_ENDPOINT"] = jobApiGrpcEndpoint.Property(EndpointProperty.Url);
-    context.EnvironmentVariables["AUTH_GRPC_ENDPOINT"] = authGrpcEndpoint.Property(EndpointProperty.Url);
+  .WithEnvironment(context =>
+  {
+      context.EnvironmentVariables["JOB_API_GRPC_ENDPOINT"] = jobApiGrpcEndpoint.Property(EndpointProperty.Url);
+      context.EnvironmentVariables["AUTH_GRPC_ENDPOINT"] = authGrpcEndpoint.Property(EndpointProperty.Url);
   })
   // .WaitFor(job_api)
   .PublishAsDockerComposeService((resource, service) =>
   {
-    service.Name = "ui";
+      service.Name = "ui";
+  })
+;
+
+var demo = builder.AddGoApp(
+    name: "demo",
+    appDirectory: "../services/demo",
+    packagePath: "./cmd/server"
+  )
+  .WithExternalHttpEndpoints()
+  .WithHttpEndpoint(
+      port: 8080,
+      env: "PORT"
+  )
+  .PublishAsDockerComposeService((resource, service) =>
+  {
+    service.Name = "demo";
   })
 ;
 
