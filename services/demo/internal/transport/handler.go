@@ -43,7 +43,7 @@ func gatewayTimeoutHandler(w http.ResponseWriter, _ *http.Request) {
 }
 
 func sleep60secHandler(w http.ResponseWriter, _ *http.Request) {
-	time.Sleep(60*time.Second)
+	time.Sleep(60 * time.Second)
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("sleep 60"))
 }

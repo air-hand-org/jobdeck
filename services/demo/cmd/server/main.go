@@ -27,7 +27,7 @@ func main() {
 	g, ctx := errgroup.WithContext(signalCtx)
 
 	server := &http.Server{
-		Addr: fmt.Sprintf(":%s", port),
+		Addr:    fmt.Sprintf(":%s", port),
 		Handler: transport.NewHttpHandler(),
 	}
 
