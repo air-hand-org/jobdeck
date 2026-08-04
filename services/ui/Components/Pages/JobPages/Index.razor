@@ -4,6 +4,7 @@
 @using Jobdeck.Job.V1
 @using ui.Client
 @inject JobApiClient JobApiClient
+@inject NavigationManager Navigation
 
 <PageTitle>Index</PageTitle>
 
@@ -33,6 +34,10 @@
     var result = await JobApiClient.ListJobsAsync(pageSize: 100);
     if (!result.IsSuccess)
     {
+        if (result.Error!.Code == ApiErrorCode.Unauthenticated)
+        {
+            Navigation.NavigateTo("/account/login", forceLoad: true);
+        }
         return;
     }
 

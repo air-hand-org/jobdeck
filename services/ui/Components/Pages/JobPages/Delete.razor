@@ -51,7 +51,12 @@ else
         var result = await JobApiClient.GetJobAsync(JobId);
         if (!result.IsSuccess)
         {
-            NavigationManager.NavigateTo("/jobs");
+            if (result.Error!.Code == ApiErrorCode.Unauthenticated)
+            {
+                NavigationManager.NavigateTo("/account/login", forceLoad: true);
+            } else {
+                NavigationManager.NavigateTo("/jobs");
+            }
             return;
         }
         _job = result.Value!;
@@ -63,7 +68,12 @@ else
         var result = await JobApiClient.DeleteJobAsync(JobId);
         if (!result.IsSuccess)
         {
-            _errorMessage = result.Error;
+            if (result.Error!.Code == ApiErrorCode.Unauthenticated)
+            {
+                NavigationManager.NavigateTo("/account/login", forceLoad: true);
+            } else {
+                _errorMessage = result.Error.Message;
+            }
             return;
         }
         NavigationManager.NavigateTo("/jobs");
