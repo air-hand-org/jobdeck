@@ -8,10 +8,14 @@ cs-build:
 		(cd $$prj && dotnet build) || exit $$?; \
 	done;
 
+.PHONY: cs-test-prepare
+cs-test-prepare:
+	@pwsh $(CS_MK_DIR)../tests/e2e/bin/Debug/net10.0/playwright.ps1 install chromium
+
 .PHONY: cs-test
-cs-test:
+cs-test: cs-build cs-test-prepare
 	@for prj in $(CS_PRJS); do \
-		(cd $$prj && dotnet test) || exit $$?; \
+		(cd $$prj && dotnet test --no-build) || exit $$?; \
 	done;
 
 .PHONY: cs-lint

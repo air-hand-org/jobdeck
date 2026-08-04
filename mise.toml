@@ -4,3 +4,5 @@ go = "1.26.4"
 buf = "1.70.0"
 grpcurl = "1.9.3"
 watchexec = "2.5.1"
+
+powershell = '7.5.0'
