@@ -3,6 +3,7 @@ go 1.26.4
 use (
 	.
 	./services/auth
+	./services/demo
 	./services/job-api
 	./services/job-worker
 )
