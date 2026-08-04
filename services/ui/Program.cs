@@ -51,10 +51,12 @@ builder.Services.AddGrpcClient<AuthService.AuthServiceClient>(options =>
 builder.Services.AddScoped<JobApiClient>();
 builder.Services.AddScoped<ExecutionApiClient>();
 builder.Services.AddScoped<AuthApiClient>();
+builder.Services.AddScoped<UICookieAuthenticationEvents>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
         {
+            options.EventsType = typeof(UICookieAuthenticationEvents);
             options.LoginPath = "/account/login";
             options.LogoutPath = "/account/logout";
             options.Cookie.HttpOnly = true;
