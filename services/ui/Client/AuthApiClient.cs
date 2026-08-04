@@ -26,18 +26,12 @@ public sealed class AuthApiClient(AuthService.AuthServiceClient auth, ILogger<Au
 
             return ApiResult<Token>.Success(response.Token);
         }
-        catch (RpcException ex) when (ex.StatusCode == StatusCode.InvalidArgument)
-        {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Status.Detail);
-            activity?.AddException(ex);
-            return ApiResult<Token>.Failure(ex.Status.Detail);
-        }
         catch (RpcException ex)
         {
             logger.LogWarning(ex, "Auth API request failed");
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Status.Detail);
             activity?.AddException(ex);
-            return ApiResult<Token>.Failure("Failed to call Auth API.");
+            return ApiResult<Token>.Failure(ApiError.FromRPCException(ex));
         }
     }
 }

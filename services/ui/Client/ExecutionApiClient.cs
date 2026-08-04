@@ -17,11 +17,8 @@ public sealed class ExecutionApiClient(ExecutionService.ExecutionServiceClient e
 
         try
         {
-            var token = await tokens.GetAsync(cancellationToken);
-            if (token is null)
-            {
-                throw new RpcException(new Status(StatusCode.Unauthenticated, "Authentication has expired."));
-            }
+            var token = await tokens.GetAsync(cancellationToken)
+                ?? throw new RpcException(new Status(StatusCode.Unauthenticated, "Authentication has expired."));
 
             var headers = new Metadata
             {
@@ -40,24 +37,12 @@ public sealed class ExecutionApiClient(ExecutionService.ExecutionServiceClient e
 
             return ApiResult.Success();
         }
-        catch (RpcException ex) when (
-            ex.StatusCode == StatusCode.InvalidArgument
-            ||
-            ex.StatusCode == StatusCode.NotFound
-            ||
-            ex.StatusCode == StatusCode.Unauthenticated
-        )
-        {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Status.Detail);
-            activity?.AddException(ex);
-            return ApiResult.Failure(ex.Status.Detail);
-        }
         catch (RpcException ex)
         {
             logger.LogWarning(ex, "Execution API request failed");
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Status.Detail);
             activity?.AddException(ex);
-            return ApiResult.Failure("Failed to call Execution API.");
+            return ApiResult.Failure(ApiError.FromRPCException(ex));
         }
     }
 
@@ -68,11 +53,8 @@ public sealed class ExecutionApiClient(ExecutionService.ExecutionServiceClient e
 
         try
         {
-            var token = await tokens.GetAsync(cancellationToken);
-            if (token is null)
-            {
-                throw new RpcException(new Status(StatusCode.Unauthenticated, "Authentication has expired."));
-            }
+            var token = await tokens.GetAsync(cancellationToken)
+                ?? throw new RpcException(new Status(StatusCode.Unauthenticated, "Authentication has expired."));
 
             var headers = new Metadata
             {
@@ -95,22 +77,12 @@ public sealed class ExecutionApiClient(ExecutionService.ExecutionServiceClient e
               response.NextPageToken
             ));
         }
-        catch (RpcException ex) when (
-            ex.StatusCode == StatusCode.InvalidArgument
-            ||
-            ex.StatusCode == StatusCode.NotFound
-        )
-        {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Status.Detail);
-            activity?.AddException(ex);
-            return ApiResult<ListExecutionsResult>.Failure(ex.Status.Detail);
-        }
         catch (RpcException ex)
         {
             logger.LogWarning(ex, "Execution API request failed");
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Status.Detail);
             activity?.AddException(ex);
-            return ApiResult<ListExecutionsResult>.Failure("Failed to call Execution API.");
+            return ApiResult<ListExecutionsResult>.Failure(ApiError.FromRPCException(ex));
         }
     }
 }

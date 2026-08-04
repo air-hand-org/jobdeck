@@ -18,11 +18,8 @@ public sealed class JobApiClient(JobService.JobServiceClient jobs, AccessTokenAc
 
         try
         {
-            var token = await tokens.GetAsync(cancellationToken);
-            if (token is null)
-            {
-                throw new RpcException(new Status(StatusCode.Unauthenticated, "Authentication has expired."));
-            }
+            var token = await tokens.GetAsync(cancellationToken)
+                ?? throw new RpcException(new Status(StatusCode.Unauthenticated, "Authentication has expired."));
 
             var headers = new Metadata
             {
@@ -42,24 +39,12 @@ public sealed class JobApiClient(JobService.JobServiceClient jobs, AccessTokenAc
 
             return ApiResult<Job>.Success(response.Job);
         }
-        catch (RpcException ex) when (ex.StatusCode == StatusCode.InvalidArgument)
-        {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Status.Detail);
-            activity?.AddException(ex);
-            return ApiResult<Job>.Failure(ex.Status.Detail);
-        }
-        catch (RpcException ex) when (ex.StatusCode == StatusCode.Unauthenticated)
-        {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Status.Detail);
-            activity?.AddException(ex);
-            return ApiResult<Job>.Failure(ex.Status.Detail);
-        }
         catch (RpcException ex)
         {
             logger.LogWarning(ex, "Job API request failed");
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Status.Detail);
             activity?.AddException(ex);
-            return ApiResult<Job>.Failure("Failed to call Job API.");
+            return ApiResult<Job>.Failure(ApiError.FromRPCException(ex));
         }
     }
 
@@ -71,11 +56,8 @@ public sealed class JobApiClient(JobService.JobServiceClient jobs, AccessTokenAc
 
         try
         {
-            var token = await tokens.GetAsync(cancellationToken);
-            if (token is null)
-            {
-                throw new RpcException(new Status(StatusCode.Unauthenticated, "Authentication has expired."));
-            }
+            var token = await tokens.GetAsync(cancellationToken)
+                ?? throw new RpcException(new Status(StatusCode.Unauthenticated, "Authentication has expired."));
 
             var headers = new Metadata
             {
@@ -95,24 +77,12 @@ public sealed class JobApiClient(JobService.JobServiceClient jobs, AccessTokenAc
             );
             return ApiResult<Job>.Success(response.Job);
         }
-        catch (RpcException ex) when (
-            ex.StatusCode == StatusCode.InvalidArgument
-            ||
-            ex.StatusCode == StatusCode.NotFound
-            ||
-            ex.StatusCode == StatusCode.Unauthenticated
-        )
-        {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Status.Detail);
-            activity?.AddException(ex);
-            return ApiResult<Job>.Failure(ex.Status.Detail);
-        }
         catch (RpcException ex)
         {
             logger.LogWarning(ex, "Job API request failed");
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Status.Detail);
             activity?.AddException(ex);
-            return ApiResult<Job>.Failure("Failed to call Job API.");
+            return ApiResult<Job>.Failure(ApiError.FromRPCException(ex));
         }
     }
 
@@ -123,11 +93,8 @@ public sealed class JobApiClient(JobService.JobServiceClient jobs, AccessTokenAc
 
         try
         {
-            var token = await tokens.GetAsync(cancellationToken);
-            if (token is null)
-            {
-                throw new RpcException(new Status(StatusCode.Unauthenticated, "Authentication has expired."));
-            }
+            var token = await tokens.GetAsync(cancellationToken)
+                ?? throw new RpcException(new Status(StatusCode.Unauthenticated, "Authentication has expired."));
 
             var headers = new Metadata
             {
@@ -145,24 +112,12 @@ public sealed class JobApiClient(JobService.JobServiceClient jobs, AccessTokenAc
             );
             return ApiResult.Success();
         }
-        catch (RpcException ex) when (
-            ex.StatusCode == StatusCode.InvalidArgument
-            ||
-            ex.StatusCode == StatusCode.NotFound
-            ||
-            ex.StatusCode == StatusCode.Unauthenticated
-        )
-        {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Status.Detail);
-            activity?.AddException(ex);
-            return ApiResult.Failure(ex.Status.Detail);
-        }
         catch (RpcException ex)
         {
             logger.LogWarning(ex, "Job API request failed");
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Status.Detail);
             activity?.AddException(ex);
-            return ApiResult.Failure("Failed to call Job API.");
+            return ApiResult.Failure(ApiError.FromRPCException(ex));
         }
     }
 
@@ -173,11 +128,8 @@ public sealed class JobApiClient(JobService.JobServiceClient jobs, AccessTokenAc
 
         try
         {
-            var token = await tokens.GetAsync(cancellationToken);
-            if (token is null)
-            {
-                throw new RpcException(new Status(StatusCode.Unauthenticated, "Authentication has expired."));
-            }
+            var token = await tokens.GetAsync(cancellationToken)
+                ?? throw new RpcException(new Status(StatusCode.Unauthenticated, "Authentication has expired."));
 
             var headers = new Metadata
             {
@@ -195,24 +147,12 @@ public sealed class JobApiClient(JobService.JobServiceClient jobs, AccessTokenAc
             );
             return ApiResult<Job>.Success(response.Job);
         }
-        catch (RpcException ex) when (
-            ex.StatusCode == StatusCode.InvalidArgument
-            ||
-            ex.StatusCode == StatusCode.NotFound
-            ||
-            ex.StatusCode == StatusCode.Unauthenticated
-        )
-        {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Status.Detail);
-            activity?.AddException(ex);
-            return ApiResult<Job>.Failure(ex.Status.Detail);
-        }
         catch (RpcException ex)
         {
             logger.LogWarning(ex, "Job API request failed");
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Status.Detail);
             activity?.AddException(ex);
-            return ApiResult<Job>.Failure("Failed to call Job API.");
+            return ApiResult<Job>.Failure(ApiError.FromRPCException(ex));
         }
     }
 
@@ -223,11 +163,8 @@ public sealed class JobApiClient(JobService.JobServiceClient jobs, AccessTokenAc
 
         try
         {
-            var token = await tokens.GetAsync(cancellationToken);
-            if (token is null)
-            {
-                throw new RpcException(new Status(StatusCode.Unauthenticated, "Authentication has expired."));
-            }
+            var token = await tokens.GetAsync(cancellationToken)
+                ?? throw new RpcException(new Status(StatusCode.Unauthenticated, "Authentication has expired."));
 
             var headers = new Metadata
             {
@@ -249,25 +186,12 @@ public sealed class JobApiClient(JobService.JobServiceClient jobs, AccessTokenAc
               response.NextPageToken
             ));
         }
-        catch (RpcException ex) when (
-            ex.StatusCode == StatusCode.InvalidArgument
-            ||
-            ex.StatusCode == StatusCode.NotFound
-            ||
-            ex.StatusCode == StatusCode.Unauthenticated
-        )
-        {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Status.Detail);
-            activity?.AddException(ex);
-            return ApiResult<ListJobsResult>.Failure(ex.Status.Detail);
-        }
         catch (RpcException ex)
         {
             logger.LogWarning(ex, "Job API request failed");
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Status.Detail);
             activity?.AddException(ex);
-            return ApiResult<ListJobsResult>.Failure("Failed to call Job API.");
+            return ApiResult<ListJobsResult>.Failure(ApiError.FromRPCException(ex));
         }
     }
-
 }
