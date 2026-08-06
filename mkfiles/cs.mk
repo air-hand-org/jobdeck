@@ -9,7 +9,7 @@ cs-build:
 
 .PHONY: cs-test-prepare
 cs-test-prepare:
-	@pwsh $(CS_MK_DIR)../tests/e2e/bin/Debug/net10.0/playwright.ps1 install chromium
+	@bash $(CS_MK_DIR)../tests/prepare-e2e.sh
 
 .PHONY: cs-test
 cs-test: cs-build cs-test-prepare

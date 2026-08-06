@@ -2,3 +2,5 @@ __debug_bin*
 bin/
 obj/
 /go.work.sum
+playwright/.auth
+playwright-traces

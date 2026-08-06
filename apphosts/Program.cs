@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Aspire.Hosting.ApplicationModel;
 
 var builder = DistributedApplication.CreateBuilder(args);
@@ -9,6 +10,8 @@ var workerClientSecretHash = builder.AddParameter("job-worker-client-secret-hash
 var workerClientId = "job-worker";
 var testUserSecretHash = builder.AddParameter("test-user-client-secret-hash", secret: true);
 
+var useVolumes = builder.Configuration.GetValue<bool>("UseVolumes", true);
+
 var compose = builder.AddDockerComposeEnvironment("compose")
   .WithProperties(env => {
     env.DashboardEnabled = true;
@@ -16,13 +19,17 @@ var compose = builder.AddDockerComposeEnvironment("compose")
   ;
 
 var postgres = builder.AddPostgres("postgres")
-  .WithDataVolume()
   .WithPgAdmin()
   .PublishAsDockerComposeService((resource, service) =>
   {
     service.Name = "db";
   })
   ;
+if (useVolumes)
+{
+    postgres.WithDataVolume();
+}
+
 var job_db = postgres.AddDatabase("jobdeck");
 var job_db_migration = builder.AddGoApp(
     name: "job-db-migrator",
@@ -125,7 +132,7 @@ else
         targetPort: 9091,
         name: "grpc",
         env: "GRPC_PORT",
-        isProxied: false
+        isProxied: false // FIXME: これはなんでproxy無効化しているんだっけか grpcだからか？
     )
     .WithReference(auth_db)
     .WithEnvironment(context =>
@@ -280,6 +287,7 @@ var ui = builder.AddProject("ui", "../services/ui/ui.csproj")
       context.EnvironmentVariables["JOB_API_GRPC_ENDPOINT"] = jobApiGrpcEndpoint.Property(EndpointProperty.Url);
       context.EnvironmentVariables["AUTH_GRPC_ENDPOINT"] = authGrpcEndpoint.Property(EndpointProperty.Url);
   })
+  .WithHttpHealthCheck("/health/ready")
   // .WaitFor(job_api)
   .PublishAsDockerComposeService((resource, service) =>
   {
