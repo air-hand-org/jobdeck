@@ -4,8 +4,11 @@ using ui.Client;
 using ui.Session;
 using ui.Telemetry;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Jobdeck.Auth.V1;
 using Jobdeck.Job.V1;
+using Grpc.Health.V1;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -53,6 +56,37 @@ builder.Services.AddScoped<ExecutionApiClient>();
 builder.Services.AddScoped<AuthApiClient>();
 builder.Services.AddScoped<UICookieAuthenticationEvents>();
 
+builder.Services.AddGrpcClient<Health.HealthClient>(
+    "job-api-health",
+    options =>
+    {
+        var address = builder.Configuration["JOB_API_GRPC_ENDPOINT"] ?? throw new InvalidOperationException("JOB_API_GRPC_ENDPOINT is required");
+        options.Address = new Uri(address);
+    }
+);
+builder.Services.AddGrpcClient<Health.HealthClient>(
+    "auth-health",
+    options =>
+    {
+        var address = builder.Configuration["AUTH_GRPC_ENDPOINT"] ?? throw new InvalidOperationException("AUTH_GRPC_ENDPOINT is required");
+        options.Address = new Uri(address);
+    }
+);
+builder.Services.AddHealthChecks()
+    .AddTypeActivatedCheck<HealthCheckClient>(
+        "job-api",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: ["ready"],
+        args: ["job-api-health"]
+    )
+    .AddTypeActivatedCheck<HealthCheckClient>(
+        "auth",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: ["ready"],
+        args: ["auth-health"]
+    )
+    ;
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
         {
@@ -90,6 +124,20 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 
+app.MapHealthChecks(
+    "/health/live",
+    new HealthCheckOptions
+    {
+        Predicate = _ => false,
+    }
+);
+app.MapHealthChecks(
+    "/health/ready",
+    new HealthCheckOptions
+    {
+        Predicate = check => check.Tags.Contains("ready"),
+    }
+);
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

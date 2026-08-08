@@ -1,18 +1,20 @@
 CS_MK := $(lastword $(MAKEFILE_LIST))
 CS_MK_DIR := $(dir $(abspath $(CS_MK)))
-CS_PRJS := $(shell find $(CS_MK_DIR)../. -name *.csproj -exec dirname {} \; | sort)
+CS_SLN := Jobdeck.slnx
 
 .PHONY: cs-build
 cs-build:
-	@for prj in $(CS_PRJS); do \
-		(cd $$prj && dotnet build) || exit $$?; \
-	done;
+	@cd $(CS_MK_DIR)../ && \
+	    dotnet build $(CS_SLN)
+
+.PHONY: cs-test-prepare
+cs-test-prepare:
+	@bash $(CS_MK_DIR)../tests/prepare-e2e.sh
 
 .PHONY: cs-test
-cs-test:
-	@for prj in $(CS_PRJS); do \
-		(cd $$prj && dotnet test) || exit $$?; \
-	done;
+cs-test: cs-build cs-test-prepare
+	@cd $(CS_MK_DIR)../ && \
+	    dotnet test $(CS_SLN) --no-build --no-restore
 
 .PHONY: cs-lint
 cs-lint:
