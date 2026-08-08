@@ -14,5 +14,5 @@ public sealed class WithTestNameAttribute : BeforeAfterTestAttribute
         CurrentClassName = methodInfo.DeclaringType!.Name;
     }
 
-    public override void After(MethodInfo methodInfo) {}
+    public override void After(MethodInfo methodInfo) { }
 }

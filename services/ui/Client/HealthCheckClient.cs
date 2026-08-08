@@ -26,7 +26,9 @@ public sealed class HealthCheckClient(GrpcClientFactory clientFactory, string se
             if (response.Status == HealthCheckResponse.Types.ServingStatus.Serving)
             {
                 return HealthCheckResult.Healthy();
-            } else {
+            }
+            else
+            {
                 return HealthCheckResult.Unhealthy($"{serviceName}: {response.Status}");
             }
         }

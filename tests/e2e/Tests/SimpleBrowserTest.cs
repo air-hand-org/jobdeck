@@ -18,24 +18,24 @@ public sealed class SimpleBrowserTest(AppFixture fixture) : BrowserTest
         await base.InitializeAsync();
         context = await Browser.NewContextAsync();
         await context.Tracing.StartAsync(new()
-            {
-                Title = $"{WithTestNameAttribute.CurrentClassName}.{WithTestNameAttribute.CurrentTestName}",
-                Screenshots = true,
-                Snapshots = true,
-                Sources = true
-            });
+        {
+            Title = $"{WithTestNameAttribute.CurrentClassName}.{WithTestNameAttribute.CurrentTestName}",
+            Screenshots = true,
+            Snapshots = true,
+            Sources = true
+        });
     }
 
     public override async Task DisposeAsync()
     {
         await context.Tracing.StopAsync(new()
-            {
-                Path = Path.Combine(
+        {
+            Path = Path.Combine(
                     Environment.CurrentDirectory,
                     "playwright-traces",
                     $"{WithTestNameAttribute.CurrentClassName}.{WithTestNameAttribute.CurrentTestName}.zip"
                 )
-            });
+        });
         await base.DisposeAsync();
     }
 
@@ -81,7 +81,7 @@ public sealed class SimpleBrowserTest(AppFixture fixture) : BrowserTest
         await page.GetByLabel("Password:").FillAsync(testUserSecret);
         await page.GetByRole(AriaRole.Button, new() { Name = "Login" }).ClickAsync();
 
-        await Expect(page.GetByRole(AriaRole.Link, new () { Name = "Logout" })).ToBeVisibleAsync();
+        await Expect(page.GetByRole(AriaRole.Link, new() { Name = "Logout" })).ToBeVisibleAsync();
 
         await page.GetByRole(AriaRole.Link, new() { Name = "Jobs" }).ClickAsync();
 

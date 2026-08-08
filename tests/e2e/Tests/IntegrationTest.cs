@@ -33,7 +33,8 @@ public class IntegrationTest(AppFixture fixture)
         using var cts = new CancellationTokenSource(DefaultTimeout);
 
         // Act
-        using var httpClient = new HttpClient() {
+        using var httpClient = new HttpClient()
+        {
             BaseAddress = fixture.Target.DemoBaseUri
         };
         using var response = await httpClient.GetAsync("/", cts.Token);

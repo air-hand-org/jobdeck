@@ -13,8 +13,9 @@ var testUserSecretHash = builder.AddParameter("test-user-client-secret-hash", se
 var useVolumes = builder.Configuration.GetValue<bool>("UseVolumes", true);
 
 var compose = builder.AddDockerComposeEnvironment("compose")
-  .WithProperties(env => {
-    env.DashboardEnabled = true;
+  .WithProperties(env =>
+  {
+      env.DashboardEnabled = true;
   })
   ;
 
@@ -22,7 +23,7 @@ var postgres = builder.AddPostgres("postgres")
   .WithPgAdmin()
   .PublishAsDockerComposeService((resource, service) =>
   {
-    service.Name = "db";
+      service.Name = "db";
   })
   ;
 if (useVolumes)
@@ -39,12 +40,12 @@ var job_db_migration = builder.AddGoApp(
   .WithReference(job_db)
   .WithEnvironment(context =>
   {
-    context.EnvironmentVariables["POSTGRESDB_URI"] = job_db.Resource.UriExpression;
+      context.EnvironmentVariables["POSTGRESDB_URI"] = job_db.Resource.UriExpression;
   })
   .WaitFor(job_db)
   .PublishAsDockerComposeService((resource, service) =>
   {
-    service.Name = "job-db-migrator";
+      service.Name = "job-db-migrator";
   })
   ;
 
@@ -57,15 +58,15 @@ var auth_db_migration = builder.AddGoApp(
   .WithReference(auth_db)
   .WithEnvironment(context =>
   {
-    context.EnvironmentVariables["POSTGRESDB_URI"] = auth_db.Resource.UriExpression;
-    context.EnvironmentVariables["AUTH_JOB_WORKER_SECRET_HASH"] = workerClientSecretHash;
-    context.EnvironmentVariables["AUTH_JOB_WORKER_CLIENT_ID"] = workerClientId;
-    context.EnvironmentVariables["AUTH_TEST_USER_SECRET_HASH"] = testUserSecretHash;
+      context.EnvironmentVariables["POSTGRESDB_URI"] = auth_db.Resource.UriExpression;
+      context.EnvironmentVariables["AUTH_JOB_WORKER_SECRET_HASH"] = workerClientSecretHash;
+      context.EnvironmentVariables["AUTH_JOB_WORKER_CLIENT_ID"] = workerClientId;
+      context.EnvironmentVariables["AUTH_TEST_USER_SECRET_HASH"] = testUserSecretHash;
   })
   .WaitFor(auth_db)
   .PublishAsDockerComposeService((resource, service) =>
   {
-    service.Name = "auth-db-migrator";
+      service.Name = "auth-db-migrator";
   })
   ;
 
@@ -81,201 +82,207 @@ var apiAuthMode = builder.Configuration["API_AUTH_MODE"] ?? "OPTIONAL"; // fallb
 // TODO: use WithDelveServer after v13.5
 if (IS_DEBUG)
 {
-  var auth = builder.AddExecutable(
-      "auth",
-      "dlv",
-      "../services/auth",
-      "debug",
-      "./cmd/server",
-      "--headless",
-      "--api-version=2",
-      "--listen=127.0.0.1:2347",
-      "--accept-multiclient",
-      "--log",
-      "--log-output=rpc,dap,debugger",
-      "--only-same-user=false" // need by Zed on WSL2?
-      , "--continue"
-    )
-    .WithHttpEndpoint(
-        port: 9091,
-        targetPort: 9091,
-        name: "grpc",
-        env: "GRPC_PORT",
-        isProxied: false
-    )
-    .WithReference(auth_db)
-    .WithEnvironment(context =>
-    {
-      context.EnvironmentVariables["POSTGRESDB_URI"] = auth_db.Resource.UriExpression;
-      context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = enableGrpcReflection;
-      context.EnvironmentVariables["AUTH_JWT_PRIVATE_KEY"] = authJwtPrivateKey;
-    })
-    .WaitFor(auth_db)
-    .WaitForCompletion(auth_db_migration)
-    .PublishAsDockerComposeService((resource, service) =>
-    {
-      service.Name = "auth";
-    });
+    var auth = builder.AddExecutable(
+        "auth",
+        "dlv",
+        "../services/auth",
+        "debug",
+        "./cmd/server",
+        "--headless",
+        "--api-version=2",
+        "--listen=127.0.0.1:2347",
+        "--accept-multiclient",
+        "--log",
+        "--log-output=rpc,dap,debugger",
+        "--only-same-user=false" // need by Zed on WSL2?
+        , "--continue"
+      )
+      .WithHttpEndpoint(
+          port: 9091,
+          targetPort: 9091,
+          name: "grpc",
+          env: "GRPC_PORT",
+          isProxied: false
+      )
+      .WithReference(auth_db)
+      .WithEnvironment(context =>
+      {
+          context.EnvironmentVariables["POSTGRESDB_URI"] = auth_db.Resource.UriExpression;
+          context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = enableGrpcReflection;
+          context.EnvironmentVariables["AUTH_JWT_PRIVATE_KEY"] = authJwtPrivateKey;
+      })
+      .WaitFor(auth_db)
+      .WaitForCompletion(auth_db_migration)
+      .PublishAsDockerComposeService((resource, service) =>
+      {
+          service.Name = "auth";
+      });
 
-  authGrpcEndpoint = auth.GetEndpoint("grpc");
+    authGrpcEndpoint = auth.GetEndpoint("grpc");
 }
 else
 {
-  var auth = builder.AddGoApp(
-      name: "auth",
-      appDirectory: "../services/auth",
-      packagePath: "./cmd/server"
-    )
-    //    .WithDelveServer(port: 2345) // --only-same-user=false needed
-    .WithHttpEndpoint(
-        port: 9091,
-        targetPort: 9091,
-        name: "grpc",
-        env: "GRPC_PORT",
-        isProxied: false // FIXME: これはなんでproxy無効化しているんだっけか grpcだからか？
-    )
-    .WithReference(auth_db)
-    .WithEnvironment(context =>
-    {
-      context.EnvironmentVariables["POSTGRESDB_URI"] = auth_db.Resource.UriExpression;
-      context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = enableGrpcReflection;
-      context.EnvironmentVariables["AUTH_JWT_PRIVATE_KEY"] = authJwtPrivateKey;
-    })
-    .WaitFor(auth_db)
-    .WaitForCompletion(auth_db_migration)
-    .PublishAsDockerComposeService((resource, service) =>
-    {
-      service.Name = "auth";
-    });
+    var auth = builder.AddGoApp(
+        name: "auth",
+        appDirectory: "../services/auth",
+        packagePath: "./cmd/server"
+      )
+      //    .WithDelveServer(port: 2345) // --only-same-user=false needed
+      .WithHttpEndpoint(
+          port: 9091,
+          targetPort: 9091,
+          name: "grpc",
+          env: "GRPC_PORT",
+          isProxied: false // FIXME: これはなんでproxy無効化しているんだっけか grpcだからか？
+      )
+      .WithReference(auth_db)
+      .WithEnvironment(context =>
+      {
+          context.EnvironmentVariables["POSTGRESDB_URI"] = auth_db.Resource.UriExpression;
+          context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = enableGrpcReflection;
+          context.EnvironmentVariables["AUTH_JWT_PRIVATE_KEY"] = authJwtPrivateKey;
+      })
+      .WaitFor(auth_db)
+      .WaitForCompletion(auth_db_migration)
+      .PublishAsDockerComposeService((resource, service) =>
+      {
+          service.Name = "auth";
+      });
 
-  authGrpcEndpoint = auth.GetEndpoint("grpc");
+    authGrpcEndpoint = auth.GetEndpoint("grpc");
 }
 
 if (IS_DEBUG)
 {
-  var job_api = builder.AddExecutable(
-      "job-api",
-      "dlv",
-      "../services/job-api",
-      "debug",
-      "./cmd/server",
-      "--headless",
-      "--api-version=2",
-      "--listen=127.0.0.1:2345",
-      "--accept-multiclient",
-      "--log",
-      "--log-output=rpc,dap,debugger",
-      "--only-same-user=false" // need by Zed on WSL2?
-      , "--continue"
-    )
-    .WithHttpEndpoint(
-        port: 9090,
-        targetPort: 9090,
-        name: "grpc",
-        env: "GRPC_PORT",
-        isProxied: false
-    )
-    .WithReference(job_db)
-    .WithEnvironment(context =>
-    {
-      context.EnvironmentVariables["POSTGRESDB_URI"] = job_db.Resource.UriExpression;
-      context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = enableGrpcReflection;
-      context.EnvironmentVariables["AUTH_JWT_PUBLIC_KEY"] = authJwtPublicKey;
-      context.EnvironmentVariables["API_AUTH_MODE"] = apiAuthMode;
-    })
-    .WaitFor(job_db)
-    .WaitForCompletion(job_db_migration)
-    .PublishAsDockerComposeService((resource, service) =>
-    {
-      service.Name = "job-api";
-    });
+    var job_api = builder.AddExecutable(
+        "job-api",
+        "dlv",
+        "../services/job-api",
+        "debug",
+        "./cmd/server",
+        "--headless",
+        "--api-version=2",
+        "--listen=127.0.0.1:2345",
+        "--accept-multiclient",
+        "--log",
+        "--log-output=rpc,dap,debugger",
+        "--only-same-user=false" // need by Zed on WSL2?
+        , "--continue"
+      )
+      .WithHttpEndpoint(
+          port: 9090,
+          targetPort: 9090,
+          name: "grpc",
+          env: "GRPC_PORT",
+          isProxied: false
+      )
+      .WithReference(job_db)
+      .WithEnvironment(context =>
+      {
+          context.EnvironmentVariables["POSTGRESDB_URI"] = job_db.Resource.UriExpression;
+          context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = enableGrpcReflection;
+          context.EnvironmentVariables["AUTH_JWT_PUBLIC_KEY"] = authJwtPublicKey;
+          context.EnvironmentVariables["API_AUTH_MODE"] = apiAuthMode;
+      })
+      .WaitFor(job_db)
+      .WaitForCompletion(job_db_migration)
+      .PublishAsDockerComposeService((resource, service) =>
+      {
+          service.Name = "job-api";
+      });
 
-  jobApiGrpcEndpoint = job_api.GetEndpoint("grpc");
+    jobApiGrpcEndpoint = job_api.GetEndpoint("grpc");
 }
 else
 {
-  var job_api = builder.AddGoApp(
-      name: "job-api",
-      appDirectory: "../services/job-api",
-      packagePath: "./cmd/server"
-    )
-    //    .WithDelveServer(port: 2345) // --only-same-user=false needed
-    .WithHttpEndpoint(
-        port: 9090,
-        targetPort: 9090,
-        name: "grpc",
-        env: "GRPC_PORT",
-        isProxied: false
-    )
-    .WithReference(job_db)
-    .WithEnvironment(context =>
-    {
-      context.EnvironmentVariables["POSTGRESDB_URI"] = job_db.Resource.UriExpression;
-      context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = enableGrpcReflection;
-      context.EnvironmentVariables["AUTH_JWT_PUBLIC_KEY"] = authJwtPublicKey;
-      context.EnvironmentVariables["API_AUTH_MODE"] = apiAuthMode;
-    })
-    .WaitFor(job_db)
-    .WaitForCompletion(job_db_migration)
-    .PublishAsDockerComposeService((resource, service) =>
-    {
-      service.Name = "job-api";
-    });
+    var job_api = builder.AddGoApp(
+        name: "job-api",
+        appDirectory: "../services/job-api",
+        packagePath: "./cmd/server"
+      )
+      //    .WithDelveServer(port: 2345) // --only-same-user=false needed
+      .WithHttpEndpoint(
+          port: 9090,
+          targetPort: 9090,
+          name: "grpc",
+          env: "GRPC_PORT",
+          isProxied: false
+      )
+      .WithReference(job_db)
+      .WithEnvironment(context =>
+      {
+          context.EnvironmentVariables["POSTGRESDB_URI"] = job_db.Resource.UriExpression;
+          context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = enableGrpcReflection;
+          context.EnvironmentVariables["AUTH_JWT_PUBLIC_KEY"] = authJwtPublicKey;
+          context.EnvironmentVariables["API_AUTH_MODE"] = apiAuthMode;
+      })
+      .WaitFor(job_db)
+      .WaitForCompletion(job_db_migration)
+      .PublishAsDockerComposeService((resource, service) =>
+      {
+          service.Name = "job-api";
+      });
 
-  jobApiGrpcEndpoint = job_api.GetEndpoint("grpc");
+    jobApiGrpcEndpoint = job_api.GetEndpoint("grpc");
 }
 
 if (IS_DEBUG)
 {
-  var job_worker = builder.AddExecutable(
-      "job-worker",
-      "dlv",
-      "../services/job-worker",
-      "debug",
-      "./cmd/worker",
-      "--headless",
-      "--api-version=2",
-      "--listen=127.0.0.1:2346",
-      "--accept-multiclient",
-      "--log",
-      "--log-output=rpc,dap,debugger",
-      "--only-same-user=false" // need by Zed on WSL2?
-      , "--continue"
-      , "--"
-      , "-worker", "3"
-    )
-    .WithReference(jobApiGrpcEndpoint)
-    .WithReference(authGrpcEndpoint)
-    .WithEnvironment(context => {
-      context.EnvironmentVariables["JOB_API_SERVER_URI"] = jobApiGrpcEndpoint.Property(EndpointProperty.HostAndPort);
-      context.EnvironmentVariables["AUTH_SERVER_URI"] = authGrpcEndpoint.Property(EndpointProperty.HostAndPort);
-      context.EnvironmentVariables["AUTH_CLIENT_ID"] = workerClientId;
-      context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
-    })
-    // .WaitFor(job_api)
-    .PublishAsDockerComposeService((resource, service) => {
-      service.Name = "job-worker";
-    });
-} else {
-  var job_worker = builder.AddGoApp(
-      name: "job-worker",
-      appDirectory: "../services/job-worker",
-      packagePath: "./cmd/worker"
-    )
-    .WithAppArgs("-worker", "3")
-    //.WithReference(job_api) // WARN: ExecutableReference is not supported.
-    .WithReference(jobApiGrpcEndpoint)
-    .WithReference(authGrpcEndpoint)
-    .WithEnvironment(context => {
-      context.EnvironmentVariables["JOB_API_SERVER_URI"] = jobApiGrpcEndpoint.Property(EndpointProperty.HostAndPort);
-      context.EnvironmentVariables["AUTH_SERVER_URI"] = authGrpcEndpoint.Property(EndpointProperty.HostAndPort);
-      context.EnvironmentVariables["AUTH_CLIENT_ID"] = "job-worker";
-      context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
-    })
-    //.WaitFor(job_api)
-    .PublishAsDockerComposeService((resource, service) => {
-      service.Name = "job-worker";
-    });
+    var job_worker = builder.AddExecutable(
+        "job-worker",
+        "dlv",
+        "../services/job-worker",
+        "debug",
+        "./cmd/worker",
+        "--headless",
+        "--api-version=2",
+        "--listen=127.0.0.1:2346",
+        "--accept-multiclient",
+        "--log",
+        "--log-output=rpc,dap,debugger",
+        "--only-same-user=false" // need by Zed on WSL2?
+        , "--continue"
+        , "--"
+        , "-worker", "3"
+      )
+      .WithReference(jobApiGrpcEndpoint)
+      .WithReference(authGrpcEndpoint)
+      .WithEnvironment(context =>
+      {
+          context.EnvironmentVariables["JOB_API_SERVER_URI"] = jobApiGrpcEndpoint.Property(EndpointProperty.HostAndPort);
+          context.EnvironmentVariables["AUTH_SERVER_URI"] = authGrpcEndpoint.Property(EndpointProperty.HostAndPort);
+          context.EnvironmentVariables["AUTH_CLIENT_ID"] = workerClientId;
+          context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
+      })
+      // .WaitFor(job_api)
+      .PublishAsDockerComposeService((resource, service) =>
+      {
+          service.Name = "job-worker";
+      });
+}
+else
+{
+    var job_worker = builder.AddGoApp(
+        name: "job-worker",
+        appDirectory: "../services/job-worker",
+        packagePath: "./cmd/worker"
+      )
+      .WithAppArgs("-worker", "3")
+      //.WithReference(job_api) // WARN: ExecutableReference is not supported.
+      .WithReference(jobApiGrpcEndpoint)
+      .WithReference(authGrpcEndpoint)
+      .WithEnvironment(context =>
+      {
+          context.EnvironmentVariables["JOB_API_SERVER_URI"] = jobApiGrpcEndpoint.Property(EndpointProperty.HostAndPort);
+          context.EnvironmentVariables["AUTH_SERVER_URI"] = authGrpcEndpoint.Property(EndpointProperty.HostAndPort);
+          context.EnvironmentVariables["AUTH_CLIENT_ID"] = "job-worker";
+          context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
+      })
+      //.WaitFor(job_api)
+      .PublishAsDockerComposeService((resource, service) =>
+      {
+          service.Name = "job-worker";
+      });
 }
 
 var ui = builder.AddProject("ui", "../services/ui/ui.csproj")
@@ -307,7 +314,7 @@ var demo = builder.AddGoApp(
   )
   .PublishAsDockerComposeService((resource, service) =>
   {
-    service.Name = "demo";
+      service.Name = "demo";
   })
 ;
 
