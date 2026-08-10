@@ -222,6 +222,24 @@ else
     jobApiGrpcEndpoint = job_api.GetEndpoint("grpc");
 }
 
+var demo = builder.AddGoApp(
+    name: "demo",
+    appDirectory: "../services/demo",
+    packagePath: "./cmd/server"
+  )
+  .WithExternalHttpEndpoints()
+  .WithHttpEndpoint(
+      name: "http",
+      port: 8080,
+      env: "PORT"
+  )
+  .PublishAsDockerComposeService((resource, service) =>
+  {
+      service.Name = "demo";
+  });
+
+var demoEndpoint = demo.GetEndpoint("http", KnownNetworkIdentifiers.LocalhostNetwork);
+
 var forwardProxy = builder.AddDockerfile(
         name: "forward-proxy",
         contextPath: "../containers/squid"
@@ -232,6 +250,10 @@ var forwardProxy = builder.AddDockerfile(
         targetPort: 3128,
         isProxied: false
     )
+    .WithEnvironment(context =>
+    {
+        context.EnvironmentVariables["SQUID_ALLOWED_DEMO_HOST_AND_PORT"] = ReferenceExpression.Create($"host.docker.internal:{demoEndpoint.Property(EndpointProperty.Port)}");
+    })
     .PublishAsDockerComposeService((resource, service) =>
     {
         service.Name = "forward-proxy";
@@ -316,22 +338,6 @@ var ui = builder.AddProject("ui", "../services/ui/ui.csproj")
   .PublishAsDockerComposeService((resource, service) =>
   {
       service.Name = "ui";
-  })
-;
-
-var demo = builder.AddGoApp(
-    name: "demo",
-    appDirectory: "../services/demo",
-    packagePath: "./cmd/server"
-  )
-  .WithExternalHttpEndpoints()
-  .WithHttpEndpoint(
-      port: 8080,
-      env: "PORT"
-  )
-  .PublishAsDockerComposeService((resource, service) =>
-  {
-      service.Name = "demo";
   })
 ;
 
