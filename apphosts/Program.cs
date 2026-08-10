@@ -3,6 +3,10 @@ using Aspire.Hosting.ApplicationModel;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
+var repoRoot = Path.GetFullPath(
+    Path.Combine(builder.Environment.ContentRootPath, "..")
+);
+
 var authJwtPrivateKey = builder.AddParameter("auth-jwt-private-key", secret: true);
 var authJwtPublicKey = builder.AddParameter("auth-jwt-public-key", secret: false);
 var workerClientSecret = builder.AddParameter("job-worker-client-secret", secret: true);
@@ -218,6 +222,23 @@ else
     jobApiGrpcEndpoint = job_api.GetEndpoint("grpc");
 }
 
+var forwardProxy = builder.AddDockerfile(
+        name: "forward-proxy",
+        contextPath: "../containers/squid"
+    )
+    .WithHttpEndpoint(
+        name: "proxy",
+        port: 3128,
+        targetPort: 3128,
+        isProxied: false
+    )
+    .PublishAsDockerComposeService((resource, service) =>
+    {
+        service.Name = "forward-proxy";
+    });
+;
+var forwardProxyEndpoint = forwardProxy.GetEndpoint("proxy");
+
 if (IS_DEBUG)
 {
     var job_worker = builder.AddExecutable(
@@ -239,12 +260,14 @@ if (IS_DEBUG)
       )
       .WithReference(jobApiGrpcEndpoint)
       .WithReference(authGrpcEndpoint)
+      .WithReference(forwardProxyEndpoint)
       .WithEnvironment(context =>
       {
           context.EnvironmentVariables["JOB_API_SERVER_URI"] = jobApiGrpcEndpoint.Property(EndpointProperty.HostAndPort);
           context.EnvironmentVariables["AUTH_SERVER_URI"] = authGrpcEndpoint.Property(EndpointProperty.HostAndPort);
           context.EnvironmentVariables["AUTH_CLIENT_ID"] = workerClientId;
           context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
+          context.EnvironmentVariables["WORKER_HTTP_PROXY"] = forwardProxyEndpoint.Property(EndpointProperty.Url);
       })
       // .WaitFor(job_api)
       .PublishAsDockerComposeService((resource, service) =>
@@ -263,12 +286,14 @@ else
       //.WithReference(job_api) // WARN: ExecutableReference is not supported.
       .WithReference(jobApiGrpcEndpoint)
       .WithReference(authGrpcEndpoint)
+      .WithReference(forwardProxyEndpoint)
       .WithEnvironment(context =>
       {
           context.EnvironmentVariables["JOB_API_SERVER_URI"] = jobApiGrpcEndpoint.Property(EndpointProperty.HostAndPort);
           context.EnvironmentVariables["AUTH_SERVER_URI"] = authGrpcEndpoint.Property(EndpointProperty.HostAndPort);
           context.EnvironmentVariables["AUTH_CLIENT_ID"] = "job-worker";
           context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
+          context.EnvironmentVariables["WORKER_HTTP_PROXY"] = forwardProxyEndpoint.Property(EndpointProperty.Url);
       })
       //.WaitFor(job_api)
       .PublishAsDockerComposeService((resource, service) =>
