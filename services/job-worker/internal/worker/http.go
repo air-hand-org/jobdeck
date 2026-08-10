@@ -144,7 +144,7 @@ func newHttpExecutor(item app.WorkItem) (*httpExecutor, error) {
 	return &httpExecutor{
 		client: http.Client{
 			Transport: transport,
-			Timeout: job_config.GetTimeout().AsDuration(),
+			Timeout:   job_config.GetTimeout().AsDuration(),
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
 				if !job_config.GetFollowRedirects() {
 					return errRedirectsDisabled

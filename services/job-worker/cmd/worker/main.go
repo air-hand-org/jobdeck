@@ -157,7 +157,7 @@ func main() {
 			return errors.Wrap(err, "job-api did not become serving")
 		}
 
-		claimer := claimer.NewClaimer(api_conn, int(cfg.workerCount), 20*time.Second)
+		claimer := claimer.NewClaimer(api_conn, int(cfg.workerCount), 10*time.Second)
 		return claimer.Run(ctx, items, results)
 	})
 
