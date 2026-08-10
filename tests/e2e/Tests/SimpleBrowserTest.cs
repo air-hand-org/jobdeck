@@ -9,9 +9,15 @@ namespace e2e.Tests;
 
 [WithTestName]
 [Collection(nameof(AppFixture))]
-public sealed class SimpleBrowserTest(AppFixture fixture) : BrowserTest
+public sealed partial class SimpleBrowserTest(AppFixture fixture) : BrowserTest
 {
     private IBrowserContext context = null!;
+
+    [GeneratedRegex(@"/account/login")]
+    private static partial Regex AccountLoginUrlRegex();
+
+    [GeneratedRegex(@"/jobs$")]
+    private static partial Regex JobsUrlRegex();
 
     public override async Task InitializeAsync()
     {
@@ -58,7 +64,7 @@ public sealed class SimpleBrowserTest(AppFixture fixture) : BrowserTest
         await page.GetByRole(AriaRole.Link, new() { Name = "Jobs" }).ClickAsync();
 
         await Expect(page).ToHaveURLAsync(
-            new Regex(@"/account/login.*$")
+            AccountLoginUrlRegex()
         );
     }
 
@@ -70,7 +76,7 @@ public sealed class SimpleBrowserTest(AppFixture fixture) : BrowserTest
         await page.GotoAsync(baseUri.AbsoluteUri);
         await page.GetByRole(AriaRole.Link, new() { Name = "Login" }).ClickAsync();
 
-        await Expect(page).ToHaveURLAsync(new Regex(@"/account/login"));
+        await Expect(page).ToHaveURLAsync(AccountLoginUrlRegex());
 
         await page.GetByLabel("Id:").FillAsync("test-user");
 
@@ -86,7 +92,7 @@ public sealed class SimpleBrowserTest(AppFixture fixture) : BrowserTest
         await page.GetByRole(AriaRole.Link, new() { Name = "Jobs" }).ClickAsync();
 
         await Expect(page).ToHaveURLAsync(
-            new Regex(@"/jobs$")
+            JobsUrlRegex()
         );
         await Expect(page.GetByRole(AriaRole.Heading, new() { Name = "Jobs list" })).ToBeVisibleAsync();
     }
