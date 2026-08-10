@@ -99,10 +99,8 @@ if (IS_DEBUG)
       )
       .WithHttpEndpoint(
           port: 9091,
-          targetPort: 9091,
           name: "grpc",
-          env: "GRPC_PORT",
-          isProxied: false
+          env: "GRPC_PORT"
       )
       .WithReference(auth_db)
       .WithEnvironment(context =>
@@ -130,10 +128,8 @@ else
       //    .WithDelveServer(port: 2345) // --only-same-user=false needed
       .WithHttpEndpoint(
           port: 9091,
-          targetPort: 9091,
           name: "grpc",
-          env: "GRPC_PORT",
-          isProxied: false // FIXME: これはなんでproxy無効化しているんだっけか grpcだからか？
+          env: "GRPC_PORT"
       )
       .WithReference(auth_db)
       .WithEnvironment(context =>
@@ -171,10 +167,8 @@ if (IS_DEBUG)
       )
       .WithHttpEndpoint(
           port: 9090,
-          targetPort: 9090,
           name: "grpc",
-          env: "GRPC_PORT",
-          isProxied: false
+          env: "GRPC_PORT"
       )
       .WithReference(job_db)
       .WithEnvironment(context =>
@@ -203,10 +197,8 @@ else
       //    .WithDelveServer(port: 2345) // --only-same-user=false needed
       .WithHttpEndpoint(
           port: 9090,
-          targetPort: 9090,
           name: "grpc",
-          env: "GRPC_PORT",
-          isProxied: false
+          env: "GRPC_PORT"
       )
       .WithReference(job_db)
       .WithEnvironment(context =>
