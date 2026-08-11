@@ -44,6 +44,7 @@ public sealed class ForwardProxyBrowserTest(AppFixture fixture) : BrowserE2ETest
         await page.GetByLabel("Name:").FillAsync(jobName);
         await page.GetByLabel("Request URL:").FillAsync(requestUri.AbsoluteUri);
         await page.Locator("#method").SelectOptionAsync("Get");
+        await page.GetByLabel("Timeout(sec):").FillAsync("5");
         var createButton = page.GetByRole(AriaRole.Button, new() { Name = "Create" });
         await Expect(createButton).ToBeEnabledAsync();
         await createButton.ClickAsync();
