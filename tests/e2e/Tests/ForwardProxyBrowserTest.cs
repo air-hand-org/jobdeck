@@ -40,13 +40,14 @@ public sealed class ForwardProxyBrowserTest(AppFixture fixture) : BrowserE2ETest
         await page.GetByRole(AriaRole.Link, new() { Name = "Jobs" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Create New" }).ClickAsync();
 
+        var createButton = page.GetByRole(AriaRole.Button, new() { Name = "Create" });
+        await Expect(createButton).ToBeEnabledAsync();
+
         var jobName = $"e2e-forward-proxy-{Guid.NewGuid():N}";
         await page.GetByLabel("Name:").FillAsync(jobName);
         await page.GetByLabel("Request URL:").FillAsync(requestUri.AbsoluteUri);
         await page.Locator("#method").SelectOptionAsync("Get");
         await page.GetByLabel("Timeout(sec):").FillAsync("5");
-        var createButton = page.GetByRole(AriaRole.Button, new() { Name = "Create" });
-        await Expect(createButton).ToBeEnabledAsync();
         await createButton.ClickAsync();
 
         var jobRow = page.Locator("tr").Filter(new() { HasText = jobName });

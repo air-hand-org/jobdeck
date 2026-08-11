@@ -104,10 +104,12 @@
     <ValidationMessage For="() => Model.MaxDelaySeconds" class="text-danger" />
   </div>
 
-  <button type="submit" class="btn btn-primary">@SubmitText</button>
+  <button type="submit" class="btn btn-primary" disabled="@(!_isInteractive)">@SubmitText</button>
 </EditForm>
 
 @code {
+  private bool _isInteractive;
+
   [Parameter, EditorRequired]
   public HttpJobFormModel Model { get; set; } = default!;
 
@@ -122,6 +124,15 @@
 
   [Parameter]
   public string? ErrorMessage {get; set;}
+
+  protected override void OnAfterRender(bool firstRender)
+  {
+    if (firstRender)
+    {
+      _isInteractive = true;
+      StateHasChanged();
+    }
+  }
 
   private async Task HandleValidSubmit(EditContext _)
   {
