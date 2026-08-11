@@ -240,6 +240,12 @@ var demo = builder.AddGoApp(
 
 var demoEndpoint = demo.GetEndpoint("http", KnownNetworkIdentifiers.LocalhostNetwork);
 
+var isGitHubActions = string.Equals(
+    Environment.GetEnvironmentVariable("GITHUB_ACTIONS"),
+    "true",
+    StringComparison.OrdinalIgnoreCase
+);
+
 var forwardProxy = builder.AddDockerfile(
         name: "forward-proxy",
         contextPath: "../containers/squid"
@@ -256,8 +262,14 @@ var forwardProxy = builder.AddDockerfile(
     .PublishAsDockerComposeService((resource, service) =>
     {
         service.Name = "forward-proxy";
-    });
+    })
 ;
+if (isGitHubActions)
+{
+    forwardProxy.WithContainerRuntimeArgs(
+        "--add-host=host.docker.internal:host-gateway"
+    );
+}
 var forwardProxyEndpoint = forwardProxy.GetEndpoint("proxy");
 
 if (IS_DEBUG)
