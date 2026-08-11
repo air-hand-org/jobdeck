@@ -222,6 +222,12 @@ else
     jobApiGrpcEndpoint = job_api.GetEndpoint("grpc");
 }
 
+var isGitHubActions = string.Equals(
+    Environment.GetEnvironmentVariable("GITHUB_ACTIONS"),
+    "true",
+    StringComparison.OrdinalIgnoreCase
+);
+
 var demo = builder.AddGoApp(
     name: "demo",
     appDirectory: "../services/demo",
@@ -231,7 +237,8 @@ var demo = builder.AddGoApp(
   .WithHttpEndpoint(
       name: "http",
       port: 8080,
-      env: "PORT"
+      env: "PORT",
+      isProxied: !isGitHubActions
   )
   .PublishAsDockerComposeService((resource, service) =>
   {
@@ -239,12 +246,6 @@ var demo = builder.AddGoApp(
   });
 
 var demoEndpoint = demo.GetEndpoint("http", KnownNetworkIdentifiers.LocalhostNetwork);
-
-var isGitHubActions = string.Equals(
-    Environment.GetEnvironmentVariable("GITHUB_ACTIONS"),
-    "true",
-    StringComparison.OrdinalIgnoreCase
-);
 
 var forwardProxy = builder.AddDockerfile(
         name: "forward-proxy",
