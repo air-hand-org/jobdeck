@@ -21,7 +21,7 @@
 <div>
   <p>@_errorMessage</p>
   <p>
-    <button type="button" class="btn btn-primary" @onclick="RequestExecution">Request to run the job</button>
+    <button type="button" class="btn btn-primary" disabled="@(!_isInteractive)" @onclick="RequestExecution">Request to run the job</button>
   </p>
 </div>
 
@@ -45,6 +45,7 @@
   private Job? _job;
   private List<Execution> _execs = [];
   private string? _errorMessage;
+  private bool _isInteractive;
 
   private readonly CancellationTokenSource _cts = new();
   private Task? _refreshTask;
@@ -75,6 +76,8 @@
     }
 
     _refreshTask = RefreshLoopAsync(_cts.Token);
+    _isInteractive = true;
+    StateHasChanged();
   }
 
   private async Task RefreshLoopAsync(CancellationToken token)
