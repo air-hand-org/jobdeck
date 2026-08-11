@@ -247,8 +247,7 @@ var forwardProxy = builder.AddDockerfile(
     .WithHttpEndpoint(
         name: "proxy",
         port: 3128,
-        targetPort: 3128,
-        isProxied: false
+        targetPort: 3128
     )
     .WithEnvironment(context =>
     {
