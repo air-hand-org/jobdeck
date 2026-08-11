@@ -19,6 +19,7 @@ jobs:
     uses: ./.github/workflows/_ci.yaml
     permissions:
       contents: read
+      id-token: write
 
   check-result:
     needs: ci
