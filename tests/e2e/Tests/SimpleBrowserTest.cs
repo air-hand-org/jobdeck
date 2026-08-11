@@ -1,6 +1,5 @@
 using System.Text.RegularExpressions;
 using Microsoft.Playwright;
-using Microsoft.Playwright.Xunit;
 
 using e2e.Attributes;
 using e2e.Fixtures;
@@ -9,47 +8,19 @@ namespace e2e.Tests;
 
 [WithTestName]
 [Collection(nameof(AppFixture))]
-public sealed partial class SimpleBrowserTest(AppFixture fixture) : BrowserTest
+public sealed partial class SimpleBrowserTest(AppFixture fixture) : BrowserE2ETest(fixture)
 {
-    private IBrowserContext context = null!;
-
     [GeneratedRegex(@"/account/login")]
     private static partial Regex AccountLoginUrlRegex();
 
     [GeneratedRegex(@"/jobs$")]
     private static partial Regex JobsUrlRegex();
 
-    public override async Task InitializeAsync()
-    {
-        await base.InitializeAsync();
-        context = await Browser.NewContextAsync();
-        await context.Tracing.StartAsync(new()
-        {
-            Title = $"{WithTestNameAttribute.CurrentClassName}.{WithTestNameAttribute.CurrentTestName}",
-            Screenshots = true,
-            Snapshots = true,
-            Sources = true
-        });
-    }
-
-    public override async Task DisposeAsync()
-    {
-        await context.Tracing.StopAsync(new()
-        {
-            Path = Path.Combine(
-                    Environment.CurrentDirectory,
-                    "playwright-traces",
-                    $"{WithTestNameAttribute.CurrentClassName}.{WithTestNameAttribute.CurrentTestName}.zip"
-                )
-        });
-        await base.DisposeAsync();
-    }
-
     [Fact]
     public async Task HasLoginLinkMenu()
     {
-        var page = await context.NewPageAsync();
-        var baseUri = fixture.Target.UIBaseUri;
+        var page = await Context.NewPageAsync();
+        var baseUri = Fixture.Target.UIBaseUri;
         await page.GotoAsync(baseUri.AbsoluteUri);
 
         await Expect(page.GetByRole(AriaRole.Link, new() { Name = "Login" })).ToBeVisibleAsync();
@@ -58,8 +29,8 @@ public sealed partial class SimpleBrowserTest(AppFixture fixture) : BrowserTest
     [Fact]
     public async Task ToBeRedirectedWithoutLogin()
     {
-        var page = await context.NewPageAsync();
-        var baseUri = fixture.Target.UIBaseUri;
+        var page = await Context.NewPageAsync();
+        var baseUri = Fixture.Target.UIBaseUri;
         await page.GotoAsync(baseUri.AbsoluteUri);
         await page.GetByRole(AriaRole.Link, new() { Name = "Jobs" }).ClickAsync();
 
@@ -71,8 +42,8 @@ public sealed partial class SimpleBrowserTest(AppFixture fixture) : BrowserTest
     [Fact]
     public async Task CanGotoJobsPageWithLogin()
     {
-        var page = await context.NewPageAsync();
-        var baseUri = fixture.Target.UIBaseUri;
+        var page = await Context.NewPageAsync();
+        var baseUri = Fixture.Target.UIBaseUri;
         await page.GotoAsync(baseUri.AbsoluteUri);
         await page.GetByRole(AriaRole.Link, new() { Name = "Login" }).ClickAsync();
 

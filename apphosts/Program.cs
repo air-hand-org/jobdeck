@@ -3,6 +3,10 @@ using Aspire.Hosting.ApplicationModel;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
+var repoRoot = Path.GetFullPath(
+    Path.Combine(builder.Environment.ContentRootPath, "..")
+);
+
 var authJwtPrivateKey = builder.AddParameter("auth-jwt-private-key", secret: true);
 var authJwtPublicKey = builder.AddParameter("auth-jwt-public-key", secret: false);
 var workerClientSecret = builder.AddParameter("job-worker-client-secret", secret: true);
@@ -218,6 +222,57 @@ else
     jobApiGrpcEndpoint = job_api.GetEndpoint("grpc");
 }
 
+var isGitHubActions = string.Equals(
+    Environment.GetEnvironmentVariable("GITHUB_ACTIONS"),
+    "true",
+    StringComparison.OrdinalIgnoreCase
+);
+
+var demo = builder.AddGoApp(
+    name: "demo",
+    appDirectory: "../services/demo",
+    packagePath: "./cmd/server"
+  )
+  .WithExternalHttpEndpoints()
+  .WithHttpEndpoint(
+      name: "http",
+      port: 8080,
+      env: "PORT",
+      isProxied: !isGitHubActions
+  )
+  .PublishAsDockerComposeService((resource, service) =>
+  {
+      service.Name = "demo";
+  });
+
+var demoEndpoint = demo.GetEndpoint("http", KnownNetworkIdentifiers.LocalhostNetwork);
+
+var forwardProxy = builder.AddDockerfile(
+        name: "forward-proxy",
+        contextPath: "../containers/squid"
+    )
+    .WithHttpEndpoint(
+        name: "proxy",
+        port: 3128,
+        targetPort: 3128
+    )
+    .WithEnvironment(context =>
+    {
+        context.EnvironmentVariables["SQUID_ALLOWED_DEMO_HOST_AND_PORT"] = ReferenceExpression.Create($"host.docker.internal:{demoEndpoint.Property(EndpointProperty.Port)}");
+    })
+    .PublishAsDockerComposeService((resource, service) =>
+    {
+        service.Name = "forward-proxy";
+    })
+;
+if (isGitHubActions)
+{
+    forwardProxy.WithContainerRuntimeArgs(
+        "--add-host=host.docker.internal:host-gateway"
+    );
+}
+var forwardProxyEndpoint = forwardProxy.GetEndpoint("proxy");
+
 if (IS_DEBUG)
 {
     var job_worker = builder.AddExecutable(
@@ -239,12 +294,14 @@ if (IS_DEBUG)
       )
       .WithReference(jobApiGrpcEndpoint)
       .WithReference(authGrpcEndpoint)
+      .WithReference(forwardProxyEndpoint)
       .WithEnvironment(context =>
       {
           context.EnvironmentVariables["JOB_API_SERVER_URI"] = jobApiGrpcEndpoint.Property(EndpointProperty.HostAndPort);
           context.EnvironmentVariables["AUTH_SERVER_URI"] = authGrpcEndpoint.Property(EndpointProperty.HostAndPort);
           context.EnvironmentVariables["AUTH_CLIENT_ID"] = workerClientId;
           context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
+          context.EnvironmentVariables["WORKER_HTTP_PROXY"] = forwardProxyEndpoint.Property(EndpointProperty.Url);
       })
       // .WaitFor(job_api)
       .PublishAsDockerComposeService((resource, service) =>
@@ -263,12 +320,14 @@ else
       //.WithReference(job_api) // WARN: ExecutableReference is not supported.
       .WithReference(jobApiGrpcEndpoint)
       .WithReference(authGrpcEndpoint)
+      .WithReference(forwardProxyEndpoint)
       .WithEnvironment(context =>
       {
           context.EnvironmentVariables["JOB_API_SERVER_URI"] = jobApiGrpcEndpoint.Property(EndpointProperty.HostAndPort);
           context.EnvironmentVariables["AUTH_SERVER_URI"] = authGrpcEndpoint.Property(EndpointProperty.HostAndPort);
           context.EnvironmentVariables["AUTH_CLIENT_ID"] = "job-worker";
           context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
+          context.EnvironmentVariables["WORKER_HTTP_PROXY"] = forwardProxyEndpoint.Property(EndpointProperty.Url);
       })
       //.WaitFor(job_api)
       .PublishAsDockerComposeService((resource, service) =>
@@ -291,22 +350,6 @@ var ui = builder.AddProject("ui", "../services/ui/ui.csproj")
   .PublishAsDockerComposeService((resource, service) =>
   {
       service.Name = "ui";
-  })
-;
-
-var demo = builder.AddGoApp(
-    name: "demo",
-    appDirectory: "../services/demo",
-    packagePath: "./cmd/server"
-  )
-  .WithExternalHttpEndpoints()
-  .WithHttpEndpoint(
-      port: 8080,
-      env: "PORT"
-  )
-  .PublishAsDockerComposeService((resource, service) =>
-  {
-      service.Name = "demo";
   })
 ;
 

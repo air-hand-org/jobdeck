@@ -19,7 +19,7 @@ func executorFactory(item app.WorkItem) (executor, error) {
 	job_type := item.Execution.GetJobSpec().GetType()
 	switch job_type {
 	case jobv1.JobType_JOB_TYPE_HTTP_REQUEST:
-		return newHttpExecutor(item), nil
+		return newHttpExecutor(item)
 	default:
 		return nil, errors.New("unsupported job type")
 	}

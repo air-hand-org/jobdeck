@@ -8,6 +8,8 @@ import (
 	"jobdeck/services/job-worker/internal/app"
 	"net"
 	"net/http"
+	"net/url"
+	"os"
 
 	"github.com/cockroachdb/errors"
 )
@@ -122,13 +124,27 @@ func httpMethodFromProto(m jobv1.HttpMethod) (string, error) {
 	}
 }
 
+var errProxySettingsNotFound = errors.New("WORKER_HTTP_PROXY env is not set")
 var errRedirectsDisabled = errors.New("redirects disabled")
 
-func newHttpExecutor(item app.WorkItem) *httpExecutor {
+func newHttpExecutor(item app.WorkItem) (*httpExecutor, error) {
+	proxyUrlStr := os.Getenv("WORKER_HTTP_PROXY")
+	if proxyUrlStr == "" {
+		return nil, errProxySettingsNotFound
+	}
+	proxyUrl, err := url.Parse(proxyUrlStr)
+	if err != nil {
+		return nil, errors.Wrap(err, "parse proxy URL")
+	}
+
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.Proxy = http.ProxyURL(proxyUrl)
+
 	job_config := item.Execution.GetJobSpec().GetHttp()
 	return &httpExecutor{
 		client: http.Client{
-			Timeout: job_config.GetTimeout().AsDuration(),
+			Transport: transport,
+			Timeout:   job_config.GetTimeout().AsDuration(),
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
 				if !job_config.GetFollowRedirects() {
 					return errRedirectsDisabled
@@ -136,5 +152,5 @@ func newHttpExecutor(item app.WorkItem) *httpExecutor {
 				return nil
 			},
 		},
-	}
+	}, nil
 }

@@ -1,0 +1,26 @@
+http_port 3128
+
+forwarded_for delete
+cache deny all
+
+acl demo dstdomain ${SQUID_ALLOWED_DEMO_HOST}
+acl demo_port port ${SQUID_ALLOWED_DEMO_PORT}
+
+acl www_google dstdomain www.google.com
+acl https_ports port 443
+
+# deny local
+acl forbidden_dst dst 0.0.0.0/8
+acl forbidden_dst dst 10.0.0.0/8
+acl forbidden_dst dst 127.0.0.0/8
+acl forbidden_dst dst 169.254.0.0/16
+acl forbidden_dst dst 172.16.0.0/12
+acl forbidden_dst dst 192.168.0.0/16
+acl forbidden_dst dst ::1
+acl forbidden_dst dst fc00::/7
+acl forbidden_dst dst fe80::/10
+
+http_access allow demo demo_port
+http_access deny forbidden_dst
+http_access allow www_google https_ports
+http_access deny all
