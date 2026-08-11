@@ -23,6 +23,11 @@ locals {
     "roles/secretmanager.admin",
   ])
 
+  plan_roles = toset([
+    "roles/viewer",
+    "roles/iam.securityReviewer",
+  ])
+
   secret_names = toset([
     "auth-jwt-private-key",
     "auth-jwt-public-key",
@@ -122,6 +127,12 @@ resource "google_service_account" "deployer" {
   display_name = "JobDeck application deployer"
 }
 
+resource "google_service_account" "plan" {
+  project      = var.project_id
+  account_id   = "jobdeck-plan"
+  display_name = "JobDeck infrastructure plan reader"
+}
+
 resource "google_service_account" "runtime" {
   for_each     = local.runtime_service_accounts
   project      = var.project_id
@@ -134,6 +145,13 @@ resource "google_project_iam_member" "deployer" {
   project  = var.project_id
   role     = each.value
   member   = "serviceAccount:${google_service_account.deployer.email}"
+}
+
+resource "google_project_iam_member" "plan" {
+  for_each = local.plan_roles
+  project  = var.project_id
+  role     = each.value
+  member   = "serviceAccount:${google_service_account.plan.email}"
 }
 
 resource "google_service_account_iam_member" "deployer_runtime" {
@@ -149,10 +167,22 @@ resource "google_storage_bucket_iam_member" "deployer_state" {
   member = "serviceAccount:${google_service_account.deployer.email}"
 }
 
+resource "google_storage_bucket_iam_member" "plan_state" {
+  bucket = var.state_bucket_name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${google_service_account.plan.email}"
+}
+
 resource "google_kms_crypto_key_iam_member" "deployer_state" {
   crypto_key_id = google_kms_crypto_key.tofu_state.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${google_service_account.deployer.email}"
+}
+
+resource "google_kms_crypto_key_iam_member" "plan_state" {
+  crypto_key_id = google_kms_crypto_key.tofu_state.id
+  role          = "roles/cloudkms.cryptoKeyDecrypter"
+  member        = "serviceAccount:${google_service_account.plan.email}"
 }
 
 resource "google_kms_crypto_key_iam_member" "deployer_sops" {
@@ -177,4 +207,10 @@ resource "google_service_account_iam_member" "deployer_wif" {
   service_account_id = google_service_account.deployer.name
   role               = "roles/iam.workloadIdentityUser"
   member             = "principalSet://iam.googleapis.com/projects/${data.google_project.current.number}/locations/global/workloadIdentityPools/${var.github_wif_pool_id}/attribute.environment/production"
+}
+
+resource "google_service_account_iam_member" "plan_wif" {
+  service_account_id = google_service_account.plan.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principalSet://iam.googleapis.com/projects/${data.google_project.current.number}/locations/global/workloadIdentityPools/${var.github_wif_pool_id}/attribute.environment/plan"
 }

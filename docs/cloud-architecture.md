@@ -84,6 +84,10 @@ main merge
 `bootstrap` は reusable workflow であり、release publish 時と必要時の手動 apply から呼ぶ。
 destroy workflow は `iac/app` だけに対して実行する。bootstrap resource と state は削除しない。
 
+PR の infrastructure plan は、専用の `jobdeck-plan` service account を GitHub Environment
+`plan` の OIDC binding で利用する。同 SA は project/IAM policy の read、state bucket の read、
+state KMS key の decrypt のみを持つ。fork PR はこの workflow を実行しない。
+
 ### Runtime topology
 
 ```text

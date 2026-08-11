@@ -1,0 +1,33 @@
+name: Infrastructure Plan
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - iac/**
+      - .github/workflows/bootstrap.yaml
+      - .github/workflows/plan.yaml
+      - aqua.yaml
+      - mkfiles/tofu.mk
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: infrastructure-plan-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bootstrap:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository }}
+    uses: ./.github/workflows/bootstrap.yaml
+    with:
+      command: plan
+      environment: plan
+    secrets: inherit
+    permissions:
+      contents: read
+      id-token: write

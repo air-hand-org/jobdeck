@@ -8,6 +8,11 @@ on:
         required: false
         type: string
         default: apply
+      environment:
+        description: GitHub Environment that provides GCP OIDC variables
+        required: false
+        type: string
+        default: bootstrap
   workflow_dispatch:
     inputs:
       command:
@@ -18,6 +23,14 @@ on:
           - plan
           - apply
         default: plan
+      environment:
+        description: GitHub Environment that provides GCP OIDC variables
+        required: true
+        type: choice
+        options:
+          - bootstrap
+          - plan
+        default: bootstrap
 
 permissions:
   contents: read
@@ -26,7 +39,7 @@ permissions:
 jobs:
   bootstrap:
     runs-on: ubuntu-latest
-    environment: bootstrap
+    environment: ${{ inputs.environment }}
     concurrency:
       group: jobdeck-bootstrap
       cancel-in-progress: false

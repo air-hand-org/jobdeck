@@ -14,6 +14,10 @@ output "deployer_service_account" {
   value = google_service_account.deployer.email
 }
 
+output "plan_service_account" {
+  value = google_service_account.plan.email
+}
+
 output "tofu_state_kms_key" {
   value = google_kms_crypto_key.tofu_state.id
 }
