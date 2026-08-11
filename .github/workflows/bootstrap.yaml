@@ -1,6 +1,13 @@
 name: Bootstrap GCP
 
 on:
+  workflow_call:
+    inputs:
+      command:
+        description: OpenTofu command to run
+        required: false
+        type: string
+        default: apply
   workflow_dispatch:
     inputs:
       command:
@@ -45,8 +52,7 @@ jobs:
         run: |
           tofu plan \
             -out=tfplan \
-            -var="project_id=${{ vars.GCP_PROJECT_ID }}" \
-            -var="project_number=${{ vars.GCP_PROJECT_NUMBER }}"
+            -var="project_id=${{ vars.GCP_PROJECT_ID }}"
       - name: Apply
         if: ${{ inputs.command == 'apply' }}
         run: tofu apply -auto-approve tfplan

@@ -40,6 +40,12 @@ locals {
   }
 }
 
+data "google_project" "current" {
+  project_id = var.project_id
+
+  depends_on = [google_project_service.required["cloudresourcemanager.googleapis.com"]]
+}
+
 resource "google_project_service" "required" {
   for_each           = local.required_services
   project            = var.project_id
@@ -170,5 +176,5 @@ resource "google_secret_manager_secret_iam_member" "runtime" {
 resource "google_service_account_iam_member" "deployer_wif" {
   service_account_id = google_service_account.deployer.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "principalSet://iam.googleapis.com/projects/${var.project_number}/locations/global/workloadIdentityPools/${var.github_wif_pool_id}/attribute.environment/production"
+  member             = "principalSet://iam.googleapis.com/projects/${data.google_project.current.number}/locations/global/workloadIdentityPools/${var.github_wif_pool_id}/attribute.environment/production"
 }

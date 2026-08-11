@@ -68,16 +68,20 @@ configuration 内の SOPS data source は使わない。復号済み data source
 ### Image and deployment flow
 
 Terraform Docker provider は使わない。CI が各 image を build し、Artifact Registry へ
-digest を push する。OpenTofu は digest を variable として受け取り、Cloud Run revision を
-固定する。
+release tag (`vX.Y.Z`) を push する。repository は immutable tag を有効にし、OpenTofu は
+release tag を variable として受け取って Cloud Run revision を固定する。
 
 ```text
-GitHub Actions
-  -> build / push image digests to Artifact Registry
+main merge
+  -> release-please creates a draft release and vX.Y.Z tag
+  -> GitHub Release published
+  -> bootstrap tofu apply
+  -> build / push vX.Y.Z images to Artifact Registry
   -> decrypt SOPS secrets
-  -> tofu apply iac/app with immutable image digests
+  -> tofu apply iac/app with immutable image tags
 ```
 
+`bootstrap` は reusable workflow であり、release publish 時と必要時の手動 apply から呼ぶ。
 destroy workflow は `iac/app` だけに対して実行する。bootstrap resource と state は削除しない。
 
 ### Runtime topology
