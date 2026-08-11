@@ -78,10 +78,9 @@ public sealed class ForwardProxyBrowserTest(AppFixture fixture) : BrowserE2ETest
     }
 
     [Fact]
-    public async Task CannotExecuteUnallowedDemoUrlThroughForwardProxy()
+    public async Task CannotExecuteForbiddenLoopbackUrlThroughForwardProxy()
     {
-        var unallowedDemoUri = new Uri(Fixture.Target.DemoBaseUri, "/200");
-        var page = await RequestExecutionAsync(unallowedDemoUri);
+        var page = await RequestExecutionAsync(new Uri("http://127.0.0.1/"));
 
         await Expect(page.GetByText("Failed", new() { Exact = true }))
             .ToBeVisibleAsync(new() { Timeout = 30_000 });
