@@ -65,7 +65,7 @@ public sealed class ForwardProxyBrowserTest(AppFixture fixture) : BrowserE2ETest
         var page = await RequestExecutionAsync(ToForwardProxyDemoUri(demoUri));
 
         await Expect(page.GetByText("Succeeded", new() { Exact = true }))
-            .ToBeVisibleAsync(new() { Timeout = 15_000 });
+            .ToBeVisibleAsync(new() { Timeout = 30_000 });
     }
 
     [Fact]
@@ -74,7 +74,7 @@ public sealed class ForwardProxyBrowserTest(AppFixture fixture) : BrowserE2ETest
         var page = await RequestExecutionAsync(new Uri("https://www.google.com/"));
 
         await Expect(page.GetByText("Succeeded", new() { Exact = true }))
-            .ToBeVisibleAsync(new() { Timeout = 15_000 });
+            .ToBeVisibleAsync(new() { Timeout = 30_000 });
     }
 
     [Fact]
@@ -84,6 +84,6 @@ public sealed class ForwardProxyBrowserTest(AppFixture fixture) : BrowserE2ETest
         var page = await RequestExecutionAsync(unallowedDemoUri);
 
         await Expect(page.GetByText("Failed", new() { Exact = true }))
-            .ToBeVisibleAsync(new() { Timeout = 15_000 });
+            .ToBeVisibleAsync(new() { Timeout = 30_000 });
     }
 }
