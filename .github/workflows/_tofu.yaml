@@ -16,34 +16,6 @@ on:
         description: GitHub Environment that provides GCP OIDC variables
         required: true
         type: string
-  workflow_dispatch:
-    inputs:
-      root:
-        description: OpenTofu root under iac/
-        required: true
-        type: choice
-        options:
-          - bootstrap
-          - app
-        default: bootstrap
-      command:
-        description: OpenTofu command to run
-        required: true
-        type: choice
-        options:
-          - plan
-          - apply
-        default: plan
-      environment:
-        description: GitHub Environment that provides GCP OIDC variables
-        required: true
-        type: choice
-        options:
-          - bootstrap
-          - plan
-          - production
-        default: plan
-
 permissions:
   contents: read
   id-token: write
