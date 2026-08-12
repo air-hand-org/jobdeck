@@ -24,5 +24,5 @@ variable "github_wif_pool_id" {
 
 variable "app_dns_name" {
   type    = string
-  default = "app.air-hand.com."
+  default = "jobdeck.app.air-hand.com."
 }

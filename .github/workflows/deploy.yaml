@@ -15,9 +15,11 @@ concurrency:
 
 jobs:
   bootstrap:
-    uses: ./.github/workflows/_bootstrap.yaml
+    uses: ./.github/workflows/_tofu.yaml
     with:
+      root: bootstrap
       command: apply
+      environment: bootstrap
     secrets: inherit
     permissions:
       contents: read
