@@ -10,23 +10,23 @@ managed:
     - file_option: go_package
       module: buf.build/bufbuild/protovalidate
 plugins:
-  - remote: buf.build/protocolbuffers/go
+  - remote: buf.build/protocolbuffers/go:v1.36.11
     out: gen/go
     opt: paths=source_relative
-  - remote: buf.build/grpc/go
+  - remote: buf.build/grpc/go:v1.6.2
     out: gen/go
     opt: paths=source_relative
-  - remote: buf.build/connectrpc/gosimple
+  - remote: buf.build/connectrpc/gosimple:v1.20.0
     out: gen/go
     opt:
       - paths=source_relative
       - simple
-  - remote: buf.build/protocolbuffers/csharp
+  - remote: buf.build/protocolbuffers/csharp:v35.1
     out: gen/csharp/Jobdeck.Proto/Generated
     include_imports: true
     opt:
       - base_namespace=
-  - remote: buf.build/grpc/csharp
+  - remote: buf.build/grpc/csharp:v1.83.0
     out: gen/csharp/Jobdeck.Proto/Generated
     include_imports: true
     opt:
