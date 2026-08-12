@@ -1,0 +1,29 @@
+name: Deploy
+
+on:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    uses: ./.github/workflows/_tofu.yaml
+    with:
+      root: bootstrap
+      command: apply
+      environment: bootstrap
+    secrets: inherit
+    permissions:
+      contents: read
+      id-token: write
+
+  # Add the app apply job here after iac/app exists. It will depend on this
+  # bootstrap job and deploy the images tagged with github.event.release.tag_name.

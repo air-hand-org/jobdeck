@@ -37,3 +37,20 @@ jobs:
           if-no-files-found: ignore
       - name: check clean
         run: make check-clean
+
+  infrastructure-plan:
+    # Fork PRs run the test job, but never receive a GCP OIDC token. This
+    # condition is defence in depth; the Workload Identity Provider must also
+    # restrict tokens to the air-hand-org/jobdeck repository.
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    uses: ./.github/workflows/_tofu.yaml
+    with:
+      root: bootstrap
+      command: plan
+      environment: plan
+    secrets: inherit
+    permissions:
+      contents: read
+      id-token: write

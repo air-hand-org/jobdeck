@@ -1,0 +1,72 @@
+name: OpenTofu
+
+on:
+  workflow_call:
+    inputs:
+      root:
+        description: OpenTofu root under iac/
+        required: true
+        type: string
+      command:
+        description: OpenTofu command to run
+        required: false
+        type: string
+        default: apply
+      environment:
+        description: GitHub Environment that provides GCP OIDC variables
+        required: true
+        type: string
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  tofu:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    concurrency:
+      group: jobdeck-tofu-${{ inputs.root }}-${{ inputs.environment }}
+      cancel-in-progress: ${{ inputs.command == 'plan' }}
+    env:
+      TOFU_ROOT: ${{ inputs.root }}
+      TOFU_ENVIRONMENT: ${{ inputs.environment }}
+      TOFU_COMMAND: ${{ inputs.command }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup-tools
+      - name: Validate root and environment
+        shell: bash
+        run: |
+          case "${TOFU_COMMAND}:${TOFU_ROOT}:${TOFU_ENVIRONMENT}" in
+            plan:bootstrap:plan|apply:bootstrap:bootstrap|plan:app:plan|apply:app:production) ;;
+            *)
+              echo "Unsupported OpenTofu command/root/environment combination: ${TOFU_COMMAND}:${TOFU_ROOT}:${TOFU_ENVIRONMENT}" >&2
+              exit 1
+              ;;
+          esac
+      - uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+      - name: Initialize OpenTofu
+        run: |
+          cd "iac/${TOFU_ROOT}"
+          tofu init \
+            -backend-config="bucket=airhand-jobdeck-bucket" \
+            -backend-config="prefix=${TOFU_ROOT}"
+      - name: Validate
+        run: |
+          cd "iac/${TOFU_ROOT}"
+          tofu validate -no-color
+      - name: Plan
+        run: |
+          cd "iac/${TOFU_ROOT}"
+          tofu plan \
+            -out=tfplan \
+            -var="project_id=${{ vars.GCP_PROJECT_ID }}"
+      - name: Apply
+        if: ${{ inputs.command == 'apply' }}
+        run: |
+          cd "iac/${TOFU_ROOT}"
+          tofu apply -auto-approve tfplan

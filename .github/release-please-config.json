@@ -1,0 +1,11 @@
+{
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "package-name": "jobdeck",
+      "draft": true,
+      "include-component-in-tag": false,
+      "force-tag-creation": true
+    }
+  }
+}
