@@ -11,6 +11,8 @@ on:
 permissions: {}
 
 jobs:
+  # Add CI jobs to _ci.yaml so this reusable workflow remains the single gate
+  # consumed by check-result.
   ci:
     uses: ./.github/workflows/_ci.yaml
     permissions:
