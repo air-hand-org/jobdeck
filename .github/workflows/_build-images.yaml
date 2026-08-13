@@ -23,8 +23,10 @@ permissions:
   contents: read
 
 concurrency:
-  group: build-images-${{ inputs.image_tag || github.run_id }}
-  cancel-in-progress: false
+  # CI build-only runs are disposable and share a group per ref. Publishing is
+  # keyed by immutable release tag and must never be cancelled mid-push.
+  group: build-images-${{ inputs.push && inputs.image_tag || github.ref }}
+  cancel-in-progress: ${{ inputs.push == false }}
 
 jobs:
   build:
