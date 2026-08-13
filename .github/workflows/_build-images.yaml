@@ -48,11 +48,11 @@ jobs:
               context: containers/forward-proxy
               file: containers/forward-proxy/Dockerfile
               push: false
-          - name: Build demo image
+          - name: Build job-api image
             uses: docker/build-push-action@v7
             with:
               context: .
-              file: containers/demo/Dockerfile
+              file: containers/job-api/Dockerfile
               push: false
       - parallel:
           - name: Build auth image
@@ -61,18 +61,18 @@ jobs:
               context: .
               file: containers/auth/Dockerfile
               push: false
-          - name: Build job-api image
-            uses: docker/build-push-action@v7
-            with:
-              context: .
-              file: containers/job-api/Dockerfile
-              push: false
-      - parallel:
           - name: Build job-worker image
             uses: docker/build-push-action@v7
             with:
               context: .
               file: containers/job-worker/Dockerfile
+              push: false
+      - parallel:
+          - name: Build demo image
+            uses: docker/build-push-action@v7
+            with:
+              context: .
+              file: containers/demo/Dockerfile
               push: false
           - name: Build ui image
             uses: docker/build-push-action@v7
@@ -122,21 +122,6 @@ jobs:
               file: containers/forward-proxy/Dockerfile
               push: true
               tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-forward-proxy/forward-proxy:${{ env.IMAGE_TAG }}
-          - name: Build and push demo image
-            uses: docker/build-push-action@v7
-            with:
-              context: .
-              file: containers/demo/Dockerfile
-              push: true
-              tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-demo/demo:${{ env.IMAGE_TAG }}
-      - parallel:
-          - name: Build and push auth image
-            uses: docker/build-push-action@v7
-            with:
-              context: .
-              file: containers/auth/Dockerfile
-              push: true
-              tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-auth/auth:${{ env.IMAGE_TAG }}
           - name: Build and push job-api image
             uses: docker/build-push-action@v7
             with:
@@ -145,6 +130,13 @@ jobs:
               push: true
               tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-job-api/job-api:${{ env.IMAGE_TAG }}
       - parallel:
+          - name: Build and push auth image
+            uses: docker/build-push-action@v7
+            with:
+              context: .
+              file: containers/auth/Dockerfile
+              push: true
+              tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-auth/auth:${{ env.IMAGE_TAG }}
           - name: Build and push job-worker image
             uses: docker/build-push-action@v7
             with:
@@ -152,6 +144,14 @@ jobs:
               file: containers/job-worker/Dockerfile
               push: true
               tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-job-worker/job-worker:${{ env.IMAGE_TAG }}
+      - parallel:
+          - name: Build and push demo image
+            uses: docker/build-push-action@v7
+            with:
+              context: .
+              file: containers/demo/Dockerfile
+              push: true
+              tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-demo/demo:${{ env.IMAGE_TAG }}
           - name: Build and push ui image
             uses: docker/build-push-action@v7
             with:
