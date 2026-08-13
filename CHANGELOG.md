@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/air-hand-org/jobdeck/compare/v0.2.0...v0.3.0) (2026-08-13)
+
+
+### Features
+
+* add release container images ([#40](https://github.com/air-hand-org/jobdeck/issues/40)) ([69b9c28](https://github.com/air-hand-org/jobdeck/commit/69b9c2836cea45d69865898a644b7f6d61345403))
+
 ## [0.2.0](https://github.com/air-hand-org/jobdeck/compare/v0.1.1...v0.2.0) (2026-08-12)
 
 
