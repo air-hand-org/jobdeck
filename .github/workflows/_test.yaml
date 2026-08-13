@@ -29,8 +29,19 @@ jobs:
           key: go-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             go-${{ runner.os }}-
-      - name: build
-        run: make build
+      - name: Restore NuGet cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+      - name: generate
+        run: make generate
+      - name: Go build
+        run: make go-build
+      - name: C# build
+        run: make cs-build
       - name: check clean
         run: make check-clean
       - parallel:
