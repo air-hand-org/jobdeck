@@ -31,11 +31,11 @@ jobs:
             go-${{ runner.os }}-
       - name: build
         run: make build
-      - name: lint
-        run: make lint
       - name: check clean
         run: make check-clean
       - parallel:
+          - name: lint
+            run: make lint
           - name: Go test
             run: make go-test
           - name: migration test
