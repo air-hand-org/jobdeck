@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/air-hand-org/jobdeck/compare/v0.3.1...v0.4.0) (2026-08-13)
+
+
+### Features
+
+* add PostgreSQL runtime entrypoints ([#44](https://github.com/air-hand-org/jobdeck/issues/44)) ([dda84e8](https://github.com/air-hand-org/jobdeck/commit/dda84e81f139ebfb36c8602efb80ca386b3fd8c0))
+
 ## [0.3.1](https://github.com/air-hand-org/jobdeck/compare/v0.3.0...v0.3.1) (2026-08-13)
 
 
