@@ -5,10 +5,9 @@ on:
 
 permissions: {}
 
-# Keep only the newest test run for a branch or pull request. Infrastructure
-# plans use their own state-locking concurrency group and are never cancelled.
+# Keep only the newest test run for a branch or pull request.
 concurrency:
-  group: jobdeck-test-${{ github.repository }}-${{ github.ref }}
+  group: jobdeck-test-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
