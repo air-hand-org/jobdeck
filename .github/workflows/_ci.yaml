@@ -11,6 +11,18 @@ jobs:
     permissions:
       contents: read
 
+  container-build:
+    # Keep the release-only push workflow honest: every production Dockerfile
+    # must build on a pull request, without authenticating to GCP or pushing.
+    uses: ./.github/workflows/_build-images.yaml
+    permissions:
+      contents: read
+      # Workflow validation checks permissions requested by every nested job,
+      # including the publish-only job which is skipped for CI builds.
+      id-token: write
+    with:
+      push: false
+
   infrastructure-plan:
     # Fork PRs run the test job, but never receive a GCP OIDC token. This
     # condition is defence in depth; the Workload Identity Provider must also

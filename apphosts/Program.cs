@@ -249,7 +249,7 @@ var demoEndpoint = demo.GetEndpoint("http", KnownNetworkIdentifiers.LocalhostNet
 
 var forwardProxy = builder.AddDockerfile(
         name: "forward-proxy",
-        contextPath: "../containers/squid"
+        contextPath: "../containers/forward-proxy"
     )
     .WithHttpEndpoint(
         name: "proxy",

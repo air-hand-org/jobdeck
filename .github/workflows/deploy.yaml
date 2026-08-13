@@ -15,6 +15,9 @@ concurrency:
 
 jobs:
   bootstrap:
+    # Release Please publishes version releases as GitHub pre-releases. Do not
+    # deploy manually-created stable releases from this workflow.
+    if: ${{ github.event.release.prerelease == true }}
     uses: ./.github/workflows/_tofu.yaml
     with:
       root: bootstrap
@@ -25,5 +28,18 @@ jobs:
       contents: read
       id-token: write
 
-  # Add the app apply job here after iac/app exists. It will depend on this
-  # bootstrap job and deploy the images tagged with github.event.release.tag_name.
+  images:
+    if: ${{ github.event.release.prerelease == true }}
+    needs: bootstrap
+    uses: ./.github/workflows/_build-images.yaml
+    with:
+      push: true
+      image_tag: ${{ github.event.release.tag_name }}
+      environment: production
+    secrets: inherit
+    permissions:
+      contents: read
+      id-token: write
+
+  # Add the app apply job here after iac/app exists. It must depend on images
+  # so the release tag is present in Artifact Registry before Cloud Run uses it.
