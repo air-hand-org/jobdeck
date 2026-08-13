@@ -4,22 +4,82 @@ on:
   release:
     types:
       - published
+  workflow_call:
+    inputs:
+      push:
+        description: Push images to Artifact Registry instead of only building them.
+        required: false
+        type: boolean
+        default: false
+      image_tag:
+        description: Immutable image tag. Required when push is true.
+        required: false
+        type: string
+        default: ""
+      environment:
+        description: GitHub environment containing GCP deployment variables.
+        required: false
+        type: string
+        default: ""
 
 permissions:
   contents: read
-  id-token: write
 
 concurrency:
-  group: build-images-${{ github.event.release.tag_name }}
+  group: build-images-${{ inputs.image_tag || github.event.release.tag_name || github.run_id }}
   cancel-in-progress: false
 
 jobs:
-  build-and-push:
-    # Release Please publishes version releases as GitHub pre-releases. Do not
-    # publish images for manually-created non-pre-releases.
-    if: ${{ github.event.release.prerelease == true }}
+  build:
+    # Pull-request CI uses this path. It intentionally has neither a GitHub
+    # environment nor OIDC permissions, so it cannot access GCP or push.
+    if: ${{ github.event_name != 'release' && inputs.push == false }}
     runs-on: ubuntu-latest
-    environment: production
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: ui
+            dockerfile: containers/ui/Dockerfile
+            context: .
+          - service: auth
+            dockerfile: containers/auth/Dockerfile
+            context: .
+          - service: job-api
+            dockerfile: containers/job-api/Dockerfile
+            context: .
+          - service: job-worker
+            dockerfile: containers/job-worker/Dockerfile
+            context: .
+          - service: demo
+            dockerfile: containers/demo/Dockerfile
+            context: .
+          - service: forward-proxy
+            dockerfile: Dockerfile
+            context: containers/forward-proxy
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Build ${{ matrix.service }} image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: false
+
+  publish:
+    # Release Please publishes version releases as GitHub pre-releases. Do not
+    # publish images for manually-created non-pre-releases. A later deploy
+    # workflow can call this workflow with push=true and an explicit tag.
+    if: >-
+      (github.event_name == 'release' && github.event.release.prerelease == true) ||
+      inputs.push == true
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'production' }}
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
@@ -50,10 +110,12 @@ jobs:
             context: containers/forward-proxy
     env:
       ARTIFACT_REGISTRY_HOST: asia-northeast1-docker.pkg.dev
-      IMAGE_TAG: ${{ github.event.release.tag_name }}
+      IMAGE_TAG: ${{ inputs.image_tag || github.event.release.tag_name }}
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-tools
+      - name: Validate image tag
+        run: test -n "$IMAGE_TAG"
       - id: google-auth
         uses: google-github-actions/auth@v3
         with:
