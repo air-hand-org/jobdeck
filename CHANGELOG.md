@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.1](https://github.com/air-hand-org/jobdeck/compare/v0.3.0...v0.3.1) (2026-08-13)
+
+
+### Bug Fixes
+
+* optimize CI image builds ([#47](https://github.com/air-hand-org/jobdeck/issues/47)) ([2e2cf7e](https://github.com/air-hand-org/jobdeck/commit/2e2cf7e9679f6532db42310fe1b21a5c7e95d88d))
+* parallelize slow CI tests and publish releases ([#46](https://github.com/air-hand-org/jobdeck/issues/46)) ([d4cc949](https://github.com/air-hand-org/jobdeck/commit/d4cc949220dbf632564fbc389877d03145187271))
+* restore CI dependency caches concurrently ([#49](https://github.com/air-hand-org/jobdeck/issues/49)) ([ae6042b](https://github.com/air-hand-org/jobdeck/commit/ae6042bb5de0abb6b74182a3122eb5d0830af5bf))
+
 ## [0.3.0](https://github.com/air-hand-org/jobdeck/compare/v0.2.0...v0.3.0) (2026-08-13)
 
 
