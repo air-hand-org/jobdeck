@@ -51,6 +51,12 @@ locals {
     "test-user-client-secret-hash" = toset([
       "auth",
     ])
+    # The value is added separately through the write-only secret-version
+    # flow. Both ephemeral PostgreSQL sidecars use the same password.
+    "postgres-password" = toset([
+      "auth",
+      "job_api",
+    ])
   }
 
   runtime_service_accounts = {
