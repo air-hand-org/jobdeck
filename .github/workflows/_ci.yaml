@@ -17,6 +17,9 @@ jobs:
     uses: ./.github/workflows/_build-images.yaml
     permissions:
       contents: read
+      # Workflow validation checks permissions requested by every nested job,
+      # including the publish-only job which is skipped for CI builds.
+      id-token: write
     with:
       push: false
 
