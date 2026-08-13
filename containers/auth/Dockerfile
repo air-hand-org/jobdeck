@@ -5,7 +5,7 @@ WORKDIR /src
 
 # The services use the repository Go workspace to resolve generated protobuf code.
 COPY . .
-RUN go build -trimpath -ldflags='-s -w' -o /out/auth ./services/auth/cmd/server
+RUN CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o /out/auth ./services/auth/cmd/server
 
 FROM gcr.io/distroless/base-debian12:nonroot
 COPY --from=build /out/auth /auth
