@@ -14,7 +14,7 @@ jobs:
   container-build:
     # Keep the release-only push workflow honest: every production Dockerfile
     # must build on a pull request, without authenticating to GCP or pushing.
-    uses: ./.github/workflows/build-images.yaml
+    uses: ./.github/workflows/_build-images.yaml
     permissions:
       contents: read
     with:

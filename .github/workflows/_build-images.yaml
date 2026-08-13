@@ -1,9 +1,6 @@
-name: Build and push images
+name: Build images
 
 on:
-  release:
-    types:
-      - published
   workflow_call:
     inputs:
       push:
@@ -26,14 +23,14 @@ permissions:
   contents: read
 
 concurrency:
-  group: build-images-${{ inputs.image_tag || github.event.release.tag_name || github.run_id }}
+  group: build-images-${{ inputs.image_tag || github.run_id }}
   cancel-in-progress: false
 
 jobs:
   build:
-    # Pull-request CI uses this path. It intentionally has neither a GitHub
-    # environment nor OIDC permissions, so it cannot access GCP or push.
-    if: ${{ github.event_name != 'release' && inputs.push == false }}
+    # CI uses this path. It intentionally has neither a GitHub environment nor
+    # OIDC permissions, so it cannot access GCP or push.
+    if: ${{ inputs.push == false }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -69,12 +66,7 @@ jobs:
           push: false
 
   publish:
-    # Release Please publishes version releases as GitHub pre-releases. Do not
-    # publish images for manually-created non-pre-releases. A later deploy
-    # workflow can call this workflow with push=true and an explicit tag.
-    if: >-
-      (github.event_name == 'release' && github.event.release.prerelease == true) ||
-      inputs.push == true
+    if: ${{ inputs.push == true }}
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'production' }}
     permissions:
@@ -110,7 +102,7 @@ jobs:
             context: containers/forward-proxy
     env:
       ARTIFACT_REGISTRY_HOST: asia-northeast1-docker.pkg.dev
-      IMAGE_TAG: ${{ inputs.image_tag || github.event.release.tag_name }}
+      IMAGE_TAG: ${{ inputs.image_tag }}
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-tools
