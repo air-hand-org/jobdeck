@@ -21,13 +21,15 @@ trap cleanup EXIT
 port=""
 for _ in {1..30}; do
   port="$(docker port "${container}" 5432/tcp | awk -F: '{print $NF}')"
-  if [[ -n "${port}" ]] && docker exec "${container}" pg_isready -U postgres -d jobdeck >/dev/null 2>&1; then
+  # pg_isready reports an accepting server even while POSTGRES_DB is still
+  # being created. Run a query against the target database instead.
+  if [[ -n "${port}" ]] && docker exec "${container}" psql -U postgres -d jobdeck -c 'SELECT 1' >/dev/null 2>&1; then
     break
   fi
   sleep 1
 done
 
-if ! docker exec "${container}" pg_isready -U postgres -d jobdeck >/dev/null 2>&1; then
+if ! docker exec "${container}" psql -U postgres -d jobdeck -c 'SELECT 1' >/dev/null 2>&1; then
   docker logs "${container}"
   exit 1
 fi
