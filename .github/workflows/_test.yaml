@@ -29,12 +29,26 @@ jobs:
           key: go-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             go-${{ runner.os }}-
+      - name: Restore NuGet cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
       - name: build
         run: make build
       - name: lint
         run: make lint
-      - name: test
-        run: make test
+      - name: check clean
+        run: make check-clean
+      - parallel:
+          - name: Go test
+            run: make go-test
+          - name: migration test
+            run: make migration-test
+      - name: C# test
+        run: make cs-test
       - name: upload Playwright traces
         if: ${{ failure() }}
         uses: actions/upload-artifact@v7
@@ -42,5 +56,3 @@ jobs:
           name: playwright-traces
           path: '**/playwright-traces/*.zip'
           if-no-files-found: ignore
-      - name: check clean
-        run: make check-clean
