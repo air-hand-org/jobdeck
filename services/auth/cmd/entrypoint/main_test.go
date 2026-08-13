@@ -5,6 +5,9 @@ import (
 	"errors"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPostgresURIFromEnvironment(t *testing.T) {
@@ -12,12 +15,8 @@ func TestPostgresURIFromEnvironment(t *testing.T) {
 	t.Setenv("POSTGRES_PASSWORD", "ignored")
 
 	uri, err := postgresURIFromEnvironment()
-	if err != nil {
-		t.Fatalf("postgresURIFromEnvironment() error = %v", err)
-	}
-	if want := "postgres://existing-uri"; uri != want {
-		t.Errorf("postgresURIFromEnvironment() = %q, want %q", uri, want)
-	}
+	require.NoError(t, err)
+	assert.Equal(t, "postgres://existing-uri", uri)
 }
 
 func TestPostgresURIFromEnvironmentBuildsEscapedURI(t *testing.T) {
@@ -30,13 +29,9 @@ func TestPostgresURIFromEnvironmentBuildsEscapedURI(t *testing.T) {
 	t.Setenv("POSTGRES_SSLMODE", "verify-full")
 
 	uri, err := postgresURIFromEnvironment()
-	if err != nil {
-		t.Fatalf("postgresURIFromEnvironment() error = %v", err)
-	}
+	require.NoError(t, err)
 	const want = "postgres://user%3Aname:p%40ss%3A%2F%3F%20word@[::1]:6543/db/name?sslmode=verify-full"
-	if uri != want {
-		t.Errorf("postgresURIFromEnvironment() = %q, want %q", uri, want)
-	}
+	assert.Equal(t, want, uri)
 }
 
 func TestPostgresURIFromEnvironmentUsesDefaults(t *testing.T) {
@@ -49,13 +44,9 @@ func TestPostgresURIFromEnvironmentUsesDefaults(t *testing.T) {
 	t.Setenv("POSTGRES_SSLMODE", "")
 
 	uri, err := postgresURIFromEnvironment()
-	if err != nil {
-		t.Fatalf("postgresURIFromEnvironment() error = %v", err)
-	}
+	require.NoError(t, err)
 	const want = "postgres://postgres:password@127.0.0.1:5432/jobdeck-auth?sslmode=disable"
-	if uri != want {
-		t.Errorf("postgresURIFromEnvironment() = %q, want %q", uri, want)
-	}
+	assert.Equal(t, want, uri)
 }
 
 func TestPostgresURIFromEnvironmentRequiresPassword(t *testing.T) {
@@ -63,9 +54,7 @@ func TestPostgresURIFromEnvironmentRequiresPassword(t *testing.T) {
 	t.Setenv("POSTGRES_PASSWORD", "")
 
 	_, err := postgresURIFromEnvironment()
-	if err == nil {
-		t.Fatal("postgresURIFromEnvironment() error = nil, want error")
-	}
+	require.Error(t, err)
 }
 
 func TestRunMigratorRetriesUntilSuccess(t *testing.T) {
@@ -78,21 +67,15 @@ func TestRunMigratorRetriesUntilSuccess(t *testing.T) {
 
 		return nil
 	})
-	if err != nil {
-		t.Fatalf("runMigrator() error = %v", err)
-	}
-	if attempts != 3 {
-		t.Errorf("migrator attempts = %d, want 3", attempts)
-	}
+	require.NoError(t, err)
+	assert.Equal(t, 3, attempts)
 }
 
 func TestRunMigratorStopsAtDeadline(t *testing.T) {
 	err := runMigrator(context.Background(), 10*time.Millisecond, 0, func(context.Context) error {
 		return errors.New("database is not ready")
 	})
-	if err == nil {
-		t.Fatal("runMigrator() error = nil, want deadline error")
-	}
+	require.Error(t, err)
 }
 
 func TestRunMigratorStopsOnCancellation(t *testing.T) {
@@ -100,10 +83,8 @@ func TestRunMigratorStopsOnCancellation(t *testing.T) {
 	cancel()
 
 	err := runMigrator(ctx, time.Second, 0, func(context.Context) error {
-		t.Fatal("migrator must not run after cancellation")
+		require.FailNow(t, "migrator must not run after cancellation")
 		return nil
 	})
-	if err == nil {
-		t.Fatal("runMigrator() error = nil, want cancellation error")
-	}
+	require.Error(t, err)
 }
