@@ -34,6 +34,16 @@ This starts the AppHost and the local resources it defines, including the UI, jo
 
 The Aspire dashboard URL is printed by the Aspire CLI.
 
+## Containerized Local Runs
+
+Normal local development remains source-first: the AppHost starts Go applications and
+the .NET UI directly so that Hot Reload and debugger support, including Delve, stay
+fast and straightforward.
+
+The production Dockerfiles are the canonical release-image build contract. A future
+AppHost option should allow selected services to run from those Dockerfiles for
+production-parity checks, without making container builds the default inner loop.
+
 ## Common Commands
 
 ```sh
@@ -44,4 +54,3 @@ make fmt
 ```
 
 The Makefile is the source of truth for local development commands.
-

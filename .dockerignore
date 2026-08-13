@@ -1,0 +1,16 @@
+.git
+.github
+.agents
+.codex
+.playwright-cli
+.zed
+**/bin
+**/obj
+**/.terraform
+*.tfplan
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+playwright/.auth
+playwright-traces

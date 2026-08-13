@@ -1,0 +1,73 @@
+name: Build and push images
+
+on:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: build-images-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-push:
+    # Release Please publishes version releases as GitHub pre-releases. Do not
+    # publish images for manually-created non-pre-releases.
+    if: ${{ github.event.release.prerelease == true }}
+    runs-on: ubuntu-latest
+    environment: production
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: ui
+            repository: jobdeck-ui
+            dockerfile: containers/ui/Dockerfile
+            context: .
+          - service: auth
+            repository: jobdeck-auth
+            dockerfile: containers/auth/Dockerfile
+            context: .
+          - service: job-api
+            repository: jobdeck-job-api
+            dockerfile: containers/job-api/Dockerfile
+            context: .
+          - service: job-worker
+            repository: jobdeck-job-worker
+            dockerfile: containers/job-worker/Dockerfile
+            context: .
+          - service: demo
+            repository: jobdeck-demo
+            dockerfile: containers/demo/Dockerfile
+            context: .
+          - service: forward-proxy
+            repository: jobdeck-forward-proxy
+            dockerfile: Dockerfile
+            context: containers/forward-proxy
+    env:
+      ARTIFACT_REGISTRY_HOST: asia-northeast1-docker.pkg.dev
+      IMAGE_TAG: ${{ github.event.release.tag_name }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup-tools
+      - uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker "$ARTIFACT_REGISTRY_HOST" --quiet
+      - name: Build image
+        env:
+          IMAGE: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/${{ matrix.repository }}/${{ matrix.service }}:${{ env.IMAGE_TAG }}
+          DOCKERFILE: ${{ matrix.dockerfile }}
+          CONTEXT: ${{ matrix.context }}
+        run: docker build --file "$DOCKERFILE" --tag "$IMAGE" "$CONTEXT"
+      - name: Push image
+        env:
+          IMAGE: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/${{ matrix.repository }}/${{ matrix.service }}:${{ env.IMAGE_TAG }}
+        run: docker push "$IMAGE"
