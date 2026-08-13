@@ -54,7 +54,7 @@ jobs:
             dockerfile: containers/demo/Dockerfile
             context: .
           - service: forward-proxy
-            dockerfile: Dockerfile
+            dockerfile: containers/forward-proxy/Dockerfile
             context: containers/forward-proxy
     steps:
       - uses: actions/checkout@v7
