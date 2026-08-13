@@ -4,39 +4,12 @@ on:
 permissions: {}
 
 jobs:
+  # This nested reusable workflow owns test-only concurrency, so cancelling a
+  # superseded test run never cancels this workflow's infrastructure plan.
   test:
+    uses: ./.github/workflows/_test.yaml
     permissions:
       contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/setup-tools
-      - name: Restore Go cache
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: go-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            go-${{ runner.os }}-
-      - name: build
-        run: make build
-      - name: lint
-        run: make lint
-      - name: test
-        run: make test
-      - name: upload Playwright traces
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: playwright-traces
-          path: '**/playwright-traces/*.zip'
-          if-no-files-found: ignore
-      - name: check clean
-        run: make check-clean
 
   infrastructure-plan:
     # Fork PRs run the test job, but never receive a GCP OIDC token. This

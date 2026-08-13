@@ -24,9 +24,6 @@ jobs:
   tofu:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
-    concurrency:
-      group: jobdeck-tofu-${{ inputs.root }}-${{ inputs.environment }}
-      cancel-in-progress: ${{ inputs.command == 'plan' }}
     env:
       TOFU_ROOT: ${{ inputs.root }}
       TOFU_ENVIRONMENT: ${{ inputs.environment }}
