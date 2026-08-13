@@ -8,8 +8,16 @@ COPY . .
 RUN --mount=type=cache,target=/go/pkg/mod,id=jobdeck-go-mod \
     --mount=type=cache,target=/root/.cache/go-build,id=jobdeck-go-build \
     CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o /out/auth ./services/auth/cmd/server
+RUN --mount=type=cache,target=/go/pkg/mod,id=jobdeck-go-mod \
+    --mount=type=cache,target=/root/.cache/go-build,id=jobdeck-go-build \
+    CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o /out/auth-migrator ./services/auth/cmd/migrator
+RUN --mount=type=cache,target=/go/pkg/mod,id=jobdeck-go-mod \
+    --mount=type=cache,target=/root/.cache/go-build,id=jobdeck-go-build \
+    CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o /out/auth-entrypoint ./services/auth/cmd/entrypoint
 
 FROM gcr.io/distroless/base-debian12:nonroot
 COPY --from=build /out/auth /auth
+COPY --from=build /out/auth-migrator /auth-migrator
+COPY --from=build /out/auth-entrypoint /auth-entrypoint
 USER nonroot:nonroot
-ENTRYPOINT ["/auth"]
+ENTRYPOINT ["/auth-entrypoint"]
