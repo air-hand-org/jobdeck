@@ -57,3 +57,10 @@ jobs:
           name: playwright-traces
           path: '**/playwright-traces/*.zip'
           if-no-files-found: ignore
+      - name: upload Aspire resource logs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: aspire-resource-logs
+          path: '**/TestResults/aspire-logs/*.log'
+          if-no-files-found: ignore

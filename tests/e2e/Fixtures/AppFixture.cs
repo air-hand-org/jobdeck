@@ -1,4 +1,5 @@
 using Aspire.Hosting;
+using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using Microsoft.Extensions.Logging;
 using Xunit;
@@ -10,6 +11,19 @@ public sealed class AppCollection : ICollectionFixture<AppFixture>;
 
 public sealed class AppFixture : IAsyncLifetime
 {
+    private static readonly string[] ResourceLogNames =
+    [
+        "auth",
+        "auth-db-migrator",
+        "demo",
+        "forward-proxy",
+        "job-api",
+        "job-db-migrator",
+        "job-worker",
+        "postgres",
+        "ui",
+    ];
+
     public AppTestTarget Target { get; private set; } = null!;
 
     private DistributedApplication? app;
@@ -96,6 +110,29 @@ public sealed class AppFixture : IAsyncLifetime
         {
             return;
         }
+
+        await WriteResourceLogsAsync();
         await app!.DisposeAsync();
+    }
+
+    private async Task WriteResourceLogsAsync()
+    {
+        var logDirectory = Path.Combine("TestResults", "aspire-logs");
+        Directory.CreateDirectory(logDirectory);
+
+        var resourceLogs = app!.Services.GetRequiredService<ResourceLoggerService>();
+        foreach (var resourceName in ResourceLogNames)
+        {
+            var logPath = Path.Combine(logDirectory, $"{resourceName}.log");
+            await using var writer = new StreamWriter(logPath);
+
+            await foreach (var batch in resourceLogs.GetAllAsync(resourceName))
+            {
+                foreach (var entry in batch)
+                {
+                    await writer.WriteLineAsync(entry.Content);
+                }
+            }
+        }
     }
 }
