@@ -106,7 +106,7 @@ jobs:
             context: .
           - service: forward-proxy
             repository: jobdeck-forward-proxy
-            dockerfile: Dockerfile
+            dockerfile: containers/forward-proxy/Dockerfile
             context: containers/forward-proxy
     env:
       ARTIFACT_REGISTRY_HOST: asia-northeast1-docker.pkg.dev
