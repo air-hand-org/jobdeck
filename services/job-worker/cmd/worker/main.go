@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"flag"
 	"jobdeck/services/job-worker/internal/app"
 	"jobdeck/services/job-worker/internal/auth"
@@ -10,6 +11,7 @@ import (
 	"jobdeck/services/job-worker/internal/transport/interceptor"
 	"jobdeck/services/job-worker/internal/worker"
 	"log"
+	"net/url"
 	"os"
 	"os/signal"
 	"syscall"
@@ -19,13 +21,28 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/credentials"
 	health_grpc "google.golang.org/grpc/health/grpc_health_v1"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
 type config struct {
 	workerCount uint
+}
+
+func newTLSClient(endpoint string, options ...grpc.DialOption) (*grpc.ClientConn, error) {
+	parsed, err := url.ParseRequestURI(endpoint)
+	if err != nil {
+		return nil, errors.Wrap(err, "parse gRPC endpoint")
+	}
+	if parsed.Scheme != "https" || parsed.Host == "" {
+		return nil, errors.New("gRPC endpoint must be an absolute HTTPS URL")
+	}
+
+	options = append(options, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
+		ServerName: parsed.Hostname(),
+	})))
+	return grpc.NewClient(parsed.Host, options...)
 }
 
 func parseFlags() config {
@@ -102,15 +119,12 @@ func main() {
 	}
 
 	g.Go(func() error {
-		auth_uri, found := os.LookupEnv("AUTH_SERVER_URI")
+		authEndpoint, found := os.LookupEnv("AUTH_GRPC_ENDPOINT")
 		if !found {
-			return errors.New("AUTH_SERVER_URI is required")
+			return errors.New("AUTH_GRPC_ENDPOINT is required")
 		}
-		auth_conn, err := grpc.NewClient(auth_uri,
+		auth_conn, err := newTLSClient(authEndpoint,
 			grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
-			grpc.WithTransportCredentials(
-				insecure.NewCredentials(),
-			),
 			grpc.WithDefaultCallOptions(
 				grpc.WaitForReady(true),
 			),
@@ -131,15 +145,12 @@ func main() {
 			return err
 		}
 
-		job_api_uri, found := os.LookupEnv("JOB_API_SERVER_URI")
+		jobApiEndpoint, found := os.LookupEnv("JOB_API_GRPC_ENDPOINT")
 		if !found {
-			return errors.New("JOB_API_SERVER_URI is required")
+			return errors.New("JOB_API_GRPC_ENDPOINT is required")
 		}
-		api_conn, err := grpc.NewClient(job_api_uri,
+		api_conn, err := newTLSClient(jobApiEndpoint,
 			grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
-			grpc.WithTransportCredentials(
-				insecure.NewCredentials(),
-			),
 			grpc.WithDefaultCallOptions(
 				grpc.WaitForReady(true),
 			),

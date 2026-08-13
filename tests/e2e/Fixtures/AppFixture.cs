@@ -87,7 +87,7 @@ public sealed class AppFixture : IAsyncLifetime
         await app!.StartAsync(cts.Token);
 
         await app!.ResourceNotifications.WaitForResourceHealthyAsync("ui", cts.Token);
-        Target = new(UIBaseUri: app!.GetEndpoint("ui", "https"), DemoBaseUri: app!.GetEndpoint("demo", "http"));
+        Target = new(UIBaseUri: app!.GetEndpoint("ui", "https"), DemoBaseUri: app!.GetEndpoint("demo", "https"));
     }
 
     public async Task DisposeAsync()
