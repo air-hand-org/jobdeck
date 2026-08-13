@@ -51,6 +51,11 @@ locals {
     "test-user-client-secret-hash" = toset([
       "auth",
     ])
+    # The value is added separately through the write-only secret-version flow.
+    "postgres-password" = toset([
+      "auth",
+      "job_api",
+    ])
   }
 
   runtime_service_accounts = {
