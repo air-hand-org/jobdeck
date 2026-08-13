@@ -33,8 +33,15 @@ jobs:
         run: make build
       - name: lint
         run: make lint
-      - name: test
-        run: make test
+      - name: check clean
+        run: make check-clean
+      - name: unit test
+        run: make go-test
+      - parallel:
+          - name: migration test
+            run: make migration-test
+          - name: C# test
+            run: make cs-test
       - name: upload Playwright traces
         if: ${{ failure() }}
         uses: actions/upload-artifact@v7
@@ -42,5 +49,3 @@ jobs:
           name: playwright-traces
           path: '**/playwright-traces/*.zip'
           if-no-files-found: ignore
-      - name: check clean
-        run: make check-clean
