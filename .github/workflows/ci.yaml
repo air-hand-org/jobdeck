@@ -10,11 +10,9 @@ on:
 
 permissions: {}
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name != 'push' }}
-
 jobs:
+  # Add CI jobs to _ci.yaml so this reusable workflow remains the single gate
+  # consumed by check-result.
   ci:
     uses: ./.github/workflows/_ci.yaml
     permissions:
@@ -24,7 +22,9 @@ jobs:
   check-result:
     needs: ci
     runs-on: ubuntu-slim
-    if: ${{ always() && needs.ci.result != 'success' }}
+    if: >-
+      always() &&
+      needs.ci.result == 'failure'
     steps:
       - name: exit with failure
         run: exit 1
