@@ -29,6 +29,7 @@ jobs:
       id-token: write
 
   images:
+    if: ${{ github.event.release.prerelease == true }}
     needs: bootstrap
     uses: ./.github/workflows/_build-images.yaml
     with:
