@@ -9,6 +9,5 @@ RUN go build -trimpath -ldflags='-s -w' -o /out/auth ./services/auth/cmd/server
 
 FROM gcr.io/distroless/base-debian12:nonroot
 COPY --from=build /out/auth /auth
-EXPOSE 9091
 USER nonroot:nonroot
 ENTRYPOINT ["/auth"]

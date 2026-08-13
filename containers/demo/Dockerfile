@@ -9,6 +9,5 @@ RUN go build -trimpath -ldflags='-s -w' -o /out/demo ./services/demo/cmd/server
 
 FROM gcr.io/distroless/base-debian12:nonroot
 COPY --from=build /out/demo /demo
-EXPOSE 8080
 USER nonroot:nonroot
 ENTRYPOINT ["/demo"]

@@ -9,6 +9,5 @@ RUN go build -trimpath -ldflags='-s -w' -o /out/job-api ./services/job-api/cmd/s
 
 FROM gcr.io/distroless/base-debian12:nonroot
 COPY --from=build /out/job-api /job-api
-EXPOSE 9090
 USER nonroot:nonroot
 ENTRYPOINT ["/job-api"]

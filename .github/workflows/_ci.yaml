@@ -11,6 +11,45 @@ jobs:
     permissions:
       contents: read
 
+  container-build:
+    # Keep the release-only push workflow honest: every production Dockerfile
+    # must build on a pull request, without authenticating to GCP or pushing.
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: ui
+            dockerfile: containers/ui/Dockerfile
+            context: .
+          - service: auth
+            dockerfile: containers/auth/Dockerfile
+            context: .
+          - service: job-api
+            dockerfile: containers/job-api/Dockerfile
+            context: .
+          - service: job-worker
+            dockerfile: containers/job-worker/Dockerfile
+            context: .
+          - service: demo
+            dockerfile: containers/demo/Dockerfile
+            context: .
+          - service: forward-proxy
+            dockerfile: Dockerfile
+            context: containers/forward-proxy
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Build ${{ matrix.service }} image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: false
+
   infrastructure-plan:
     # Fork PRs run the test job, but never receive a GCP OIDC token. This
     # condition is defence in depth; the Workload Identity Provider must also
