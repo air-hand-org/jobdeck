@@ -34,38 +34,52 @@ jobs:
     # OIDC permissions, so it cannot access GCP or push.
     if: ${{ inputs.push == false }}
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - service: ui
-            dockerfile: containers/ui/Dockerfile
-            context: .
-          - service: auth
-            dockerfile: containers/auth/Dockerfile
-            context: .
-          - service: job-api
-            dockerfile: containers/job-api/Dockerfile
-            context: .
-          - service: job-worker
-            dockerfile: containers/job-worker/Dockerfile
-            context: .
-          - service: demo
-            dockerfile: containers/demo/Dockerfile
-            context: .
-          - service: forward-proxy
-            dockerfile: containers/forward-proxy/Dockerfile
-            context: containers/forward-proxy
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - name: Build ${{ matrix.service }} image
-        uses: docker/build-push-action@v7
-        with:
-          context: ${{ matrix.context }}
-          file: ${{ matrix.dockerfile }}
-          push: false
+      - uses: docker/setup-buildx-action@v4
+      # Keep pairs small enough for the hosted runner while sharing its Docker
+      # layer and BuildKit cache with every following build.
+      - parallel:
+          - name: Build forward-proxy image
+            uses: docker/build-push-action@v7
+            with:
+              context: containers/forward-proxy
+              file: containers/forward-proxy/Dockerfile
+              push: false
+          - name: Build demo image
+            uses: docker/build-push-action@v7
+            with:
+              context: .
+              file: containers/demo/Dockerfile
+              push: false
+      - parallel:
+          - name: Build auth image
+            uses: docker/build-push-action@v7
+            with:
+              context: .
+              file: containers/auth/Dockerfile
+              push: false
+          - name: Build job-api image
+            uses: docker/build-push-action@v7
+            with:
+              context: .
+              file: containers/job-api/Dockerfile
+              push: false
+      - parallel:
+          - name: Build job-worker image
+            uses: docker/build-push-action@v7
+            with:
+              context: .
+              file: containers/job-worker/Dockerfile
+              push: false
+          - name: Build ui image
+            uses: docker/build-push-action@v7
+            with:
+              context: .
+              file: containers/ui/Dockerfile
+              push: false
 
   publish:
     if: ${{ inputs.push == true }}
