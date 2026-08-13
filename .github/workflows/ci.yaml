@@ -10,21 +10,26 @@ on:
 
 permissions: {}
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name != 'push' }}
-
 jobs:
-  ci:
+  test:
+    uses: ./.github/workflows/_test.yaml
+    permissions:
+      contents: read
+
+  infrastructure-plan:
     uses: ./.github/workflows/_ci.yaml
     permissions:
       contents: read
       id-token: write
 
   check-result:
-    needs: ci
+    needs:
+      - test
+      - infrastructure-plan
     runs-on: ubuntu-slim
-    if: ${{ always() && needs.ci.result != 'success' }}
+    if: >-
+      always() &&
+      (needs.test.result == 'failure' || needs.infrastructure-plan.result == 'failure')
     steps:
       - name: exit with failure
         run: exit 1
