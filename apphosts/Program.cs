@@ -107,6 +107,7 @@ if (IS_DEBUG)
           env: "GRPC_PORT",
           isProxied: true
       )
+      .AsHttp2Service()
       .WithReference(auth_db)
       .WithEnvironment(context =>
       {
@@ -137,6 +138,7 @@ else
           env: "GRPC_PORT",
           isProxied: true
       )
+      .AsHttp2Service()
       .WithReference(auth_db)
       .WithEnvironment(context =>
       {
@@ -177,6 +179,7 @@ if (IS_DEBUG)
           env: "GRPC_PORT",
           isProxied: true
       )
+      .AsHttp2Service()
       .WithReference(job_db)
       .WithEnvironment(context =>
       {
@@ -208,6 +211,7 @@ else
           env: "GRPC_PORT",
           isProxied: true
       )
+      .AsHttp2Service()
       .WithReference(job_db)
       .WithEnvironment(context =>
       {
