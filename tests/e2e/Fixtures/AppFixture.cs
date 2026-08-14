@@ -30,10 +30,8 @@ public sealed class AppFixture : IAsyncLifetime
     public AppTestTarget Target { get; private set; } = null!;
 
     private DistributedApplication? app;
-    private CancellationTokenSource? resourceLogCancellation;
-    private Task[] resourceLogTasks = [];
 
-    private Uri ValidUri(string inputUri)
+    private static Uri ValidUri(string inputUri)
     {
         if (!Uri.TryCreate(inputUri, UriKind.Absolute, out var uri)
             || (uri.Scheme is not "http" and not "https")
@@ -106,7 +104,6 @@ public sealed class AppFixture : IAsyncLifetime
         try
         {
             app = await appHost.BuildAsync(cts.Token);
-            StartResourceLogCapture();
             await app.StartAsync(cts.Token);
 
             await app.ResourceNotifications.WaitForResourceHealthyAsync("ui", cts.Token);
@@ -134,50 +131,38 @@ public sealed class AppFixture : IAsyncLifetime
             return;
         }
 
-        await app.DisposeAsync();
-
-        if (resourceLogCancellation is not null)
-        {
-            await resourceLogCancellation.CancelAsync();
-        }
-
         try
         {
-            await Task.WhenAll(resourceLogTasks);
-        }
-        catch (OperationCanceledException)
-        {
-            // Expected when stopping the resource log watchers.
+            await CaptureResourceLogsAsync();
         }
         finally
         {
-            resourceLogCancellation?.Dispose();
+            await app.DisposeAsync();
         }
     }
 
-    private void StartResourceLogCapture()
+    private async Task CaptureResourceLogsAsync()
     {
         var logDirectory = Path.Combine("TestResults", "aspire-logs");
         Directory.CreateDirectory(logDirectory);
 
-        resourceLogCancellation = new CancellationTokenSource();
         var resourceLogs = app!.Services.GetRequiredService<ResourceLoggerService>();
+        var appModel = app.Services.GetRequiredService<DistributedApplicationModel>();
 
-        resourceLogTasks = ResourceLogNames.Select(resourceName => Task.Run(async () =>
+        await Task.WhenAll(appModel.Resources
+            .Where(resource => ResourceLogNames.Contains(resource.Name, StringComparer.Ordinal))
+            .Select(async resource =>
         {
-            var logPath = Path.Combine(logDirectory, $"{resourceName}.log");
+            var logPath = Path.Combine(logDirectory, $"{resource.Name}.log");
             await using var writer = new StreamWriter(logPath);
 
-            await foreach (var batch in resourceLogs
-                .WatchAsync(resourceName)
-                .WithCancellation(resourceLogCancellation.Token))
+            await foreach (var batch in resourceLogs.GetAllAsync(resource))
             {
                 foreach (var entry in batch)
                 {
                     await writer.WriteLineAsync(entry.Content);
                 }
-                await writer.FlushAsync();
             }
-        })).ToArray();
+        }));
     }
 }
