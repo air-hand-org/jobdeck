@@ -104,7 +104,8 @@ if (IS_DEBUG)
       .WithHttpsEndpoint(
           port: 9091,
           name: "grpc",
-          env: "GRPC_PORT"
+          env: "GRPC_PORT",
+          isProxied: true
       )
       .WithReference(auth_db)
       .WithEnvironment(context =>
@@ -133,7 +134,8 @@ else
       .WithHttpsEndpoint(
           port: 9091,
           name: "grpc",
-          env: "GRPC_PORT"
+          env: "GRPC_PORT",
+          isProxied: true
       )
       .WithReference(auth_db)
       .WithEnvironment(context =>
@@ -172,7 +174,8 @@ if (IS_DEBUG)
       .WithHttpsEndpoint(
           port: 9090,
           name: "grpc",
-          env: "GRPC_PORT"
+          env: "GRPC_PORT",
+          isProxied: true
       )
       .WithReference(job_db)
       .WithEnvironment(context =>
@@ -202,7 +205,8 @@ else
       .WithHttpsEndpoint(
           port: 9090,
           name: "grpc",
-          env: "GRPC_PORT"
+          env: "GRPC_PORT",
+          isProxied: true
       )
       .WithReference(job_db)
       .WithEnvironment(context =>
@@ -237,7 +241,8 @@ var demo = builder.AddGoApp(
   .WithHttpsEndpoint(
       name: "https",
       port: 8080,
-      env: "PORT"
+      env: "PORT",
+      isProxied: true
   )
   .PublishAsDockerComposeService((resource, service) =>
   {
