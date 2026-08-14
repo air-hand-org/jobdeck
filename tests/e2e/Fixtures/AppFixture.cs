@@ -1,4 +1,5 @@
 using Aspire.Hosting;
+using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using Microsoft.Extensions.Logging;
 using Xunit;
@@ -10,11 +11,27 @@ public sealed class AppCollection : ICollectionFixture<AppFixture>;
 
 public sealed class AppFixture : IAsyncLifetime
 {
+    private static readonly string[] ResourceLogNames =
+    [
+        "auth",
+        "auth-db-migrator",
+        "auth-tls",
+        "demo",
+        "demo-backend",
+        "forward-proxy",
+        "job-api",
+        "job-api-tls",
+        "job-db-migrator",
+        "job-worker",
+        "postgres",
+        "ui",
+    ];
+
     public AppTestTarget Target { get; private set; } = null!;
 
     private DistributedApplication? app;
 
-    private Uri ValidUri(string inputUri)
+    private static Uri ValidUri(string inputUri)
     {
         if (!Uri.TryCreate(inputUri, UriKind.Absolute, out var uri)
             || (uri.Scheme is not "http" and not "https")
@@ -31,7 +48,8 @@ public sealed class AppFixture : IAsyncLifetime
         var demoBaseUrl = Environment.GetEnvironmentVariable("E2E_DEMO_BASE_URL");
         if (!string.IsNullOrWhiteSpace(uiBaseUrl) && !string.IsNullOrWhiteSpace(demoBaseUrl))
         {
-            Target = new(UIBaseUri: ValidUri(uiBaseUrl), DemoBaseUri: ValidUri(demoBaseUrl));
+            var demoUri = ValidUri(demoBaseUrl);
+            Target = new(UIBaseUri: ValidUri(uiBaseUrl), DemoBaseUri: demoUri, DemoBaseUriFromContainerNetwork: demoUri);
             return;
         }
 
@@ -83,11 +101,27 @@ public sealed class AppFixture : IAsyncLifetime
             // To output logs to the xUnit.net ITestOutputHelper, consider adding a package from https://www.nuget.org/packages?q=xunit+logging
         });
 
-        app = await appHost.BuildAsync(cts.Token);
-        await app!.StartAsync(cts.Token);
+        try
+        {
+            app = await appHost.BuildAsync(cts.Token);
+            await app.StartAsync(cts.Token);
 
-        await app!.ResourceNotifications.WaitForResourceHealthyAsync("ui", cts.Token);
-        Target = new(UIBaseUri: app!.GetEndpoint("ui", "https"), DemoBaseUri: app!.GetEndpoint("demo", "http"));
+            await app.ResourceNotifications.WaitForResourceHealthyAsync("ui", cts.Token);
+            Target = new(
+                UIBaseUri: app.GetEndpoint("ui", "https"),
+                DemoBaseUri: app.GetEndpoint("demo", "https"),
+                DemoBaseUriFromContainerNetwork: app.GetEndpointForNetwork(
+                    "demo",
+                    KnownNetworkIdentifiers.DefaultAspireContainerNetwork,
+                    "https"
+                )
+            );
+        }
+        catch
+        {
+            await DisposeAsync();
+            throw;
+        }
     }
 
     public async Task DisposeAsync()
@@ -96,6 +130,39 @@ public sealed class AppFixture : IAsyncLifetime
         {
             return;
         }
-        await app!.DisposeAsync();
+
+        try
+        {
+            await CaptureResourceLogsAsync();
+        }
+        finally
+        {
+            await app.DisposeAsync();
+        }
+    }
+
+    private async Task CaptureResourceLogsAsync()
+    {
+        var logDirectory = Path.Combine("TestResults", "aspire-logs");
+        Directory.CreateDirectory(logDirectory);
+
+        var resourceLogs = app!.Services.GetRequiredService<ResourceLoggerService>();
+        var appModel = app.Services.GetRequiredService<DistributedApplicationModel>();
+
+        await Task.WhenAll(appModel.Resources
+            .Where(resource => ResourceLogNames.Contains(resource.Name, StringComparer.Ordinal))
+            .Select(async resource =>
+        {
+            var logPath = Path.Combine(logDirectory, $"{resource.Name}.log");
+            await using var writer = new StreamWriter(logPath);
+
+            await foreach (var batch in resourceLogs.GetAllAsync(resource))
+            {
+                foreach (var entry in batch)
+                {
+                    await writer.WriteLineAsync(entry.Content);
+                }
+            }
+        }));
     }
 }

@@ -143,6 +143,14 @@ Cloud Run domain mapping は Preview のため使わない。global external HTT
 serverless NEG、Google-managed certificate を IaC 管理し、2 host をそれぞれ `ui` と `demo` に
 route する。
 
+### Edge protection
+
+load balancer / DNS の slice では、`ui` と `demo` の external HTTPS Load Balancer backend service に
+共有の Cloud Armor Standard policy を 1 つ接続する。初期 rule は明示的な protocol / IP deny と
+rate limiting に限定し、OWASP preconfigured WAF rule は実トラフィックと false positive の挙動を
+観測してから preview・enforce を判断する。これは公開 endpoint の基本的な防御を先に確保する一方で、
+Cloud Armor の固定費、rule ごとの費用、誤検知対応という運用コストを増やしすぎないための判断である。
+
 ### Service boundaries and future polyrepo migration
 
 現在は monorepo を維持するが、`auth`、`job-api`、`job-worker`、`ui` は将来それぞれ独立した

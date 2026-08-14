@@ -1,5 +1,7 @@
+using System.Net;
 using Microsoft.Extensions.Configuration;
 using Aspire.Hosting.ApplicationModel;
+using Aspire.Hosting.Yarp;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -74,8 +76,8 @@ var auth_db_migration = builder.AddGoApp(
   })
   ;
 
-EndpointReference jobApiGrpcEndpoint;
-EndpointReference authGrpcEndpoint;
+EndpointReference jobApiBackendEndpoint;
+EndpointReference authBackendEndpoint;
 
 var IS_DEBUG = string.Equals(builder.Configuration["DEBUG"], "true", StringComparison.OrdinalIgnoreCase);
 
@@ -102,10 +104,10 @@ if (IS_DEBUG)
         , "--continue"
       )
       .WithHttpEndpoint(
-          port: 9091,
-          name: "grpc",
+          name: "grpc-backend",
           env: "GRPC_PORT"
       )
+      .AsHttp2Service()
       .WithReference(auth_db)
       .WithEnvironment(context =>
       {
@@ -120,7 +122,7 @@ if (IS_DEBUG)
           service.Name = "auth";
       });
 
-    authGrpcEndpoint = auth.GetEndpoint("grpc");
+    authBackendEndpoint = auth.GetEndpoint("grpc-backend");
 }
 else
 {
@@ -131,10 +133,10 @@ else
       )
       //    .WithDelveServer(port: 2345) // --only-same-user=false needed
       .WithHttpEndpoint(
-          port: 9091,
-          name: "grpc",
+          name: "grpc-backend",
           env: "GRPC_PORT"
       )
+      .AsHttp2Service()
       .WithReference(auth_db)
       .WithEnvironment(context =>
       {
@@ -149,8 +151,24 @@ else
           service.Name = "auth";
       });
 
-    authGrpcEndpoint = auth.GetEndpoint("grpc");
+    authBackendEndpoint = auth.GetEndpoint("grpc-backend");
 }
+
+var authTls = builder.AddYarp("auth-tls")
+    .WithHostHttpsPort(9091)
+    // Aspire.Hosting.Yarp 13.4.6 does not flatten enum values in cluster configuration.
+    .WithEnvironment("REVERSEPROXY__CLUSTERS__cluster_auth__HTTPREQUEST__VERSIONPOLICY", HttpVersionPolicy.RequestVersionExact.ToString())
+    .WithConfiguration(yarp =>
+    {
+        var cluster = yarp.AddCluster(authBackendEndpoint)
+            .WithForwarderRequestConfig(new()
+            {
+                Version = HttpVersion.Version20,
+                VersionPolicy = HttpVersionPolicy.RequestVersionExact,
+            });
+        yarp.AddRoute(cluster);
+    });
+var authGrpcEndpoint = authTls.GetEndpoint("https");
 
 if (IS_DEBUG)
 {
@@ -170,10 +188,10 @@ if (IS_DEBUG)
         , "--continue"
       )
       .WithHttpEndpoint(
-          port: 9090,
-          name: "grpc",
+          name: "grpc-backend",
           env: "GRPC_PORT"
       )
+      .AsHttp2Service()
       .WithReference(job_db)
       .WithEnvironment(context =>
       {
@@ -189,7 +207,7 @@ if (IS_DEBUG)
           service.Name = "job-api";
       });
 
-    jobApiGrpcEndpoint = job_api.GetEndpoint("grpc");
+    jobApiBackendEndpoint = job_api.GetEndpoint("grpc-backend");
 }
 else
 {
@@ -200,10 +218,10 @@ else
       )
       //    .WithDelveServer(port: 2345) // --only-same-user=false needed
       .WithHttpEndpoint(
-          port: 9090,
-          name: "grpc",
+          name: "grpc-backend",
           env: "GRPC_PORT"
       )
+      .AsHttp2Service()
       .WithReference(job_db)
       .WithEnvironment(context =>
       {
@@ -219,33 +237,49 @@ else
           service.Name = "job-api";
       });
 
-    jobApiGrpcEndpoint = job_api.GetEndpoint("grpc");
+    jobApiBackendEndpoint = job_api.GetEndpoint("grpc-backend");
 }
 
-var isGitHubActions = string.Equals(
-    Environment.GetEnvironmentVariable("GITHUB_ACTIONS"),
-    "true",
-    StringComparison.OrdinalIgnoreCase
-);
+var jobApiTls = builder.AddYarp("job-api-tls")
+    .WithHostHttpsPort(9090)
+    // Aspire.Hosting.Yarp 13.4.6 does not flatten enum values in cluster configuration.
+    .WithEnvironment("REVERSEPROXY__CLUSTERS__cluster_job-api__HTTPREQUEST__VERSIONPOLICY", HttpVersionPolicy.RequestVersionExact.ToString())
+    .WithConfiguration(yarp =>
+    {
+        var cluster = yarp.AddCluster(jobApiBackendEndpoint)
+            .WithForwarderRequestConfig(new()
+            {
+                Version = HttpVersion.Version20,
+                VersionPolicy = HttpVersionPolicy.RequestVersionExact,
+            });
+        yarp.AddRoute(cluster);
+    });
+var jobApiGrpcEndpoint = jobApiTls.GetEndpoint("https");
 
-var demo = builder.AddGoApp(
-    name: "demo",
+var demoBackend = builder.AddGoApp(
+    name: "demo-backend",
     appDirectory: "../services/demo",
     packagePath: "./cmd/server"
   )
-  .WithExternalHttpEndpoints()
   .WithHttpEndpoint(
-      name: "http",
-      port: 8080,
-      env: "PORT",
-      isProxied: !isGitHubActions
+      name: "http-backend",
+      env: "PORT"
   )
   .PublishAsDockerComposeService((resource, service) =>
   {
-      service.Name = "demo";
+      service.Name = "demo-backend";
   });
+var demoBackendEndpoint = demoBackend.GetEndpoint("http-backend");
 
-var demoEndpoint = demo.GetEndpoint("http", KnownNetworkIdentifiers.LocalhostNetwork);
+var demo = builder.AddYarp("demo")
+    .WithExternalHttpEndpoints()
+    .WithHostHttpsPort(8080)
+    .WithConfiguration(yarp =>
+    {
+        yarp.AddRoute(demoBackendEndpoint);
+    });
+
+var demoContainerEndpoint = demo.GetEndpoint("https", KnownNetworkIdentifiers.DefaultAspireContainerNetwork);
 
 var forwardProxy = builder.AddDockerfile(
         name: "forward-proxy",
@@ -258,19 +292,13 @@ var forwardProxy = builder.AddDockerfile(
     )
     .WithEnvironment(context =>
     {
-        context.EnvironmentVariables["SQUID_ALLOWED_DEMO_HOST_AND_PORT"] = ReferenceExpression.Create($"host.docker.internal:{demoEndpoint.Property(EndpointProperty.Port)}");
+        context.EnvironmentVariables["SQUID_ALLOWED_DEMO_HOST_AND_PORT"] = demoContainerEndpoint.Property(EndpointProperty.HostAndPort);
     })
     .PublishAsDockerComposeService((resource, service) =>
     {
         service.Name = "forward-proxy";
     })
 ;
-if (isGitHubActions)
-{
-    forwardProxy.WithContainerRuntimeArgs(
-        "--add-host=host.docker.internal:host-gateway"
-    );
-}
 var forwardProxyEndpoint = forwardProxy.GetEndpoint("proxy");
 
 if (IS_DEBUG)
@@ -297,8 +325,8 @@ if (IS_DEBUG)
       .WithReference(forwardProxyEndpoint)
       .WithEnvironment(context =>
       {
-          context.EnvironmentVariables["JOB_API_SERVER_URI"] = jobApiGrpcEndpoint.Property(EndpointProperty.HostAndPort);
-          context.EnvironmentVariables["AUTH_SERVER_URI"] = authGrpcEndpoint.Property(EndpointProperty.HostAndPort);
+          context.EnvironmentVariables["JOB_API_GRPC_ENDPOINT"] = jobApiGrpcEndpoint.Property(EndpointProperty.Url);
+          context.EnvironmentVariables["AUTH_GRPC_ENDPOINT"] = authGrpcEndpoint.Property(EndpointProperty.Url);
           context.EnvironmentVariables["AUTH_CLIENT_ID"] = workerClientId;
           context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
           context.EnvironmentVariables["WORKER_HTTP_PROXY"] = forwardProxyEndpoint.Property(EndpointProperty.Url);
@@ -323,8 +351,8 @@ else
       .WithReference(forwardProxyEndpoint)
       .WithEnvironment(context =>
       {
-          context.EnvironmentVariables["JOB_API_SERVER_URI"] = jobApiGrpcEndpoint.Property(EndpointProperty.HostAndPort);
-          context.EnvironmentVariables["AUTH_SERVER_URI"] = authGrpcEndpoint.Property(EndpointProperty.HostAndPort);
+          context.EnvironmentVariables["JOB_API_GRPC_ENDPOINT"] = jobApiGrpcEndpoint.Property(EndpointProperty.Url);
+          context.EnvironmentVariables["AUTH_GRPC_ENDPOINT"] = authGrpcEndpoint.Property(EndpointProperty.Url);
           context.EnvironmentVariables["AUTH_CLIENT_ID"] = "job-worker";
           context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
           context.EnvironmentVariables["WORKER_HTTP_PROXY"] = forwardProxyEndpoint.Property(EndpointProperty.Url);

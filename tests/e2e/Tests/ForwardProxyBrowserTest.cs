@@ -9,20 +9,6 @@ namespace e2e.Tests;
 [Collection(nameof(AppFixture))]
 public sealed class ForwardProxyBrowserTest(AppFixture fixture) : BrowserE2ETest(fixture)
 {
-    private static Uri ToForwardProxyDemoUri(Uri demoBaseUri)
-    {
-        if (!demoBaseUri.IsLoopback)
-        {
-            return demoBaseUri;
-        }
-
-        var builder = new UriBuilder(demoBaseUri)
-        {
-            Host = "host.docker.internal",
-        };
-        return builder.Uri;
-    }
-
     private async Task<IPage> RequestExecutionAsync(Uri requestUri)
     {
         var page = await Context.NewPageAsync();
@@ -61,8 +47,7 @@ public sealed class ForwardProxyBrowserTest(AppFixture fixture) : BrowserE2ETest
     [Fact]
     public async Task CanExecuteAllowedDemoUrlThroughForwardProxy()
     {
-        var demoUri = new Uri(Fixture.Target.DemoBaseUri, "/200");
-        var page = await RequestExecutionAsync(ToForwardProxyDemoUri(demoUri));
+        var page = await RequestExecutionAsync(new Uri(Fixture.Target.DemoBaseUriFromContainerNetwork, "/200"));
 
         await Expect(page.GetByText("Succeeded", new() { Exact = true }))
             .ToBeVisibleAsync(new() { Timeout = 30_000 });
