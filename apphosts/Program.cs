@@ -1,5 +1,7 @@
+using System.Net;
 using Microsoft.Extensions.Configuration;
 using Aspire.Hosting.ApplicationModel;
+using Yarp.ReverseProxy.Forwarder;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -156,7 +158,14 @@ var authTls = builder.AddYarp("auth-tls")
     .WithHostHttpsPort(9091)
     .WithConfiguration(yarp =>
     {
-        yarp.AddRoute(authBackendEndpoint);
+        var destination = yarp.AddDestination(authBackendEndpoint)
+            .WithForwarderRequestConfig(new ForwarderRequestConfig
+            {
+                Version = HttpVersion.Version20,
+                VersionPolicy = HttpVersionPolicy.RequestVersionExact,
+            });
+        yarp.AddRoute("/{**catch-all}")
+            .WithReference(destination);
     });
 var authGrpcEndpoint = authTls.GetEndpoint("https");
 
@@ -234,7 +243,14 @@ var jobApiTls = builder.AddYarp("job-api-tls")
     .WithHostHttpsPort(9090)
     .WithConfiguration(yarp =>
     {
-        yarp.AddRoute(jobApiBackendEndpoint);
+        var destination = yarp.AddDestination(jobApiBackendEndpoint)
+            .WithForwarderRequestConfig(new ForwarderRequestConfig
+            {
+                Version = HttpVersion.Version20,
+                VersionPolicy = HttpVersionPolicy.RequestVersionExact,
+            });
+        yarp.AddRoute("/{**catch-all}")
+            .WithReference(destination);
     });
 var jobApiGrpcEndpoint = jobApiTls.GetEndpoint("https");
 
