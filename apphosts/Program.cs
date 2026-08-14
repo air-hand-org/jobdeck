@@ -76,8 +76,6 @@ var auth_db_migration = builder.AddGoApp(
 
 EndpointReference jobApiGrpcEndpoint;
 EndpointReference authGrpcEndpoint;
-EndpointReference jobApiGrpcHttpsEndpoint;
-EndpointReference authGrpcHttpsEndpoint;
 
 var IS_DEBUG = string.Equals(builder.Configuration["DEBUG"], "true", StringComparison.OrdinalIgnoreCase);
 
@@ -103,14 +101,10 @@ if (IS_DEBUG)
         "--only-same-user=false" // need by Zed on WSL2?
         , "--continue"
       )
-      .WithHttpEndpoint(
+      .WithHttpsEndpoint(
           port: 9091,
           name: "grpc",
           env: "GRPC_PORT"
-      )
-      .WithHttpsEndpoint(
-          targetPort: 9091,
-          name: "grpc-https"
       )
       .WithReference(auth_db)
       .WithEnvironment(context =>
@@ -127,7 +121,6 @@ if (IS_DEBUG)
       });
 
     authGrpcEndpoint = auth.GetEndpoint("grpc");
-    authGrpcHttpsEndpoint = auth.GetEndpoint("grpc-https");
 }
 else
 {
@@ -137,14 +130,10 @@ else
         packagePath: "./cmd/server"
       )
       //    .WithDelveServer(port: 2345) // --only-same-user=false needed
-      .WithHttpEndpoint(
+      .WithHttpsEndpoint(
           port: 9091,
           name: "grpc",
           env: "GRPC_PORT"
-      )
-      .WithHttpsEndpoint(
-          targetPort: 9091,
-          name: "grpc-https"
       )
       .WithReference(auth_db)
       .WithEnvironment(context =>
@@ -161,7 +150,6 @@ else
       });
 
     authGrpcEndpoint = auth.GetEndpoint("grpc");
-    authGrpcHttpsEndpoint = auth.GetEndpoint("grpc-https");
 }
 
 if (IS_DEBUG)
@@ -181,14 +169,10 @@ if (IS_DEBUG)
         "--only-same-user=false" // need by Zed on WSL2?
         , "--continue"
       )
-      .WithHttpEndpoint(
+      .WithHttpsEndpoint(
           port: 9090,
           name: "grpc",
           env: "GRPC_PORT"
-      )
-      .WithHttpsEndpoint(
-          targetPort: 9090,
-          name: "grpc-https"
       )
       .WithReference(job_db)
       .WithEnvironment(context =>
@@ -206,7 +190,6 @@ if (IS_DEBUG)
       });
 
     jobApiGrpcEndpoint = job_api.GetEndpoint("grpc");
-    jobApiGrpcHttpsEndpoint = job_api.GetEndpoint("grpc-https");
 }
 else
 {
@@ -216,14 +199,10 @@ else
         packagePath: "./cmd/server"
       )
       //    .WithDelveServer(port: 2345) // --only-same-user=false needed
-      .WithHttpEndpoint(
+      .WithHttpsEndpoint(
           port: 9090,
           name: "grpc",
           env: "GRPC_PORT"
-      )
-      .WithHttpsEndpoint(
-          targetPort: 9090,
-          name: "grpc-https"
       )
       .WithReference(job_db)
       .WithEnvironment(context =>
@@ -241,7 +220,6 @@ else
       });
 
     jobApiGrpcEndpoint = job_api.GetEndpoint("grpc");
-    jobApiGrpcHttpsEndpoint = job_api.GetEndpoint("grpc-https");
 }
 
 var isGitHubActions = string.Equals(
@@ -258,7 +236,7 @@ var demo = builder.AddGoApp(
   .WithExternalHttpEndpoints()
   .WithHttpsEndpoint(
       name: "https",
-      targetPort: 8080,
+      port: 8080,
       env: "PORT"
   )
   .PublishAsDockerComposeService((resource, service) =>
@@ -318,8 +296,8 @@ if (IS_DEBUG)
       .WithReference(forwardProxyEndpoint)
       .WithEnvironment(context =>
       {
-          context.EnvironmentVariables["JOB_API_GRPC_ENDPOINT"] = jobApiGrpcHttpsEndpoint.Property(EndpointProperty.Url);
-          context.EnvironmentVariables["AUTH_GRPC_ENDPOINT"] = authGrpcHttpsEndpoint.Property(EndpointProperty.Url);
+          context.EnvironmentVariables["JOB_API_GRPC_ENDPOINT"] = jobApiGrpcEndpoint.Property(EndpointProperty.Url);
+          context.EnvironmentVariables["AUTH_GRPC_ENDPOINT"] = authGrpcEndpoint.Property(EndpointProperty.Url);
           context.EnvironmentVariables["AUTH_CLIENT_ID"] = workerClientId;
           context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
           context.EnvironmentVariables["WORKER_HTTP_PROXY"] = forwardProxyEndpoint.Property(EndpointProperty.Url);
@@ -344,8 +322,8 @@ else
       .WithReference(forwardProxyEndpoint)
       .WithEnvironment(context =>
       {
-          context.EnvironmentVariables["JOB_API_GRPC_ENDPOINT"] = jobApiGrpcHttpsEndpoint.Property(EndpointProperty.Url);
-          context.EnvironmentVariables["AUTH_GRPC_ENDPOINT"] = authGrpcHttpsEndpoint.Property(EndpointProperty.Url);
+          context.EnvironmentVariables["JOB_API_GRPC_ENDPOINT"] = jobApiGrpcEndpoint.Property(EndpointProperty.Url);
+          context.EnvironmentVariables["AUTH_GRPC_ENDPOINT"] = authGrpcEndpoint.Property(EndpointProperty.Url);
           context.EnvironmentVariables["AUTH_CLIENT_ID"] = "job-worker";
           context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
           context.EnvironmentVariables["WORKER_HTTP_PROXY"] = forwardProxyEndpoint.Property(EndpointProperty.Url);
@@ -359,12 +337,12 @@ else
 
 var ui = builder.AddProject("ui", "../services/ui/ui.csproj")
   .WithExternalHttpEndpoints()
-  .WithReference(jobApiGrpcHttpsEndpoint)
-  .WithReference(authGrpcHttpsEndpoint)
+  .WithReference(jobApiGrpcEndpoint)
+  .WithReference(authGrpcEndpoint)
   .WithEnvironment(context =>
   {
-      context.EnvironmentVariables["JOB_API_GRPC_ENDPOINT"] = jobApiGrpcHttpsEndpoint.Property(EndpointProperty.Url);
-      context.EnvironmentVariables["AUTH_GRPC_ENDPOINT"] = authGrpcHttpsEndpoint.Property(EndpointProperty.Url);
+      context.EnvironmentVariables["JOB_API_GRPC_ENDPOINT"] = jobApiGrpcEndpoint.Property(EndpointProperty.Url);
+      context.EnvironmentVariables["AUTH_GRPC_ENDPOINT"] = authGrpcEndpoint.Property(EndpointProperty.Url);
   })
   .WithHttpHealthCheck("/health/ready")
   // .WaitFor(job_api)
