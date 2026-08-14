@@ -74,8 +74,8 @@ var auth_db_migration = builder.AddGoApp(
   })
   ;
 
-EndpointReference jobApiGrpcEndpoint;
-EndpointReference authGrpcEndpoint;
+EndpointReference jobApiBackendEndpoint;
+EndpointReference authBackendEndpoint;
 
 var IS_DEBUG = string.Equals(builder.Configuration["DEBUG"], "true", StringComparison.OrdinalIgnoreCase);
 
@@ -101,11 +101,9 @@ if (IS_DEBUG)
         "--only-same-user=false" // need by Zed on WSL2?
         , "--continue"
       )
-      .WithHttpsEndpoint(
-          port: 9091,
-          name: "grpc",
-          env: "GRPC_PORT",
-          isProxied: true
+      .WithHttpEndpoint(
+          name: "grpc-backend",
+          env: "GRPC_PORT"
       )
       .AsHttp2Service()
       .WithReference(auth_db)
@@ -122,7 +120,7 @@ if (IS_DEBUG)
           service.Name = "auth";
       });
 
-    authGrpcEndpoint = auth.GetEndpoint("grpc");
+    authBackendEndpoint = auth.GetEndpoint("grpc-backend");
 }
 else
 {
@@ -132,11 +130,9 @@ else
         packagePath: "./cmd/server"
       )
       //    .WithDelveServer(port: 2345) // --only-same-user=false needed
-      .WithHttpsEndpoint(
-          port: 9091,
-          name: "grpc",
-          env: "GRPC_PORT",
-          isProxied: true
+      .WithHttpEndpoint(
+          name: "grpc-backend",
+          env: "GRPC_PORT"
       )
       .AsHttp2Service()
       .WithReference(auth_db)
@@ -153,8 +149,20 @@ else
           service.Name = "auth";
       });
 
-    authGrpcEndpoint = auth.GetEndpoint("grpc");
+    authBackendEndpoint = auth.GetEndpoint("grpc-backend");
 }
+
+var authTls = builder.AddYarp("auth-tls")
+    .WithHttpsEndpoint(
+        port: 9091,
+        name: "grpc"
+    )
+    .WithHttpsDeveloperCertificate()
+    .WithConfiguration(yarp =>
+    {
+        yarp.AddRoute(authBackendEndpoint);
+    });
+var authGrpcEndpoint = authTls.GetEndpoint("grpc");
 
 if (IS_DEBUG)
 {
@@ -173,11 +181,9 @@ if (IS_DEBUG)
         "--only-same-user=false" // need by Zed on WSL2?
         , "--continue"
       )
-      .WithHttpsEndpoint(
-          port: 9090,
-          name: "grpc",
-          env: "GRPC_PORT",
-          isProxied: true
+      .WithHttpEndpoint(
+          name: "grpc-backend",
+          env: "GRPC_PORT"
       )
       .AsHttp2Service()
       .WithReference(job_db)
@@ -195,7 +201,7 @@ if (IS_DEBUG)
           service.Name = "job-api";
       });
 
-    jobApiGrpcEndpoint = job_api.GetEndpoint("grpc");
+    jobApiBackendEndpoint = job_api.GetEndpoint("grpc-backend");
 }
 else
 {
@@ -205,11 +211,9 @@ else
         packagePath: "./cmd/server"
       )
       //    .WithDelveServer(port: 2345) // --only-same-user=false needed
-      .WithHttpsEndpoint(
-          port: 9090,
-          name: "grpc",
-          env: "GRPC_PORT",
-          isProxied: true
+      .WithHttpEndpoint(
+          name: "grpc-backend",
+          env: "GRPC_PORT"
       )
       .AsHttp2Service()
       .WithReference(job_db)
@@ -227,8 +231,20 @@ else
           service.Name = "job-api";
       });
 
-    jobApiGrpcEndpoint = job_api.GetEndpoint("grpc");
+    jobApiBackendEndpoint = job_api.GetEndpoint("grpc-backend");
 }
+
+var jobApiTls = builder.AddYarp("job-api-tls")
+    .WithHttpsEndpoint(
+        port: 9090,
+        name: "grpc"
+    )
+    .WithHttpsDeveloperCertificate()
+    .WithConfiguration(yarp =>
+    {
+        yarp.AddRoute(jobApiBackendEndpoint);
+    });
+var jobApiGrpcEndpoint = jobApiTls.GetEndpoint("grpc");
 
 var isGitHubActions = string.Equals(
     Environment.GetEnvironmentVariable("GITHUB_ACTIONS"),
@@ -236,22 +252,32 @@ var isGitHubActions = string.Equals(
     StringComparison.OrdinalIgnoreCase
 );
 
-var demo = builder.AddGoApp(
-    name: "demo",
+var demoBackend = builder.AddGoApp(
+    name: "demo-backend",
     appDirectory: "../services/demo",
     packagePath: "./cmd/server"
   )
-  .WithExternalHttpEndpoints()
-  .WithHttpsEndpoint(
-      name: "https",
-      port: 8080,
-      env: "PORT",
-      isProxied: true
+  .WithHttpEndpoint(
+      name: "http-backend",
+      env: "PORT"
   )
   .PublishAsDockerComposeService((resource, service) =>
   {
-      service.Name = "demo";
+      service.Name = "demo-backend";
   });
+var demoBackendEndpoint = demoBackend.GetEndpoint("http-backend");
+
+var demo = builder.AddYarp("demo")
+    .WithExternalHttpEndpoints()
+    .WithHttpsEndpoint(
+        port: 8080,
+        name: "https"
+    )
+    .WithHttpsDeveloperCertificate()
+    .WithConfiguration(yarp =>
+    {
+        yarp.AddRoute(demoBackendEndpoint);
+    });
 
 var demoEndpoint = demo.GetEndpoint("https", KnownNetworkIdentifiers.LocalhostNetwork);
 
