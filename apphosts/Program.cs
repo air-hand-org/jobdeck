@@ -158,14 +158,13 @@ var authTls = builder.AddYarp("auth-tls")
     .WithHostHttpsPort(9091)
     .WithConfiguration(yarp =>
     {
-        var destination = yarp.AddDestination(authBackendEndpoint)
+        var cluster = yarp.AddCluster(authBackendEndpoint)
             .WithForwarderRequestConfig(new ForwarderRequestConfig
             {
                 Version = HttpVersion.Version20,
                 VersionPolicy = HttpVersionPolicy.RequestVersionExact,
             });
-        yarp.AddRoute("/{**catch-all}")
-            .WithReference(destination);
+        yarp.AddRoute(cluster);
     });
 var authGrpcEndpoint = authTls.GetEndpoint("https");
 
@@ -243,14 +242,13 @@ var jobApiTls = builder.AddYarp("job-api-tls")
     .WithHostHttpsPort(9090)
     .WithConfiguration(yarp =>
     {
-        var destination = yarp.AddDestination(jobApiBackendEndpoint)
+        var cluster = yarp.AddCluster(jobApiBackendEndpoint)
             .WithForwarderRequestConfig(new ForwarderRequestConfig
             {
                 Version = HttpVersion.Version20,
                 VersionPolicy = HttpVersionPolicy.RequestVersionExact,
             });
-        yarp.AddRoute("/{**catch-all}")
-            .WithReference(destination);
+        yarp.AddRoute(cluster);
     });
 var jobApiGrpcEndpoint = jobApiTls.GetEndpoint("https");
 
