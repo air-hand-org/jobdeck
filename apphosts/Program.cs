@@ -261,12 +261,6 @@ var jobApiTls = builder.AddYarp("job-api-tls")
     });
 var jobApiGrpcEndpoint = jobApiTls.GetEndpoint("https");
 
-var isGitHubActions = string.Equals(
-    Environment.GetEnvironmentVariable("GITHUB_ACTIONS"),
-    "true",
-    StringComparison.OrdinalIgnoreCase
-);
-
 var demoBackend = builder.AddGoApp(
     name: "demo-backend",
     appDirectory: "../services/demo",
@@ -296,6 +290,7 @@ var forwardProxy = builder.AddDockerfile(
         name: "forward-proxy",
         contextPath: "../containers/forward-proxy"
     )
+    .WithContainerRuntimeArgs("--add-host=host.docker.internal:host-gateway")
     .WithHttpEndpoint(
         name: "proxy",
         port: 3128,
@@ -310,12 +305,6 @@ var forwardProxy = builder.AddDockerfile(
         service.Name = "forward-proxy";
     })
 ;
-if (isGitHubActions)
-{
-    forwardProxy.WithContainerRuntimeArgs(
-        "--add-host=host.docker.internal:host-gateway"
-    );
-}
 var forwardProxyEndpoint = forwardProxy.GetEndpoint("proxy");
 
 if (IS_DEBUG)
