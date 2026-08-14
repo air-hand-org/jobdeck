@@ -1,6 +1,7 @@
 using System.Net;
 using Microsoft.Extensions.Configuration;
 using Aspire.Hosting.ApplicationModel;
+using Aspire.Hosting.Yarp;
 using Yarp.ReverseProxy.Forwarder;
 
 var builder = DistributedApplication.CreateBuilder(args);
