@@ -157,7 +157,6 @@ var authTls = builder.AddYarp("auth-tls")
         port: 9091,
         name: "grpc"
     )
-    .WithHttpsDeveloperCertificate()
     .WithConfiguration(yarp =>
     {
         yarp.AddRoute(authBackendEndpoint);
@@ -239,7 +238,6 @@ var jobApiTls = builder.AddYarp("job-api-tls")
         port: 9090,
         name: "grpc"
     )
-    .WithHttpsDeveloperCertificate()
     .WithConfiguration(yarp =>
     {
         yarp.AddRoute(jobApiBackendEndpoint);
@@ -273,7 +271,6 @@ var demo = builder.AddYarp("demo")
         port: 8080,
         name: "https"
     )
-    .WithHttpsDeveloperCertificate()
     .WithConfiguration(yarp =>
     {
         yarp.AddRoute(demoBackendEndpoint);
