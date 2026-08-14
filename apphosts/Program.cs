@@ -157,9 +157,13 @@ else
 
 var authTls = builder.AddYarp("auth-tls")
     .WithHostHttpsPort(9091)
+    .WithContainerRuntimeArgs("--add-host=host.docker.internal:host-gateway")
     .WithConfiguration(yarp =>
     {
-        var cluster = yarp.AddCluster(authBackendEndpoint)
+        var cluster = yarp.AddCluster(
+            "auth-backend",
+            ReferenceExpression.Create($"http://host.docker.internal:{authBackendEndpoint.Property(EndpointProperty.Port)}")
+        )
             .WithForwarderRequestConfig(new ForwarderRequestConfig
             {
                 Version = HttpVersion.Version20,
@@ -241,9 +245,13 @@ else
 
 var jobApiTls = builder.AddYarp("job-api-tls")
     .WithHostHttpsPort(9090)
+    .WithContainerRuntimeArgs("--add-host=host.docker.internal:host-gateway")
     .WithConfiguration(yarp =>
     {
-        var cluster = yarp.AddCluster(jobApiBackendEndpoint)
+        var cluster = yarp.AddCluster(
+            "job-api-backend",
+            ReferenceExpression.Create($"http://host.docker.internal:{jobApiBackendEndpoint.Property(EndpointProperty.Port)}")
+        )
             .WithForwarderRequestConfig(new ForwarderRequestConfig
             {
                 Version = HttpVersion.Version20,
