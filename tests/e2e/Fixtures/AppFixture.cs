@@ -50,7 +50,8 @@ public sealed class AppFixture : IAsyncLifetime
         var demoBaseUrl = Environment.GetEnvironmentVariable("E2E_DEMO_BASE_URL");
         if (!string.IsNullOrWhiteSpace(uiBaseUrl) && !string.IsNullOrWhiteSpace(demoBaseUrl))
         {
-            Target = new(UIBaseUri: ValidUri(uiBaseUrl), DemoBaseUri: ValidUri(demoBaseUrl));
+            var demoUri = ValidUri(demoBaseUrl);
+            Target = new(UIBaseUri: ValidUri(uiBaseUrl), DemoBaseUri: demoUri, DemoBaseUriFromContainerNetwork: demoUri);
             return;
         }
 
@@ -109,7 +110,15 @@ public sealed class AppFixture : IAsyncLifetime
             await app.StartAsync(cts.Token);
 
             await app.ResourceNotifications.WaitForResourceHealthyAsync("ui", cts.Token);
-            Target = new(UIBaseUri: app.GetEndpoint("ui", "https"), DemoBaseUri: app.GetEndpoint("demo", "https"));
+            Target = new(
+                UIBaseUri: app.GetEndpoint("ui", "https"),
+                DemoBaseUri: app.GetEndpoint("demo", "https"),
+                DemoBaseUriFromContainerNetwork: app.GetEndpointForNetwork(
+                    "demo",
+                    KnownNetworkIdentifiers.DefaultAspireContainerNetwork,
+                    "https"
+                )
+            );
         }
         catch
         {

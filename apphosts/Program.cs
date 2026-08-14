@@ -279,13 +279,12 @@ var demo = builder.AddYarp("demo")
         yarp.AddRoute(demoBackendEndpoint);
     });
 
-var demoEndpoint = demo.GetEndpoint("https", KnownNetworkIdentifiers.LocalhostNetwork);
+var demoContainerEndpoint = demo.GetEndpoint("https", KnownNetworkIdentifiers.DefaultAspireContainerNetwork);
 
 var forwardProxy = builder.AddDockerfile(
         name: "forward-proxy",
         contextPath: "../containers/forward-proxy"
     )
-    .WithContainerRuntimeArgs("--add-host=host.docker.internal:host-gateway")
     .WithHttpEndpoint(
         name: "proxy",
         port: 3128,
@@ -293,7 +292,7 @@ var forwardProxy = builder.AddDockerfile(
     )
     .WithEnvironment(context =>
     {
-        context.EnvironmentVariables["SQUID_ALLOWED_DEMO_HOST_AND_PORT"] = ReferenceExpression.Create($"host.docker.internal:{demoEndpoint.Property(EndpointProperty.Port)}");
+        context.EnvironmentVariables["SQUID_ALLOWED_DEMO_HOST_AND_PORT"] = demoContainerEndpoint.Property(EndpointProperty.HostAndPort);
     })
     .PublishAsDockerComposeService((resource, service) =>
     {
