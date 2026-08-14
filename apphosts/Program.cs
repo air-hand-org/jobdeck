@@ -2,7 +2,6 @@ using System.Net;
 using Microsoft.Extensions.Configuration;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Yarp;
-using Yarp.ReverseProxy.Forwarder;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -157,14 +156,12 @@ else
 
 var authTls = builder.AddYarp("auth-tls")
     .WithHostHttpsPort(9091)
-    .WithContainerRuntimeArgs("--add-host=host.docker.internal:host-gateway")
+    // Aspire.Hosting.Yarp 13.4.6 does not flatten enum values in cluster configuration.
+    .WithEnvironment("REVERSEPROXY__CLUSTERS__cluster_auth__HTTPREQUEST__VERSIONPOLICY", HttpVersionPolicy.RequestVersionExact.ToString())
     .WithConfiguration(yarp =>
     {
-        var cluster = yarp.AddCluster(
-            "auth-backend",
-            ReferenceExpression.Create($"http://host.docker.internal:{authBackendEndpoint.Property(EndpointProperty.Port)}")
-        )
-            .WithForwarderRequestConfig(new ForwarderRequestConfig
+        var cluster = yarp.AddCluster(authBackendEndpoint)
+            .WithForwarderRequestConfig(new()
             {
                 Version = HttpVersion.Version20,
                 VersionPolicy = HttpVersionPolicy.RequestVersionExact,
@@ -245,14 +242,12 @@ else
 
 var jobApiTls = builder.AddYarp("job-api-tls")
     .WithHostHttpsPort(9090)
-    .WithContainerRuntimeArgs("--add-host=host.docker.internal:host-gateway")
+    // Aspire.Hosting.Yarp 13.4.6 does not flatten enum values in cluster configuration.
+    .WithEnvironment("REVERSEPROXY__CLUSTERS__cluster_job-api__HTTPREQUEST__VERSIONPOLICY", HttpVersionPolicy.RequestVersionExact.ToString())
     .WithConfiguration(yarp =>
     {
-        var cluster = yarp.AddCluster(
-            "job-api-backend",
-            ReferenceExpression.Create($"http://host.docker.internal:{jobApiBackendEndpoint.Property(EndpointProperty.Port)}")
-        )
-            .WithForwarderRequestConfig(new ForwarderRequestConfig
+        var cluster = yarp.AddCluster(jobApiBackendEndpoint)
+            .WithForwarderRequestConfig(new()
             {
                 Version = HttpVersion.Version20,
                 VersionPolicy = HttpVersionPolicy.RequestVersionExact,
