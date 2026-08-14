@@ -153,15 +153,12 @@ else
 }
 
 var authTls = builder.AddYarp("auth-tls")
-    .WithHttpsEndpoint(
-        port: 9091,
-        name: "grpc"
-    )
+    .WithHostHttpsPort(9091)
     .WithConfiguration(yarp =>
     {
         yarp.AddRoute(authBackendEndpoint);
     });
-var authGrpcEndpoint = authTls.GetEndpoint("grpc");
+var authGrpcEndpoint = authTls.GetEndpoint("https");
 
 if (IS_DEBUG)
 {
@@ -234,15 +231,12 @@ else
 }
 
 var jobApiTls = builder.AddYarp("job-api-tls")
-    .WithHttpsEndpoint(
-        port: 9090,
-        name: "grpc"
-    )
+    .WithHostHttpsPort(9090)
     .WithConfiguration(yarp =>
     {
         yarp.AddRoute(jobApiBackendEndpoint);
     });
-var jobApiGrpcEndpoint = jobApiTls.GetEndpoint("grpc");
+var jobApiGrpcEndpoint = jobApiTls.GetEndpoint("https");
 
 var isGitHubActions = string.Equals(
     Environment.GetEnvironmentVariable("GITHUB_ACTIONS"),
@@ -267,10 +261,7 @@ var demoBackendEndpoint = demoBackend.GetEndpoint("http-backend");
 
 var demo = builder.AddYarp("demo")
     .WithExternalHttpEndpoints()
-    .WithHttpsEndpoint(
-        port: 8080,
-        name: "https"
-    )
+    .WithHostHttpsPort(8080)
     .WithConfiguration(yarp =>
     {
         yarp.AddRoute(demoBackendEndpoint);
