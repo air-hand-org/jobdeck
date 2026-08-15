@@ -15,9 +15,9 @@ concurrency:
 
 jobs:
   bootstrap:
-    # Release Please publishes version releases as GitHub pre-releases. Do not
-    # deploy manually-created stable releases from this workflow.
-    if: ${{ github.event.release.prerelease == true }}
+    # Release Please publishes stable releases after its release PR is merged.
+    # Pre-releases are deliberately not a deployment trigger in this flow.
+    if: ${{ github.event.release.prerelease == false }}
     uses: ./.github/workflows/_tofu.yaml
     with:
       root: bootstrap
@@ -29,7 +29,7 @@ jobs:
       id-token: write
 
   images:
-    if: ${{ github.event.release.prerelease == true }}
+    if: ${{ github.event.release.prerelease == false }}
     needs: bootstrap
     uses: ./.github/workflows/_build-images.yaml
     with:
@@ -44,7 +44,7 @@ jobs:
   app:
     # Keep the image push and revision apply in one release chain: app resources
     # must never refer to an Artifact Registry tag that has not been pushed.
-    if: ${{ github.event.release.prerelease == true }}
+    if: ${{ github.event.release.prerelease == false }}
     needs: images
     uses: ./.github/workflows/_tofu.yaml
     with:
