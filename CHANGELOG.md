@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/air-hand-org/jobdeck/compare/v0.4.0...v0.5.0) (2026-08-15)
+
+
+### Features
+
+* use HTTPS for local service communication ([#51](https://github.com/air-hand-org/jobdeck/issues/51)) ([da940e5](https://github.com/air-hand-org/jobdeck/commit/da940e576b365f498acfa7606419050af9e8df8b))
+
 ## [0.4.0](https://github.com/air-hand-org/jobdeck/compare/v0.3.1...v0.4.0) (2026-08-13)
 
 
