@@ -28,6 +28,9 @@ jobs:
       TOFU_ROOT: ${{ inputs.root }}
       TOFU_ENVIRONMENT: ${{ inputs.environment }}
       TOFU_COMMAND: ${{ inputs.command }}
+      # iac/app uses this during backend state encryption, which is configured
+      # before the later `tofu plan -var=...` invocation.
+      TF_VAR_project_id: ${{ vars.GCP_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-tools
