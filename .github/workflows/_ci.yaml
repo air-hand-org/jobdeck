@@ -39,3 +39,19 @@ jobs:
     permissions:
       contents: read
       id-token: write
+
+  application-infrastructure-plan:
+    # The app root reads the bootstrap state, so planning it here also verifies
+    # that the two OpenTofu roots remain compatible.
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    uses: ./.github/workflows/_tofu.yaml
+    with:
+      root: app
+      command: plan
+      environment: plan
+    secrets: inherit
+    permissions:
+      contents: read
+      id-token: write

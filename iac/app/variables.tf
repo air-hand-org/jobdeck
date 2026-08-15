@@ -9,8 +9,8 @@ variable "region" {
   default     = "asia-northeast1"
 }
 
-variable "state_bucket_name" {
-  description = "Pre-created GCS bucket used by both OpenTofu roots."
+variable "bootstrap_state_bucket_name" {
+  description = "GCS bucket containing the bootstrap root state to consume."
   type        = string
   default     = "airhand-jobdeck-bucket"
 }

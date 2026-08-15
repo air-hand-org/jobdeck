@@ -41,5 +41,17 @@ jobs:
       contents: read
       id-token: write
 
-  # Add the app apply job here after iac/app exists. It must depend on images
-  # so the release tag is present in Artifact Registry before Cloud Run uses it.
+  app:
+    # Keep the image push and revision apply in one release chain: app resources
+    # must never refer to an Artifact Registry tag that has not been pushed.
+    if: ${{ github.event.release.prerelease == true }}
+    needs: images
+    uses: ./.github/workflows/_tofu.yaml
+    with:
+      root: app
+      command: apply
+      environment: production
+    secrets: inherit
+    permissions:
+      contents: read
+      id-token: write
