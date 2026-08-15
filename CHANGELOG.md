@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/air-hand-org/jobdeck/compare/v0.5.0...v0.5.1) (2026-08-15)
+
+
+### Bug Fixes
+
+* **release:** publish stable releases ([#54](https://github.com/air-hand-org/jobdeck/issues/54)) ([ac17870](https://github.com/air-hand-org/jobdeck/commit/ac178707cd6ceaee730e793b7ef662c7914ef126))
+
 ## [0.5.0](https://github.com/air-hand-org/jobdeck/compare/v0.4.0...v0.5.0) (2026-08-15)
 
 
