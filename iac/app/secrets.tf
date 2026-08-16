@@ -30,7 +30,16 @@ resource "google_secret_manager_secret_version" "application" {
     precondition {
       # Key names are deliberately not secret; only make the value map
       # non-sensitive for this schema check.
-      condition     = setequals(toset(nonsensitive(keys(local.decrypted_secret_values))), toset(keys(local.secret_data_wo_versions)))
+      condition = (
+        length(setsubtract(
+          toset(nonsensitive(keys(local.decrypted_secret_values))),
+          toset(keys(local.secret_data_wo_versions)),
+        )) == 0 &&
+        length(setsubtract(
+          toset(keys(local.secret_data_wo_versions)),
+          toset(nonsensitive(keys(local.decrypted_secret_values))),
+        )) == 0
+      )
       error_message = "The encrypted production secret source must match the bootstrap secret contract exactly."
     }
   }
