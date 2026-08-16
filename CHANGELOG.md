@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/air-hand-org/jobdeck/compare/v0.6.0...v0.6.1) (2026-08-16)
+
+
+### Bug Fixes
+
+* **iac:** allow deployer to enable secret versions ([#58](https://github.com/air-hand-org/jobdeck/issues/58)) ([81cb7ea](https://github.com/air-hand-org/jobdeck/commit/81cb7ea4b51138e8bcaa3a8767d8f39bfbe10000))
+
 ## [0.6.0](https://github.com/air-hand-org/jobdeck/compare/v0.5.1...v0.6.0) (2026-08-16)
 
 
