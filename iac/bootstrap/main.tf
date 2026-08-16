@@ -222,12 +222,12 @@ resource "google_kms_crypto_key_iam_member" "deployer_sops" {
   member        = "serviceAccount:${google_service_account.deployer.email}"
 }
 
-resource "google_secret_manager_secret_iam_member" "deployer_version_adder" {
+resource "google_secret_manager_secret_iam_member" "deployer_version_manager" {
   for_each = local.secret_consumers
 
   project   = var.project_id
   secret_id = google_secret_manager_secret.application[each.key].secret_id
-  role      = "roles/secretmanager.secretVersionAdder"
+  role      = "roles/secretmanager.secretVersionManager"
   member    = "serviceAccount:${google_service_account.deployer.email}"
 }
 
