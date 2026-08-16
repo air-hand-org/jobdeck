@@ -51,6 +51,9 @@ locals {
     "test-user-client-secret-hash" = toset([
       "auth",
     ])
+    # Kept for the operator to recover the test credential. The running auth
+    # service receives only its hash, so no runtime service account accesses it.
+    "test-user-client-secret" = toset([])
     # The value is added separately through the write-only secret-version flow.
     "postgres-password" = toset([
       "auth",
@@ -212,6 +215,12 @@ resource "google_kms_crypto_key_iam_member" "deployer_state" {
 
 resource "google_kms_crypto_key_iam_member" "plan_state" {
   crypto_key_id = google_kms_crypto_key.tofu_state.id
+  role          = "roles/cloudkms.cryptoKeyDecrypter"
+  member        = "serviceAccount:${data.google_service_account.plan.email}"
+}
+
+resource "google_kms_crypto_key_iam_member" "plan_sops" {
+  crypto_key_id = google_kms_crypto_key.sops.id
   role          = "roles/cloudkms.cryptoKeyDecrypter"
   member        = "serviceAccount:${data.google_service_account.plan.email}"
 }

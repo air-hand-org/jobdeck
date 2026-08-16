@@ -12,3 +12,8 @@ playwright-traces
 *.tfstate.*
 *.tfvars
 *.tfvars.json
+
+# SOPS-encrypted secret sources are versioned. Never stage plaintext input.
+iac/secrets/*.yaml
+!iac/secrets/*.enc.yaml
+!iac/secrets/*.example.yaml

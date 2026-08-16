@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/google"
       version = "= 7.43.0"
     }
+    sops = {
+      source  = "nobbs/sops"
+      version = "= 0.3.3"
+    }
   }
 
   backend "gcs" {}
@@ -46,3 +50,7 @@ provider "google" {
   project = var.project_id
   region  = var.region
 }
+
+# The provider exposes only functions. In contrast to the older data-source
+# providers, its decrypted values are not recorded in OpenTofu state.
+provider "sops" {}
