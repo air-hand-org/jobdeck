@@ -41,6 +41,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-tools
+      - name: Lint OpenTofu
+        run: make tofu-lint
       - name: Validate root and environment
         shell: bash
         run: |
@@ -62,8 +64,6 @@ jobs:
           tofu init \
             -backend-config="bucket=airhand-jobdeck-bucket" \
             -backend-config="prefix=${TOFU_ROOT}"
-      - name: Lint OpenTofu
-        run: make tofu-lint
       - name: Validate
         run: |
           cd "iac/${TOFU_ROOT}"
