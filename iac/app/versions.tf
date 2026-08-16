@@ -7,6 +7,7 @@ terraform {
       version = "= 7.43.0"
     }
     sops = {
+      # Provider functions keep decrypted values out of state.
       source  = "nobbs/sops"
       version = "= 0.3.3"
     }
@@ -51,6 +52,4 @@ provider "google" {
   region  = var.region
 }
 
-# The provider exposes only functions. In contrast to the older data-source
-# providers, its decrypted values are not recorded in OpenTofu state.
 provider "sops" {}
