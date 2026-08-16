@@ -219,12 +219,6 @@ resource "google_kms_crypto_key_iam_member" "plan_state" {
   member        = "serviceAccount:${data.google_service_account.plan.email}"
 }
 
-resource "google_kms_crypto_key_iam_member" "plan_sops" {
-  crypto_key_id = google_kms_crypto_key.sops.id
-  role          = "roles/cloudkms.cryptoKeyDecrypter"
-  member        = "serviceAccount:${data.google_service_account.plan.email}"
-}
-
 resource "google_kms_crypto_key_iam_member" "deployer_sops" {
   crypto_key_id = google_kms_crypto_key.sops.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
