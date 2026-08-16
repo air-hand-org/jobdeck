@@ -1,0 +1,3 @@
+creation_rules:
+  - path_regex: ^iac/secrets/[^/]+\.enc\.yaml$
+    gcp_kms: projects/airhand-jobdeck/locations/asia-northeast1/keyRings/jobdeck/cryptoKeys/sops

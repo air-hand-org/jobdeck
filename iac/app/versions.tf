@@ -6,6 +6,11 @@ terraform {
       source  = "hashicorp/google"
       version = "= 7.43.0"
     }
+    sops = {
+      # Provider functions keep decrypted values out of state.
+      source  = "nobbs/sops"
+      version = "= 0.3.3"
+    }
   }
 
   backend "gcs" {}
@@ -46,3 +51,5 @@ provider "google" {
   project = var.project_id
   region  = var.region
 }
+
+provider "sops" {}

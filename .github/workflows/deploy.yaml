@@ -51,6 +51,7 @@ jobs:
       root: app
       command: apply
       environment: production
+      image_tag: ${{ github.event.release.tag_name }}
     secrets: inherit
     permissions:
       contents: read

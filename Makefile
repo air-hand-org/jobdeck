@@ -17,7 +17,7 @@ build: generate go-build cs-build
 fmt: buf-fmt go-fmt cs-fmt tofu-fmt
 
 .PHONY: lint
-lint: buf-lint go-lint cs-lint tofu-lint
+lint: buf-lint go-lint cs-lint
 
 .PHONY: check-clean
 check-clean:
