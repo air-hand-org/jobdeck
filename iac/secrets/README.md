@@ -1,8 +1,10 @@
 # Production secret source
 
 `production.enc.yaml` is the version-controlled, SOPS-encrypted source for
-the Secret Manager values in the bootstrap contract. Plaintext files are
-ignored by Git.
+the Secret Manager values in the bootstrap contract. It can also retain an
+operator-only secret such as `test-user-client-secret`; that value is not
+injected into Secret Manager until a later bootstrap change. Plaintext files
+are ignored by Git.
 
 After bootstrap has created the `jobdeck/sops` KMS key, authenticate locally
 to GCP and create the initial source once:
