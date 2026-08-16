@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/air-hand-org/jobdeck/compare/v0.5.1...v0.6.0) (2026-08-16)
+
+
+### Features
+
+* **iac:** deploy application services to Cloud Run ([#56](https://github.com/air-hand-org/jobdeck/issues/56)) ([91f3cae](https://github.com/air-hand-org/jobdeck/commit/91f3caec33a0237980fab5dba0ed82282cb1c3ec))
+
 ## [0.5.1](https://github.com/air-hand-org/jobdeck/compare/v0.5.0...v0.5.1) (2026-08-15)
 
 
