@@ -56,14 +56,14 @@ jobs:
           project_id: ${{ vars.GCP_PROJECT_ID }}
           workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
-      - name: Lint OpenTofu
-        run: make tofu-lint
       - name: Initialize OpenTofu
         run: |
           cd "iac/${TOFU_ROOT}"
           tofu init \
             -backend-config="bucket=airhand-jobdeck-bucket" \
             -backend-config="prefix=${TOFU_ROOT}"
+      - name: Lint OpenTofu
+        run: make tofu-lint
       - name: Validate
         run: |
           cd "iac/${TOFU_ROOT}"
