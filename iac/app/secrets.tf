@@ -10,16 +10,25 @@ locals {
     "test-user-client-secret-hash"  = 1
   }
 
+}
+
+variable "decrypt_secrets" {
+  description = "Decrypt the production source and manage Secret Manager versions."
+  type        = bool
+  default     = false
+}
+
+locals {
   # `nobbs/sops` implements this as a provider function rather than a data
-  # source, so the decrypted result is not retained in state. `sensitive`
-  # additionally prevents an accidental plan rendering from exposing values.
-  decrypted_secret_values = sensitive(
+  # source, so the decrypted result is not retained in state. Keep local lint
+  # independent of KMS credentials; CI app plan/apply enables this explicitly.
+  decrypted_secret_values = var.decrypt_secrets ? sensitive(
     provider::sops::file("${path.module}/../secrets/production.enc.yaml", "yaml").data.secret_values
-  )
+  ) : {}
 }
 
 resource "google_secret_manager_secret_version" "application" {
-  for_each = local.secret_data_wo_versions
+  for_each = var.decrypt_secrets ? local.secret_data_wo_versions : {}
 
   secret                 = local.application_secrets[each.key]
   secret_data_wo         = local.decrypted_secret_values[each.key]
