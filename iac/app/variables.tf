@@ -16,7 +16,7 @@ variable "bootstrap_state_bucket_name" {
 }
 
 variable "bootstrap_state_prefix" {
-  description = "GCS backend prefix for the bootstrap root state to consume."
+  description = "GCS backend prefix for the bootstrap root state."
   type        = string
   default     = "bootstrap"
 }
