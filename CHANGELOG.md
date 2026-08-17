@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/air-hand-org/jobdeck/compare/v0.7.0...v0.8.0) (2026-08-17)
+
+
+### Features
+
+* **iac:** store test user credential ([#63](https://github.com/air-hand-org/jobdeck/issues/63)) ([87807a0](https://github.com/air-hand-org/jobdeck/commit/87807a04a718fe95c44ce7e16053003f70cf92c2))
+
 ## [0.7.0](https://github.com/air-hand-org/jobdeck/compare/v0.6.1...v0.7.0) (2026-08-17)
 
 
