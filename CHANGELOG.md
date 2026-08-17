@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/air-hand-org/jobdeck/compare/v0.6.1...v0.7.0) (2026-08-17)
+
+
+### Features
+
+* add regional public edge ([#61](https://github.com/air-hand-org/jobdeck/issues/61)) ([51ba935](https://github.com/air-hand-org/jobdeck/commit/51ba935b32268e5ddb6c0bbd050468edfd4af353))
+
 ## [0.6.1](https://github.com/air-hand-org/jobdeck/compare/v0.6.0...v0.6.1) (2026-08-16)
 
 
