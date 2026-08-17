@@ -82,7 +82,8 @@ resource "google_compute_region_backend_service" "public" {
   security_policy       = google_compute_region_security_policy.public.id
 
   backend {
-    group = each.value.id
+    group           = each.value.id
+    capacity_scaler = 1.0
   }
 }
 
