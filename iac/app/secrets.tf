@@ -7,7 +7,6 @@ locals {
     "job-worker-client-secret"      = 1
     "job-worker-client-secret-hash" = 1
     "postgres-password"             = 1
-    "test-user-client-secret"       = 1
     "test-user-client-secret-hash"  = 1
   }
 
