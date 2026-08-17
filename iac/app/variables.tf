@@ -16,7 +16,7 @@ variable "bootstrap_state_bucket_name" {
 }
 
 variable "bootstrap_state_prefix" {
-  description = "GCS backend prefix for the bootstrap root state."
+  description = "GCS backend prefix for the bootstrap root state to consume."
   type        = string
   default     = "bootstrap"
 }
@@ -36,4 +36,16 @@ variable "cloud_run_subnet_cidr" {
   description = "CIDR allocated to Direct VPC egress interfaces."
   type        = string
   default     = "10.42.0.0/26"
+}
+
+variable "load_balancer_proxy_subnet_cidr" {
+  description = "CIDR reserved for the regional Application Load Balancer proxy-only subnet."
+  type        = string
+  default     = "10.42.1.0/26"
+}
+
+variable "public_domain" {
+  description = "Primary public hostname for the JobDeck UI."
+  type        = string
+  default     = "jobdeck.app.air-hand.com"
 }
