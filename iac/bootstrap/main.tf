@@ -52,6 +52,9 @@ locals {
     "test-user-client-secret-hash" = toset([
       "auth",
     ])
+    # This is retained for an operator to recover the test credential; auth
+    # receives only its hash and no runtime service account accesses it.
+    "test-user-client-secret" = toset([])
     # The value is added separately through the write-only secret-version flow.
     "postgres-password" = toset([
       "auth",
