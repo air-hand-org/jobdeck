@@ -15,6 +15,7 @@ locals {
   ])
 
   deployer_roles = toset([
+    "roles/certificatemanager.editor",
     "roles/cloudscheduler.admin",
     "roles/compute.admin",
     "roles/dns.admin",
