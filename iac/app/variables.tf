@@ -37,3 +37,15 @@ variable "cloud_run_subnet_cidr" {
   type        = string
   default     = "10.42.0.0/26"
 }
+
+variable "load_balancer_proxy_subnet_cidr" {
+  description = "CIDR reserved for the regional Application Load Balancer proxy-only subnet."
+  type        = string
+  default     = "10.42.1.0/26"
+}
+
+variable "public_domain" {
+  description = "Primary public hostname for the JobDeck UI."
+  type        = string
+  default     = "jobdeck.app.air-hand.com"
+}
