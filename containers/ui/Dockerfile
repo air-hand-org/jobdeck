@@ -16,7 +16,7 @@ RUN dotnet publish services/ui/ui.csproj \
     --no-restore \
     --configuration Release \
     --output /app/publish \
- && find /app/publish -iname '*blazor*' -o -iname '*staticwebassets*'
+ && find /app/publish -iname '*blazor*' -o -iname '*staticwebassets*' && cat /app/publish/ui.staticwebassets.endpoints.json
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
