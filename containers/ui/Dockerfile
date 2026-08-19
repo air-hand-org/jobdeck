@@ -12,6 +12,11 @@ RUN dotnet restore services/ui/ui.csproj
 COPY gen/csharp/ gen/csharp/
 COPY services/ui/ services/ui/
 RUN dotnet publish services/ui/ui.csproj --no-restore --configuration Release --output /app/publish
+RUN dotnet publish services/ui/ui.csproj \
+    --no-restore \
+    --configuration Release \
+    --output /app/publish \
+ && find /app/publish -iname '*blazor*' -o -iname '*staticwebassets*'
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
