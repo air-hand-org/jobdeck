@@ -2,6 +2,7 @@ using System.Net;
 using Microsoft.Extensions.Configuration;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
+using Aspire.Hosting.Yarp;
 
 namespace apphosts;
 
@@ -13,19 +14,31 @@ public sealed class JobWorkerBuilder(
     , string workerClientId
 )
 {
-    public void Build(bool isDebug)
+    public EndpointReference Build(int port, bool isDebug)
     {
         var forwardProxy = ForwardProxy(demoContainerEndpoint);
-        Worker(isDebug, forwardProxy);
+        var backend = Backend(isDebug, forwardProxy);
+        return ReverseProxy(port, backend);
     }
 
-    private void Worker(
+    private EndpointReference ReverseProxy(int port, EndpointReference backend)
+    {
+        return builder.AddYarp("job-worker-tls")
+            .WithHostHttpsPort(port)
+            .WithConfiguration(yarp =>
+            {
+                yarp.AddRoute(backend);
+            })
+            .GetEndpoint("https");
+    }
+
+    private EndpointReference Backend(
         bool isDebug
-        , IResourceBuilder<ContainerResource> forwardProxy
+        , EndpointReference forwardProxyEndpoint
     )
     {
         var workerClientSecret = builder.AddParameter("job-worker-client-secret", secret: true);
-        var forwardProxyEndpoint = forwardProxy.GetEndpoint("proxy");
+        EndpointReference endpoint;
         // TODO: use WithDelveServer after v13.5
         if (isDebug)
         {
@@ -46,6 +59,10 @@ public sealed class JobWorkerBuilder(
                 , "--"
                 , "-worker", "3"
               )
+              .WithHttpEndpoint(
+                  name: "push",
+                  env: "PORT"
+              )
               .WithReference(jobApiGrpcEndpoint)
               .WithReference(authGrpcEndpoint)
               .WithReference(forwardProxyEndpoint)
@@ -57,8 +74,9 @@ public sealed class JobWorkerBuilder(
                   context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
                   context.EnvironmentVariables["WORKER_HTTP_PROXY"] = forwardProxyEndpoint.Property(EndpointProperty.Url);
               })
-              .WaitFor(forwardProxy)
               ;
+
+            endpoint = backend.GetEndpoint("push");
         }
         else
         {
@@ -69,6 +87,10 @@ public sealed class JobWorkerBuilder(
               )
               .WithAppArgs("-worker", "3")
               //    .WithDelveServer(port: 2346) // --only-same-user=false needed
+              .WithHttpEndpoint(
+                  name: "push",
+                  env: "PORT"
+              )
               .WithReference(jobApiGrpcEndpoint)
               .WithReference(authGrpcEndpoint)
               .WithReference(forwardProxyEndpoint)
@@ -80,12 +102,14 @@ public sealed class JobWorkerBuilder(
                   context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
                   context.EnvironmentVariables["WORKER_HTTP_PROXY"] = forwardProxyEndpoint.Property(EndpointProperty.Url);
               })
-              .WaitFor(forwardProxy)
               ;
+
+            endpoint = backend.GetEndpoint("push");
         }
+        return endpoint;
     }
 
-    private IResourceBuilder<ContainerResource> ForwardProxy(EndpointReference demoContainerEndpoint)
+    private EndpointReference ForwardProxy(EndpointReference demoContainerEndpoint)
     {
         return builder.AddDockerfile(
                 name: "forward-proxy",
@@ -100,6 +124,7 @@ public sealed class JobWorkerBuilder(
             {
                 context.EnvironmentVariables["SQUID_ALLOWED_DEMO_HOST_AND_PORT"] = demoContainerEndpoint.Property(EndpointProperty.HostAndPort);
             })
+            .GetEndpoint("proxy")
         ;
     }
 }

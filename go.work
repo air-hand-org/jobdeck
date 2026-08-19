@@ -6,4 +6,5 @@ use (
 	./services/demo
 	./services/job-api
 	./services/job-worker
+	./tools/pubsub
 )

@@ -9,13 +9,14 @@ namespace apphosts;
 public sealed class JobAPIBuilder(
     IDistributedApplicationBuilder builder
     , IResourceBuilder<PostgresServerResource> postgres
+    , PubSubTopicResource jobWorkerTopic
 )
 {
     public EndpointReference Build(int port, bool isDebug, string grpcReflectionFlag, string apiAuthMode)
     {
         var db = postgres.AddDatabase("jobdeck");
         var migrator = DBMigration(db);
-        var backend = Backend(isDebug, grpcReflectionFlag, apiAuthMode, db, migrator);
+        var backend = Backend(isDebug, grpcReflectionFlag, apiAuthMode, db, migrator, jobWorkerTopic);
         return ReverseProxy(port, backend);
     }
 
@@ -43,7 +44,8 @@ public sealed class JobAPIBuilder(
         string grpcReflectionFlag,
         string apiAuthMode,
         IResourceBuilder<PostgresDatabaseResource> db,
-        IResourceBuilder<ExecutableResource> dbMigrator
+        IResourceBuilder<ExecutableResource> dbMigrator,
+        PubSubTopicResource workerTopic
     )
     {
         // TODO: get pubkey from auth-service
@@ -73,15 +75,20 @@ public sealed class JobAPIBuilder(
               )
               .AsHttp2Service()
               .WithReference(db)
+              .WithReference(workerTopic.PubsubEndpoint)
               .WithEnvironment(context =>
               {
                   context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
                   context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = grpcReflectionFlag;
                   context.EnvironmentVariables["AUTH_JWT_PUBLIC_KEY"] = authJwtPublicKey;
                   context.EnvironmentVariables["API_AUTH_MODE"] = apiAuthMode;
+                  context.EnvironmentVariables["PUBSUB_EMULATOR_HOST"] = workerTopic.PubsubEndpoint.Property(EndpointProperty.HostAndPort);
+                  context.EnvironmentVariables["PUBSUB_PROJECT_ID"] = workerTopic.ProjectID;
+                  context.EnvironmentVariables["PUBSUB_WORKER_TOPIC_ID"] = workerTopic.TopicID;
               })
               .WaitFor(db)
               .WaitForCompletion(dbMigrator)
+              .WaitForCompletion(workerTopic.Creator)
               ;
 
             endpoint = backend.GetEndpoint("grpc-backend");
@@ -100,15 +107,20 @@ public sealed class JobAPIBuilder(
               )
               .AsHttp2Service()
               .WithReference(db)
+              .WithReference(workerTopic.PubsubEndpoint)
               .WithEnvironment(context =>
               {
                   context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
                   context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = grpcReflectionFlag;
                   context.EnvironmentVariables["AUTH_JWT_PUBLIC_KEY"] = authJwtPublicKey;
                   context.EnvironmentVariables["API_AUTH_MODE"] = apiAuthMode;
+                  context.EnvironmentVariables["PUBSUB_EMULATOR_HOST"] = workerTopic.PubsubEndpoint.Property(EndpointProperty.HostAndPort);
+                  context.EnvironmentVariables["PUBSUB_PROJECT_ID"] = workerTopic.ProjectID;
+                  context.EnvironmentVariables["PUBSUB_WORKER_TOPIC_ID"] = workerTopic.TopicID;
               })
               .WaitFor(db)
               .WaitForCompletion(dbMigrator)
+              .WaitForCompletion(workerTopic.Creator)
               ;
 
             endpoint = backend.GetEndpoint("grpc-backend");
