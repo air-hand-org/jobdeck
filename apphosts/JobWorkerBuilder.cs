@@ -12,28 +12,18 @@ public sealed class JobWorkerBuilder(
     , EndpointReference authGrpcEndpoint
     , EndpointReference demoContainerEndpoint
     , string workerClientId
+    , string pubsubVerificationToken
 )
 {
     public EndpointReference Build(int port, bool isDebug)
     {
         var forwardProxy = ForwardProxy(demoContainerEndpoint);
-        var backend = Backend(isDebug, forwardProxy);
-        return ReverseProxy(port, backend);
-    }
-
-    private EndpointReference ReverseProxy(int port, EndpointReference backend)
-    {
-        return builder.AddYarp("job-worker-tls")
-            .WithHostHttpsPort(port)
-            .WithConfiguration(yarp =>
-            {
-                yarp.AddRoute(backend);
-            })
-            .GetEndpoint("https");
+        return Backend(port, isDebug, forwardProxy);
     }
 
     private EndpointReference Backend(
-        bool isDebug
+        int port
+        , bool isDebug
         , EndpointReference forwardProxyEndpoint
     )
     {
@@ -61,6 +51,7 @@ public sealed class JobWorkerBuilder(
               )
               .WithHttpEndpoint(
                   name: "push",
+                  port: port,
                   env: "PORT"
               )
               .WithReference(jobApiGrpcEndpoint)
@@ -73,10 +64,11 @@ public sealed class JobWorkerBuilder(
                   context.EnvironmentVariables["AUTH_CLIENT_ID"] = workerClientId;
                   context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
                   context.EnvironmentVariables["WORKER_HTTP_PROXY"] = forwardProxyEndpoint.Property(EndpointProperty.Url);
+                  context.EnvironmentVariables["PUBSUB_VERIFICATION_TOKEN"] = pubsubVerificationToken;
               })
               ;
 
-            endpoint = backend.GetEndpoint("push");
+            endpoint = backend.GetEndpoint("push", KnownNetworkIdentifiers.DefaultAspireContainerNetwork);
         }
         else
         {
@@ -89,6 +81,7 @@ public sealed class JobWorkerBuilder(
               //    .WithDelveServer(port: 2346) // --only-same-user=false needed
               .WithHttpEndpoint(
                   name: "push",
+                  port: port,
                   env: "PORT"
               )
               .WithReference(jobApiGrpcEndpoint)
@@ -101,10 +94,11 @@ public sealed class JobWorkerBuilder(
                   context.EnvironmentVariables["AUTH_CLIENT_ID"] = workerClientId;
                   context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
                   context.EnvironmentVariables["WORKER_HTTP_PROXY"] = forwardProxyEndpoint.Property(EndpointProperty.Url);
+                  context.EnvironmentVariables["PUBSUB_VERIFICATION_TOKEN"] = pubsubVerificationToken;
               })
               ;
 
-            endpoint = backend.GetEndpoint("push");
+            endpoint = backend.GetEndpoint("push", KnownNetworkIdentifiers.DefaultAspireContainerNetwork);
         }
         return endpoint;
     }
@@ -120,6 +114,7 @@ public sealed class JobWorkerBuilder(
                 port: 3128,
                 targetPort: 3128
             )
+            .WithReference(demoContainerEndpoint)
             .WithEnvironment(context =>
             {
                 context.EnvironmentVariables["SQUID_ALLOWED_DEMO_HOST_AND_PORT"] = demoContainerEndpoint.Property(EndpointProperty.HostAndPort);

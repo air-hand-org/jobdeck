@@ -14,28 +14,31 @@ public sealed record PubSubTopicResource(
 
 public sealed class PubSubSubscriptionBuilder(
     IDistributedApplicationBuilder builder
+    , IResourceBuilder<ContainerResource> pubsub
     , PubSubTopicResource pubsubTopic
 )
 {
     public PubSubTopicResource Topic { get; } = pubsubTopic;
 
-    public IResourceBuilder<ExecutableResource> PushSubscription(string subscriptionID, EndpointReference pushEndpoint)
+    public IResourceBuilder<ExecutableResource> PushSubscription(string subscriptionID, EndpointReference pushEndpoint, string pushVerificationToken)
     {
+        pubsub.WithReference(pushEndpoint);
+
         return builder.AddGoApp(
             name: subscriptionID,
             appDirectory: "../tools/pubsub",
             packagePath: "./cmd/subscription"
         )
         .WithReference(Topic.PubsubEndpoint)
-        .WithReference(pushEndpoint)
         .WithEnvironment(context =>
         {
             context.EnvironmentVariables["PUBSUB_EMULATOR_HOST"] = Topic.PubsubEndpoint.Property(EndpointProperty.HostAndPort);
             context.EnvironmentVariables["PUBSUB_PROJECT_ID"] = Topic.ProjectID;
             context.EnvironmentVariables["PUBSUB_TOPIC_ID"] = Topic.TopicID;
             context.EnvironmentVariables["PUBSUB_SUBSCRIPTION_ID"] = subscriptionID;
-            context.EnvironmentVariables["PUBSUB_PUSH_ENDPOINT"] = pushEndpoint.Property(EndpointProperty.Url);
+            context.EnvironmentVariables["PUBSUB_PUSH_ENDPOINT"] = ReferenceExpression.Create($"{pushEndpoint.Property(EndpointProperty.Url)}?token={pushVerificationToken}");
         })
+        .WaitFor(pubsub)
         .WaitForCompletion(Topic.Creator)
         ;
     }
@@ -43,6 +46,7 @@ public sealed class PubSubSubscriptionBuilder(
 
 public sealed class PubSubTopicBuilder(
     IDistributedApplicationBuilder builder
+    , IResourceBuilder<ContainerResource> pubsub
     , string projectID
     , EndpointReference pubsubEndpoint
 )
@@ -61,9 +65,11 @@ public sealed class PubSubTopicBuilder(
             context.EnvironmentVariables["PUBSUB_PROJECT_ID"] = projectID;
             context.EnvironmentVariables["PUBSUB_TOPIC_ID"] = topicID;
         })
+        .WaitFor(pubsub)
         ;
         return new(
             builder: builder,
+            pubsub: pubsub,
             pubsubTopic: new(
                 ProjectID: projectID,
                 TopicID: topicID,
@@ -96,6 +102,7 @@ public sealed class PubSubBuilder(
         var pubsubEndpoint = pubsub.GetEndpoint("http");
         return new(
             builder: builder,
+            pubsub: pubsub,
             projectID: projectID,
             pubsubEndpoint: pubsubEndpoint
         );

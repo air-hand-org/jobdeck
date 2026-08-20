@@ -55,18 +55,21 @@ var jobApiGrpcEndpoint = new JobAPIBuilder(
 
 var demoContainerEndpoint = new DemoBuilder(builder: builder).Build(8080, KnownNetworkIdentifiers.DefaultAspireContainerNetwork);
 
+var workerPubsubVerificationToken = Guid.NewGuid().ToString("N");
+
 var workerPushEndpoint = new JobWorkerBuilder(
-    builder: builder,
-    jobApiGrpcEndpoint: jobApiGrpcEndpoint,
-    authGrpcEndpoint: authGrpcEndpoint,
-    demoContainerEndpoint: demoContainerEndpoint,
-    workerClientId: workerClientId
+    builder: builder
+    , jobApiGrpcEndpoint: jobApiGrpcEndpoint
+    , authGrpcEndpoint: authGrpcEndpoint
+    , demoContainerEndpoint: demoContainerEndpoint
+    , workerClientId: workerClientId
+    , pubsubVerificationToken: workerPubsubVerificationToken
 ).Build(
     port: 9092,
     isDebug: IS_DEBUG
 );
 
-pubsubWorkerTopic.PushSubscription("job-worker-subscription", workerPushEndpoint);
+pubsubWorkerTopic.PushSubscription("job-worker-subscription", workerPushEndpoint, workerPubsubVerificationToken);
 
 var ui = builder.AddProject("ui", "../services/ui/ui.csproj")
   .WithExternalHttpEndpoints()
