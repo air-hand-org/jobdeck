@@ -38,28 +38,36 @@ namespace Jobdeck.Job.V1 {
             "dBImCgltYXhfY291bnQYASABKAVCCbpIBhoEGGQoAVIIbWF4Q291bnRKBAgC",
             "EANSDmxlYXNlX2R1cmF0aW9uIlsKF0NsYWltRXhlY3V0aW9uc1Jlc3BvbnNl",
             "EkAKCmV4ZWN1dGlvbnMYASADKAsyIC5qb2JkZWNrLmpvYi52MS5DbGFpbWVk",
-            "RXhlY3V0aW9uUgpleGVjdXRpb25zItQBChxSZXBvcnRFeGVjdXRpb25SZXN1",
-            "bHRSZXF1ZXN0EisKDGV4ZWN1dGlvbl9pZBgBIAEoCUIIukgFcgOwAQFSC2V4",
-            "ZWN1dGlvbklkEigKC2xlYXNlX3Rva2VuGAIgASgJQge6SARyAhABUgpsZWFz",
-            "ZVRva2VuEj8KBnJlc3VsdBgEIAEoCzIfLmpvYmRlY2suam9iLnYxLkV4ZWN1",
-            "dGlvblJlc3VsdEIGukgDyAEBUgZyZXN1bHRKBAgDEARKBAgFEAZSBnN0YXR1",
-            "c1IIZHVyYXRpb24iMAodUmVwb3J0RXhlY3V0aW9uUmVzdWx0UmVzcG9uc2VK",
-            "BAgBEAJSCWV4ZWN1dGlvbjLxAQoVRXhlY3V0aW9uUXVldWVTZXJ2aWNlEmIK",
-            "D0NsYWltRXhlY3V0aW9ucxImLmpvYmRlY2suam9iLnYxLkNsYWltRXhlY3V0",
-            "aW9uc1JlcXVlc3QaJy5qb2JkZWNrLmpvYi52MS5DbGFpbUV4ZWN1dGlvbnNS",
-            "ZXNwb25zZRJ0ChVSZXBvcnRFeGVjdXRpb25SZXN1bHQSLC5qb2JkZWNrLmpv",
-            "Yi52MS5SZXBvcnRFeGVjdXRpb25SZXN1bHRSZXF1ZXN0Gi0uam9iZGVjay5q",
-            "b2IudjEuUmVwb3J0RXhlY3V0aW9uUmVzdWx0UmVzcG9uc2VCnwEKEmNvbS5q",
-            "b2JkZWNrLmpvYi52MUIKUXVldWVQcm90b1ABWiNqb2JkZWNrL2dlbi9nby9q",
-            "b2JkZWNrL2pvYi92MTtqb2J2MaICA0pKWKoCDkpvYmRlY2suSm9iLlYxygIO",
-            "Sm9iZGVja1xKb2JcVjHiAhpKb2JkZWNrXEpvYlxWMVxHUEJNZXRhZGF0YeoC",
-            "EEpvYmRlY2s6OkpvYjo6VjFiBnByb3RvMw=="));
+            "RXhlY3V0aW9uUgpleGVjdXRpb25zIkQKFUNsYWltRXhlY3V0aW9uUmVxdWVz",
+            "dBIrCgxleGVjdXRpb25faWQYASABKAlCCLpIBXIDsAEBUgtleGVjdXRpb25J",
+            "ZCJYChZDbGFpbUV4ZWN1dGlvblJlc3BvbnNlEj4KCWV4ZWN1dGlvbhgBIAEo",
+            "CzIgLmpvYmRlY2suam9iLnYxLkNsYWltZWRFeGVjdXRpb25SCWV4ZWN1dGlv",
+            "biLUAQocUmVwb3J0RXhlY3V0aW9uUmVzdWx0UmVxdWVzdBIrCgxleGVjdXRp",
+            "b25faWQYASABKAlCCLpIBXIDsAEBUgtleGVjdXRpb25JZBIoCgtsZWFzZV90",
+            "b2tlbhgCIAEoCUIHukgEcgIQAVIKbGVhc2VUb2tlbhI/CgZyZXN1bHQYBCAB",
+            "KAsyHy5qb2JkZWNrLmpvYi52MS5FeGVjdXRpb25SZXN1bHRCBrpIA8gBAVIG",
+            "cmVzdWx0SgQIAxAESgQIBRAGUgZzdGF0dXNSCGR1cmF0aW9uIjAKHVJlcG9y",
+            "dEV4ZWN1dGlvblJlc3VsdFJlc3BvbnNlSgQIARACUglleGVjdXRpb24y0gIK",
+            "FUV4ZWN1dGlvblF1ZXVlU2VydmljZRJiCg9DbGFpbUV4ZWN1dGlvbnMSJi5q",
+            "b2JkZWNrLmpvYi52MS5DbGFpbUV4ZWN1dGlvbnNSZXF1ZXN0Gicuam9iZGVj",
+            "ay5qb2IudjEuQ2xhaW1FeGVjdXRpb25zUmVzcG9uc2USXwoOQ2xhaW1FeGVj",
+            "dXRpb24SJS5qb2JkZWNrLmpvYi52MS5DbGFpbUV4ZWN1dGlvblJlcXVlc3Qa",
+            "Ji5qb2JkZWNrLmpvYi52MS5DbGFpbUV4ZWN1dGlvblJlc3BvbnNlEnQKFVJl",
+            "cG9ydEV4ZWN1dGlvblJlc3VsdBIsLmpvYmRlY2suam9iLnYxLlJlcG9ydEV4",
+            "ZWN1dGlvblJlc3VsdFJlcXVlc3QaLS5qb2JkZWNrLmpvYi52MS5SZXBvcnRF",
+            "eGVjdXRpb25SZXN1bHRSZXNwb25zZUKfAQoSY29tLmpvYmRlY2suam9iLnYx",
+            "QgpRdWV1ZVByb3RvUAFaI2pvYmRlY2svZ2VuL2dvL2pvYmRlY2svam9iL3Yx",
+            "O2pvYnYxogIDSkpYqgIOSm9iZGVjay5Kb2IuVjHKAg5Kb2JkZWNrXEpvYlxW",
+            "MeICGkpvYmRlY2tcSm9iXFYxXEdQQk1ldGFkYXRh6gIQSm9iZGVjazo6Sm9i",
+            "OjpWMWIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Buf.Validate.ValidateReflection.Descriptor, global::Google.Protobuf.WellKnownTypes.TimestampReflection.Descriptor, global::Jobdeck.Job.V1.ExecutionReflection.Descriptor, global::Jobdeck.Job.V1.JobReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.ClaimedExecution), global::Jobdeck.Job.V1.ClaimedExecution.Parser, new[]{ "ExecutionId", "LeaseToken", "LeaseExpiresAt", "Attempt", "JobSpec", "JobId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.ClaimExecutionsRequest), global::Jobdeck.Job.V1.ClaimExecutionsRequest.Parser, new[]{ "MaxCount" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.ClaimExecutionsResponse), global::Jobdeck.Job.V1.ClaimExecutionsResponse.Parser, new[]{ "Executions" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.ClaimExecutionRequest), global::Jobdeck.Job.V1.ClaimExecutionRequest.Parser, new[]{ "ExecutionId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.ClaimExecutionResponse), global::Jobdeck.Job.V1.ClaimExecutionResponse.Parser, new[]{ "Execution" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.ReportExecutionResultRequest), global::Jobdeck.Job.V1.ReportExecutionResultRequest.Parser, new[]{ "ExecutionId", "LeaseToken", "Result" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Jobdeck.Job.V1.ReportExecutionResultResponse), global::Jobdeck.Job.V1.ReportExecutionResultResponse.Parser, null, null, null, null, null)
           }));
@@ -855,6 +863,411 @@ namespace Jobdeck.Job.V1 {
   }
 
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class ClaimExecutionRequest : pb::IMessage<ClaimExecutionRequest>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<ClaimExecutionRequest> _parser = new pb::MessageParser<ClaimExecutionRequest>(() => new ClaimExecutionRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<ClaimExecutionRequest> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Jobdeck.Job.V1.QueueReflection.Descriptor.MessageTypes[3]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ClaimExecutionRequest() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ClaimExecutionRequest(ClaimExecutionRequest other) : this() {
+      executionId_ = other.executionId_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ClaimExecutionRequest Clone() {
+      return new ClaimExecutionRequest(this);
+    }
+
+    /// <summary>Field number for the "execution_id" field.</summary>
+    public const int ExecutionIdFieldNumber = 1;
+    private string executionId_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string ExecutionId {
+      get { return executionId_; }
+      set {
+        executionId_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as ClaimExecutionRequest);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(ClaimExecutionRequest other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (ExecutionId != other.ExecutionId) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (ExecutionId.Length != 0) hash ^= ExecutionId.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (ExecutionId.Length != 0) {
+        output.WriteRawTag(10);
+        output.WriteString(ExecutionId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (ExecutionId.Length != 0) {
+        output.WriteRawTag(10);
+        output.WriteString(ExecutionId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (ExecutionId.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ExecutionId);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(ClaimExecutionRequest other) {
+      if (other == null) {
+        return;
+      }
+      if (other.ExecutionId.Length != 0) {
+        ExecutionId = other.ExecutionId;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            ExecutionId = input.ReadString();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            ExecutionId = input.ReadString();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class ClaimExecutionResponse : pb::IMessage<ClaimExecutionResponse>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<ClaimExecutionResponse> _parser = new pb::MessageParser<ClaimExecutionResponse>(() => new ClaimExecutionResponse());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<ClaimExecutionResponse> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Jobdeck.Job.V1.QueueReflection.Descriptor.MessageTypes[4]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ClaimExecutionResponse() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ClaimExecutionResponse(ClaimExecutionResponse other) : this() {
+      execution_ = other.execution_ != null ? other.execution_.Clone() : null;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public ClaimExecutionResponse Clone() {
+      return new ClaimExecutionResponse(this);
+    }
+
+    /// <summary>Field number for the "execution" field.</summary>
+    public const int ExecutionFieldNumber = 1;
+    private global::Jobdeck.Job.V1.ClaimedExecution execution_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Jobdeck.Job.V1.ClaimedExecution Execution {
+      get { return execution_; }
+      set {
+        execution_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as ClaimExecutionResponse);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(ClaimExecutionResponse other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Execution, other.Execution)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (execution_ != null) hash ^= Execution.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (execution_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Execution);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (execution_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Execution);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (execution_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Execution);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(ClaimExecutionResponse other) {
+      if (other == null) {
+        return;
+      }
+      if (other.execution_ != null) {
+        if (execution_ == null) {
+          Execution = new global::Jobdeck.Job.V1.ClaimedExecution();
+        }
+        Execution.MergeFrom(other.Execution);
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (execution_ == null) {
+              Execution = new global::Jobdeck.Job.V1.ClaimedExecution();
+            }
+            input.ReadMessage(Execution);
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (execution_ == null) {
+              Execution = new global::Jobdeck.Job.V1.ClaimedExecution();
+            }
+            input.ReadMessage(Execution);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class ReportExecutionResultRequest : pb::IMessage<ReportExecutionResultRequest>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
@@ -869,7 +1282,7 @@ namespace Jobdeck.Job.V1 {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Jobdeck.Job.V1.QueueReflection.Descriptor.MessageTypes[3]; }
+      get { return global::Jobdeck.Job.V1.QueueReflection.Descriptor.MessageTypes[5]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1150,7 +1563,7 @@ namespace Jobdeck.Job.V1 {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Jobdeck.Job.V1.QueueReflection.Descriptor.MessageTypes[4]; }
+      get { return global::Jobdeck.Job.V1.QueueReflection.Descriptor.MessageTypes[6]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

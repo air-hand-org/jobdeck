@@ -41,6 +41,28 @@ func (s *executionQueueServiceServer) ClaimExecutions(ctx context.Context, req *
 	}, nil
 }
 
+func (s *executionQueueServiceServer) ClaimExecution(ctx context.Context, req *jobv1.ClaimExecutionRequest) (*jobv1.ClaimExecutionResponse, error) {
+	actor, ok := auth.GetActorContext(ctx)
+	if !ok {
+		return nil, domain.ErrUnauthenticated
+	}
+	exec_id, err := transform.ExecutionIdFromProto(req.GetExecutionId())
+	if err != nil {
+		return nil, err
+	}
+	claim, err := s.u.ClaimExecution(ctx, actor, exec_id)
+	if err != nil {
+		return nil, err
+	}
+	claimProto, err := transform.ClaimedExecutionToProto(claim)
+	if err != nil {
+		return nil, err
+	}
+	return &jobv1.ClaimExecutionResponse{
+		Execution: claimProto,
+	}, nil
+}
+
 func (s *executionQueueServiceServer) ReportExecutionResult(ctx context.Context, req *jobv1.ReportExecutionResultRequest) (*jobv1.ReportExecutionResultResponse, error) {
 	exec_id, err := transform.ExecutionIdFromProto(req.GetExecutionId())
 	if err != nil {

@@ -25,6 +25,14 @@ func ensureWithEndpoint(ctx context.Context, projectID, topic, subscription, pus
 	}
 	defer client.Close()
 
+	slog.InfoContext(
+		ctx,
+		"ensure with endpoint",
+		"topic", topic,
+		"subscription", subscription,
+		"endpoint", pushEndpoint,
+	)
+
 	for {
 		_, err := client.SubscriptionAdminClient.GetSubscription(ctx, &pubsubpb.GetSubscriptionRequest{
 			Subscription: subscription,
@@ -38,23 +46,21 @@ func ensureWithEndpoint(ctx context.Context, projectID, topic, subscription, pus
 
 		if code == codes.NotFound {
 			_, err := client.SubscriptionAdminClient.CreateSubscription(ctx, &pubsubpb.Subscription{
-				Name: subscription,
-				Topic: topic,
+				Name:               subscription,
+				Topic:              topic,
 				AckDeadlineSeconds: 60,
-				PushConfig: &pubsubpb.PushConfig{PushEndpoint: pushEndpoint},
+				PushConfig:         &pubsubpb.PushConfig{PushEndpoint: pushEndpoint},
 			})
 			if err == nil || status.Code(err) == codes.AlreadyExists {
 				slog.Info("Subscription created", "name", subscription, "endpoint", pushEndpoint)
 				return nil
 			}
-		}
-
-		if code != codes.Unavailable && code != codes.DeadlineExceeded {
+		} else if code != codes.Unavailable && code != codes.DeadlineExceeded {
 			return fmt.Errorf("Failed: %w", err)
 		}
 
 		slog.Info("Retrying...")
-		time.Sleep(3*time.Second)
+		time.Sleep(3 * time.Second)
 	}
 }
 

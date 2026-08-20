@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"jobdeck/services/job-api/internal/app"
+	"jobdeck/services/job-api/internal/eventing"
 	jobdb "jobdeck/services/job-api/internal/repository/gen"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -21,6 +22,7 @@ var _ app.JobStore = (*Store)(nil)
 var _ app.ExecutionStore = (*Store)(nil)
 var _ app.ExecutionQueueStore = (*Store)(nil)
 var _ app.ActorStore = (*Store)(nil)
+var _ eventing.OutboxStore = (*Store)(nil)
 
 func (s *Store) Jobs() app.JobRepository {
 	return newJobRepository(s.q)
@@ -89,6 +91,24 @@ func (s *Store) WithinActorTx(ctx context.Context, fn func(ctx context.Context, 
 
 	actors := newActorRepository(s.q.WithTx(tx))
 	if err := fn(ctx, actors); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
+}
+
+func (s *Store) Outbox() eventing.OutboxRepository {
+	return newOutboxRepository(s.q)
+}
+
+func (s *Store) WithinOutboxTx(ctx context.Context, fn func(ctx context.Context, outbox eventing.OutboxRepository) error) error {
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	outbox := newOutboxRepository(s.q.WithTx(tx))
+	if err := fn(ctx, outbox); err != nil {
 		return err
 	}
 	return tx.Commit(ctx)

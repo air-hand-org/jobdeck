@@ -517,6 +517,50 @@ func (x *HttpError) GetMessage() string {
 	return ""
 }
 
+type ExecutionRequested struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ExecutionId   string                 `protobuf:"bytes,1,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExecutionRequested) Reset() {
+	*x = ExecutionRequested{}
+	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExecutionRequested) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExecutionRequested) ProtoMessage() {}
+
+func (x *ExecutionRequested) ProtoReflect() protoreflect.Message {
+	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExecutionRequested.ProtoReflect.Descriptor instead.
+func (*ExecutionRequested) Descriptor() ([]byte, []int) {
+	return file_jobdeck_job_v1_execution_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ExecutionRequested) GetExecutionId() string {
+	if x != nil {
+		return x.ExecutionId
+	}
+	return ""
+}
+
 type GetExecutionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ExecutionId   string                 `protobuf:"bytes,1,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
@@ -526,7 +570,7 @@ type GetExecutionRequest struct {
 
 func (x *GetExecutionRequest) Reset() {
 	*x = GetExecutionRequest{}
-	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[5]
+	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -538,7 +582,7 @@ func (x *GetExecutionRequest) String() string {
 func (*GetExecutionRequest) ProtoMessage() {}
 
 func (x *GetExecutionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[5]
+	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -551,7 +595,7 @@ func (x *GetExecutionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExecutionRequest.ProtoReflect.Descriptor instead.
 func (*GetExecutionRequest) Descriptor() ([]byte, []int) {
-	return file_jobdeck_job_v1_execution_proto_rawDescGZIP(), []int{5}
+	return file_jobdeck_job_v1_execution_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetExecutionRequest) GetExecutionId() string {
@@ -570,7 +614,7 @@ type GetExecutionResponse struct {
 
 func (x *GetExecutionResponse) Reset() {
 	*x = GetExecutionResponse{}
-	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[6]
+	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -582,7 +626,7 @@ func (x *GetExecutionResponse) String() string {
 func (*GetExecutionResponse) ProtoMessage() {}
 
 func (x *GetExecutionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[6]
+	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -595,7 +639,7 @@ func (x *GetExecutionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExecutionResponse.ProtoReflect.Descriptor instead.
 func (*GetExecutionResponse) Descriptor() ([]byte, []int) {
-	return file_jobdeck_job_v1_execution_proto_rawDescGZIP(), []int{6}
+	return file_jobdeck_job_v1_execution_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetExecutionResponse) GetExecution() *Execution {
@@ -616,7 +660,7 @@ type ListExecutionsRequest struct {
 
 func (x *ListExecutionsRequest) Reset() {
 	*x = ListExecutionsRequest{}
-	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[7]
+	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -628,7 +672,7 @@ func (x *ListExecutionsRequest) String() string {
 func (*ListExecutionsRequest) ProtoMessage() {}
 
 func (x *ListExecutionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[7]
+	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -641,7 +685,7 @@ func (x *ListExecutionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListExecutionsRequest.ProtoReflect.Descriptor instead.
 func (*ListExecutionsRequest) Descriptor() ([]byte, []int) {
-	return file_jobdeck_job_v1_execution_proto_rawDescGZIP(), []int{7}
+	return file_jobdeck_job_v1_execution_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ListExecutionsRequest) GetJobId() string {
@@ -675,7 +719,7 @@ type ListExecutionsResponse struct {
 
 func (x *ListExecutionsResponse) Reset() {
 	*x = ListExecutionsResponse{}
-	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[8]
+	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -687,7 +731,7 @@ func (x *ListExecutionsResponse) String() string {
 func (*ListExecutionsResponse) ProtoMessage() {}
 
 func (x *ListExecutionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[8]
+	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -700,7 +744,7 @@ func (x *ListExecutionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListExecutionsResponse.ProtoReflect.Descriptor instead.
 func (*ListExecutionsResponse) Descriptor() ([]byte, []int) {
-	return file_jobdeck_job_v1_execution_proto_rawDescGZIP(), []int{8}
+	return file_jobdeck_job_v1_execution_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *ListExecutionsResponse) GetExecutions() []*Execution {
@@ -726,7 +770,7 @@ type DoExecutionRequest struct {
 
 func (x *DoExecutionRequest) Reset() {
 	*x = DoExecutionRequest{}
-	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[9]
+	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -738,7 +782,7 @@ func (x *DoExecutionRequest) String() string {
 func (*DoExecutionRequest) ProtoMessage() {}
 
 func (x *DoExecutionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[9]
+	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -751,7 +795,7 @@ func (x *DoExecutionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DoExecutionRequest.ProtoReflect.Descriptor instead.
 func (*DoExecutionRequest) Descriptor() ([]byte, []int) {
-	return file_jobdeck_job_v1_execution_proto_rawDescGZIP(), []int{9}
+	return file_jobdeck_job_v1_execution_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *DoExecutionRequest) GetJobId() string {
@@ -770,7 +814,7 @@ type DoExecutionResponse struct {
 
 func (x *DoExecutionResponse) Reset() {
 	*x = DoExecutionResponse{}
-	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[10]
+	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -782,7 +826,7 @@ func (x *DoExecutionResponse) String() string {
 func (*DoExecutionResponse) ProtoMessage() {}
 
 func (x *DoExecutionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[10]
+	mi := &file_jobdeck_job_v1_execution_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -795,7 +839,7 @@ func (x *DoExecutionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DoExecutionResponse.ProtoReflect.Descriptor instead.
 func (*DoExecutionResponse) Descriptor() ([]byte, []int) {
-	return file_jobdeck_job_v1_execution_proto_rawDescGZIP(), []int{10}
+	return file_jobdeck_job_v1_execution_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *DoExecutionResponse) GetExecution() *Execution {
@@ -844,7 +888,9 @@ const file_jobdeck_job_v1_execution_proto_rawDesc = "" +
 	"\tHttpError\x12=\n" +
 	"\x04type\x18\x01 \x01(\x0e2\x1d.jobdeck.job.v1.HttpErrorTypeB\n" +
 	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\x04type\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"B\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"A\n" +
+	"\x12ExecutionRequested\x12+\n" +
+	"\fexecution_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vexecutionId\"B\n" +
 	"\x13GetExecutionRequest\x12+\n" +
 	"\fexecution_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vexecutionId\"O\n" +
 	"\x14GetExecutionResponse\x127\n" +
@@ -897,7 +943,7 @@ func file_jobdeck_job_v1_execution_proto_rawDescGZIP() []byte {
 }
 
 var file_jobdeck_job_v1_execution_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_jobdeck_job_v1_execution_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_jobdeck_job_v1_execution_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_jobdeck_job_v1_execution_proto_goTypes = []any{
 	(ExecutionStatus)(0),           // 0: jobdeck.job.v1.ExecutionStatus
 	(ExecutionTrigger)(0),          // 1: jobdeck.job.v1.ExecutionTrigger
@@ -907,35 +953,36 @@ var file_jobdeck_job_v1_execution_proto_goTypes = []any{
 	(*ExecutionResult)(nil),        // 5: jobdeck.job.v1.ExecutionResult
 	(*HttpExecutionResult)(nil),    // 6: jobdeck.job.v1.HttpExecutionResult
 	(*HttpError)(nil),              // 7: jobdeck.job.v1.HttpError
-	(*GetExecutionRequest)(nil),    // 8: jobdeck.job.v1.GetExecutionRequest
-	(*GetExecutionResponse)(nil),   // 9: jobdeck.job.v1.GetExecutionResponse
-	(*ListExecutionsRequest)(nil),  // 10: jobdeck.job.v1.ListExecutionsRequest
-	(*ListExecutionsResponse)(nil), // 11: jobdeck.job.v1.ListExecutionsResponse
-	(*DoExecutionRequest)(nil),     // 12: jobdeck.job.v1.DoExecutionRequest
-	(*DoExecutionResponse)(nil),    // 13: jobdeck.job.v1.DoExecutionResponse
-	(*timestamppb.Timestamp)(nil),  // 14: google.protobuf.Timestamp
+	(*ExecutionRequested)(nil),     // 8: jobdeck.job.v1.ExecutionRequested
+	(*GetExecutionRequest)(nil),    // 9: jobdeck.job.v1.GetExecutionRequest
+	(*GetExecutionResponse)(nil),   // 10: jobdeck.job.v1.GetExecutionResponse
+	(*ListExecutionsRequest)(nil),  // 11: jobdeck.job.v1.ListExecutionsRequest
+	(*ListExecutionsResponse)(nil), // 12: jobdeck.job.v1.ListExecutionsResponse
+	(*DoExecutionRequest)(nil),     // 13: jobdeck.job.v1.DoExecutionRequest
+	(*DoExecutionResponse)(nil),    // 14: jobdeck.job.v1.DoExecutionResponse
+	(*timestamppb.Timestamp)(nil),  // 15: google.protobuf.Timestamp
 }
 var file_jobdeck_job_v1_execution_proto_depIdxs = []int32{
 	0,  // 0: jobdeck.job.v1.Execution.status:type_name -> jobdeck.job.v1.ExecutionStatus
 	1,  // 1: jobdeck.job.v1.Execution.trigger:type_name -> jobdeck.job.v1.ExecutionTrigger
 	4,  // 2: jobdeck.job.v1.Execution.events:type_name -> jobdeck.job.v1.ExecutionEvent
 	5,  // 3: jobdeck.job.v1.Execution.result:type_name -> jobdeck.job.v1.ExecutionResult
-	14, // 4: jobdeck.job.v1.Execution.created_at:type_name -> google.protobuf.Timestamp
-	14, // 5: jobdeck.job.v1.Execution.updated_at:type_name -> google.protobuf.Timestamp
+	15, // 4: jobdeck.job.v1.Execution.created_at:type_name -> google.protobuf.Timestamp
+	15, // 5: jobdeck.job.v1.Execution.updated_at:type_name -> google.protobuf.Timestamp
 	0,  // 6: jobdeck.job.v1.ExecutionEvent.status:type_name -> jobdeck.job.v1.ExecutionStatus
-	14, // 7: jobdeck.job.v1.ExecutionEvent.created_at:type_name -> google.protobuf.Timestamp
+	15, // 7: jobdeck.job.v1.ExecutionEvent.created_at:type_name -> google.protobuf.Timestamp
 	6,  // 8: jobdeck.job.v1.ExecutionResult.http:type_name -> jobdeck.job.v1.HttpExecutionResult
 	7,  // 9: jobdeck.job.v1.HttpExecutionResult.error:type_name -> jobdeck.job.v1.HttpError
 	2,  // 10: jobdeck.job.v1.HttpError.type:type_name -> jobdeck.job.v1.HttpErrorType
 	3,  // 11: jobdeck.job.v1.GetExecutionResponse.execution:type_name -> jobdeck.job.v1.Execution
 	3,  // 12: jobdeck.job.v1.ListExecutionsResponse.executions:type_name -> jobdeck.job.v1.Execution
 	3,  // 13: jobdeck.job.v1.DoExecutionResponse.execution:type_name -> jobdeck.job.v1.Execution
-	8,  // 14: jobdeck.job.v1.ExecutionService.GetExecution:input_type -> jobdeck.job.v1.GetExecutionRequest
-	10, // 15: jobdeck.job.v1.ExecutionService.ListExecutions:input_type -> jobdeck.job.v1.ListExecutionsRequest
-	12, // 16: jobdeck.job.v1.ExecutionService.DoExecution:input_type -> jobdeck.job.v1.DoExecutionRequest
-	9,  // 17: jobdeck.job.v1.ExecutionService.GetExecution:output_type -> jobdeck.job.v1.GetExecutionResponse
-	11, // 18: jobdeck.job.v1.ExecutionService.ListExecutions:output_type -> jobdeck.job.v1.ListExecutionsResponse
-	13, // 19: jobdeck.job.v1.ExecutionService.DoExecution:output_type -> jobdeck.job.v1.DoExecutionResponse
+	9,  // 14: jobdeck.job.v1.ExecutionService.GetExecution:input_type -> jobdeck.job.v1.GetExecutionRequest
+	11, // 15: jobdeck.job.v1.ExecutionService.ListExecutions:input_type -> jobdeck.job.v1.ListExecutionsRequest
+	13, // 16: jobdeck.job.v1.ExecutionService.DoExecution:input_type -> jobdeck.job.v1.DoExecutionRequest
+	10, // 17: jobdeck.job.v1.ExecutionService.GetExecution:output_type -> jobdeck.job.v1.GetExecutionResponse
+	12, // 18: jobdeck.job.v1.ExecutionService.ListExecutions:output_type -> jobdeck.job.v1.ListExecutionsResponse
+	14, // 19: jobdeck.job.v1.ExecutionService.DoExecution:output_type -> jobdeck.job.v1.DoExecutionResponse
 	17, // [17:20] is the sub-list for method output_type
 	14, // [14:17] is the sub-list for method input_type
 	14, // [14:14] is the sub-list for extension type_name
@@ -957,7 +1004,7 @@ func file_jobdeck_job_v1_execution_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_jobdeck_job_v1_execution_proto_rawDesc), len(file_jobdeck_job_v1_execution_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   11,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

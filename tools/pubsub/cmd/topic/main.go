@@ -55,7 +55,7 @@ func ensureTopic(ctx context.Context, projectID string, topicID string) error {
 		}
 
 		slog.Info("Retrying...")
-		time.Sleep(3*time.Second)
+		time.Sleep(3 * time.Second)
 	}
 }
 

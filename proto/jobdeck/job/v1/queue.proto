@@ -31,6 +31,14 @@ message ClaimExecutionsResponse {
   repeated ClaimedExecution executions = 1;
 }
 
+message ClaimExecutionRequest {
+  string execution_id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message ClaimExecutionResponse {
+  ClaimedExecution execution = 1;
+}
+
 message ReportExecutionResultRequest {
   reserved 3, 5;
   reserved "status", "duration";
@@ -47,5 +55,6 @@ message ReportExecutionResultResponse {
 
 service ExecutionQueueService {
   rpc ClaimExecutions(ClaimExecutionsRequest) returns (ClaimExecutionsResponse);
+  rpc ClaimExecution(ClaimExecutionRequest) returns (ClaimExecutionResponse);
   rpc ReportExecutionResult(ReportExecutionResultRequest) returns (ReportExecutionResultResponse);
 }

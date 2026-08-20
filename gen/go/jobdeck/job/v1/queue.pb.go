@@ -195,6 +195,94 @@ func (x *ClaimExecutionsResponse) GetExecutions() []*ClaimedExecution {
 	return nil
 }
 
+type ClaimExecutionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ExecutionId   string                 `protobuf:"bytes,1,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClaimExecutionRequest) Reset() {
+	*x = ClaimExecutionRequest{}
+	mi := &file_jobdeck_job_v1_queue_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClaimExecutionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClaimExecutionRequest) ProtoMessage() {}
+
+func (x *ClaimExecutionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_jobdeck_job_v1_queue_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClaimExecutionRequest.ProtoReflect.Descriptor instead.
+func (*ClaimExecutionRequest) Descriptor() ([]byte, []int) {
+	return file_jobdeck_job_v1_queue_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ClaimExecutionRequest) GetExecutionId() string {
+	if x != nil {
+		return x.ExecutionId
+	}
+	return ""
+}
+
+type ClaimExecutionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Execution     *ClaimedExecution      `protobuf:"bytes,1,opt,name=execution,proto3" json:"execution,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClaimExecutionResponse) Reset() {
+	*x = ClaimExecutionResponse{}
+	mi := &file_jobdeck_job_v1_queue_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClaimExecutionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClaimExecutionResponse) ProtoMessage() {}
+
+func (x *ClaimExecutionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_jobdeck_job_v1_queue_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClaimExecutionResponse.ProtoReflect.Descriptor instead.
+func (*ClaimExecutionResponse) Descriptor() ([]byte, []int) {
+	return file_jobdeck_job_v1_queue_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ClaimExecutionResponse) GetExecution() *ClaimedExecution {
+	if x != nil {
+		return x.Execution
+	}
+	return nil
+}
+
 type ReportExecutionResultRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ExecutionId   string                 `protobuf:"bytes,1,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
@@ -206,7 +294,7 @@ type ReportExecutionResultRequest struct {
 
 func (x *ReportExecutionResultRequest) Reset() {
 	*x = ReportExecutionResultRequest{}
-	mi := &file_jobdeck_job_v1_queue_proto_msgTypes[3]
+	mi := &file_jobdeck_job_v1_queue_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -218,7 +306,7 @@ func (x *ReportExecutionResultRequest) String() string {
 func (*ReportExecutionResultRequest) ProtoMessage() {}
 
 func (x *ReportExecutionResultRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_jobdeck_job_v1_queue_proto_msgTypes[3]
+	mi := &file_jobdeck_job_v1_queue_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -231,7 +319,7 @@ func (x *ReportExecutionResultRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReportExecutionResultRequest.ProtoReflect.Descriptor instead.
 func (*ReportExecutionResultRequest) Descriptor() ([]byte, []int) {
-	return file_jobdeck_job_v1_queue_proto_rawDescGZIP(), []int{3}
+	return file_jobdeck_job_v1_queue_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ReportExecutionResultRequest) GetExecutionId() string {
@@ -263,7 +351,7 @@ type ReportExecutionResultResponse struct {
 
 func (x *ReportExecutionResultResponse) Reset() {
 	*x = ReportExecutionResultResponse{}
-	mi := &file_jobdeck_job_v1_queue_proto_msgTypes[4]
+	mi := &file_jobdeck_job_v1_queue_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -275,7 +363,7 @@ func (x *ReportExecutionResultResponse) String() string {
 func (*ReportExecutionResultResponse) ProtoMessage() {}
 
 func (x *ReportExecutionResultResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_jobdeck_job_v1_queue_proto_msgTypes[4]
+	mi := &file_jobdeck_job_v1_queue_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -288,7 +376,7 @@ func (x *ReportExecutionResultResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReportExecutionResultResponse.ProtoReflect.Descriptor instead.
 func (*ReportExecutionResultResponse) Descriptor() ([]byte, []int) {
-	return file_jobdeck_job_v1_queue_proto_rawDescGZIP(), []int{4}
+	return file_jobdeck_job_v1_queue_proto_rawDescGZIP(), []int{6}
 }
 
 var File_jobdeck_job_v1_queue_proto protoreflect.FileDescriptor
@@ -309,15 +397,20 @@ const file_jobdeck_job_v1_queue_proto_rawDesc = "" +
 	"\x17ClaimExecutionsResponse\x12@\n" +
 	"\n" +
 	"executions\x18\x01 \x03(\v2 .jobdeck.job.v1.ClaimedExecutionR\n" +
-	"executions\"\xd4\x01\n" +
+	"executions\"D\n" +
+	"\x15ClaimExecutionRequest\x12+\n" +
+	"\fexecution_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vexecutionId\"X\n" +
+	"\x16ClaimExecutionResponse\x12>\n" +
+	"\texecution\x18\x01 \x01(\v2 .jobdeck.job.v1.ClaimedExecutionR\texecution\"\xd4\x01\n" +
 	"\x1cReportExecutionResultRequest\x12+\n" +
 	"\fexecution_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vexecutionId\x12(\n" +
 	"\vlease_token\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\n" +
 	"leaseToken\x12?\n" +
 	"\x06result\x18\x04 \x01(\v2\x1f.jobdeck.job.v1.ExecutionResultB\x06\xbaH\x03\xc8\x01\x01R\x06resultJ\x04\b\x03\x10\x04J\x04\b\x05\x10\x06R\x06statusR\bduration\"0\n" +
-	"\x1dReportExecutionResultResponseJ\x04\b\x01\x10\x02R\texecution2\xf1\x01\n" +
+	"\x1dReportExecutionResultResponseJ\x04\b\x01\x10\x02R\texecution2\xd2\x02\n" +
 	"\x15ExecutionQueueService\x12b\n" +
-	"\x0fClaimExecutions\x12&.jobdeck.job.v1.ClaimExecutionsRequest\x1a'.jobdeck.job.v1.ClaimExecutionsResponse\x12t\n" +
+	"\x0fClaimExecutions\x12&.jobdeck.job.v1.ClaimExecutionsRequest\x1a'.jobdeck.job.v1.ClaimExecutionsResponse\x12_\n" +
+	"\x0eClaimExecution\x12%.jobdeck.job.v1.ClaimExecutionRequest\x1a&.jobdeck.job.v1.ClaimExecutionResponse\x12t\n" +
 	"\x15ReportExecutionResult\x12,.jobdeck.job.v1.ReportExecutionResultRequest\x1a-.jobdeck.job.v1.ReportExecutionResultResponseB\x9f\x01\n" +
 	"\x12com.jobdeck.job.v1B\n" +
 	"QueueProtoP\x01Z#jobdeck/gen/go/jobdeck/job/v1;jobv1\xa2\x02\x03JJX\xaa\x02\x0eJobdeck.Job.V1\xca\x02\x0eJobdeck\\Job\\V1\xe2\x02\x1aJobdeck\\Job\\V1\\GPBMetadata\xea\x02\x10Jobdeck::Job::V1b\x06proto3"
@@ -334,31 +427,36 @@ func file_jobdeck_job_v1_queue_proto_rawDescGZIP() []byte {
 	return file_jobdeck_job_v1_queue_proto_rawDescData
 }
 
-var file_jobdeck_job_v1_queue_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_jobdeck_job_v1_queue_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_jobdeck_job_v1_queue_proto_goTypes = []any{
 	(*ClaimedExecution)(nil),              // 0: jobdeck.job.v1.ClaimedExecution
 	(*ClaimExecutionsRequest)(nil),        // 1: jobdeck.job.v1.ClaimExecutionsRequest
 	(*ClaimExecutionsResponse)(nil),       // 2: jobdeck.job.v1.ClaimExecutionsResponse
-	(*ReportExecutionResultRequest)(nil),  // 3: jobdeck.job.v1.ReportExecutionResultRequest
-	(*ReportExecutionResultResponse)(nil), // 4: jobdeck.job.v1.ReportExecutionResultResponse
-	(*timestamppb.Timestamp)(nil),         // 5: google.protobuf.Timestamp
-	(*JobSpec)(nil),                       // 6: jobdeck.job.v1.JobSpec
-	(*ExecutionResult)(nil),               // 7: jobdeck.job.v1.ExecutionResult
+	(*ClaimExecutionRequest)(nil),         // 3: jobdeck.job.v1.ClaimExecutionRequest
+	(*ClaimExecutionResponse)(nil),        // 4: jobdeck.job.v1.ClaimExecutionResponse
+	(*ReportExecutionResultRequest)(nil),  // 5: jobdeck.job.v1.ReportExecutionResultRequest
+	(*ReportExecutionResultResponse)(nil), // 6: jobdeck.job.v1.ReportExecutionResultResponse
+	(*timestamppb.Timestamp)(nil),         // 7: google.protobuf.Timestamp
+	(*JobSpec)(nil),                       // 8: jobdeck.job.v1.JobSpec
+	(*ExecutionResult)(nil),               // 9: jobdeck.job.v1.ExecutionResult
 }
 var file_jobdeck_job_v1_queue_proto_depIdxs = []int32{
-	5, // 0: jobdeck.job.v1.ClaimedExecution.lease_expires_at:type_name -> google.protobuf.Timestamp
-	6, // 1: jobdeck.job.v1.ClaimedExecution.job_spec:type_name -> jobdeck.job.v1.JobSpec
+	7, // 0: jobdeck.job.v1.ClaimedExecution.lease_expires_at:type_name -> google.protobuf.Timestamp
+	8, // 1: jobdeck.job.v1.ClaimedExecution.job_spec:type_name -> jobdeck.job.v1.JobSpec
 	0, // 2: jobdeck.job.v1.ClaimExecutionsResponse.executions:type_name -> jobdeck.job.v1.ClaimedExecution
-	7, // 3: jobdeck.job.v1.ReportExecutionResultRequest.result:type_name -> jobdeck.job.v1.ExecutionResult
-	1, // 4: jobdeck.job.v1.ExecutionQueueService.ClaimExecutions:input_type -> jobdeck.job.v1.ClaimExecutionsRequest
-	3, // 5: jobdeck.job.v1.ExecutionQueueService.ReportExecutionResult:input_type -> jobdeck.job.v1.ReportExecutionResultRequest
-	2, // 6: jobdeck.job.v1.ExecutionQueueService.ClaimExecutions:output_type -> jobdeck.job.v1.ClaimExecutionsResponse
-	4, // 7: jobdeck.job.v1.ExecutionQueueService.ReportExecutionResult:output_type -> jobdeck.job.v1.ReportExecutionResultResponse
-	6, // [6:8] is the sub-list for method output_type
-	4, // [4:6] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	0, // 3: jobdeck.job.v1.ClaimExecutionResponse.execution:type_name -> jobdeck.job.v1.ClaimedExecution
+	9, // 4: jobdeck.job.v1.ReportExecutionResultRequest.result:type_name -> jobdeck.job.v1.ExecutionResult
+	1, // 5: jobdeck.job.v1.ExecutionQueueService.ClaimExecutions:input_type -> jobdeck.job.v1.ClaimExecutionsRequest
+	3, // 6: jobdeck.job.v1.ExecutionQueueService.ClaimExecution:input_type -> jobdeck.job.v1.ClaimExecutionRequest
+	5, // 7: jobdeck.job.v1.ExecutionQueueService.ReportExecutionResult:input_type -> jobdeck.job.v1.ReportExecutionResultRequest
+	2, // 8: jobdeck.job.v1.ExecutionQueueService.ClaimExecutions:output_type -> jobdeck.job.v1.ClaimExecutionsResponse
+	4, // 9: jobdeck.job.v1.ExecutionQueueService.ClaimExecution:output_type -> jobdeck.job.v1.ClaimExecutionResponse
+	6, // 10: jobdeck.job.v1.ExecutionQueueService.ReportExecutionResult:output_type -> jobdeck.job.v1.ReportExecutionResultResponse
+	8, // [8:11] is the sub-list for method output_type
+	5, // [5:8] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_jobdeck_job_v1_queue_proto_init() }
@@ -374,7 +472,7 @@ func file_jobdeck_job_v1_queue_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_jobdeck_job_v1_queue_proto_rawDesc), len(file_jobdeck_job_v1_queue_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

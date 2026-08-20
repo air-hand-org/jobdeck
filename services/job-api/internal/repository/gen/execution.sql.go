@@ -12,6 +12,58 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const claimExecution = `-- name: ClaimExecution :one
+WITH claimed AS (
+  SELECT
+    e.execution_id
+  FROM job.execution AS e
+  INNER JOIN job.job_revision AS r ON e.job_id = r.job_id AND e.job_revision_id = r.revision_id
+  WHERE
+    e.execution_id = $1
+    AND e.status = 'QUEUED'
+    AND e.next_run_at <= NOW()
+    AND e.attempt <= r.retry_max_attempts
+  FOR UPDATE OF e SKIP LOCKED
+)
+, updated AS (
+  UPDATE job.execution AS e
+  SET
+    status = 'RUNNING'
+    , attempt = e.attempt
+    , lease_token = uuidv7()
+    , lease_expires_at = $2
+  FROM claimed AS c
+  WHERE e.execution_id = c.execution_id
+  RETURNING e.execution_id, e.job_id, e.trigger_type, e.status, e.attempt, e.lease_token, e.lease_expires_at, e.next_run_at, e.result, e.created_at, e.updated_at, e.job_revision_id
+)
+, added_event AS (
+  INSERT INTO job.execution_event AS ee (
+    execution_id
+    , status
+  )
+  SELECT
+    u.execution_id
+    , u.status
+  FROM updated AS u
+  RETURNING ee.execution_event_id, ee.execution_id, ee.status, ee.created_at
+)
+SELECT
+  execution_id
+FROM added_event
+`
+
+type ClaimExecutionParams struct {
+	ExecutionID    uuid.UUID
+	LeaseExpiresAt pgtype.Timestamptz
+}
+
+func (q *Queries) ClaimExecution(ctx context.Context, arg ClaimExecutionParams) (uuid.UUID, error) {
+	row := q.db.QueryRow(ctx, claimExecution, arg.ExecutionID, arg.LeaseExpiresAt)
+	var execution_id uuid.UUID
+	err := row.Scan(&execution_id)
+	return execution_id, err
+}
+
 const claimExecutions = `-- name: ClaimExecutions :many
 WITH claimed AS (
   SELECT
@@ -21,7 +73,7 @@ WITH claimed AS (
   WHERE
     e.status = 'QUEUED'
     AND e.next_run_at <= NOW()
-    AND e.attempt < r.retry_max_attempts
+    AND e.attempt <= r.retry_max_attempts
   ORDER BY e.next_run_at, e.created_at, e.execution_id
   LIMIT $1
   FOR UPDATE OF e SKIP LOCKED
@@ -30,7 +82,6 @@ WITH claimed AS (
   UPDATE job.execution AS e
   SET
     status = 'RUNNING'
-    , attempt = e.attempt + 1
     , lease_token = uuidv7()
     , lease_expires_at = $2
   FROM claimed AS c
@@ -93,7 +144,7 @@ WITH added AS (
     , cr.revision_id
     , $1
     , 'QUEUED'
-    , 0
+    , 1
     , NOW()
   FROM job.job_current_revision AS cr
   INNER JOIN job.job AS j ON cr.job_id = j.job_id
@@ -116,9 +167,18 @@ WITH added AS (
   FROM added
   RETURNING ee.execution_event_id, ee.execution_id, ee.status, ee.created_at
 )
+, added_outbox AS (
+    INSERT INTO job.outbox_execution_requested AS r (
+        execution_id
+    )
+    SELECT
+        execution_id
+    FROM added_event
+    RETURNING r.execution_id, r.status, r.created_at, r.published_at
+)
 SELECT
   execution_id
-FROM added_event
+FROM added_outbox
 `
 
 type CreateExecutionForCurrentJobParams struct {
@@ -135,7 +195,6 @@ func (q *Queries) CreateExecutionForCurrentJob(ctx context.Context, arg CreateEx
 }
 
 const createRetryForUnsuccessfulExecution = `-- name: CreateRetryForUnsuccessfulExecution :one
-
 WITH added AS (
   INSERT INTO job.execution AS e (
     job_id
@@ -150,7 +209,7 @@ WITH added AS (
     , cp.job_revision_id
     , cp.trigger_type
     , 'QUEUED'
-    , cp.attempt
+    , cp.attempt + 1
     , $1
   FROM job.execution AS cp
   INNER JOIN job.job_revision AS r ON cp.job_id = r.job_id AND cp.job_revision_id = r.revision_id
@@ -173,9 +232,18 @@ WITH added AS (
   FROM added
   RETURNING ee.execution_event_id, ee.execution_id, ee.status, ee.created_at
 )
+, added_outbox AS (
+    INSERT INTO job.outbox_execution_requested AS r (
+        execution_id
+    )
+    SELECT
+        execution_id
+    FROM added_event
+    RETURNING r.execution_id, r.status, r.created_at, r.published_at
+)
 SELECT
   execution_id
-FROM added_event
+FROM added_outbox
 `
 
 type CreateRetryForUnsuccessfulExecutionParams struct {
@@ -183,12 +251,35 @@ type CreateRetryForUnsuccessfulExecutionParams struct {
 	ExecutionID uuid.UUID
 }
 
-// for ExecutionQueryService
 func (q *Queries) CreateRetryForUnsuccessfulExecution(ctx context.Context, arg CreateRetryForUnsuccessfulExecutionParams) (uuid.UUID, error) {
 	row := q.db.QueryRow(ctx, createRetryForUnsuccessfulExecution, arg.NextRunAt, arg.ExecutionID)
 	var execution_id uuid.UUID
 	err := row.Scan(&execution_id)
 	return execution_id, err
+}
+
+const getExecutionClaimDetail = `-- name: GetExecutionClaimDetail :one
+SELECT execution_id, job_id, job_revision_id, attempt, lease_token, lease_expires_at, job_type, job_config, created_at
+FROM job.execution_claim_detail AS e
+WHERE
+    e.execution_id = $1
+`
+
+func (q *Queries) GetExecutionClaimDetail(ctx context.Context, executionID uuid.UUID) (JobExecutionClaimDetail, error) {
+	row := q.db.QueryRow(ctx, getExecutionClaimDetail, executionID)
+	var i JobExecutionClaimDetail
+	err := row.Scan(
+		&i.ExecutionID,
+		&i.JobID,
+		&i.JobRevisionID,
+		&i.Attempt,
+		&i.LeaseToken,
+		&i.LeaseExpiresAt,
+		&i.JobType,
+		&i.JobConfig,
+		&i.CreatedAt,
+	)
+	return i, err
 }
 
 const getExecutionDetail = `-- name: GetExecutionDetail :one
@@ -463,6 +554,36 @@ func (q *Queries) ListExecutionsFirstPage(ctx context.Context, arg ListExecution
 	return items, nil
 }
 
+const markAsPublishedOutboxExecutionRequested = `-- name: MarkAsPublishedOutboxExecutionRequested :many
+UPDATE job.outbox_execution_requested AS r
+SET
+    status = 'PUBLISHED'
+    , published_at = NOW()
+WHERE
+  execution_id = ANY($1::uuid[]) AND status = 'REQUESTED'
+RETURNING r.execution_id
+`
+
+func (q *Queries) MarkAsPublishedOutboxExecutionRequested(ctx context.Context, executionIds []uuid.UUID) ([]uuid.UUID, error) {
+	rows, err := q.db.Query(ctx, markAsPublishedOutboxExecutionRequested, executionIds)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []uuid.UUID{}
+	for rows.Next() {
+		var execution_id uuid.UUID
+		if err := rows.Scan(&execution_id); err != nil {
+			return nil, err
+		}
+		items = append(items, execution_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const reportExecutionResult = `-- name: ReportExecutionResult :one
 WITH updated AS (
   UPDATE job.execution AS e
@@ -488,9 +609,23 @@ WITH updated AS (
   FROM updated AS u
   RETURNING ee.execution_event_id, ee.execution_id, ee.status, ee.created_at
 )
+, deleted_outbox AS (
+    DELETE FROM job.outbox_execution_requested AS r
+    WHERE
+        r.execution_id = (SELECT execution_id FROM added_event) AND r.status = 'PUBLISHED'
+    RETURNING r.execution_id, r.status, r.created_at, r.published_at
+)
+INSERT INTO job.outbox_execution_completed AS c (
+    execution_id
+    , requested_at
+    , published_at
+)
 SELECT
-  execution_id
-FROM added_event
+    d.execution_id
+    , d.created_at
+    , d.published_at
+FROM deleted_outbox AS d
+RETURNING c.execution_id
 `
 
 type ReportExecutionResultParams struct {
@@ -510,4 +645,35 @@ func (q *Queries) ReportExecutionResult(ctx context.Context, arg ReportExecution
 	var execution_id uuid.UUID
 	err := row.Scan(&execution_id)
 	return execution_id, err
+}
+
+const reserveForPublishOutboxExecutionRequested = `-- name: ReserveForPublishOutboxExecutionRequested :many
+SELECT
+    r.execution_id
+FROM job.outbox_execution_requested AS r
+WHERE
+    status = 'REQUESTED'
+ORDER BY r.created_at, r.execution_id
+LIMIT $1
+FOR UPDATE OF r SKIP LOCKED
+`
+
+func (q *Queries) ReserveForPublishOutboxExecutionRequested(ctx context.Context, maxSize int32) ([]uuid.UUID, error) {
+	rows, err := q.db.Query(ctx, reserveForPublishOutboxExecutionRequested, maxSize)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []uuid.UUID{}
+	for rows.Next() {
+		var execution_id uuid.UUID
+		if err := rows.Scan(&execution_id); err != nil {
+			return nil, err
+		}
+		items = append(items, execution_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

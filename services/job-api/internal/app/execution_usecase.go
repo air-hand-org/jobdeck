@@ -15,6 +15,7 @@ type ExecutionStore interface {
 
 type ExecutionUsecase struct {
 	s ExecutionStore
+	d OutboxDispatcher
 }
 
 func (u *ExecutionUsecase) RequestExecution(ctx context.Context, actor domain.Actor, job_id domain.JobId, trigger domain.ExecutionTrigger) (domain.Execution, error) {
@@ -22,15 +23,20 @@ func (u *ExecutionUsecase) RequestExecution(ctx context.Context, actor domain.Ac
 		return domain.Execution{}, errors.Wrapf(domain.ErrPermissionDenied, "actor %s has no cap %s", actor.ID, domain.CapJobWrite)
 	}
 	var execution domain.Execution
-	err := u.s.WithinExecutionTx(ctx, func(ctx context.Context, execs ExecutionRepository) error {
+	if err := u.s.WithinExecutionTx(ctx, func(ctx context.Context, execs ExecutionRepository) error {
 		e, err := execs.CreateForCurrentJob(ctx, actor.ID, job_id, trigger)
 		if err != nil {
 			return err
 		}
 		execution = e
 		return nil
-	})
-	return execution, err
+	}); err != nil {
+		return domain.Execution{}, err
+	}
+	if err := u.d.Trigger(ctx); err != nil {
+		return domain.Execution{}, err
+	}
+	return execution, nil
 }
 
 func (u *ExecutionUsecase) GetExecution(ctx context.Context, actor domain.Actor, execution_id domain.ExecutionId) (domain.Execution, error) {
@@ -47,6 +53,6 @@ func (u *ExecutionUsecase) ListExecutions(ctx context.Context, actor domain.Acto
 	return u.s.Executions().ListByJob(ctx, actor.ID, job_id, page_size, page_token)
 }
 
-func NewExecutionUsecase(s ExecutionStore) *ExecutionUsecase {
-	return &ExecutionUsecase{s: s}
+func NewExecutionUsecase(s ExecutionStore, d OutboxDispatcher) *ExecutionUsecase {
+	return &ExecutionUsecase{s: s, d: d}
 }
