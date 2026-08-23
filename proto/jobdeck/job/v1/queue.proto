@@ -17,18 +17,12 @@ message ClaimedExecution {
   string job_id = 6 [(buf.validate.field).string.uuid = true];
 }
 
-message ClaimExecutionsRequest {
-  reserved 2;
-  reserved "lease_duration";
-
-  int32 max_count = 1 [(buf.validate.field).int32 = {
-    gte: 1
-    lte: 100
-  }];
+message ClaimExecutionRequest {
+  string execution_id = 1 [(buf.validate.field).string.uuid = true];
 }
 
-message ClaimExecutionsResponse {
-  repeated ClaimedExecution executions = 1;
+message ClaimExecutionResponse {
+  ClaimedExecution execution = 1;
 }
 
 message ReportExecutionResultRequest {
@@ -46,6 +40,6 @@ message ReportExecutionResultResponse {
 }
 
 service ExecutionQueueService {
-  rpc ClaimExecutions(ClaimExecutionsRequest) returns (ClaimExecutionsResponse);
+  rpc ClaimExecution(ClaimExecutionRequest) returns (ClaimExecutionResponse);
   rpc ReportExecutionResult(ReportExecutionResultRequest) returns (ReportExecutionResultResponse);
 }

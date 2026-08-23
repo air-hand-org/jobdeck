@@ -148,3 +148,21 @@ type JobJobType struct {
 	Type   string
 	Active bool
 }
+
+type JobOutboxExecutionCompleted struct {
+	ExecutionID uuid.UUID
+	RequestedAt pgtype.Timestamptz
+	PublishedAt pgtype.Timestamptz
+	CompletedAt pgtype.Timestamptz
+}
+
+type JobOutboxExecutionRequested struct {
+	ExecutionID uuid.UUID
+	Status      string
+	CreatedAt   pgtype.Timestamptz
+	PublishedAt pgtype.Timestamptz
+}
+
+type JobOutboxExecutionStatus struct {
+	Status string
+}

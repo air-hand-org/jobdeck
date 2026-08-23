@@ -89,6 +89,10 @@ enum HttpErrorType {
   HTTP_ERROR_TYPE_NETWORK = 2;
 }
 
+message ExecutionRequested {
+  string execution_id = 1 [(buf.validate.field).string.uuid = true];
+}
+
 message GetExecutionRequest {
   string execution_id = 1 [(buf.validate.field).string.uuid = true];
 }

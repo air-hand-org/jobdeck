@@ -6,6 +6,7 @@ var ErrJobNotFound = errors.New("job is not found")
 
 var ErrExecutionNotFound = errors.New("execution is not found")
 var ErrExecutionNotReportable = errors.New("execution is not reportable")
+var ErrExecutionHasAlreadyConsumed = errors.New("execution has already consumed")
 
 var ErrActorNotFound = errors.New("actor is not found")
 var ErrActorInactive = errors.New("actor is not active")

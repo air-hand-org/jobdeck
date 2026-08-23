@@ -20,8 +20,8 @@ var _ ExecutionQueueRepository = &ExecutionQueueRepositoryMock{}
 //
 //		// make and configure a mocked ExecutionQueueRepository
 //		mockedExecutionQueueRepository := &ExecutionQueueRepositoryMock{
-//			ClaimsFunc: func(ctx context.Context, max_count int32) ([]domain.ClaimedExecution, error) {
-//				panic("mock out the Claims method")
+//			ClaimFunc: func(ctx context.Context, execution_id domain.ExecutionId) (domain.ClaimedExecution, error) {
+//				panic("mock out the Claim method")
 //			},
 //			CreateRetryUnsuccessfulFunc: func(ctx context.Context, execution_id domain.ExecutionId, next_run_at time.Time) (domain.Execution, error) {
 //				panic("mock out the CreateRetryUnsuccessful method")
@@ -39,8 +39,8 @@ var _ ExecutionQueueRepository = &ExecutionQueueRepositoryMock{}
 //
 //	}
 type ExecutionQueueRepositoryMock struct {
-	// ClaimsFunc mocks the Claims method.
-	ClaimsFunc func(ctx context.Context, max_count int32) ([]domain.ClaimedExecution, error)
+	// ClaimFunc mocks the Claim method.
+	ClaimFunc func(ctx context.Context, execution_id domain.ExecutionId) (domain.ClaimedExecution, error)
 
 	// CreateRetryUnsuccessfulFunc mocks the CreateRetryUnsuccessful method.
 	CreateRetryUnsuccessfulFunc func(ctx context.Context, execution_id domain.ExecutionId, next_run_at time.Time) (domain.Execution, error)
@@ -53,12 +53,12 @@ type ExecutionQueueRepositoryMock struct {
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// Claims holds details about calls to the Claims method.
-		Claims []struct {
+		// Claim holds details about calls to the Claim method.
+		Claim []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// Max_count is the max_count argument value.
-			Max_count int32
+			// Execution_id is the execution_id argument value.
+			Execution_id domain.ExecutionId
 		}
 		// CreateRetryUnsuccessful holds details about calls to the CreateRetryUnsuccessful method.
 		CreateRetryUnsuccessful []struct {
@@ -92,45 +92,45 @@ type ExecutionQueueRepositoryMock struct {
 			Result domain.ExecutionResult
 		}
 	}
-	lockClaims                  sync.RWMutex
+	lockClaim                   sync.RWMutex
 	lockCreateRetryUnsuccessful sync.RWMutex
 	lockGetReportTarget         sync.RWMutex
 	lockReportResult            sync.RWMutex
 }
 
-// Claims calls ClaimsFunc.
-func (mock *ExecutionQueueRepositoryMock) Claims(ctx context.Context, max_count int32) ([]domain.ClaimedExecution, error) {
-	if mock.ClaimsFunc == nil {
-		panic("ExecutionQueueRepositoryMock.ClaimsFunc: method is nil but ExecutionQueueRepository.Claims was just called")
+// Claim calls ClaimFunc.
+func (mock *ExecutionQueueRepositoryMock) Claim(ctx context.Context, execution_id domain.ExecutionId) (domain.ClaimedExecution, error) {
+	if mock.ClaimFunc == nil {
+		panic("ExecutionQueueRepositoryMock.ClaimFunc: method is nil but ExecutionQueueRepository.Claim was just called")
 	}
 	callInfo := struct {
-		Ctx       context.Context
-		Max_count int32
+		Ctx          context.Context
+		Execution_id domain.ExecutionId
 	}{
-		Ctx:       ctx,
-		Max_count: max_count,
+		Ctx:          ctx,
+		Execution_id: execution_id,
 	}
-	mock.lockClaims.Lock()
-	mock.calls.Claims = append(mock.calls.Claims, callInfo)
-	mock.lockClaims.Unlock()
-	return mock.ClaimsFunc(ctx, max_count)
+	mock.lockClaim.Lock()
+	mock.calls.Claim = append(mock.calls.Claim, callInfo)
+	mock.lockClaim.Unlock()
+	return mock.ClaimFunc(ctx, execution_id)
 }
 
-// ClaimsCalls gets all the calls that were made to Claims.
+// ClaimCalls gets all the calls that were made to Claim.
 // Check the length with:
 //
-//	len(mockedExecutionQueueRepository.ClaimsCalls())
-func (mock *ExecutionQueueRepositoryMock) ClaimsCalls() []struct {
-	Ctx       context.Context
-	Max_count int32
+//	len(mockedExecutionQueueRepository.ClaimCalls())
+func (mock *ExecutionQueueRepositoryMock) ClaimCalls() []struct {
+	Ctx          context.Context
+	Execution_id domain.ExecutionId
 } {
 	var calls []struct {
-		Ctx       context.Context
-		Max_count int32
+		Ctx          context.Context
+		Execution_id domain.ExecutionId
 	}
-	mock.lockClaims.RLock()
-	calls = mock.calls.Claims
-	mock.lockClaims.RUnlock()
+	mock.lockClaim.RLock()
+	calls = mock.calls.Claim
+	mock.lockClaim.RUnlock()
 	return calls
 }
 

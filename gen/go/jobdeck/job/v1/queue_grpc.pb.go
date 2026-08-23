@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ExecutionQueueService_ClaimExecutions_FullMethodName       = "/jobdeck.job.v1.ExecutionQueueService/ClaimExecutions"
+	ExecutionQueueService_ClaimExecution_FullMethodName        = "/jobdeck.job.v1.ExecutionQueueService/ClaimExecution"
 	ExecutionQueueService_ReportExecutionResult_FullMethodName = "/jobdeck.job.v1.ExecutionQueueService/ReportExecutionResult"
 )
 
@@ -27,7 +27,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ExecutionQueueServiceClient interface {
-	ClaimExecutions(ctx context.Context, in *ClaimExecutionsRequest, opts ...grpc.CallOption) (*ClaimExecutionsResponse, error)
+	ClaimExecution(ctx context.Context, in *ClaimExecutionRequest, opts ...grpc.CallOption) (*ClaimExecutionResponse, error)
 	ReportExecutionResult(ctx context.Context, in *ReportExecutionResultRequest, opts ...grpc.CallOption) (*ReportExecutionResultResponse, error)
 }
 
@@ -39,10 +39,10 @@ func NewExecutionQueueServiceClient(cc grpc.ClientConnInterface) ExecutionQueueS
 	return &executionQueueServiceClient{cc}
 }
 
-func (c *executionQueueServiceClient) ClaimExecutions(ctx context.Context, in *ClaimExecutionsRequest, opts ...grpc.CallOption) (*ClaimExecutionsResponse, error) {
+func (c *executionQueueServiceClient) ClaimExecution(ctx context.Context, in *ClaimExecutionRequest, opts ...grpc.CallOption) (*ClaimExecutionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ClaimExecutionsResponse)
-	err := c.cc.Invoke(ctx, ExecutionQueueService_ClaimExecutions_FullMethodName, in, out, cOpts...)
+	out := new(ClaimExecutionResponse)
+	err := c.cc.Invoke(ctx, ExecutionQueueService_ClaimExecution_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func (c *executionQueueServiceClient) ReportExecutionResult(ctx context.Context,
 // All implementations must embed UnimplementedExecutionQueueServiceServer
 // for forward compatibility.
 type ExecutionQueueServiceServer interface {
-	ClaimExecutions(context.Context, *ClaimExecutionsRequest) (*ClaimExecutionsResponse, error)
+	ClaimExecution(context.Context, *ClaimExecutionRequest) (*ClaimExecutionResponse, error)
 	ReportExecutionResult(context.Context, *ReportExecutionResultRequest) (*ReportExecutionResultResponse, error)
 	mustEmbedUnimplementedExecutionQueueServiceServer()
 }
@@ -75,8 +75,8 @@ type ExecutionQueueServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedExecutionQueueServiceServer struct{}
 
-func (UnimplementedExecutionQueueServiceServer) ClaimExecutions(context.Context, *ClaimExecutionsRequest) (*ClaimExecutionsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ClaimExecutions not implemented")
+func (UnimplementedExecutionQueueServiceServer) ClaimExecution(context.Context, *ClaimExecutionRequest) (*ClaimExecutionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ClaimExecution not implemented")
 }
 func (UnimplementedExecutionQueueServiceServer) ReportExecutionResult(context.Context, *ReportExecutionResultRequest) (*ReportExecutionResultResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ReportExecutionResult not implemented")
@@ -102,20 +102,20 @@ func RegisterExecutionQueueServiceServer(s grpc.ServiceRegistrar, srv ExecutionQ
 	s.RegisterService(&ExecutionQueueService_ServiceDesc, srv)
 }
 
-func _ExecutionQueueService_ClaimExecutions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ClaimExecutionsRequest)
+func _ExecutionQueueService_ClaimExecution_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ClaimExecutionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ExecutionQueueServiceServer).ClaimExecutions(ctx, in)
+		return srv.(ExecutionQueueServiceServer).ClaimExecution(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ExecutionQueueService_ClaimExecutions_FullMethodName,
+		FullMethod: ExecutionQueueService_ClaimExecution_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ExecutionQueueServiceServer).ClaimExecutions(ctx, req.(*ClaimExecutionsRequest))
+		return srv.(ExecutionQueueServiceServer).ClaimExecution(ctx, req.(*ClaimExecutionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -146,8 +146,8 @@ var ExecutionQueueService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ExecutionQueueServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ClaimExecutions",
-			Handler:    _ExecutionQueueService_ClaimExecutions_Handler,
+			MethodName: "ClaimExecution",
+			Handler:    _ExecutionQueueService_ClaimExecution_Handler,
 		},
 		{
 			MethodName: "ReportExecutionResult",

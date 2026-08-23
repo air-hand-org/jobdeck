@@ -54,5 +54,6 @@ func main() {
 
 	if err := g.Wait(); err != nil {
 		slog.Error("error occured", "err", err)
+		os.Exit(1)
 	}
 }

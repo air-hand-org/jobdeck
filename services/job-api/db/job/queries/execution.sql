@@ -13,7 +13,7 @@ WITH added AS (
     , cr.revision_id
     , sqlc.arg(trigger_type)
     , 'QUEUED'
-    , 0
+    , 1
     , NOW()
   FROM job.job_current_revision AS cr
   INNER JOIN job.job AS j ON cr.job_id = j.job_id
@@ -36,9 +36,18 @@ WITH added AS (
   FROM added
   RETURNING ee.*
 )
+, added_outbox AS (
+    INSERT INTO job.outbox_execution_requested AS r (
+        execution_id
+    )
+    SELECT
+        execution_id
+    FROM added_event
+    RETURNING r.*
+)
 SELECT
   execution_id
-FROM added_event;
+FROM added_outbox;
 ;
 
 -- name: GetExecutionDetail :one
@@ -84,8 +93,6 @@ ORDER BY e.created_at DESC, e.execution_id DESC
 LIMIT sqlc.arg(page_size)
 ;
 
--- for ExecutionQueryService
-
 -- name: CreateRetryForUnsuccessfulExecution :one
 WITH added AS (
   INSERT INTO job.execution AS e (
@@ -101,7 +108,7 @@ WITH added AS (
     , cp.job_revision_id
     , cp.trigger_type
     , 'QUEUED'
-    , cp.attempt
+    , cp.attempt + 1
     , sqlc.arg(next_run_at)
   FROM job.execution AS cp
   INNER JOIN job.job_revision AS r ON cp.job_id = r.job_id AND cp.job_revision_id = r.revision_id
@@ -124,30 +131,38 @@ WITH added AS (
   FROM added
   RETURNING ee.*
 )
+, added_outbox AS (
+    INSERT INTO job.outbox_execution_requested AS r (
+        execution_id
+    )
+    SELECT
+        execution_id
+    FROM added_event
+    RETURNING r.*
+)
 SELECT
   execution_id
-FROM added_event
+FROM added_outbox
 ;
 
--- name: ClaimExecutions :many
+-- name: ClaimExecution :one
 WITH claimed AS (
   SELECT
     e.execution_id
   FROM job.execution AS e
   INNER JOIN job.job_revision AS r ON e.job_id = r.job_id AND e.job_revision_id = r.revision_id
   WHERE
-    e.status = 'QUEUED'
+    e.execution_id = sqlc.arg(execution_id)
+    AND e.status = 'QUEUED'
     AND e.next_run_at <= NOW()
-    AND e.attempt < r.retry_max_attempts
-  ORDER BY e.next_run_at, e.created_at, e.execution_id
-  LIMIT sqlc.arg(max_size)
+    AND e.attempt <= r.retry_max_attempts
   FOR UPDATE OF e SKIP LOCKED
 )
 , updated AS (
   UPDATE job.execution AS e
   SET
     status = 'RUNNING'
-    , attempt = e.attempt + 1
+    , attempt = e.attempt
     , lease_token = uuidv7()
     , lease_expires_at = sqlc.arg(lease_expires_at)
   FROM claimed AS c
@@ -195,9 +210,23 @@ WITH updated AS (
   FROM updated AS u
   RETURNING ee.*
 )
+, deleted_outbox AS (
+    DELETE FROM job.outbox_execution_requested AS r
+    WHERE
+        r.execution_id = (SELECT execution_id FROM added_event)
+    RETURNING r.*
+)
+INSERT INTO job.outbox_execution_completed AS c (
+    execution_id
+    , requested_at
+    , published_at
+)
 SELECT
-  execution_id
-FROM added_event
+    d.execution_id
+    , d.created_at
+    , d.published_at
+FROM deleted_outbox AS d
+RETURNING c.execution_id
 ;
 
 -- name: GetExecutionDetailDirect :one
@@ -207,10 +236,48 @@ WHERE
   e.execution_id = sqlc.arg(execution_id)
 ;
 
+-- name: GetExecutionClaimDetail :one
+SELECT *
+FROM job.execution_claim_detail AS e
+WHERE
+    e.execution_id = sqlc.arg(execution_id)
+;
+
 -- name: ListExecutionClaimDetails :many
 SELECT *
 FROM job.execution_claim_detail AS e
 WHERE
   e.execution_id = ANY(sqlc.arg(execution_ids)::uuid[])
 ORDER BY e.created_at ASC, e.execution_id ASC
+;
+
+-- name: ReserveForPublishOutboxExecutionRequested :many
+SELECT
+    r.execution_id
+FROM job.outbox_execution_requested AS r
+WHERE
+    status = 'REQUESTED'
+ORDER BY r.created_at, r.execution_id
+LIMIT sqlc.arg(max_size)
+FOR UPDATE OF r SKIP LOCKED
+;
+
+-- name: MarkAsPublishedOutboxExecutionRequested :many
+UPDATE job.outbox_execution_requested AS r
+SET
+    status = 'PUBLISHED'
+    , published_at = NOW()
+WHERE
+  execution_id = ANY(sqlc.arg(execution_ids)::uuid[]) AND status = 'REQUESTED'
+RETURNING r.execution_id
+;
+
+-- name: RepublishOutboxExecutionRequested :many
+UPDATE job.outbox_execution_requested AS r
+SET
+    status = 'REQUESTED'
+    , published_at = NULL
+WHERE
+    status = 'PUBLISHED'
+RETURNING r.execution_id
 ;

@@ -18,12 +18,15 @@ import (
 	"jobdeck/services/job-api/internal/app"
 	"jobdeck/services/job-api/internal/auth"
 	"jobdeck/services/job-api/internal/domain"
+	"jobdeck/services/job-api/internal/eventing"
+	job_pubsub "jobdeck/services/job-api/internal/eventing/pubsub"
 	"jobdeck/services/job-api/internal/repository"
 	"jobdeck/services/job-api/internal/telemetry"
 	"jobdeck/services/job-api/internal/transport"
 	"jobdeck/services/job-api/internal/transport/interceptor"
 
 	"buf.build/go/protovalidate"
+	"cloud.google.com/go/pubsub/v2"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors"
 	protovalidate_middleware "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/protovalidate"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/selector"
@@ -133,20 +136,36 @@ func main() {
 			interceptor.LoggingErrorUnaryServerInterceptor(slog.Default()),
 		),
 	)
+
+	pubsub_client, err := pubsub.NewClient(signalCtx, os.Getenv("PUBSUB_PROJECT_ID"))
+	if err != nil {
+		log.Fatalf("failed to new client: %v", err)
+	}
+	defer pubsub_client.Close()
+
+	execution_publisher := job_pubsub.NewExecutionPublisher(pubsub_client, os.Getenv("PUBSUB_WORKER_TOPIC_ID"))
+	defer execution_publisher.Close()
+
+	outbox_dispatcher := eventing.NewOutboxDispatcher(execution_publisher, store)
+
+	g, ctx := errgroup.WithContext(signalCtx)
+
 	healthcheck := health.NewServer()
 	healthgrpc.RegisterHealthServer(s, healthcheck)
 	jobv1.RegisterJobServiceServer(s, transport.NewJobServiceServer(app.NewJobUsecase(store)))
-	jobv1.RegisterExecutionQueueServiceServer(s, transport.NewExecutionQueueServiceServer(app.NewExecutionQueueUsecase(store)))
-	jobv1.RegisterExecutionServiceServer(s, transport.NewExecutionServiceServer(app.NewExecutionUsecase(store)))
+	jobv1.RegisterExecutionQueueServiceServer(s, transport.NewExecutionQueueServiceServer(app.NewExecutionQueueUsecase(store, outbox_dispatcher)))
+	jobv1.RegisterExecutionServiceServer(s, transport.NewExecutionServiceServer(app.NewExecutionUsecase(store, outbox_dispatcher)))
 	if strings.EqualFold(os.Getenv("GRPC_REFLECTION_ENABLED"), "true") {
 		reflection.Register(s)
 	}
 
-	g, ctx := errgroup.WithContext(signalCtx)
-
 	g.Go(func() error {
 		runHealthCheck(ctx, healthcheck, pool)
 		return nil
+	})
+
+	g.Go(func() error {
+		return outbox_dispatcher.Run(ctx)
 	})
 
 	g.Go(func() error {

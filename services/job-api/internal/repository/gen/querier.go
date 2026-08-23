@@ -11,14 +11,14 @@ import (
 )
 
 type Querier interface {
-	ClaimExecutions(ctx context.Context, arg ClaimExecutionsParams) ([]uuid.UUID, error)
+	ClaimExecution(ctx context.Context, arg ClaimExecutionParams) (uuid.UUID, error)
 	CreateActor(ctx context.Context, arg CreateActorParams) (uuid.UUID, error)
 	CreateExecutionForCurrentJob(ctx context.Context, arg CreateExecutionForCurrentJobParams) (uuid.UUID, error)
 	CreateJob(ctx context.Context, arg CreateJobParams) (uuid.UUID, error)
-	// for ExecutionQueryService
 	CreateRetryForUnsuccessfulExecution(ctx context.Context, arg CreateRetryForUnsuccessfulExecutionParams) (uuid.UUID, error)
 	DeleteJob(ctx context.Context, arg DeleteJobParams) (int64, error)
 	GetActor(ctx context.Context, actorID uuid.UUID) (JobActor, error)
+	GetExecutionClaimDetail(ctx context.Context, executionID uuid.UUID) (JobExecutionClaimDetail, error)
 	GetExecutionDetail(ctx context.Context, arg GetExecutionDetailParams) (Execution, error)
 	GetExecutionDetailDirect(ctx context.Context, executionID uuid.UUID) (Execution, error)
 	GetJob(ctx context.Context, arg GetJobParams) (Job, error)
@@ -28,8 +28,11 @@ type Querier interface {
 	ListExecutionsFirstPage(ctx context.Context, arg ListExecutionsFirstPageParams) ([]Execution, error)
 	ListJobsAfter(ctx context.Context, arg ListJobsAfterParams) ([]Job, error)
 	ListJobsFirstPage(ctx context.Context, arg ListJobsFirstPageParams) ([]Job, error)
+	MarkAsPublishedOutboxExecutionRequested(ctx context.Context, executionIds []uuid.UUID) ([]uuid.UUID, error)
 	RenameJob(ctx context.Context, arg RenameJobParams) (int64, error)
 	ReportExecutionResult(ctx context.Context, arg ReportExecutionResultParams) (uuid.UUID, error)
+	RepublishOutboxExecutionRequested(ctx context.Context) ([]uuid.UUID, error)
+	ReserveForPublishOutboxExecutionRequested(ctx context.Context, maxSize int32) ([]uuid.UUID, error)
 	SetJobEnabled(ctx context.Context, arg SetJobEnabledParams) (uuid.UUID, error)
 	UpdateJobSpec(ctx context.Context, arg UpdateJobSpecParams) (uuid.UUID, error)
 }

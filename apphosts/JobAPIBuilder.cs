@@ -9,13 +9,15 @@ namespace apphosts;
 public sealed class JobAPIBuilder(
     IDistributedApplicationBuilder builder
     , IResourceBuilder<PostgresServerResource> postgres
+    , PubSubTopicResource jobWorkerTopic
 )
 {
     public EndpointReference Build(int port, bool isDebug, string grpcReflectionFlag, string apiAuthMode)
     {
         var db = postgres.AddDatabase("jobdeck");
         var migrator = DBMigration(db);
-        var backend = Backend(isDebug, grpcReflectionFlag, apiAuthMode, db, migrator);
+        var republisher = RepublishOutbox(db, migrator);
+        var backend = Backend(isDebug, grpcReflectionFlag, apiAuthMode, db, migrator, republisher, jobWorkerTopic);
         return ReverseProxy(port, backend);
     }
 
@@ -43,7 +45,9 @@ public sealed class JobAPIBuilder(
         string grpcReflectionFlag,
         string apiAuthMode,
         IResourceBuilder<PostgresDatabaseResource> db,
-        IResourceBuilder<ExecutableResource> dbMigrator
+        IResourceBuilder<ExecutableResource> dbMigrator,
+        IResourceBuilder<ExecutableResource> republisher,
+        PubSubTopicResource workerTopic
     )
     {
         // TODO: get pubkey from auth-service
@@ -73,15 +77,21 @@ public sealed class JobAPIBuilder(
               )
               .AsHttp2Service()
               .WithReference(db)
+              .WithReference(workerTopic.PubsubEndpoint)
               .WithEnvironment(context =>
               {
                   context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
                   context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = grpcReflectionFlag;
                   context.EnvironmentVariables["AUTH_JWT_PUBLIC_KEY"] = authJwtPublicKey;
                   context.EnvironmentVariables["API_AUTH_MODE"] = apiAuthMode;
+                  context.EnvironmentVariables["PUBSUB_EMULATOR_HOST"] = workerTopic.PubsubEndpoint.Property(EndpointProperty.HostAndPort);
+                  context.EnvironmentVariables["PUBSUB_PROJECT_ID"] = workerTopic.ProjectID;
+                  context.EnvironmentVariables["PUBSUB_WORKER_TOPIC_ID"] = workerTopic.TopicID;
               })
               .WaitFor(db)
               .WaitForCompletion(dbMigrator)
+              .WaitForCompletion(republisher)
+              .WaitForCompletion(workerTopic.Creator)
               ;
 
             endpoint = backend.GetEndpoint("grpc-backend");
@@ -100,15 +110,21 @@ public sealed class JobAPIBuilder(
               )
               .AsHttp2Service()
               .WithReference(db)
+              .WithReference(workerTopic.PubsubEndpoint)
               .WithEnvironment(context =>
               {
                   context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
                   context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = grpcReflectionFlag;
                   context.EnvironmentVariables["AUTH_JWT_PUBLIC_KEY"] = authJwtPublicKey;
                   context.EnvironmentVariables["API_AUTH_MODE"] = apiAuthMode;
+                  context.EnvironmentVariables["PUBSUB_EMULATOR_HOST"] = workerTopic.PubsubEndpoint.Property(EndpointProperty.HostAndPort);
+                  context.EnvironmentVariables["PUBSUB_PROJECT_ID"] = workerTopic.ProjectID;
+                  context.EnvironmentVariables["PUBSUB_WORKER_TOPIC_ID"] = workerTopic.TopicID;
               })
               .WaitFor(db)
               .WaitForCompletion(dbMigrator)
+              .WaitForCompletion(republisher)
+              .WaitForCompletion(workerTopic.Creator)
               ;
 
             endpoint = backend.GetEndpoint("grpc-backend");
@@ -129,5 +145,21 @@ public sealed class JobAPIBuilder(
               context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
           })
           .WaitFor(db);
+    }
+
+    private IResourceBuilder<ExecutableResource> RepublishOutbox(IResourceBuilder<PostgresDatabaseResource> db, IResourceBuilder<ExecutableResource> migrator)
+    {
+        return builder.AddGoApp(
+                name: "job-outbox-republisher",
+                appDirectory: "../services/job-api",
+                packagePath: "./cmd/republish"
+            )
+            .WithReference(db)
+            .WithEnvironment(context =>
+            {
+                context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
+            })
+            .WaitForCompletion(migrator)
+        ;
     }
 }

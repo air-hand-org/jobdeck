@@ -11,14 +11,14 @@ import (
 	"github.com/cockroachdb/errors"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/samber/lo"
 )
 
 type executionQueueQuerier interface {
-	ClaimExecutions(ctx context.Context, arg jobdb.ClaimExecutionsParams) ([]uuid.UUID, error)
+	ClaimExecution(ctx context.Context, arg jobdb.ClaimExecutionParams) (uuid.UUID, error)
 	CreateRetryForUnsuccessfulExecution(ctx context.Context, arg jobdb.CreateRetryForUnsuccessfulExecutionParams) (uuid.UUID, error)
 	ReportExecutionResult(ctx context.Context, arg jobdb.ReportExecutionResultParams) (uuid.UUID, error)
 
+	GetExecutionClaimDetail(ctx context.Context, executionID uuid.UUID) (jobdb.JobExecutionClaimDetail, error)
 	GetExecutionDetailDirect(ctx context.Context, executionID uuid.UUID) (jobdb.Execution, error)
 	ListExecutionEvents(ctx context.Context, executionID uuid.UUID) ([]jobdb.JobExecutionEvent, error)
 	ListExecutionClaimDetails(ctx context.Context, executionIdList []uuid.UUID) ([]jobdb.JobExecutionClaimDetail, error)
@@ -47,26 +47,27 @@ func (r *executionQueueRepository) CreateRetryUnsuccessful(ctx context.Context, 
 	return r.findById(ctx, exec_id)
 }
 
-func (r *executionQueueRepository) Claims(ctx context.Context, max_count int32) ([]domain.ClaimedExecution, error) {
+func (r *executionQueueRepository) Claim(ctx context.Context, execution_id domain.ExecutionId) (domain.ClaimedExecution, error) {
 	// TODO
 	lease_expires_at, err := timeToPGType(time.Now().Add(5 * time.Minute))
 	if err != nil {
-		return []domain.ClaimedExecution{}, err
+		return domain.ClaimedExecution{}, err
 	}
-	claim_exec_id_list, err := r.q.ClaimExecutions(ctx, jobdb.ClaimExecutionsParams{
-		MaxSize:        max_count,
+	claim_exec_id, err := r.q.ClaimExecution(ctx, jobdb.ClaimExecutionParams{
+		ExecutionID:    execution_id,
 		LeaseExpiresAt: lease_expires_at,
 	})
 	if err != nil {
-		return []domain.ClaimedExecution{}, errors.Wrap(err, "failed to claim executions")
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.ClaimedExecution{}, errors.Wrapf(domain.ErrExecutionHasAlreadyConsumed, "failed to claim execution: %v", err)
+		}
+		return domain.ClaimedExecution{}, errors.Wrap(err, "failed to claim execution")
 	}
-	claims, err := r.q.ListExecutionClaimDetails(ctx, claim_exec_id_list)
+	claim, err := r.q.GetExecutionClaimDetail(ctx, claim_exec_id)
 	if err != nil {
-		return []domain.ClaimedExecution{}, errors.Wrap(err, "failed to list execution claim details")
+		return domain.ClaimedExecution{}, errors.Wrapf(domain.ErrExecutionNotFound, "failed to get execution claim detail: %v", err)
 	}
-	return lo.MapErr(claims, func(e jobdb.JobExecutionClaimDetail, _ int) (domain.ClaimedExecution, error) {
-		return claimExecutionFromDB(e)
-	})
+	return claimExecutionFromDB(claim)
 }
 
 func (r *executionQueueRepository) GetReportTarget(ctx context.Context, execution_id domain.ExecutionId, lease_token domain.LeaseToken) (domain.Execution, error) {

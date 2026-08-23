@@ -33,9 +33,9 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
-	// ExecutionQueueServiceClaimExecutionsProcedure is the fully-qualified name of the
-	// ExecutionQueueService's ClaimExecutions RPC.
-	ExecutionQueueServiceClaimExecutionsProcedure = "/jobdeck.job.v1.ExecutionQueueService/ClaimExecutions"
+	// ExecutionQueueServiceClaimExecutionProcedure is the fully-qualified name of the
+	// ExecutionQueueService's ClaimExecution RPC.
+	ExecutionQueueServiceClaimExecutionProcedure = "/jobdeck.job.v1.ExecutionQueueService/ClaimExecution"
 	// ExecutionQueueServiceReportExecutionResultProcedure is the fully-qualified name of the
 	// ExecutionQueueService's ReportExecutionResult RPC.
 	ExecutionQueueServiceReportExecutionResultProcedure = "/jobdeck.job.v1.ExecutionQueueService/ReportExecutionResult"
@@ -43,7 +43,7 @@ const (
 
 // ExecutionQueueServiceClient is a client for the jobdeck.job.v1.ExecutionQueueService service.
 type ExecutionQueueServiceClient interface {
-	ClaimExecutions(context.Context, *v1.ClaimExecutionsRequest) (*v1.ClaimExecutionsResponse, error)
+	ClaimExecution(context.Context, *v1.ClaimExecutionRequest) (*v1.ClaimExecutionResponse, error)
 	ReportExecutionResult(context.Context, *v1.ReportExecutionResultRequest) (*v1.ReportExecutionResultResponse, error)
 }
 
@@ -58,10 +58,10 @@ func NewExecutionQueueServiceClient(httpClient connect.HTTPClient, baseURL strin
 	baseURL = strings.TrimRight(baseURL, "/")
 	executionQueueServiceMethods := v1.File_jobdeck_job_v1_queue_proto.Services().ByName("ExecutionQueueService").Methods()
 	return &executionQueueServiceClient{
-		claimExecutions: connect.NewClient[v1.ClaimExecutionsRequest, v1.ClaimExecutionsResponse](
+		claimExecution: connect.NewClient[v1.ClaimExecutionRequest, v1.ClaimExecutionResponse](
 			httpClient,
-			baseURL+ExecutionQueueServiceClaimExecutionsProcedure,
-			connect.WithSchema(executionQueueServiceMethods.ByName("ClaimExecutions")),
+			baseURL+ExecutionQueueServiceClaimExecutionProcedure,
+			connect.WithSchema(executionQueueServiceMethods.ByName("ClaimExecution")),
 			connect.WithClientOptions(opts...),
 		),
 		reportExecutionResult: connect.NewClient[v1.ReportExecutionResultRequest, v1.ReportExecutionResultResponse](
@@ -75,13 +75,13 @@ func NewExecutionQueueServiceClient(httpClient connect.HTTPClient, baseURL strin
 
 // executionQueueServiceClient implements ExecutionQueueServiceClient.
 type executionQueueServiceClient struct {
-	claimExecutions       *connect.Client[v1.ClaimExecutionsRequest, v1.ClaimExecutionsResponse]
+	claimExecution        *connect.Client[v1.ClaimExecutionRequest, v1.ClaimExecutionResponse]
 	reportExecutionResult *connect.Client[v1.ReportExecutionResultRequest, v1.ReportExecutionResultResponse]
 }
 
-// ClaimExecutions calls jobdeck.job.v1.ExecutionQueueService.ClaimExecutions.
-func (c *executionQueueServiceClient) ClaimExecutions(ctx context.Context, req *v1.ClaimExecutionsRequest) (*v1.ClaimExecutionsResponse, error) {
-	response, err := c.claimExecutions.CallUnary(ctx, connect.NewRequest(req))
+// ClaimExecution calls jobdeck.job.v1.ExecutionQueueService.ClaimExecution.
+func (c *executionQueueServiceClient) ClaimExecution(ctx context.Context, req *v1.ClaimExecutionRequest) (*v1.ClaimExecutionResponse, error) {
+	response, err := c.claimExecution.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -100,7 +100,7 @@ func (c *executionQueueServiceClient) ReportExecutionResult(ctx context.Context,
 // ExecutionQueueServiceHandler is an implementation of the jobdeck.job.v1.ExecutionQueueService
 // service.
 type ExecutionQueueServiceHandler interface {
-	ClaimExecutions(context.Context, *v1.ClaimExecutionsRequest) (*v1.ClaimExecutionsResponse, error)
+	ClaimExecution(context.Context, *v1.ClaimExecutionRequest) (*v1.ClaimExecutionResponse, error)
 	ReportExecutionResult(context.Context, *v1.ReportExecutionResultRequest) (*v1.ReportExecutionResultResponse, error)
 }
 
@@ -111,10 +111,10 @@ type ExecutionQueueServiceHandler interface {
 // and JSON codecs. They also support gzip compression.
 func NewExecutionQueueServiceHandler(svc ExecutionQueueServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
 	executionQueueServiceMethods := v1.File_jobdeck_job_v1_queue_proto.Services().ByName("ExecutionQueueService").Methods()
-	executionQueueServiceClaimExecutionsHandler := connect.NewUnaryHandlerSimple(
-		ExecutionQueueServiceClaimExecutionsProcedure,
-		svc.ClaimExecutions,
-		connect.WithSchema(executionQueueServiceMethods.ByName("ClaimExecutions")),
+	executionQueueServiceClaimExecutionHandler := connect.NewUnaryHandlerSimple(
+		ExecutionQueueServiceClaimExecutionProcedure,
+		svc.ClaimExecution,
+		connect.WithSchema(executionQueueServiceMethods.ByName("ClaimExecution")),
 		connect.WithHandlerOptions(opts...),
 	)
 	executionQueueServiceReportExecutionResultHandler := connect.NewUnaryHandlerSimple(
@@ -125,8 +125,8 @@ func NewExecutionQueueServiceHandler(svc ExecutionQueueServiceHandler, opts ...c
 	)
 	return "/jobdeck.job.v1.ExecutionQueueService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case ExecutionQueueServiceClaimExecutionsProcedure:
-			executionQueueServiceClaimExecutionsHandler.ServeHTTP(w, r)
+		case ExecutionQueueServiceClaimExecutionProcedure:
+			executionQueueServiceClaimExecutionHandler.ServeHTTP(w, r)
 		case ExecutionQueueServiceReportExecutionResultProcedure:
 			executionQueueServiceReportExecutionResultHandler.ServeHTTP(w, r)
 		default:
@@ -138,8 +138,8 @@ func NewExecutionQueueServiceHandler(svc ExecutionQueueServiceHandler, opts ...c
 // UnimplementedExecutionQueueServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedExecutionQueueServiceHandler struct{}
 
-func (UnimplementedExecutionQueueServiceHandler) ClaimExecutions(context.Context, *v1.ClaimExecutionsRequest) (*v1.ClaimExecutionsResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("jobdeck.job.v1.ExecutionQueueService.ClaimExecutions is not implemented"))
+func (UnimplementedExecutionQueueServiceHandler) ClaimExecution(context.Context, *v1.ClaimExecutionRequest) (*v1.ClaimExecutionResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("jobdeck.job.v1.ExecutionQueueService.ClaimExecution is not implemented"))
 }
 
 func (UnimplementedExecutionQueueServiceHandler) ReportExecutionResult(context.Context, *v1.ReportExecutionResultRequest) (*v1.ReportExecutionResultResponse, error) {

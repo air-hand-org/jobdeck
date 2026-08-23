@@ -107,27 +107,27 @@ func (x *ClaimedExecution) GetJobId() string {
 	return ""
 }
 
-type ClaimExecutionsRequest struct {
+type ClaimExecutionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	MaxCount      int32                  `protobuf:"varint,1,opt,name=max_count,json=maxCount,proto3" json:"max_count,omitempty"`
+	ExecutionId   string                 `protobuf:"bytes,1,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ClaimExecutionsRequest) Reset() {
-	*x = ClaimExecutionsRequest{}
+func (x *ClaimExecutionRequest) Reset() {
+	*x = ClaimExecutionRequest{}
 	mi := &file_jobdeck_job_v1_queue_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ClaimExecutionsRequest) String() string {
+func (x *ClaimExecutionRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ClaimExecutionsRequest) ProtoMessage() {}
+func (*ClaimExecutionRequest) ProtoMessage() {}
 
-func (x *ClaimExecutionsRequest) ProtoReflect() protoreflect.Message {
+func (x *ClaimExecutionRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_jobdeck_job_v1_queue_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -139,39 +139,39 @@ func (x *ClaimExecutionsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ClaimExecutionsRequest.ProtoReflect.Descriptor instead.
-func (*ClaimExecutionsRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ClaimExecutionRequest.ProtoReflect.Descriptor instead.
+func (*ClaimExecutionRequest) Descriptor() ([]byte, []int) {
 	return file_jobdeck_job_v1_queue_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ClaimExecutionsRequest) GetMaxCount() int32 {
+func (x *ClaimExecutionRequest) GetExecutionId() string {
 	if x != nil {
-		return x.MaxCount
+		return x.ExecutionId
 	}
-	return 0
+	return ""
 }
 
-type ClaimExecutionsResponse struct {
+type ClaimExecutionResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Executions    []*ClaimedExecution    `protobuf:"bytes,1,rep,name=executions,proto3" json:"executions,omitempty"`
+	Execution     *ClaimedExecution      `protobuf:"bytes,1,opt,name=execution,proto3" json:"execution,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ClaimExecutionsResponse) Reset() {
-	*x = ClaimExecutionsResponse{}
+func (x *ClaimExecutionResponse) Reset() {
+	*x = ClaimExecutionResponse{}
 	mi := &file_jobdeck_job_v1_queue_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ClaimExecutionsResponse) String() string {
+func (x *ClaimExecutionResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ClaimExecutionsResponse) ProtoMessage() {}
+func (*ClaimExecutionResponse) ProtoMessage() {}
 
-func (x *ClaimExecutionsResponse) ProtoReflect() protoreflect.Message {
+func (x *ClaimExecutionResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_jobdeck_job_v1_queue_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -183,14 +183,14 @@ func (x *ClaimExecutionsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ClaimExecutionsResponse.ProtoReflect.Descriptor instead.
-func (*ClaimExecutionsResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ClaimExecutionResponse.ProtoReflect.Descriptor instead.
+func (*ClaimExecutionResponse) Descriptor() ([]byte, []int) {
 	return file_jobdeck_job_v1_queue_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ClaimExecutionsResponse) GetExecutions() []*ClaimedExecution {
+func (x *ClaimExecutionResponse) GetExecution() *ClaimedExecution {
 	if x != nil {
-		return x.Executions
+		return x.Execution
 	}
 	return nil
 }
@@ -303,21 +303,19 @@ const file_jobdeck_job_v1_queue_proto_rawDesc = "" +
 	"\x10lease_expires_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x0eleaseExpiresAt\x12!\n" +
 	"\aattempt\x18\x04 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\aattempt\x12:\n" +
 	"\bjob_spec\x18\x05 \x01(\v2\x17.jobdeck.job.v1.JobSpecB\x06\xbaH\x03\xc8\x01\x01R\ajobSpec\x12\x1f\n" +
-	"\x06job_id\x18\x06 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x05jobId\"V\n" +
-	"\x16ClaimExecutionsRequest\x12&\n" +
-	"\tmax_count\x18\x01 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x01R\bmaxCountJ\x04\b\x02\x10\x03R\x0elease_duration\"[\n" +
-	"\x17ClaimExecutionsResponse\x12@\n" +
-	"\n" +
-	"executions\x18\x01 \x03(\v2 .jobdeck.job.v1.ClaimedExecutionR\n" +
-	"executions\"\xd4\x01\n" +
+	"\x06job_id\x18\x06 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x05jobId\"D\n" +
+	"\x15ClaimExecutionRequest\x12+\n" +
+	"\fexecution_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vexecutionId\"X\n" +
+	"\x16ClaimExecutionResponse\x12>\n" +
+	"\texecution\x18\x01 \x01(\v2 .jobdeck.job.v1.ClaimedExecutionR\texecution\"\xd4\x01\n" +
 	"\x1cReportExecutionResultRequest\x12+\n" +
 	"\fexecution_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\vexecutionId\x12(\n" +
 	"\vlease_token\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\n" +
 	"leaseToken\x12?\n" +
 	"\x06result\x18\x04 \x01(\v2\x1f.jobdeck.job.v1.ExecutionResultB\x06\xbaH\x03\xc8\x01\x01R\x06resultJ\x04\b\x03\x10\x04J\x04\b\x05\x10\x06R\x06statusR\bduration\"0\n" +
-	"\x1dReportExecutionResultResponseJ\x04\b\x01\x10\x02R\texecution2\xf1\x01\n" +
-	"\x15ExecutionQueueService\x12b\n" +
-	"\x0fClaimExecutions\x12&.jobdeck.job.v1.ClaimExecutionsRequest\x1a'.jobdeck.job.v1.ClaimExecutionsResponse\x12t\n" +
+	"\x1dReportExecutionResultResponseJ\x04\b\x01\x10\x02R\texecution2\xee\x01\n" +
+	"\x15ExecutionQueueService\x12_\n" +
+	"\x0eClaimExecution\x12%.jobdeck.job.v1.ClaimExecutionRequest\x1a&.jobdeck.job.v1.ClaimExecutionResponse\x12t\n" +
 	"\x15ReportExecutionResult\x12,.jobdeck.job.v1.ReportExecutionResultRequest\x1a-.jobdeck.job.v1.ReportExecutionResultResponseB\x9f\x01\n" +
 	"\x12com.jobdeck.job.v1B\n" +
 	"QueueProtoP\x01Z#jobdeck/gen/go/jobdeck/job/v1;jobv1\xa2\x02\x03JJX\xaa\x02\x0eJobdeck.Job.V1\xca\x02\x0eJobdeck\\Job\\V1\xe2\x02\x1aJobdeck\\Job\\V1\\GPBMetadata\xea\x02\x10Jobdeck::Job::V1b\x06proto3"
@@ -337,8 +335,8 @@ func file_jobdeck_job_v1_queue_proto_rawDescGZIP() []byte {
 var file_jobdeck_job_v1_queue_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_jobdeck_job_v1_queue_proto_goTypes = []any{
 	(*ClaimedExecution)(nil),              // 0: jobdeck.job.v1.ClaimedExecution
-	(*ClaimExecutionsRequest)(nil),        // 1: jobdeck.job.v1.ClaimExecutionsRequest
-	(*ClaimExecutionsResponse)(nil),       // 2: jobdeck.job.v1.ClaimExecutionsResponse
+	(*ClaimExecutionRequest)(nil),         // 1: jobdeck.job.v1.ClaimExecutionRequest
+	(*ClaimExecutionResponse)(nil),        // 2: jobdeck.job.v1.ClaimExecutionResponse
 	(*ReportExecutionResultRequest)(nil),  // 3: jobdeck.job.v1.ReportExecutionResultRequest
 	(*ReportExecutionResultResponse)(nil), // 4: jobdeck.job.v1.ReportExecutionResultResponse
 	(*timestamppb.Timestamp)(nil),         // 5: google.protobuf.Timestamp
@@ -348,11 +346,11 @@ var file_jobdeck_job_v1_queue_proto_goTypes = []any{
 var file_jobdeck_job_v1_queue_proto_depIdxs = []int32{
 	5, // 0: jobdeck.job.v1.ClaimedExecution.lease_expires_at:type_name -> google.protobuf.Timestamp
 	6, // 1: jobdeck.job.v1.ClaimedExecution.job_spec:type_name -> jobdeck.job.v1.JobSpec
-	0, // 2: jobdeck.job.v1.ClaimExecutionsResponse.executions:type_name -> jobdeck.job.v1.ClaimedExecution
+	0, // 2: jobdeck.job.v1.ClaimExecutionResponse.execution:type_name -> jobdeck.job.v1.ClaimedExecution
 	7, // 3: jobdeck.job.v1.ReportExecutionResultRequest.result:type_name -> jobdeck.job.v1.ExecutionResult
-	1, // 4: jobdeck.job.v1.ExecutionQueueService.ClaimExecutions:input_type -> jobdeck.job.v1.ClaimExecutionsRequest
+	1, // 4: jobdeck.job.v1.ExecutionQueueService.ClaimExecution:input_type -> jobdeck.job.v1.ClaimExecutionRequest
 	3, // 5: jobdeck.job.v1.ExecutionQueueService.ReportExecutionResult:input_type -> jobdeck.job.v1.ReportExecutionResultRequest
-	2, // 6: jobdeck.job.v1.ExecutionQueueService.ClaimExecutions:output_type -> jobdeck.job.v1.ClaimExecutionsResponse
+	2, // 6: jobdeck.job.v1.ExecutionQueueService.ClaimExecution:output_type -> jobdeck.job.v1.ClaimExecutionResponse
 	4, // 7: jobdeck.job.v1.ExecutionQueueService.ReportExecutionResult:output_type -> jobdeck.job.v1.ReportExecutionResultResponse
 	6, // [6:8] is the sub-list for method output_type
 	4, // [4:6] is the sub-list for method input_type
