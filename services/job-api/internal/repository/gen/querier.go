@@ -12,7 +12,6 @@ import (
 
 type Querier interface {
 	ClaimExecution(ctx context.Context, arg ClaimExecutionParams) (uuid.UUID, error)
-	ClaimExecutions(ctx context.Context, arg ClaimExecutionsParams) ([]uuid.UUID, error)
 	CreateActor(ctx context.Context, arg CreateActorParams) (uuid.UUID, error)
 	CreateExecutionForCurrentJob(ctx context.Context, arg CreateExecutionForCurrentJobParams) (uuid.UUID, error)
 	CreateJob(ctx context.Context, arg CreateJobParams) (uuid.UUID, error)

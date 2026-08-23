@@ -23,9 +23,6 @@ var _ ExecutionQueueRepository = &ExecutionQueueRepositoryMock{}
 //			ClaimFunc: func(ctx context.Context, execution_id domain.ExecutionId) (domain.ClaimedExecution, error) {
 //				panic("mock out the Claim method")
 //			},
-//			ClaimsFunc: func(ctx context.Context, max_count int32) ([]domain.ClaimedExecution, error) {
-//				panic("mock out the Claims method")
-//			},
 //			CreateRetryUnsuccessfulFunc: func(ctx context.Context, execution_id domain.ExecutionId, next_run_at time.Time) (domain.Execution, error) {
 //				panic("mock out the CreateRetryUnsuccessful method")
 //			},
@@ -45,9 +42,6 @@ type ExecutionQueueRepositoryMock struct {
 	// ClaimFunc mocks the Claim method.
 	ClaimFunc func(ctx context.Context, execution_id domain.ExecutionId) (domain.ClaimedExecution, error)
 
-	// ClaimsFunc mocks the Claims method.
-	ClaimsFunc func(ctx context.Context, max_count int32) ([]domain.ClaimedExecution, error)
-
 	// CreateRetryUnsuccessfulFunc mocks the CreateRetryUnsuccessful method.
 	CreateRetryUnsuccessfulFunc func(ctx context.Context, execution_id domain.ExecutionId, next_run_at time.Time) (domain.Execution, error)
 
@@ -65,13 +59,6 @@ type ExecutionQueueRepositoryMock struct {
 			Ctx context.Context
 			// Execution_id is the execution_id argument value.
 			Execution_id domain.ExecutionId
-		}
-		// Claims holds details about calls to the Claims method.
-		Claims []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// Max_count is the max_count argument value.
-			Max_count int32
 		}
 		// CreateRetryUnsuccessful holds details about calls to the CreateRetryUnsuccessful method.
 		CreateRetryUnsuccessful []struct {
@@ -106,7 +93,6 @@ type ExecutionQueueRepositoryMock struct {
 		}
 	}
 	lockClaim                   sync.RWMutex
-	lockClaims                  sync.RWMutex
 	lockCreateRetryUnsuccessful sync.RWMutex
 	lockGetReportTarget         sync.RWMutex
 	lockReportResult            sync.RWMutex
@@ -145,42 +131,6 @@ func (mock *ExecutionQueueRepositoryMock) ClaimCalls() []struct {
 	mock.lockClaim.RLock()
 	calls = mock.calls.Claim
 	mock.lockClaim.RUnlock()
-	return calls
-}
-
-// Claims calls ClaimsFunc.
-func (mock *ExecutionQueueRepositoryMock) Claims(ctx context.Context, max_count int32) ([]domain.ClaimedExecution, error) {
-	if mock.ClaimsFunc == nil {
-		panic("ExecutionQueueRepositoryMock.ClaimsFunc: method is nil but ExecutionQueueRepository.Claims was just called")
-	}
-	callInfo := struct {
-		Ctx       context.Context
-		Max_count int32
-	}{
-		Ctx:       ctx,
-		Max_count: max_count,
-	}
-	mock.lockClaims.Lock()
-	mock.calls.Claims = append(mock.calls.Claims, callInfo)
-	mock.lockClaims.Unlock()
-	return mock.ClaimsFunc(ctx, max_count)
-}
-
-// ClaimsCalls gets all the calls that were made to Claims.
-// Check the length with:
-//
-//	len(mockedExecutionQueueRepository.ClaimsCalls())
-func (mock *ExecutionQueueRepositoryMock) ClaimsCalls() []struct {
-	Ctx       context.Context
-	Max_count int32
-} {
-	var calls []struct {
-		Ctx       context.Context
-		Max_count int32
-	}
-	mock.lockClaims.RLock()
-	calls = mock.calls.Claims
-	mock.lockClaims.RUnlock()
 	return calls
 }
 

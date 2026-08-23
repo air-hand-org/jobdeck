@@ -8,7 +8,6 @@ import (
 	"jobdeck/services/job-api/internal/domain"
 	"jobdeck/services/job-api/internal/transform"
 
-	"github.com/samber/lo"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -20,26 +19,6 @@ type executionQueueServiceServer struct {
 }
 
 var _ jobv1.ExecutionQueueServiceServer = (*executionQueueServiceServer)(nil)
-
-func (s *executionQueueServiceServer) ClaimExecutions(ctx context.Context, req *jobv1.ClaimExecutionsRequest) (*jobv1.ClaimExecutionsResponse, error) {
-	actor, ok := auth.GetActorContext(ctx)
-	if !ok {
-		return nil, domain.ErrUnauthenticated
-	}
-	claims, err := s.u.ClaimExecutions(ctx, actor, req.GetMaxCount())
-	if err != nil {
-		return nil, err
-	}
-	claimsProto, err := lo.MapErr(claims, func(claim domain.ClaimedExecution, _ int) (*jobv1.ClaimedExecution, error) {
-		return transform.ClaimedExecutionToProto(claim)
-	})
-	if err != nil {
-		return nil, err
-	}
-	return &jobv1.ClaimExecutionsResponse{
-		Executions: claimsProto,
-	}, nil
-}
 
 func (s *executionQueueServiceServer) ClaimExecution(ctx context.Context, req *jobv1.ClaimExecutionRequest) (*jobv1.ClaimExecutionResponse, error) {
 	actor, ok := auth.GetActorContext(ctx)

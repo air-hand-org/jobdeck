@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"jobdeck/services/job-api/internal/domain"
 	"time"
 
@@ -38,29 +37,6 @@ func (u *ExecutionQueueUsecase) ClaimExecution(ctx context.Context, actor domain
 		return domain.ClaimedExecution{}, err
 	}
 	return execution, nil
-}
-
-// TODO: delete this
-func (u *ExecutionQueueUsecase) ClaimExecutions(ctx context.Context, actor domain.Actor, max_count int32) ([]domain.ClaimedExecution, error) {
-	if !actor.Role.HasCapability(domain.CapQueueClaim) {
-		return nil, errors.Wrapf(domain.ErrPermissionDenied, "actor %s has no cap %s", actor.ID, domain.CapQueueClaim)
-	}
-	if max_count <= 0 {
-		return nil, fmt.Errorf("max_count must be positive: %v", max_count)
-	}
-	var executions []domain.ClaimedExecution
-	err := u.s.WithinExecutionQueueTx(ctx, func(ctx context.Context, queues ExecutionQueueRepository) error {
-		res, err := queues.Claims(ctx, max_count)
-		if err != nil {
-			return errors.Wrapf(err, "failed to claims %d", max_count)
-		}
-		executions = res
-		return nil
-	})
-	if err != nil {
-		return []domain.ClaimedExecution{}, err
-	}
-	return executions, nil
 }
 
 type ReportExecutionResultCommand struct {

@@ -11,12 +11,10 @@ import (
 	"github.com/cockroachdb/errors"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/samber/lo"
 )
 
 type executionQueueQuerier interface {
 	ClaimExecution(ctx context.Context, arg jobdb.ClaimExecutionParams) (uuid.UUID, error)
-	ClaimExecutions(ctx context.Context, arg jobdb.ClaimExecutionsParams) ([]uuid.UUID, error)
 	CreateRetryForUnsuccessfulExecution(ctx context.Context, arg jobdb.CreateRetryForUnsuccessfulExecutionParams) (uuid.UUID, error)
 	ReportExecutionResult(ctx context.Context, arg jobdb.ReportExecutionResultParams) (uuid.UUID, error)
 
@@ -70,28 +68,6 @@ func (r *executionQueueRepository) Claim(ctx context.Context, execution_id domai
 		return domain.ClaimedExecution{}, errors.Wrapf(domain.ErrExecutionNotFound, "failed to get execution claim detail: %v", err)
 	}
 	return claimExecutionFromDB(claim)
-}
-
-func (r *executionQueueRepository) Claims(ctx context.Context, max_count int32) ([]domain.ClaimedExecution, error) {
-	// TODO
-	lease_expires_at, err := timeToPGType(time.Now().Add(5 * time.Minute))
-	if err != nil {
-		return []domain.ClaimedExecution{}, err
-	}
-	claim_exec_id_list, err := r.q.ClaimExecutions(ctx, jobdb.ClaimExecutionsParams{
-		MaxSize:        max_count,
-		LeaseExpiresAt: lease_expires_at,
-	})
-	if err != nil {
-		return []domain.ClaimedExecution{}, errors.Wrap(err, "failed to claim executions")
-	}
-	claims, err := r.q.ListExecutionClaimDetails(ctx, claim_exec_id_list)
-	if err != nil {
-		return []domain.ClaimedExecution{}, errors.Wrap(err, "failed to list execution claim details")
-	}
-	return lo.MapErr(claims, func(e jobdb.JobExecutionClaimDetail, _ int) (domain.ClaimedExecution, error) {
-		return claimExecutionFromDB(e)
-	})
 }
 
 func (r *executionQueueRepository) GetReportTarget(ctx context.Context, execution_id domain.ExecutionId, lease_token domain.LeaseToken) (domain.Execution, error) {
