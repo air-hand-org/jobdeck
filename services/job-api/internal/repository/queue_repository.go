@@ -60,11 +60,14 @@ func (r *executionQueueRepository) Claim(ctx context.Context, execution_id domai
 		LeaseExpiresAt: lease_expires_at,
 	})
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.ClaimedExecution{}, errors.Wrapf(domain.ErrExecutionHasAlreadyConsumed, "failed to claim execution: %v", err)
+		}
 		return domain.ClaimedExecution{}, errors.Wrap(err, "failed to claim execution")
 	}
 	claim, err := r.q.GetExecutionClaimDetail(ctx, claim_exec_id)
 	if err != nil {
-		return domain.ClaimedExecution{}, errors.Wrap(err, "failed to get execution claim detail")
+		return domain.ClaimedExecution{}, errors.Wrapf(domain.ErrExecutionNotFound, "failed to get execution claim detail: %v", err)
 	}
 	return claimExecutionFromDB(claim)
 }

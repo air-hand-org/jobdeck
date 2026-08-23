@@ -40,6 +40,10 @@ func toGrpcError(err error) error {
 		return status.Error(codes.PermissionDenied, "permission denied")
 	case errors.Is(err, domain.ErrUnauthenticated):
 		return status.Error(codes.Unauthenticated, "authenticate required")
+	case errors.Is(err, domain.ErrExecutionHasAlreadyConsumed):
+		return status.Error(codes.FailedPrecondition, "conflicted")
+	case errors.Is(err, domain.ErrExecutionNotFound), errors.Is(err, domain.ErrJobNotFound):
+		return status.Error(codes.NotFound, "not found")
 	default:
 		return status.Error(codes.Internal, "internal server error")
 	}

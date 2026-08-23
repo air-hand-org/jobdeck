@@ -253,7 +253,7 @@ WITH updated AS (
 , deleted_outbox AS (
     DELETE FROM job.outbox_execution_requested AS r
     WHERE
-        r.execution_id = (SELECT execution_id FROM added_event) AND r.status = 'PUBLISHED'
+        r.execution_id = (SELECT execution_id FROM added_event)
     RETURNING r.*
 )
 INSERT INTO job.outbox_execution_completed AS c (
@@ -309,5 +309,15 @@ SET
     , published_at = NOW()
 WHERE
   execution_id = ANY(sqlc.arg(execution_ids)::uuid[]) AND status = 'REQUESTED'
+RETURNING r.execution_id
+;
+
+-- name: RepublishOutboxExecutionRequested :many
+UPDATE job.outbox_execution_requested AS r
+SET
+    status = 'REQUESTED'
+    , published_at = NULL
+WHERE
+    status = 'PUBLISHED'
 RETURNING r.execution_id
 ;

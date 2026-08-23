@@ -16,7 +16,8 @@ public sealed class JobAPIBuilder(
     {
         var db = postgres.AddDatabase("jobdeck");
         var migrator = DBMigration(db);
-        var backend = Backend(isDebug, grpcReflectionFlag, apiAuthMode, db, migrator, jobWorkerTopic);
+        var republisher = RepublishOutbox(db, migrator);
+        var backend = Backend(isDebug, grpcReflectionFlag, apiAuthMode, db, migrator, republisher, jobWorkerTopic);
         return ReverseProxy(port, backend);
     }
 
@@ -45,6 +46,7 @@ public sealed class JobAPIBuilder(
         string apiAuthMode,
         IResourceBuilder<PostgresDatabaseResource> db,
         IResourceBuilder<ExecutableResource> dbMigrator,
+        IResourceBuilder<ExecutableResource> republisher,
         PubSubTopicResource workerTopic
     )
     {
@@ -88,6 +90,7 @@ public sealed class JobAPIBuilder(
               })
               .WaitFor(db)
               .WaitForCompletion(dbMigrator)
+              .WaitForCompletion(republisher)
               .WaitForCompletion(workerTopic.Creator)
               ;
 
@@ -120,6 +123,7 @@ public sealed class JobAPIBuilder(
               })
               .WaitFor(db)
               .WaitForCompletion(dbMigrator)
+              .WaitForCompletion(republisher)
               .WaitForCompletion(workerTopic.Creator)
               ;
 
@@ -141,5 +145,21 @@ public sealed class JobAPIBuilder(
               context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
           })
           .WaitFor(db);
+    }
+
+    private IResourceBuilder<ExecutableResource> RepublishOutbox(IResourceBuilder<PostgresDatabaseResource> db, IResourceBuilder<ExecutableResource> migrator)
+    {
+        return builder.AddGoApp(
+                name: "job-outbox-republisher",
+                appDirectory: "../services/job-api",
+                packagePath: "./cmd/republish"
+            )
+            .WithReference(db)
+            .WithEnvironment(context =>
+            {
+                context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
+            })
+            .WaitForCompletion(migrator)
+        ;
     }
 }

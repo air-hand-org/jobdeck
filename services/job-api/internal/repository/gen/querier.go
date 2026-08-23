@@ -32,6 +32,7 @@ type Querier interface {
 	MarkAsPublishedOutboxExecutionRequested(ctx context.Context, executionIds []uuid.UUID) ([]uuid.UUID, error)
 	RenameJob(ctx context.Context, arg RenameJobParams) (int64, error)
 	ReportExecutionResult(ctx context.Context, arg ReportExecutionResultParams) (uuid.UUID, error)
+	RepublishOutboxExecutionRequested(ctx context.Context) ([]uuid.UUID, error)
 	ReserveForPublishOutboxExecutionRequested(ctx context.Context, maxSize int32) ([]uuid.UUID, error)
 	SetJobEnabled(ctx context.Context, arg SetJobEnabledParams) (uuid.UUID, error)
 	UpdateJobSpec(ctx context.Context, arg UpdateJobSpecParams) (uuid.UUID, error)

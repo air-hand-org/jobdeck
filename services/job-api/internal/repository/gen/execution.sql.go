@@ -612,7 +612,7 @@ WITH updated AS (
 , deleted_outbox AS (
     DELETE FROM job.outbox_execution_requested AS r
     WHERE
-        r.execution_id = (SELECT execution_id FROM added_event) AND r.status = 'PUBLISHED'
+        r.execution_id = (SELECT execution_id FROM added_event)
     RETURNING r.execution_id, r.status, r.created_at, r.published_at
 )
 INSERT INTO job.outbox_execution_completed AS c (
@@ -645,6 +645,36 @@ func (q *Queries) ReportExecutionResult(ctx context.Context, arg ReportExecution
 	var execution_id uuid.UUID
 	err := row.Scan(&execution_id)
 	return execution_id, err
+}
+
+const republishOutboxExecutionRequested = `-- name: RepublishOutboxExecutionRequested :many
+UPDATE job.outbox_execution_requested AS r
+SET
+    status = 'REQUESTED'
+    , published_at = NULL
+WHERE
+    status = 'PUBLISHED'
+RETURNING r.execution_id
+`
+
+func (q *Queries) RepublishOutboxExecutionRequested(ctx context.Context) ([]uuid.UUID, error) {
+	rows, err := q.db.Query(ctx, republishOutboxExecutionRequested)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []uuid.UUID{}
+	for rows.Next() {
+		var execution_id uuid.UUID
+		if err := rows.Scan(&execution_id); err != nil {
+			return nil, err
+		}
+		items = append(items, execution_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const reserveForPublishOutboxExecutionRequested = `-- name: ReserveForPublishOutboxExecutionRequested :many
