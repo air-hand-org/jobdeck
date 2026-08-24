@@ -616,8 +616,11 @@ const reserveForPublishOutboxExecutionRequested = `-- name: ReserveForPublishOut
 SELECT
     r.execution_id
 FROM job.outbox_execution_requested AS r
+INNER JOIN job.execution AS e ON e.execution_id = r.execution_id
 WHERE
-    status = 'REQUESTED'
+    r.status = 'REQUESTED'
+    AND e.status = 'QUEUED'
+    AND e.next_run_at <= NOW()
 ORDER BY r.created_at, r.execution_id
 LIMIT $1
 FOR UPDATE OF r SKIP LOCKED
