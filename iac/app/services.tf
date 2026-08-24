@@ -273,6 +273,16 @@ resource "google_cloud_run_v2_service" "job_api" {
       }
 
       env {
+        name  = "PUBSUB_PROJECT_ID"
+        value = var.project_id
+      }
+
+      env {
+        name  = "PUBSUB_WORKER_TOPIC_ID"
+        value = google_pubsub_topic.execution_requested.name
+      }
+
+      env {
         name  = "POSTGRES_HOST"
         value = "127.0.0.1"
       }
