@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/air-hand-org/jobdeck/compare/v1.0.0...v1.0.1) (2026-08-24)
+
+
+### Bug Fixes
+
+* **job-api:** delay retry publication until due ([#86](https://github.com/air-hand-org/jobdeck/issues/86)) ([9e9c2f8](https://github.com/air-hand-org/jobdeck/commit/9e9c2f8b87b8dcb4bf51334ab04fb192274221c7))
+
 ## [1.0.0](https://github.com/air-hand-org/jobdeck/compare/v0.9.0...v1.0.0) (2026-08-24)
 
 
