@@ -28,6 +28,10 @@ output "runtime_service_accounts" {
   }
 }
 
+output "pubsub_push_service_account" {
+  value = google_service_account.pubsub_push.email
+}
+
 output "plan_service_account" {
   value = data.google_service_account.plan.email
 }
