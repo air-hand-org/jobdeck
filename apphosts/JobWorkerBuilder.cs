@@ -64,7 +64,7 @@ public sealed class JobWorkerBuilder(
                   context.EnvironmentVariables["AUTH_CLIENT_ID"] = workerClientId;
                   context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
                   context.EnvironmentVariables["WORKER_HTTP_PROXY"] = forwardProxyEndpoint.Property(EndpointProperty.Url);
-                  context.EnvironmentVariables["PUBSUB_VERIFICATION_TOKEN"] = pubsubVerificationToken;
+                  context.EnvironmentVariables["LOCAL_PUBSUB_VERIFICATION_TOKEN"] = pubsubVerificationToken;
               })
               ;
 
@@ -94,7 +94,7 @@ public sealed class JobWorkerBuilder(
                   context.EnvironmentVariables["AUTH_CLIENT_ID"] = workerClientId;
                   context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
                   context.EnvironmentVariables["WORKER_HTTP_PROXY"] = forwardProxyEndpoint.Property(EndpointProperty.Url);
-                  context.EnvironmentVariables["PUBSUB_VERIFICATION_TOKEN"] = pubsubVerificationToken;
+                  context.EnvironmentVariables["LOCAL_PUBSUB_VERIFICATION_TOKEN"] = pubsubVerificationToken;
               })
               ;
 
