@@ -11,6 +11,8 @@ import (
 	"github.com/samber/lo"
 )
 
+const dispatchInterval = 3 * time.Second
+
 type OutboxDispatcher struct {
 	ep          ExecutionPublisher
 	s           OutboxStore
@@ -29,7 +31,7 @@ func (d *OutboxDispatcher) Trigger(ctx context.Context) error {
 }
 
 func (d *OutboxDispatcher) Run(ctx context.Context) error {
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(dispatchInterval)
 	defer ticker.Stop()
 
 	for {
