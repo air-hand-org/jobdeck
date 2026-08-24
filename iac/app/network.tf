@@ -1,3 +1,8 @@
+locals {
+  # https://cloud.google.com/vpc/docs/configure-private-google-access
+  private_google_access_ipv4_cidr = "199.36.153.8/30"
+}
+
 resource "google_compute_network" "jobdeck" {
   name                    = "jobdeck"
   auto_create_subnetworks = false
@@ -32,7 +37,10 @@ resource "google_dns_record_set" "run_app_private" {
   name         = "run.app."
   type         = "A"
   ttl          = 300
-  rrdatas      = ["199.36.153.8", "199.36.153.9", "199.36.153.10", "199.36.153.11"]
+  rrdatas = [
+    for host_number in range(4) :
+    cidrhost(local.private_google_access_ipv4_cidr, host_number)
+  ]
 }
 
 resource "google_dns_record_set" "run_app_private_wildcard" {
