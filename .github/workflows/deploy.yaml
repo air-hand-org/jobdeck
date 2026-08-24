@@ -16,7 +16,6 @@ concurrency:
 jobs:
   images:
     if: ${{ github.event.release.prerelease == false }}
-    needs: bootstrap
     uses: ./.github/workflows/_build-images.yaml
     with:
       push: true
