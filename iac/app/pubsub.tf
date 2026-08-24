@@ -22,6 +22,10 @@ resource "google_pubsub_subscription" "job_worker" {
   name    = "jobdeck-job-worker"
   topic   = google_pubsub_topic.execution_requested.name
 
+  # The worker acknowledges after claiming the execution. Allow a cold start
+  # plus auth/job-api readiness without avoidable duplicate deliveries.
+  ack_deadline_seconds = 60
+
   push_config {
     push_endpoint = google_cloud_run_v2_service.job_worker.uri
 

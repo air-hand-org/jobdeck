@@ -1,14 +1,21 @@
 # JobDeck application infrastructure
 
-This OpenTofu root owns application-lifecycle resources: Cloud Run services and
-Jobs, networking, the external load balancer, and records in the delegated Cloud
-DNS zone. It consumes stable, non-secret bootstrap outputs from the `bootstrap`
-root.
+This OpenTofu root owns application-lifecycle resources: Cloud Run services,
+networking, Pub/Sub delivery, the external load balancer, and records in the
+delegated Cloud DNS zone. It consumes stable, non-secret bootstrap outputs from
+the `bootstrap` root.
 
-The first application slice creates the shared Direct VPC egress network and
-the `ui`, `demo`, `auth`, and `job-api` Cloud Run services. Auth and job-api
-each run an ephemeral PostgreSQL sidecar. The worker, scheduler, public load
-balancer, and DNS records are intentionally added by later slices.
+The application consists of `ui`, `demo`, `auth`, `job-api`, and `job-worker`.
+Auth and job-api each run an ephemeral PostgreSQL sidecar. Job-api writes
+execution requests to its outbox and publishes them to Pub/Sub; a push
+subscription invokes job-worker.
+
+Every Cloud Run service uses Direct VPC egress with `PRIVATE_RANGES_ONLY`.
+The `run.app` private Cloud DNS zone resolves service URLs through Private
+Google Access, so calls to internal auth and job-api services retain Cloud Run's
+internal-ingress classification. Other destinations keep Cloud Run's managed
+public egress: the worker's Squid sidecar allowlists only
+`demo.${var.public_domain}:443`, so no Cloud NAT is needed for demo requests.
 
 Every service revision uses the same immutable `image_tag`. Pull-request plans
 use the harmless placeholder `v0.0.0`; release deployment passes the published
@@ -31,5 +38,5 @@ State and saved plans are encrypted with bootstrap's `tofu-state` GCP KMS key.
 The bootstrap remote state is deliberately read as unencrypted OpenTofu state:
 that root creates the KMS key and must not contain secret values.
 
-Later changes add the worker job, load balancing, and DNS while preserving this
-state and remote-state contract.
+The public regional HTTPS load balancer exposes only the UI and demo hosts and
+is protected by the baseline regional Cloud Armor policy.
