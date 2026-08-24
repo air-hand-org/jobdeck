@@ -5,9 +5,9 @@ import (
 	"fmt"
 	jobv1 "jobdeck/gen/go/jobdeck/job/v1"
 	"jobdeck/services/job-worker/internal/app"
+	"jobdeck/services/job-worker/internal/transport/verification"
 	"log/slog"
 	"net/http"
-	"os"
 
 	"cloud.google.com/go/pubsub/v2"
 	"google.golang.org/protobuf/proto"
@@ -19,9 +19,9 @@ type pushRequest struct {
 }
 
 type PushHandler struct {
-	logger                *slog.Logger
-	pushVerificationToken string
-	usecase               *app.PushUsecase
+	logger   *slog.Logger
+	verifier verification.Verifier
+	usecase  *app.PushUsecase
 }
 
 var _ http.Handler = (*PushHandler)(nil)
@@ -32,19 +32,10 @@ func (h *PushHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if token, ok := r.URL.Query()["token"]; !ok || len(token) != 1 || token[0] != h.pushVerificationToken {
-		http.Error(w, "Bad token", http.StatusBadRequest)
+	if err := h.verifier.Verify(r); err != nil {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
-
-	// TODO: Validate Request token
-	// authentication push subscription
-	// authHeader := r.Header.Get("Authorization")
-	// h.logger.InfoContext(
-	// 	r.Context(),
-	// 	"auth header debug delete after",
-	// 	"value", authHeader,
-	// )
 
 	var pr pushRequest
 	if err := json.NewDecoder(r.Body).Decode(&pr); err != nil {
@@ -79,10 +70,10 @@ func (h *PushHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, http.StatusText(http.StatusCreated))
 }
 
-func NewPushHandler(usecase *app.PushUsecase) *PushHandler {
+func NewPushHandler(usecase *app.PushUsecase, verifier verification.Verifier) *PushHandler {
 	return &PushHandler{
-		logger:                slog.Default(),
-		pushVerificationToken: os.Getenv("PUBSUB_VERIFICATION_TOKEN"),
-		usecase:               usecase,
+		logger:   slog.Default(),
+		verifier: verifier,
+		usecase:  usecase,
 	}
 }
