@@ -14,7 +14,7 @@ resource "google_cloud_run_v2_service" "ui" {
     }
 
     vpc_access {
-      egress = "ALL_TRAFFIC"
+      egress = "PRIVATE_RANGES_ONLY"
 
       network_interfaces {
         network    = google_compute_network.jobdeck.id
@@ -64,7 +64,7 @@ resource "google_cloud_run_v2_service" "demo" {
     timeout         = "60s"
 
     vpc_access {
-      egress = "ALL_TRAFFIC"
+      egress = "PRIVATE_RANGES_ONLY"
 
       network_interfaces {
         network    = google_compute_network.jobdeck.id
@@ -109,7 +109,7 @@ resource "google_cloud_run_v2_service" "auth" {
     }
 
     vpc_access {
-      egress = "ALL_TRAFFIC"
+      egress = "PRIVATE_RANGES_ONLY"
 
       network_interfaces {
         network    = google_compute_network.jobdeck.id
@@ -249,7 +249,7 @@ resource "google_cloud_run_v2_service" "job_api" {
     }
 
     vpc_access {
-      egress = "ALL_TRAFFIC"
+      egress = "PRIVATE_RANGES_ONLY"
 
       network_interfaces {
         network    = google_compute_network.jobdeck.id
