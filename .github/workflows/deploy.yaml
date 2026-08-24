@@ -14,20 +14,6 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  bootstrap:
-    # Release Please publishes stable releases after its release PR is merged.
-    # Pre-releases are deliberately not a deployment trigger in this flow.
-    if: ${{ github.event.release.prerelease == false }}
-    uses: ./.github/workflows/_tofu.yaml
-    with:
-      root: bootstrap
-      command: apply
-      environment: bootstrap
-    secrets: inherit
-    permissions:
-      contents: read
-      id-token: write
-
   images:
     if: ${{ github.event.release.prerelease == false }}
     needs: bootstrap
