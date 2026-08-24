@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.0.0](https://github.com/air-hand-org/jobdeck/compare/v0.9.0...v1.0.0) (2026-08-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* pubsub topology ([#74](https://github.com/air-hand-org/jobdeck/issues/74))
+
+### Features
+
+* apply bootstrap independently ([#78](https://github.com/air-hand-org/jobdeck/issues/78)) ([a781069](https://github.com/air-hand-org/jobdeck/commit/a781069c64a0ae2e3e4ec63a7f7aa46584f1f63a))
+* **iac:** add Pub/Sub app delivery ([#81](https://github.com/air-hand-org/jobdeck/issues/81)) ([b47b7f1](https://github.com/air-hand-org/jobdeck/commit/b47b7f12ecf2258727c20b28a0339ffa440b1ecd))
+* **iac:** add worker forward proxy sidecar ([#84](https://github.com/air-hand-org/jobdeck/issues/84)) ([b479d04](https://github.com/air-hand-org/jobdeck/commit/b479d0491aa2ce1b2e6b011d3d8cb27a52a0b326))
+* **iac:** bootstrap Pub/Sub IAM ([#79](https://github.com/air-hand-org/jobdeck/issues/79)) ([5b7816d](https://github.com/air-hand-org/jobdeck/commit/5b7816dcc5f957dce4c720434c848a0cb3da82dc))
+* **iac:** use Private Google Access for service egress ([#85](https://github.com/air-hand-org/jobdeck/issues/85)) ([130349d](https://github.com/air-hand-org/jobdeck/commit/130349dbec81f9e27b77521fbce6ecf2245eab2d))
+* pubsub topology ([#74](https://github.com/air-hand-org/jobdeck/issues/74)) ([574819f](https://github.com/air-hand-org/jobdeck/commit/574819fc025592e6c2819050d91bb20b7da3c54d))
+* **worker:** add Pub/Sub push verifier ([#83](https://github.com/air-hand-org/jobdeck/issues/83)) ([7f76957](https://github.com/air-hand-org/jobdeck/commit/7f76957cfd3ff364838a6379133d5e519c9db436))
+
+
+### Bug Fixes
+
+* **iac:** remove redundant Pub/Sub token creator role ([#82](https://github.com/air-hand-org/jobdeck/issues/82)) ([249f553](https://github.com/air-hand-org/jobdeck/commit/249f553cfa01e55cbd17b64f64708faff2bc6c29))
+* publish ui static assets such as blazor.web.js ([#70](https://github.com/air-hand-org/jobdeck/issues/70)) ([42cf7ec](https://github.com/air-hand-org/jobdeck/commit/42cf7ecb457974a5ae3cb610f3b75c833211d7a2))
+* remove wait bootstrap job ([#80](https://github.com/air-hand-org/jobdeck/issues/80)) ([06787a0](https://github.com/air-hand-org/jobdeck/commit/06787a08d576918c5e355e1ec7eddcc632c4aae3))
+
 ## [0.9.0](https://github.com/air-hand-org/jobdeck/compare/v0.8.0...v0.9.0) (2026-08-17)
 
 
