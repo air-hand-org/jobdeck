@@ -6,11 +6,12 @@ locals {
   pubsub_push_service_account    = data.terraform_remote_state.bootstrap.outputs.pubsub_push_service_account
 
   images = {
-    ui         = "${local.artifact_registry_host}/${var.project_id}/${local.artifact_registry_repositories.ui}/ui:${var.image_tag}"
-    demo       = "${local.artifact_registry_host}/${var.project_id}/${local.artifact_registry_repositories.demo}/demo:${var.image_tag}"
-    auth       = "${local.artifact_registry_host}/${var.project_id}/${local.artifact_registry_repositories.auth}/auth:${var.image_tag}"
-    job_api    = "${local.artifact_registry_host}/${var.project_id}/${local.artifact_registry_repositories.job_api}/job-api:${var.image_tag}"
-    job_worker = "${local.artifact_registry_host}/${var.project_id}/${local.artifact_registry_repositories.job_worker}/job-worker:${var.image_tag}"
+    ui            = "${local.artifact_registry_host}/${var.project_id}/${local.artifact_registry_repositories.ui}/ui:${var.image_tag}"
+    demo          = "${local.artifact_registry_host}/${var.project_id}/${local.artifact_registry_repositories.demo}/demo:${var.image_tag}"
+    auth          = "${local.artifact_registry_host}/${var.project_id}/${local.artifact_registry_repositories.auth}/auth:${var.image_tag}"
+    job_api       = "${local.artifact_registry_host}/${var.project_id}/${local.artifact_registry_repositories.job_api}/job-api:${var.image_tag}"
+    job_worker    = "${local.artifact_registry_host}/${var.project_id}/${local.artifact_registry_repositories.job_worker}/job-worker:${var.image_tag}"
+    forward_proxy = "${local.artifact_registry_host}/${var.project_id}/${local.artifact_registry_repositories.forward_proxy}/forward-proxy:${var.image_tag}"
   }
 
   # Cloud Run runs linux/amd64 images. Pin the multi-architecture manifest so
