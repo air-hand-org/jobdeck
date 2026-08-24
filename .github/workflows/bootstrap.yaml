@@ -1,0 +1,30 @@
+name: Bootstrap infra
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "iac/bootstrap/**"
+      - ".github/workflows/bootstrap.yaml"
+      - ".github/workflows/_tofu.yaml"
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: bootstrap-production
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    uses: ./.github/workflows/_tofu.yaml
+    with:
+      root: bootstrap
+      command: apply
+      environment: bootstrap
+    secrets: inherit
+    permissions:
+      contents: read
+      id-token: write
