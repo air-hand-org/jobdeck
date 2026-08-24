@@ -3,11 +3,14 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"net/url"
 	"testing"
 	"time"
 
 	migrations "jobdeck/services/job-api/db/job"
-	jobdb "jobdeck/services/job-api/internal/repository/gen"
+	"jobdeck/services/job-api/internal/app"
+	"jobdeck/services/job-api/internal/domain"
+	"jobdeck/services/job-api/internal/eventing"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -21,20 +24,22 @@ import (
 func TestOutboxRepositoryReserveForPublishExecutionRequested_OnlyReservesDueQueuedExecutions(t *testing.T) {
 	ctx := context.Background()
 	pool := newMigratedTestPool(t, ctx)
+	store := NewStore(pool)
 
-	dueID := insertOutboxExecution(t, ctx, pool, "QUEUED", time.Now().Add(-time.Minute))
-	insertOutboxExecution(t, ctx, pool, "QUEUED", time.Now().Add(time.Minute))
-	insertOutboxExecution(t, ctx, pool, "RUNNING", time.Now().Add(-time.Minute))
+	dueID := createRetryExecution(t, ctx, store, time.Now().Add(-time.Minute))
+	createRetryExecution(t, ctx, store, time.Now().Add(time.Minute))
+	runningID := createRetryExecution(t, ctx, store, time.Now().Add(-time.Minute))
+	claimExecution(t, ctx, store, runningID)
 
-	tx, err := pool.Begin(ctx)
+	var got []domain.ExecutionId
+	err := store.WithinOutboxTx(ctx, func(ctx context.Context, outbox eventing.OutboxRepository) error {
+		var err error
+		got, err = outbox.ReserveForPublishExecutionRequested(ctx, 10)
+		return err
+	})
+
 	require.NoError(t, err)
-	t.Cleanup(func() { require.NoError(t, tx.Rollback(ctx)) })
-
-	repository := newOutboxRepository(jobdb.New(tx))
-	got, err := repository.ReserveForPublishExecutionRequested(ctx, 10)
-
-	require.NoError(t, err)
-	require.Equal(t, []uuid.UUID{dueID}, got)
+	require.Equal(t, []domain.ExecutionId{dueID}, got)
 }
 
 func newMigratedTestPool(t *testing.T, ctx context.Context) *pgxpool.Pool {
@@ -70,41 +75,102 @@ func newMigratedTestPool(t *testing.T, ctx context.Context) *pgxpool.Pool {
 	return pool
 }
 
-func insertOutboxExecution(t *testing.T, ctx context.Context, pool *pgxpool.Pool, status string, nextRunAt time.Time) uuid.UUID {
+func createRetryExecution(t *testing.T, ctx context.Context, store *Store, nextRunAt time.Time) domain.ExecutionId {
 	t.Helper()
 
-	jobID := uuid.New()
-	revisionID := uuid.New()
-	executionID := uuid.New()
+	ownerID := uuid.New()
+	job := createRetryableJob(t, ctx, store, ownerID)
+	execution := createExecution(t, ctx, store, ownerID, job.Id)
+	markExecutionPublished(t, ctx, store, execution.Id)
+	claimed := claimExecution(t, ctx, store, execution.Id)
 
-	_, err := pool.Exec(ctx, `
-INSERT INTO job.job (job_id, owner_id, enabled, name)
-VALUES ($1, $2, TRUE, 'outbox integration test')
-`, jobID, uuid.New())
+	var retry domain.Execution
+	err := store.WithinExecutionQueueTx(ctx, func(ctx context.Context, queues app.ExecutionQueueRepository) error {
+		failed, err := queues.ReportResult(
+			ctx,
+			execution.Id,
+			domain.EXECUTION_STATUS_FAILED,
+			claimed.LeaseToken,
+			domain.ExecutionResult{
+				Result: &domain.HttpExecutionResult{
+					Error: &domain.HttpError{
+						Type:    domain.HTTP_ERROR_TYPE_NETWORK,
+						Message: "integration test failure",
+					},
+				},
+			},
+		)
+		if err != nil {
+			return err
+		}
+
+		retry, err = queues.CreateRetryUnsuccessful(ctx, failed.Id, nextRunAt)
+		return err
+	})
+	require.NoError(t, err)
+	return retry.Id
+}
+
+func createRetryableJob(t *testing.T, ctx context.Context, store *Store, ownerID domain.ActorId) domain.Job {
+	t.Helper()
+
+	target, err := url.ParseRequestURI("https://example.com")
 	require.NoError(t, err)
 
-	_, err = pool.Exec(ctx, `
-INSERT INTO job.job_revision (
-  revision_id, job_id, revision_number, type, config,
-  retry_max_attempts, retry_backoff_type, retry_initial_delay_ms, retry_max_delay_ms
-)
-VALUES ($1, $2, 1, 'HTTP_REQUEST', '{}'::jsonb, 1, 'FIXED', 0, 0)
-`, revisionID, jobID)
+	var job domain.Job
+	err = store.WithinJobTx(ctx, func(ctx context.Context, jobs app.JobRepository) error {
+		var err error
+		job, err = jobs.Create(ctx, ownerID, "outbox integration test", domain.JobSpec{
+			Type: domain.JOB_TYPE_HTTP_REQUEST,
+			Config: &domain.HttpJobConfig{
+				HttpMethod:          domain.HTTP_METHOD_GET,
+				Url:                 *target,
+				Timeout:             time.Second,
+				ExpectedStatusCodes: domain.StatusCodes{Codes: []int32{200}},
+				RetryOnNetworkError: true,
+			},
+			RetryPolicy: domain.RetryPolicy{
+				MaxAttempts: 2,
+				BackoffType: domain.BACKOFF_TYPE_FIXED,
+			},
+		})
+		return err
+	})
 	require.NoError(t, err)
+	return job
+}
 
-	_, err = pool.Exec(ctx, `
-INSERT INTO job.execution (
-  execution_id, job_id, job_revision_id, trigger_type, status, attempt, next_run_at
-)
-VALUES ($1, $2, $3, 'MANUAL', $4, 1, $5)
-`, executionID, jobID, revisionID, status, nextRunAt)
+func createExecution(t *testing.T, ctx context.Context, store *Store, ownerID domain.ActorId, jobID domain.JobId) domain.Execution {
+	t.Helper()
+
+	var execution domain.Execution
+	err := store.WithinExecutionTx(ctx, func(ctx context.Context, executions app.ExecutionRepository) error {
+		var err error
+		execution, err = executions.CreateForCurrentJob(ctx, ownerID, jobID, domain.EXECUTION_TRIGGER_MANUAL)
+		return err
+	})
 	require.NoError(t, err)
+	return execution
+}
 
-	_, err = pool.Exec(ctx, `
-INSERT INTO job.outbox_execution_requested (execution_id)
-VALUES ($1)
-`, executionID)
+func markExecutionPublished(t *testing.T, ctx context.Context, store *Store, executionID domain.ExecutionId) {
+	t.Helper()
+
+	err := store.WithinOutboxTx(ctx, func(ctx context.Context, outbox eventing.OutboxRepository) error {
+		return outbox.MarkAsPublishedExecutionRequested(ctx, []domain.ExecutionId{executionID})
+	})
 	require.NoError(t, err)
+}
 
-	return executionID
+func claimExecution(t *testing.T, ctx context.Context, store *Store, executionID domain.ExecutionId) domain.ClaimedExecution {
+	t.Helper()
+
+	var claimed domain.ClaimedExecution
+	err := store.WithinExecutionQueueTx(ctx, func(ctx context.Context, queues app.ExecutionQueueRepository) error {
+		var err error
+		claimed, err = queues.Claim(ctx, executionID)
+		return err
+	})
+	require.NoError(t, err)
+	return claimed
 }
