@@ -197,14 +197,6 @@ resource "google_project_iam_member" "plan" {
   member   = "serviceAccount:${data.google_service_account.plan.email}"
 }
 
-resource "google_project_iam_member" "pubsub_service_agent_token_creator" {
-  project = var.project_id
-  role    = "roles/iam.serviceAccountTokenCreator"
-  member  = "serviceAccount:service-${data.google_project.current.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-
-  depends_on = [google_project_service.required["pubsub.googleapis.com"]]
-}
-
 resource "google_service_account_iam_member" "deployer_runtime" {
   for_each           = google_service_account.runtime
   service_account_id = each.value.name
