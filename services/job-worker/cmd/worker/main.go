@@ -12,6 +12,7 @@ import (
 	"jobdeck/services/job-worker/internal/telemetry"
 	"jobdeck/services/job-worker/internal/transport"
 	"jobdeck/services/job-worker/internal/transport/interceptor"
+	"jobdeck/services/job-worker/internal/transport/verification"
 	"jobdeck/services/job-worker/internal/worker"
 	"log/slog"
 	"net/http"
@@ -175,13 +176,18 @@ func main() {
 			return errors.Wrap(err, "job-api did not become serving")
 		}
 
+		pushVerifier, err := verification.NewFromEnvironment()
+		if err != nil {
+			return errors.Wrap(err, "configure Pub/Sub push verification")
+		}
+
 		port := os.Getenv("PORT")
 		if port == "" {
 			port = "9092"
 		}
 		server := transport.NewServer(port, app.NewPushUsecase(
 			claimer.NewClaimer(api_conn, items, logger),
-		))
+		), pushVerifier)
 
 		g.Go(func() error {
 			reporter := reporter.NewReporter(api_conn, logger)
