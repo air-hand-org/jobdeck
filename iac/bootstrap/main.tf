@@ -8,6 +8,7 @@ locals {
     "dns.googleapis.com",
     "iam.googleapis.com",
     "iamcredentials.googleapis.com",
+    "pubsub.googleapis.com",
     "run.googleapis.com",
     "secretmanager.googleapis.com",
     "sts.googleapis.com",
@@ -19,6 +20,7 @@ locals {
     "roles/cloudscheduler.admin",
     "roles/compute.admin",
     "roles/dns.admin",
+    "roles/pubsub.admin",
     "roles/run.admin",
   ])
 
@@ -175,6 +177,12 @@ resource "google_service_account" "runtime" {
   display_name = "JobDeck ${each.key} runtime"
 }
 
+resource "google_service_account" "pubsub_push" {
+  project      = var.project_id
+  account_id   = "jobdeck-pubsub-push"
+  display_name = "JobDeck Pub/Sub push invoker"
+}
+
 resource "google_project_iam_member" "deployer" {
   for_each = local.deployer_roles
   project  = var.project_id
@@ -189,9 +197,23 @@ resource "google_project_iam_member" "plan" {
   member   = "serviceAccount:${data.google_service_account.plan.email}"
 }
 
+resource "google_project_iam_member" "pubsub_service_agent_token_creator" {
+  project = var.project_id
+  role    = "roles/iam.serviceAccountTokenCreator"
+  member  = "serviceAccount:service-${data.google_project.current.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+
+  depends_on = [google_project_service.required["pubsub.googleapis.com"]]
+}
+
 resource "google_service_account_iam_member" "deployer_runtime" {
   for_each           = google_service_account.runtime
   service_account_id = each.value.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.deployer.email}"
+}
+
+resource "google_service_account_iam_member" "deployer_pubsub_push" {
+  service_account_id = google_service_account.pubsub_push.name
   role               = "roles/iam.serviceAccountUser"
   member             = "serviceAccount:${google_service_account.deployer.email}"
 }
