@@ -18,8 +18,9 @@ resource "google_cloud_run_v2_service" "job_worker" {
     }
 
     containers {
-      name  = "job-worker"
-      image = local.images.job_worker
+      name       = "job-worker"
+      image      = local.images.job_worker
+      depends_on = ["forward-proxy"]
 
       ports {
         container_port = 8080
@@ -41,6 +42,11 @@ resource "google_cloud_run_v2_service" "job_worker" {
       }
 
       env {
+        name  = "WORKER_HTTP_PROXY"
+        value = "http://127.0.0.1:3128"
+      }
+
+      env {
         name = "AUTH_CLIENT_SECRET"
         value_source {
           secret_key_ref {
@@ -48,6 +54,25 @@ resource "google_cloud_run_v2_service" "job_worker" {
             version = "latest"
           }
         }
+      }
+    }
+
+    containers {
+      name  = "forward-proxy"
+      image = local.images.forward_proxy
+
+      env {
+        name  = "SQUID_ALLOWED_DEMO_HOST_AND_PORT"
+        value = "${replace(google_cloud_run_v2_service.demo.uri, "https://", "")}:443"
+      }
+
+      startup_probe {
+        tcp_socket {
+          port = 3128
+        }
+        failure_threshold = 10
+        period_seconds    = 1
+        timeout_seconds   = 1
       }
     }
   }
