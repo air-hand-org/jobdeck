@@ -2,14 +2,11 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"flag"
 	"log"
 	"os"
 
 	"jobdeck/services/auth/internal/migrator"
-
-	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 type config struct {
@@ -33,17 +30,12 @@ func main() {
 		log.Fatal("POSTGRESDB_URI is required")
 	}
 
-	db, err := sql.Open("pgx", connStr)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
 	ctx := context.Background()
+	var err error
 	if cfg.downTo0 {
-		err = migrator.DownTo0(ctx, db)
+		err = migrator.DownTo0(ctx, connStr)
 	} else {
-		err = migrator.Up(ctx, db)
+		err = migrator.Up(ctx, connStr)
 	}
 	if err != nil {
 		log.Fatal(err)
