@@ -39,8 +39,6 @@ jobs:
                 nuget-${{ runner.os }}-
       - name: build
         run: make build
-      - name: show Go module tidy diff
-        run: git diff -- services/auth/go.mod services/auth/go.sum
       - name: lint
         run: make lint
       - name: check clean
