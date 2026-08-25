@@ -37,16 +37,19 @@ jobs:
               key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
               restore-keys: |
                 nuget-${{ runner.os }}-
-      - name: build
-        run: make build
+      - name: generate
+        run: make generate
+      - name: C# build and test
+        id: cs-test
+        run: make cs-build cs-test
+        background: true
+      - name: Go build and test
+        run: make go-build go-test
+      - wait: cs-test
       - name: lint
         run: make lint
       - name: check clean
         run: make check-clean
-      - name: Go test
-        run: make go-test
-      - name: C# test
-        run: make cs-test
       - name: upload Playwright traces
         if: ${{ failure() }}
         uses: actions/upload-artifact@v7
