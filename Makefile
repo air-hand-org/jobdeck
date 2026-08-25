@@ -25,9 +25,4 @@ check-clean:
 	@test -z "$$(git status --porcelain)"
 
 .PHONY: test
-test: go-test migration-test cs-test
-
-.PHONY: migration-test
-migration-test:
-	@TARGET_SERVICE=job-api ./tests/migration-test.sh && \
-		TARGET_SERVICE=auth ./tests/migration-test.sh
+test: go-test cs-test

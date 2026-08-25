@@ -1,15 +1,12 @@
 package main
 
 import (
-	"database/sql"
+	"context"
 	"flag"
 	"log"
 	"os"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/pressly/goose/v3"
-
-	migrations "jobdeck/services/job-api/db/job"
+	"jobdeck/services/job-api/internal/migrator"
 )
 
 type config struct {
@@ -33,26 +30,14 @@ func main() {
 		log.Fatal("POSTGRESDB_URI is required")
 	}
 
-	db, err := sql.Open("pgx", connStr)
+	ctx := context.Background()
+	var err error
+	if cfg.downTo0 {
+		err = migrator.DownTo0(ctx, connStr)
+	} else {
+		err = migrator.Up(ctx, connStr)
+	}
 	if err != nil {
 		log.Fatal(err)
-	}
-	defer db.Close()
-
-	goose.SetBaseFS(migrations.FS)
-	goose.SetTableName("public.goose_db_version")
-
-	if err := goose.SetDialect("postgres"); err != nil {
-		log.Fatal(err)
-	}
-
-	if cfg.downTo0 {
-		if err := goose.DownTo(db, "migrations", 0); err != nil {
-			log.Fatal(err)
-		}
-	} else {
-		if err := goose.Up(db, "migrations"); err != nil {
-			log.Fatal(err)
-		}
 	}
 }

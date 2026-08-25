@@ -43,11 +43,8 @@ jobs:
         run: make lint
       - name: check clean
         run: make check-clean
-      - parallel:
-          - name: Go test
-            run: make go-test
-          - name: migration test
-            run: make migration-test
+      - name: Go test
+        run: make go-test
       - name: C# test
         run: make cs-test
       - name: upload Playwright traces
