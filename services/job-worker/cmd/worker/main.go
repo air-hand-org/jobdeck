@@ -60,9 +60,6 @@ func parseFlags() config {
 }
 
 func waitForServing(ctx context.Context, conn *grpc.ClientConn) error {
-	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
-	defer cancel()
-
 	client := health_grpc.NewHealthClient(conn)
 
 	ticker := time.NewTicker(time.Second)
