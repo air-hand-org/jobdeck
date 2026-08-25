@@ -135,8 +135,7 @@ func createExecution(t *testing.T, ctx context.Context, store *Store, ownerID do
 	var execution domain.Execution
 	err := store.WithinExecutionTx(ctx, func(ctx context.Context, executions app.ExecutionRepository) error {
 		var err error
-		claimed, err := executions.CreateForCurrentJob(ctx, ownerID, jobID, domain.EXECUTION_TRIGGER_MANUAL)
-		execution = claimed
+		execution, err = executions.CreateForCurrentJob(ctx, ownerID, jobID, domain.EXECUTION_TRIGGER_MANUAL)
 		return err
 	})
 	require.NoError(t, err)
