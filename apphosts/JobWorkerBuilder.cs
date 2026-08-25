@@ -2,6 +2,7 @@ using System.Net;
 using Microsoft.Extensions.Configuration;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
+using Aspire.Hosting.Go;
 using Aspire.Hosting.Yarp;
 
 namespace apphosts;
@@ -28,79 +29,43 @@ public sealed class JobWorkerBuilder(
     )
     {
         var workerClientSecret = builder.AddParameter("job-worker-client-secret", secret: true);
-        EndpointReference endpoint;
-        // TODO: use WithDelveServer after v13.5
+        var backend = builder.AddGoApp(
+            name: "job-worker",
+            appDirectory: "../services/job-worker",
+            packagePath: "./cmd/worker"
+        )
+        .WithAppArgs("-worker", "3")
+        .WithHttpEndpoint(
+            name: "push",
+            port: port,
+            env: "PORT"
+        )
+        .WithReference(jobApiGrpcEndpoint)
+        .WithReference(authGrpcEndpoint)
+        .WithReference(forwardProxyEndpoint)
+        .WithEnvironment(context =>
+        {
+            context.EnvironmentVariables["JOB_API_GRPC_ENDPOINT"] = jobApiGrpcEndpoint.Property(EndpointProperty.Url);
+            context.EnvironmentVariables["AUTH_GRPC_ENDPOINT"] = authGrpcEndpoint.Property(EndpointProperty.Url);
+            context.EnvironmentVariables["AUTH_CLIENT_ID"] = workerClientId;
+            context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
+            context.EnvironmentVariables["WORKER_HTTP_PROXY"] = forwardProxyEndpoint.Property(EndpointProperty.Url);
+            context.EnvironmentVariables["LOCAL_PUBSUB_VERIFICATION_TOKEN"] = pubsubVerificationToken;
+        })
+        ;
+
         if (isDebug)
         {
-            var backend = builder.AddExecutable(
-                "job-worker",
-                "dlv",
-                "../services/job-worker",
-                "debug",
-                "./cmd/worker",
-                "--headless",
-                "--api-version=2",
-                "--listen=127.0.0.1:2346",
-                "--accept-multiclient",
-                "--log",
-                "--log-output=rpc,dap,debugger",
-                "--only-same-user=false" // need by Zed on WSL2?
-                , "--continue"
-                , "--"
-                , "-worker", "3"
-              )
-              .WithHttpEndpoint(
-                  name: "push",
-                  port: port,
-                  env: "PORT"
-              )
-              .WithReference(jobApiGrpcEndpoint)
-              .WithReference(authGrpcEndpoint)
-              .WithReference(forwardProxyEndpoint)
-              .WithEnvironment(context =>
-              {
-                  context.EnvironmentVariables["JOB_API_GRPC_ENDPOINT"] = jobApiGrpcEndpoint.Property(EndpointProperty.Url);
-                  context.EnvironmentVariables["AUTH_GRPC_ENDPOINT"] = authGrpcEndpoint.Property(EndpointProperty.Url);
-                  context.EnvironmentVariables["AUTH_CLIENT_ID"] = workerClientId;
-                  context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
-                  context.EnvironmentVariables["WORKER_HTTP_PROXY"] = forwardProxyEndpoint.Property(EndpointProperty.Url);
-                  context.EnvironmentVariables["LOCAL_PUBSUB_VERIFICATION_TOKEN"] = pubsubVerificationToken;
-              })
-              ;
-
-            endpoint = backend.GetEndpoint("push", KnownNetworkIdentifiers.DefaultAspireContainerNetwork);
+            backend.WithDelveServer(new DelveServerOptions
+            {
+                Port = 2346,
+                AcceptMultiClient = true,
+                ContinueOnStart = true,
+                OnlySameUser = false
+            });
         }
-        else
-        {
-            var backend = builder.AddGoApp(
-                name: "job-worker",
-                appDirectory: "../services/job-worker",
-                packagePath: "./cmd/worker"
-              )
-              .WithAppArgs("-worker", "3")
-              //    .WithDelveServer(port: 2346) // --only-same-user=false needed
-              .WithHttpEndpoint(
-                  name: "push",
-                  port: port,
-                  env: "PORT"
-              )
-              .WithReference(jobApiGrpcEndpoint)
-              .WithReference(authGrpcEndpoint)
-              .WithReference(forwardProxyEndpoint)
-              .WithEnvironment(context =>
-              {
-                  context.EnvironmentVariables["JOB_API_GRPC_ENDPOINT"] = jobApiGrpcEndpoint.Property(EndpointProperty.Url);
-                  context.EnvironmentVariables["AUTH_GRPC_ENDPOINT"] = authGrpcEndpoint.Property(EndpointProperty.Url);
-                  context.EnvironmentVariables["AUTH_CLIENT_ID"] = workerClientId;
-                  context.EnvironmentVariables["AUTH_CLIENT_SECRET"] = workerClientSecret;
-                  context.EnvironmentVariables["WORKER_HTTP_PROXY"] = forwardProxyEndpoint.Property(EndpointProperty.Url);
-                  context.EnvironmentVariables["LOCAL_PUBSUB_VERIFICATION_TOKEN"] = pubsubVerificationToken;
-              })
-              ;
 
-            endpoint = backend.GetEndpoint("push", KnownNetworkIdentifiers.DefaultAspireContainerNetwork);
-        }
-        return endpoint;
+        return backend.GetEndpoint("push", KnownNetworkIdentifiers.DefaultAspireContainerNetwork);
     }
 
     private EndpointReference ForwardProxy(EndpointReference demoContainerEndpoint)

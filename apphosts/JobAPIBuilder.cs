@@ -2,6 +2,7 @@ using System.Net;
 using Microsoft.Extensions.Configuration;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
+using Aspire.Hosting.Go;
 using Aspire.Hosting.Yarp;
 
 namespace apphosts;
@@ -25,7 +26,7 @@ public sealed class JobAPIBuilder(
     {
         return builder.AddYarp("job-api-tls")
             .WithHostHttpsPort(port)
-            // Aspire.Hosting.Yarp 13.4.6 does not flatten enum values in cluster configuration.
+            // Aspire.Hosting.Yarp 13.5.2 does not flatten enum values in cluster configuration.
             .WithEnvironment("REVERSEPROXY__CLUSTERS__cluster_job-api__HTTPREQUEST__VERSIONPOLICY", HttpVersionPolicy.RequestVersionExact.ToString())
             .WithConfiguration(yarp =>
             {
@@ -52,84 +53,46 @@ public sealed class JobAPIBuilder(
     {
         // TODO: get pubkey from auth-service
         var authJwtPublicKey = builder.AddParameter("auth-jwt-public-key", secret: false);
-        EndpointReference endpoint;
-        // TODO: use WithDelveServer after v13.5
+        var backend = builder.AddGoApp(
+            name: "job-api",
+            appDirectory: "../services/job-api",
+            packagePath: "./cmd/server"
+        )
+        .WithHttpEndpoint(
+            name: "grpc-backend",
+            env: "GRPC_PORT"
+        )
+        .AsHttp2Service()
+        .WithReference(db)
+        .WithReference(workerTopic.PubsubEndpoint)
+        .WithEnvironment(context =>
+        {
+            context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
+            context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = grpcReflectionFlag;
+            context.EnvironmentVariables["AUTH_JWT_PUBLIC_KEY"] = authJwtPublicKey;
+            context.EnvironmentVariables["API_AUTH_MODE"] = apiAuthMode;
+            context.EnvironmentVariables["PUBSUB_EMULATOR_HOST"] = workerTopic.PubsubEndpoint.Property(EndpointProperty.HostAndPort);
+            context.EnvironmentVariables["PUBSUB_PROJECT_ID"] = workerTopic.ProjectID;
+            context.EnvironmentVariables["PUBSUB_WORKER_TOPIC_ID"] = workerTopic.TopicID;
+        })
+        .WaitFor(db)
+        .WaitForCompletion(dbMigrator)
+        .WaitForCompletion(republisher)
+        .WaitForCompletion(workerTopic.Creator)
+        ;
+
         if (isDebug)
         {
-            var backend = builder.AddExecutable(
-                "job-api",
-                "dlv",
-                "../services/job-api",
-                "debug",
-                "./cmd/server",
-                "--headless",
-                "--api-version=2",
-                "--listen=127.0.0.1:2345",
-                "--accept-multiclient",
-                "--log",
-                "--log-output=rpc,dap,debugger",
-                "--only-same-user=false" // need by Zed on WSL2?
-                , "--continue"
-              )
-              .WithHttpEndpoint(
-                  name: "grpc-backend",
-                  env: "GRPC_PORT"
-              )
-              .AsHttp2Service()
-              .WithReference(db)
-              .WithReference(workerTopic.PubsubEndpoint)
-              .WithEnvironment(context =>
-              {
-                  context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
-                  context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = grpcReflectionFlag;
-                  context.EnvironmentVariables["AUTH_JWT_PUBLIC_KEY"] = authJwtPublicKey;
-                  context.EnvironmentVariables["API_AUTH_MODE"] = apiAuthMode;
-                  context.EnvironmentVariables["PUBSUB_EMULATOR_HOST"] = workerTopic.PubsubEndpoint.Property(EndpointProperty.HostAndPort);
-                  context.EnvironmentVariables["PUBSUB_PROJECT_ID"] = workerTopic.ProjectID;
-                  context.EnvironmentVariables["PUBSUB_WORKER_TOPIC_ID"] = workerTopic.TopicID;
-              })
-              .WaitFor(db)
-              .WaitForCompletion(dbMigrator)
-              .WaitForCompletion(republisher)
-              .WaitForCompletion(workerTopic.Creator)
-              ;
-
-            endpoint = backend.GetEndpoint("grpc-backend");
+            backend.WithDelveServer(new DelveServerOptions
+            {
+                Port = 2345,
+                AcceptMultiClient = true,
+                ContinueOnStart = true,
+                OnlySameUser = false
+            });
         }
-        else
-        {
-            var backend = builder.AddGoApp(
-                name: "job-api",
-                appDirectory: "../services/job-api",
-                packagePath: "./cmd/server"
-              )
-              //    .WithDelveServer(port: 2345) // --only-same-user=false needed
-              .WithHttpEndpoint(
-                  name: "grpc-backend",
-                  env: "GRPC_PORT"
-              )
-              .AsHttp2Service()
-              .WithReference(db)
-              .WithReference(workerTopic.PubsubEndpoint)
-              .WithEnvironment(context =>
-              {
-                  context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
-                  context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = grpcReflectionFlag;
-                  context.EnvironmentVariables["AUTH_JWT_PUBLIC_KEY"] = authJwtPublicKey;
-                  context.EnvironmentVariables["API_AUTH_MODE"] = apiAuthMode;
-                  context.EnvironmentVariables["PUBSUB_EMULATOR_HOST"] = workerTopic.PubsubEndpoint.Property(EndpointProperty.HostAndPort);
-                  context.EnvironmentVariables["PUBSUB_PROJECT_ID"] = workerTopic.ProjectID;
-                  context.EnvironmentVariables["PUBSUB_WORKER_TOPIC_ID"] = workerTopic.TopicID;
-              })
-              .WaitFor(db)
-              .WaitForCompletion(dbMigrator)
-              .WaitForCompletion(republisher)
-              .WaitForCompletion(workerTopic.Creator)
-              ;
 
-            endpoint = backend.GetEndpoint("grpc-backend");
-        }
-        return endpoint;
+        return backend.GetEndpoint("grpc-backend");
     }
 
     private IResourceBuilder<ExecutableResource> DBMigration(IResourceBuilder<PostgresDatabaseResource> db)
