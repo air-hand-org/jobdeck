@@ -24,6 +24,7 @@ public sealed class AppFixture : IAsyncLifetime
         "job-db-migrator",
         "job-worker",
         "postgres",
+        "pubsub",
         "ui",
     ];
 

@@ -13,7 +13,7 @@ func TestMigrationsUpDownUp(t *testing.T) {
 	ctx := context.Background()
 	container, err := postgres.Run(
 		ctx,
-		"postgres:18",
+		"postgres:18.4-bookworm",
 		postgres.WithDatabase("jobdeck"),
 		postgres.WithUsername("postgres"),
 		postgres.WithPassword("postgres"),
