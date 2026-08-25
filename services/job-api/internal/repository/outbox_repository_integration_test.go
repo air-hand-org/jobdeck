@@ -44,7 +44,7 @@ func newMigratedTestPool(t *testing.T, ctx context.Context) *pgxpool.Pool {
 
 	container, err := postgres.Run(
 		ctx,
-		"postgres:18",
+		"postgres:18.4-bookworm",
 		postgres.WithDatabase("jobdeck"),
 		postgres.WithUsername("postgres"),
 		postgres.WithPassword("postgres"),
@@ -135,7 +135,8 @@ func createExecution(t *testing.T, ctx context.Context, store *Store, ownerID do
 	var execution domain.Execution
 	err := store.WithinExecutionTx(ctx, func(ctx context.Context, executions app.ExecutionRepository) error {
 		var err error
-		execution, err = executions.CreateForCurrentJob(ctx, ownerID, jobID, domain.EXECUTION_TRIGGER_MANUAL)
+		claimed, err := executions.CreateForCurrentJob(ctx, ownerID, jobID, domain.EXECUTION_TRIGGER_MANUAL)
+		execution = claimed
 		return err
 	})
 	require.NoError(t, err)
