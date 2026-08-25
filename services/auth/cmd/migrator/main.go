@@ -1,15 +1,15 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"flag"
 	"log"
 	"os"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/pressly/goose/v3"
+	"jobdeck/services/auth/internal/migrator"
 
-	migrations "jobdeck/services/auth/internal/db/auth"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 type config struct {
@@ -39,20 +39,13 @@ func main() {
 	}
 	defer db.Close()
 
-	goose.SetBaseFS(migrations.FS)
-	goose.SetTableName("public.goose_db_version")
-
-	if err := goose.SetDialect("postgres"); err != nil {
-		log.Fatal(err)
-	}
-
+	ctx := context.Background()
 	if cfg.downTo0 {
-		if err := goose.DownTo(db, "migrations", 0); err != nil {
-			log.Fatal(err)
-		}
+		err = migrator.DownTo0(ctx, db)
 	} else {
-		if err := goose.Up(db, "migrations"); err != nil {
-			log.Fatal(err)
-		}
+		err = migrator.Up(ctx, db)
+	}
+	if err != nil {
+		log.Fatal(err)
 	}
 }
