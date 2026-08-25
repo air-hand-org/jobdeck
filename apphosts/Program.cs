@@ -22,6 +22,7 @@ var enableGrpcReflection = builder.Configuration["GRPC_REFLECTION_ENABLED"] ?? "
 var apiAuthMode = builder.Configuration["API_AUTH_MODE"] ?? "OPTIONAL"; // fallback
 
 var postgres = builder.AddPostgres("postgres")
+  .WithImageTag("18.4-bookworm")
   .WithPgAdmin()
   ;
 if (useVolumes)
