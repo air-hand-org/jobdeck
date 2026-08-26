@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/air-hand-org/jobdeck/compare/v1.0.1...v1.0.2) (2026-08-26)
+
+
+### Bug Fixes
+
+* **worker:** wait for dependencies without startup timeout ([#91](https://github.com/air-hand-org/jobdeck/issues/91)) ([004bbfe](https://github.com/air-hand-org/jobdeck/commit/004bbfed9a210747d0bf823c726ac6acce674f0b))
+
 ## [1.0.1](https://github.com/air-hand-org/jobdeck/compare/v1.0.0...v1.0.1) (2026-08-24)
 
 
