@@ -4,6 +4,7 @@ go 1.26.4
 
 require (
 	buf.build/go/protovalidate v1.2.0
+	github.com/air-hand-org/api-contracts/packages/jobdeck/auth v1.1.2
 	github.com/cockroachdb/errors v1.14.0
 	github.com/exaring/otelpgx v0.11.1
 	github.com/golang-jwt/jwt/v5 v5.3.1

@@ -2,8 +2,9 @@ package transport
 
 import (
 	"context"
-	authv1 "jobdeck/gen/go/jobdeck/auth/v1"
 	"jobdeck/services/auth/internal/app"
+
+	authv1 "github.com/air-hand-org/api-contracts/packages/jobdeck/auth/go/v1"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

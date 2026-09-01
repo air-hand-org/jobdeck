@@ -11,13 +11,14 @@ import (
 	"syscall"
 	"time"
 
-	authv1 "jobdeck/gen/go/jobdeck/auth/v1"
 	"jobdeck/services/auth/internal/app"
 	"jobdeck/services/auth/internal/repository"
 	"jobdeck/services/auth/internal/secret"
 	"jobdeck/services/auth/internal/telemetry"
 	"jobdeck/services/auth/internal/token"
 	"jobdeck/services/auth/internal/transport"
+
+	authv1 "github.com/air-hand-org/api-contracts/packages/jobdeck/auth/go/v1"
 
 	"buf.build/go/protovalidate"
 	protovalidate_middleware "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/protovalidate"
