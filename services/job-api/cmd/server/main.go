@@ -14,7 +14,7 @@ import (
 	"syscall"
 	"time"
 
-	jobv1 "jobdeck/gen/go/jobdeck/job/v1"
+	jobv1 "github.com/air-hand-org/api-contracts/packages/jobdeck/job/go/v1"
 	"jobdeck/services/job-api/internal/app"
 	"jobdeck/services/job-api/internal/auth"
 	"jobdeck/services/job-api/internal/domain"
