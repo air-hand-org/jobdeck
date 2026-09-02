@@ -2,11 +2,11 @@ package claimer
 
 import (
 	"context"
-	jobv1 "jobdeck/gen/go/jobdeck/job/v1"
 	"jobdeck/services/job-worker/internal/app"
 	"log/slog"
 	"time"
 
+	jobv1 "github.com/air-hand-org/api-contracts/packages/jobdeck/job/go/v1"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"

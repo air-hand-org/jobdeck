@@ -3,13 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	jobv1 "jobdeck/gen/go/jobdeck/job/v1"
 	"jobdeck/services/job-worker/internal/app"
 	"jobdeck/services/job-worker/internal/transport/verification"
 	"log/slog"
 	"net/http"
 
 	"cloud.google.com/go/pubsub/v2"
+	jobv1 "github.com/air-hand-org/api-contracts/packages/jobdeck/job/go/v1"
 	"google.golang.org/protobuf/proto"
 )
 

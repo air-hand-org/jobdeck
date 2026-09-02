@@ -2,11 +2,11 @@ package auth
 
 import (
 	"context"
-	authv1 "jobdeck/gen/go/jobdeck/auth/v1"
 	"jobdeck/services/job-worker/internal/transport/interceptor"
 	"testing"
 	"time"
 
+	authv1 "github.com/air-hand-org/api-contracts/packages/jobdeck/auth/go/v1"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 )
