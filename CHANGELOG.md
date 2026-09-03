@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/air-hand-org/jobdeck/compare/v1.0.2...v1.0.3) (2026-09-03)
+
+
+### Bug Fixes
+
+* link protobuf other repo ([#96](https://github.com/air-hand-org/jobdeck/issues/96)) ([1bf3bf2](https://github.com/air-hand-org/jobdeck/commit/1bf3bf2def93a488fa4009818b42f6fd890c658c))
+
 ## [1.0.2](https://github.com/air-hand-org/jobdeck/compare/v1.0.1...v1.0.2) (2026-08-26)
 
 
