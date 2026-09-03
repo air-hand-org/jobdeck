@@ -1,3 +1,4 @@
+// Package token issues and validates auth tokens.
 package token
 
 import (
@@ -12,6 +13,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// ActorClaims contains JWT claims for an actor.
 type ActorClaims struct {
 	jwt.RegisteredClaims
 	ActorType string `json:"actor_type"`
@@ -28,38 +30,40 @@ func decodePrivateKey(encoded string) (ed25519.PrivateKey, error) {
 	return ed25519.PrivateKey(decoded), nil
 }
 
+// JWTIssuer issues signed JWTs.
 type JWTIssuer struct {
 	privateKey ed25519.PrivateKey
 }
 
 var _ app.TokenIssuer = (*JWTIssuer)(nil)
 
-func (i JWTIssuer) Token(actor_id domain.ActorId, actor_type string, audience string, now time.Time) (app.AccessToken, error) {
+// Token issues a signed access token.
+func (i JWTIssuer) Token(actorID domain.ActorId, actorType string, audience string, now time.Time) (app.AccessToken, error) {
 	claims := ActorClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "jobdeck-auth",
-			Subject:   actor_id.String(),
+			Subject:   actorID.String(),
 			Audience:  []string{audience},
 			IssuedAt:  jwt.NewNumericDate(now),
-			ExpiresAt: jwt.NewNumericDate(now.Add(i.expiresDuration(actor_type))),
+			ExpiresAt: jwt.NewNumericDate(now.Add(i.expiresDuration(actorType))),
 		},
-		ActorType: actor_type,
+		ActorType: actorType,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodEdDSA, claims)
-	signed_jwt, err := token.SignedString(i.privateKey)
+	signedJWT, err := token.SignedString(i.privateKey)
 	if err != nil {
 		return app.AccessToken{}, err
 	}
 	return app.AccessToken{
-		Token:        signed_jwt,
+		Token:        signedJWT,
 		TokenType:    "Bearer",
-		ExpiresInSec: int64(i.expiresDuration(actor_type).Seconds()),
+		ExpiresInSec: int64(i.expiresDuration(actorType).Seconds()),
 	}, nil
 }
 
-func (i JWTIssuer) expiresDuration(actor_type string) time.Duration {
-	switch actor_type {
+func (i JWTIssuer) expiresDuration(actorType string) time.Duration {
+	switch actorType {
 	case "USER":
 		return 60 * time.Minute
 	default:
@@ -67,13 +71,14 @@ func (i JWTIssuer) expiresDuration(actor_type string) time.Duration {
 	}
 }
 
-func NewJWTIssuer(encoded_privatekey string) (*JWTIssuer, error) {
-	privatekey, err := decodePrivateKey(encoded_privatekey)
+// NewJWTIssuer creates a JWT issuer from an encoded private key.
+func NewJWTIssuer(encodedPrivateKey string) (*JWTIssuer, error) {
+	privateKey, err := decodePrivateKey(encodedPrivateKey)
 	if err != nil {
 		return nil, err
 	}
 
 	return &JWTIssuer{
-		privateKey: privatekey,
+		privateKey: privateKey,
 	}, nil
 }

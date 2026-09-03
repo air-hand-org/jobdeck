@@ -14,6 +14,7 @@ func (f phcBuilderFactory) FromPHC(phc app.PHC) (app.PHCBuilder, error) {
 	return newArgon2IDPHCBuilderFromPHC(phc)
 }
 
+// NewPHCBuilderFactory creates a password hashing builder factory.
 func NewPHCBuilderFactory() *phcBuilderFactory {
 	return &phcBuilderFactory{}
 }

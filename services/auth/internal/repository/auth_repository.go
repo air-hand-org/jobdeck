@@ -1,3 +1,4 @@
+// Package repository provides auth persistence implementations.
 package repository
 
 import (
@@ -21,8 +22,8 @@ type authRepository struct {
 
 var _ app.AuthRepository = (*authRepository)(nil)
 
-func (r *authRepository) GetLocalAuthClient(ctx context.Context, client_id string) (domain.LocalAuthClient, error) {
-	row, err := r.q.GetMatchedLocalAuthClient(ctx, client_id)
+func (r *authRepository) GetLocalAuthClient(ctx context.Context, clientID string) (domain.LocalAuthClient, error) {
+	row, err := r.q.GetMatchedLocalAuthClient(ctx, clientID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return domain.LocalAuthClient{}, domain.ErrAuthClientNotFound
@@ -32,15 +33,15 @@ func (r *authRepository) GetLocalAuthClient(ctx context.Context, client_id strin
 	return localAuthClientFromDB(row), nil
 }
 
-func (r *authRepository) UpdateLocalAuthClientSecretHash(ctx context.Context, actor_id domain.ActorId, secret_hash string) error {
-	updated_count, err := r.q.UpdateLocalAuthClientSecretHash(ctx, authdb.UpdateLocalAuthClientSecretHashParams{
-		ActorID:    actor_id,
-		SecretHash: secret_hash,
+func (r *authRepository) UpdateLocalAuthClientSecretHash(ctx context.Context, actorID domain.ActorId, secretHash string) error {
+	updatedCount, err := r.q.UpdateLocalAuthClientSecretHash(ctx, authdb.UpdateLocalAuthClientSecretHashParams{
+		ActorID:    actorID,
+		SecretHash: secretHash,
 	})
 	if err != nil {
 		return err
 	}
-	if updated_count != 1 {
+	if updatedCount != 1 {
 		return domain.ErrAuthClientNotFound
 	}
 	return nil

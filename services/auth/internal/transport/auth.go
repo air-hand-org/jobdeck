@@ -1,3 +1,4 @@
+// Package transport exposes auth application services over gRPC.
 package transport
 
 import (
@@ -33,6 +34,7 @@ func (s *authSeviceServer) AuthenticateLocalClient(ctx context.Context, req *aut
 	}, nil
 }
 
+// NewAuthServiceServer creates an auth gRPC service server.
 func NewAuthServiceServer(usecase *app.AuthUsecase) *authSeviceServer {
 	return &authSeviceServer{
 		usecase: *usecase,

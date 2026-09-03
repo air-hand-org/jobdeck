@@ -16,8 +16,8 @@ func init() {
 var testUserActorID = uuid.MustParse("ffffffff-ffff-ffff-ffff-fffffffffffd")
 
 func upSeedTestUserCredential(ctx context.Context, tx *sql.Tx) error {
-	secret_hash := os.Getenv("AUTH_TEST_USER_SECRET_HASH")
-	if secret_hash == "" {
+	secretHash := os.Getenv("AUTH_TEST_USER_SECRET_HASH")
+	if secretHash == "" {
 		return nil
 	}
 	_, err := tx.ExecContext(
@@ -30,7 +30,7 @@ func upSeedTestUserCredential(ctx context.Context, tx *sql.Tx) error {
 		`,
 		testUserActorID,
 		"test-user",
-		secret_hash,
+		secretHash,
 	)
 	if err != nil {
 		return err

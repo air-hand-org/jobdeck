@@ -1,3 +1,4 @@
+// Package main runs the auth gRPC server.
 package main
 
 import (
@@ -27,7 +28,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	healthgrpc "google.golang.org/grpc/health/grpc_health_v1"
-	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 
 	"github.com/exaring/otelpgx"
@@ -55,7 +55,7 @@ func runHealthCheck(ctx context.Context, h *health.Server, pool *pgxpool.Pool) {
 	for {
 		select {
 		case <-ctx.Done():
-			h.SetServingStatus("", healthpb.HealthCheckResponse_NOT_SERVING)
+			h.SetServingStatus("", healthgrpc.HealthCheckResponse_NOT_SERVING)
 			return
 		case <-ticker.C:
 			check()
