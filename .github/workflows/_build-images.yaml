@@ -19,14 +19,13 @@ on:
         type: string
         default: ""
 
-permissions:
-  contents: read
-
 concurrency:
   # CI build-only runs are disposable and share a group per ref. Publishing is
   # keyed by immutable release tag and must never be cancelled mid-push.
   group: build-images-${{ inputs.push && inputs.image_tag || github.ref }}
   cancel-in-progress: ${{ inputs.push == false }}
+
+permissions: {}
 
 jobs:
   build:
@@ -34,10 +33,23 @@ jobs:
     # OIDC permissions, so it cannot access GCP or push.
     if: ${{ inputs.push == false }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+      - name: create GitHub App token for read GOPRIVATE
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.GH_APP_RELEASE_CLIENT_ID }}
+          private-key: ${{ secrets.GH_APP_RELEASE_PRIVATE_KEY }}
+          permission-contents: read
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            api-contracts
       - uses: docker/setup-buildx-action@v4
       # Keep pairs small enough for the hosted runner while sharing its Docker
       # layer and BuildKit cache with every following build.
@@ -54,6 +66,8 @@ jobs:
               context: .
               file: containers/job-api/Dockerfile
               push: false
+              secrets: |
+                github_contents_token=${{ steps.app-token.outputs.token }}
       - parallel:
           - name: Build auth image
             uses: docker/build-push-action@v7
@@ -61,12 +75,16 @@ jobs:
               context: .
               file: containers/auth/Dockerfile
               push: false
+              secrets: |
+                github_contents_token=${{ steps.app-token.outputs.token }}
           - name: Build job-worker image
             uses: docker/build-push-action@v7
             with:
               context: .
               file: containers/job-worker/Dockerfile
               push: false
+              secrets: |
+                github_contents_token=${{ steps.app-token.outputs.token }}
       - parallel:
           - name: Build demo image
             uses: docker/build-push-action@v7
@@ -80,6 +98,10 @@ jobs:
               context: .
               file: containers/ui/Dockerfile
               push: false
+              build-args: |
+                GITHUB_ACTOR=${{ github.actor }}
+              secrets: |
+                github_packages_token=${{ secrets.GITHUB_TOKEN }}
 
   publish:
     if: ${{ inputs.push == true }}
@@ -87,6 +109,7 @@ jobs:
     environment: ${{ inputs.environment || 'production' }}
     permissions:
       contents: read
+      packages: read
       id-token: write
     env:
       ARTIFACT_REGISTRY_HOST: asia-northeast1-docker.pkg.dev
@@ -95,6 +118,16 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+      - name: create GitHub App token for read GOPRIVATE
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.GH_APP_RELEASE_CLIENT_ID }}
+          private-key: ${{ secrets.GH_APP_RELEASE_PRIVATE_KEY }}
+          permission-contents: read
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            api-contracts
       - uses: docker/setup-buildx-action@v4
       - name: Validate image tag
         run: test -n "$IMAGE_TAG"
@@ -129,6 +162,8 @@ jobs:
               file: containers/job-api/Dockerfile
               push: true
               tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-job-api/job-api:${{ env.IMAGE_TAG }}
+              secrets: |
+                github_contents_token=${{ steps.app-token.outputs.token }}
       - parallel:
           - name: Build and push auth image
             uses: docker/build-push-action@v7
@@ -137,6 +172,8 @@ jobs:
               file: containers/auth/Dockerfile
               push: true
               tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-auth/auth:${{ env.IMAGE_TAG }}
+              secrets: |
+                github_contents_token=${{ steps.app-token.outputs.token }}
           - name: Build and push job-worker image
             uses: docker/build-push-action@v7
             with:
@@ -144,6 +181,8 @@ jobs:
               file: containers/job-worker/Dockerfile
               push: true
               tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-job-worker/job-worker:${{ env.IMAGE_TAG }}
+              secrets: |
+                github_contents_token=${{ steps.app-token.outputs.token }}
       - parallel:
           - name: Build and push demo image
             uses: docker/build-push-action@v7
@@ -159,3 +198,7 @@ jobs:
               file: containers/ui/Dockerfile
               push: true
               tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-ui/ui:${{ env.IMAGE_TAG }}
+              build-args: |
+                GITHUB_ACTOR=${{ github.actor }}
+              secrets: |
+                github_packages_token=${{ secrets.GITHUB_TOKEN }}
