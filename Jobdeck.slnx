@@ -1,8 +1,4 @@
 <Solution>
-  <Folder Name="/gen/" />
-  <Folder Name="/gen/csharp/">
-    <Project Path="gen/csharp/Jobdeck.Proto/Jobdeck.Proto.csproj" />
-  </Folder>
   <Folder Name="/services/">
     <Project Path="services/ui/ui.csproj" />
   </Folder>

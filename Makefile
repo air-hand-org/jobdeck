@@ -7,7 +7,7 @@ setup:
 	@aqua i && mise i
 
 .PHONY: generate
-generate: buf-generate
+generate:
 	@sqlc generate
 
 .PHONY: build

@@ -5,3 +5,16 @@ grpcurl = "1.9.3"
 watchexec = "2.5.1"
 
 powershell = '7.5.0'
+
+[env]
+# set GITHUB_PACKAGES_TOKEN in .env.local
+_.file = ".env.local"
+
+GOPRIVATE = "github.com/air-hand-org/api-contracts"
+GITHUB_ACTOR = {
+    default = '''{{ exec(command="gh auth status --hostname github.com --json hosts --jq '.hosts[][] | select(.active) | .login'") }}''',
+}
+NuGetPackageSourceCredentials_github = {
+    value = "Username=$GITHUB_ACTOR;Password=$GITHUB_PACKAGES_TOKEN",
+    redact = true,
+}

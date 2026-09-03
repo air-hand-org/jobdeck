@@ -14,7 +14,10 @@ jobs:
   test:
     permissions:
       contents: read
+      packages: read
     runs-on: ubuntu-latest
+    env:
+      NuGetPackageSourceCredentials_github: "Username=${{ github.actor }};Password=${{ secrets.GITHUB_TOKEN }}"
     steps:
       - uses: actions/checkout@v7
         with:

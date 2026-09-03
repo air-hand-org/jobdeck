@@ -4,6 +4,7 @@ obj/
 /go.work.sum
 playwright/.auth
 playwright-traces
+.env.local
 
 # OpenTofu local working files. Remote state is stored in GCS.
 **/.terraform/
