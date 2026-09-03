@@ -189,13 +189,6 @@ func claimExecutionFromDB(e jobdb.JobExecutionClaimDetail) (domain.ClaimedExecut
 	}, nil
 }
 
-func textToPGType(s string) pgtype.Text {
-	return pgtype.Text{
-		String: s,
-		Valid:  true,
-	}
-}
-
 func executionEventsFromDB(events []jobdb.JobExecutionEvent) ([]domain.ExecutionEvent, error) {
 	return lo.MapErr(events, func(ee jobdb.JobExecutionEvent, _ int) (domain.ExecutionEvent, error) {
 		created_at, err := timeFromPGType(ee.CreatedAt)

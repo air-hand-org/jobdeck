@@ -35,7 +35,7 @@ func withDB(connectionString string, fn func(*sql.DB) error) error {
 	if err != nil {
 		return err
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	return fn(db)
 }

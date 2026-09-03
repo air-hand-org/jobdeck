@@ -19,13 +19,13 @@ func shouldRetry(status ExecutionStatus, attempt int32, spec JobSpec, result *Ex
 
 	switch spec.Type {
 	case JOB_TYPE_HTTP_REQUEST:
-		return shouldRetryHttpJob(spec.HttpJobConfig(), result.HttpResult())
+		return shouldRetryHTTPJob(spec.HttpJobConfig(), result.HttpResult())
 	default:
 		return false
 	}
 }
 
-func shouldRetryHttpJob(cfg *HttpJobConfig, result *HttpExecutionResult) bool {
+func shouldRetryHTTPJob(cfg *HttpJobConfig, result *HttpExecutionResult) bool {
 	if cfg == nil || result == nil {
 		return false
 	}

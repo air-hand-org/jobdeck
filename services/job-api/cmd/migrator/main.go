@@ -1,3 +1,4 @@
+// Command migrator applies database migrations.
 package main
 
 import (

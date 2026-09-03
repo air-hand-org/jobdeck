@@ -172,12 +172,16 @@ func (r *jobRepository) ListByOwner(ctx context.Context, owner_id domain.ActorId
 		if err != nil {
 			return app.ListJobsResult{}, err
 		}
-		jobs, err = r.q.ListJobsAfter(ctx, jobdb.ListJobsAfterParams{
+		var queryErr error
+		jobs, queryErr = r.q.ListJobsAfter(ctx, jobdb.ListJobsAfterParams{
 			OwnerID:   owner_id,
 			CreatedAt: c_at,
 			JobID:     token.JobId,
 			PageSize:  page_size,
 		})
+		if queryErr != nil {
+			return app.ListJobsResult{}, queryErr
+		}
 	}
 	if err != nil {
 		return app.ListJobsResult{}, err

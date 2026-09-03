@@ -7,37 +7,51 @@ import (
 	"github.com/samber/lo"
 )
 
+// ActorType identifies the kind of actor.
 type ActorType string
 
 const (
-	ActorTypeUser    ActorType = "USER"
+	// ActorTypeUser identifies a human user.
+	ActorTypeUser ActorType = "USER"
+	// ActorTypeService identifies a service account.
 	ActorTypeService ActorType = "SERVICE"
 )
 
+// Capability identifies an authorized operation.
 type Capability string
 
 const (
-	CapJobRead     Capability = "job.read"
-	CapJobWrite    Capability = "job.write"
-	CapQueueClaim  Capability = "queue.claim"
+	// CapJobRead permits reading jobs.
+	CapJobRead Capability = "job.read"
+	// CapJobWrite permits modifying jobs.
+	CapJobWrite Capability = "job.write"
+	// CapQueueClaim permits claiming executions.
+	CapQueueClaim Capability = "queue.claim"
+	// CapQueueReport permits reporting execution results.
 	CapQueueReport Capability = "queue.report"
 )
 
+// Role contains the capabilities granted to an actor.
 type Role struct {
 	Caps []Capability `json:"caps"`
 }
 
-func (r Role) HasCapability(cap Capability) bool {
-	return lo.Contains(r.Caps, cap)
+// HasCapability reports whether the role includes capability.
+func (r Role) HasCapability(capability Capability) bool {
+	return lo.Contains(r.Caps, capability)
 }
 
+// RoleName identifies a role definition.
 type RoleName string
 
 const (
-	RoleUser   RoleName = "USER"
+	// RoleUser is the default user role.
+	RoleUser RoleName = "USER"
+	// RoleWorker is the worker role.
 	RoleWorker RoleName = "WORKER"
 )
 
+// RoleDefinition maps an actor type to its capabilities.
 type RoleDefinition struct {
 	ActorType ActorType    `json:"actor_type"`
 	Caps      []Capability `json:"caps"`
@@ -60,9 +74,9 @@ var roleDefinitions = map[RoleName]RoleDefinition{
 	},
 }
 
-func roleFromName(actor_type ActorType, name RoleName) (Role, error) {
+func roleFromName(actorType ActorType, name RoleName) (Role, error) {
 	// if user doesnt has role, set role fallbackly
-	if actor_type == ActorTypeUser && len(name) == 0 {
+	if actorType == ActorTypeUser && len(name) == 0 {
 		name = RoleUser
 	}
 
@@ -70,26 +84,31 @@ func roleFromName(actor_type ActorType, name RoleName) (Role, error) {
 		return Role{}, ErrActorNotHasRole
 	}
 
-	role_def, ok := roleDefinitions[name]
+	roleDef, ok := roleDefinitions[name]
 	if !ok {
 		return Role{}, ErrActorInvalidRole
 	}
-	if role_def.ActorType != actor_type {
+	if roleDef.ActorType != actorType {
 		return Role{}, ErrActorInvalidRole
 	}
 
 	return Role{
-		Caps: slices.Clone(role_def.Caps),
+		Caps: slices.Clone(roleDef.Caps),
 	}, nil
 }
 
+// ActorId is the UUID of an actor.
+//
+//nolint:revive // Retained for compatibility with the existing internal API.
 type ActorId = uuid.UUID
 
+// AuthenticatedIdentity is the identity extracted from a valid token.
 type AuthenticatedIdentity struct {
 	ID   ActorId   `json:"id"`
 	Type ActorType `json:"type"`
 }
 
+// Actor is an authenticated principal and its permissions.
 type Actor struct {
 	ID     ActorId   `json:"id"`
 	Active bool      `json:"active"`
@@ -97,16 +116,17 @@ type Actor struct {
 	Role   Role      `json:"role"`
 }
 
-func NewActor(actor_id ActorId, active bool, actor_type ActorType, role_name RoleName) (Actor, error) {
-	role, err := roleFromName(actor_type, role_name)
+// NewActor creates an actor with the specified role.
+func NewActor(actorID ActorId, active bool, actorType ActorType, roleName RoleName) (Actor, error) {
+	role, err := roleFromName(actorType, roleName)
 	if err != nil {
 		return Actor{}, err
 	}
 
 	return Actor{
-		ID:     actor_id,
+		ID:     actorID,
 		Active: active,
-		Type:   actor_type,
+		Type:   actorType,
 		Role:   role,
 	}, nil
 }

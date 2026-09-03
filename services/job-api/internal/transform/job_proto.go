@@ -28,14 +28,14 @@ func retryPolicyFromProto(p *jobv1.RetryPolicy) (domain.RetryPolicy, error) {
 		return domain.RetryPolicy{}, errors.New("retry policy is required")
 	}
 
-	backoff_type, err := retryPolicyBackoffTypeFromProto(p.GetBackoffType())
+	backoffType, err := retryPolicyBackoffTypeFromProto(p.GetBackoffType())
 	if err != nil {
 		return domain.RetryPolicy{}, err
 	}
 
 	return domain.RetryPolicy{
 		MaxAttempts: p.GetMaxAttempts(),
-		BackoffType: backoff_type,
+		BackoffType: backoffType,
 
 		InitialDelay: p.GetInitialDelay().AsDuration(),
 		MaxDelay:     p.GetMaxDelay().AsDuration(),
@@ -133,12 +133,12 @@ func httpJobConfigFromProto(p *jobv1.HttpJobConfig) (domain.HttpJobConfig, error
 		return domain.HttpJobConfig{}, err
 	}
 
-	expected_sc, err := statusCodesFromProto(p.GetExpectedStatusCodes())
+	expectedSc, err := statusCodesFromProto(p.GetExpectedStatusCodes())
 	if err != nil {
 		return domain.HttpJobConfig{}, err
 	}
 
-	retry_sc, err := statusCodesFromProto(p.GetRetryOnStatusCodes())
+	retrySc, err := statusCodesFromProto(p.GetRetryOnStatusCodes())
 	if err != nil {
 		return domain.HttpJobConfig{}, err
 	}
@@ -150,23 +150,25 @@ func httpJobConfigFromProto(p *jobv1.HttpJobConfig) (domain.HttpJobConfig, error
 		Body:       p.GetBody(),
 
 		Timeout:             p.GetTimeout().AsDuration(),
-		ExpectedStatusCodes: expected_sc,
+		ExpectedStatusCodes: expectedSc,
 
 		MaxResponseBodyBytes: p.GetMaxResponseBodyBytes(),
 		FollowRedirects:      p.GetFollowRedirects(),
 
 		RetryOnTimeout:      p.GetRetryOnTimeout(),
 		RetryOnNetworkError: p.GetRetryOnNetworkError(),
-		RetryStatusCodes:    retry_sc,
+		RetryStatusCodes:    retrySc,
 	}
 
 	return cfg, nil
 }
 
-func JobIdFromProto(job_id string) (domain.JobId, error) {
-	return uuid.Parse(job_id)
+// JobIdFromProto parses a job ID.
+func JobIdFromProto(jobID string) (domain.JobId, error) {
+	return uuid.Parse(jobID)
 }
 
+// JobSpecToProto converts a job specification to protobuf.
 func JobSpecToProto(s domain.JobSpec) (*jobv1.JobSpec, error) {
 	p := &jobv1.JobSpec{
 		Type: jobTypeToProto(s.Type),
@@ -186,12 +188,13 @@ func JobSpecToProto(s domain.JobSpec) (*jobv1.JobSpec, error) {
 	return p, nil
 }
 
+// JobSpecFromProto converts a protobuf specification to the domain model.
 func JobSpecFromProto(p *jobv1.JobSpec) (domain.JobSpec, error) {
 	if p == nil {
 		return domain.JobSpec{}, errors.New("job spec is required")
 	}
 
-	job_type, err := jobTypeFromProto(p.GetType())
+	jobType, err := jobTypeFromProto(p.GetType())
 	if err != nil {
 		return domain.JobSpec{}, err
 	}
@@ -202,7 +205,7 @@ func JobSpecFromProto(p *jobv1.JobSpec) (domain.JobSpec, error) {
 	}
 
 	spec := domain.JobSpec{
-		Type: job_type,
+		Type: jobType,
 
 		RetryPolicy: retry_policy,
 	}
@@ -221,6 +224,7 @@ func JobSpecFromProto(p *jobv1.JobSpec) (domain.JobSpec, error) {
 	return spec, nil
 }
 
+// JobToProto converts a job to protobuf.
 func JobToProto(j domain.Job) (*jobv1.Job, error) {
 	spec, err := JobSpecToProto(j.Spec)
 	if err != nil {
@@ -240,6 +244,7 @@ func JobToProto(j domain.Job) (*jobv1.Job, error) {
 	}, nil
 }
 
+// JobFromProto converts a protobuf job to the domain model.
 func JobFromProto(j *jobv1.Job) (domain.Job, error) {
 	if j == nil {
 		return domain.Job{}, errors.New("job is required")

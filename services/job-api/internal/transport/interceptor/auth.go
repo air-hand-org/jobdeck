@@ -1,3 +1,4 @@
+// Package interceptor contains gRPC server interceptors.
 package interceptor
 
 import (
@@ -30,6 +31,7 @@ var developmentActor = func() domain.Actor {
 	return actor
 }()
 
+// IdentityFromTokenFunc resolves an actor from an authentication token.
 type IdentityFromTokenFunc func(ctx context.Context, token string) (domain.Actor, error)
 
 func newAuthFunc(idFromTokenFn IdentityFromTokenFunc) func(context.Context) (context.Context, error) {
@@ -57,6 +59,7 @@ func newAuthFunc(idFromTokenFn IdentityFromTokenFunc) func(context.Context) (con
 	}
 }
 
+// AuthenticationInterceptor authenticates requests selected by matcher.
 func AuthenticationInterceptor(matcher selector.Matcher, fn IdentityFromTokenFunc) grpc.UnaryServerInterceptor {
 	return selector.UnaryServerInterceptor(
 		auth.UnaryServerInterceptor(newAuthFunc(fn)),

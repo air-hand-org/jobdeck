@@ -39,9 +39,13 @@ func (d *OutboxDispatcher) Run(ctx context.Context) error {
 		case <-ctx.Done():
 			return ctx.Err()
 		case <-d.triggerChan:
-			d.dispatch(ctx)
+			if err := d.dispatch(ctx); err != nil {
+				d.logger.ErrorContext(ctx, "failed to dispatch triggered outbox", "error", err)
+			}
 		case <-ticker.C:
-			d.dispatch(ctx)
+			if err := d.dispatch(ctx); err != nil {
+				d.logger.ErrorContext(ctx, "failed to dispatch scheduled outbox", "error", err)
+			}
 		}
 	}
 }

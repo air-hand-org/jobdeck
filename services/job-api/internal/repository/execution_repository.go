@@ -94,13 +94,17 @@ func (r *executionRepository) ListByJob(ctx context.Context, owner_id domain.Act
 		if err != nil {
 			return app.ListExecutionsResult{}, err
 		}
-		execs, err = r.q.ListExecutionsAfter(ctx, jobdb.ListExecutionsAfterParams{
+		var queryErr error
+		execs, queryErr = r.q.ListExecutionsAfter(ctx, jobdb.ListExecutionsAfterParams{
 			JobID:       job_id,
 			OwnerID:     owner_id,
 			CreatedAt:   c_at,
 			ExecutionID: token.ExecutionId,
 			PageSize:    page_size,
 		})
+		if queryErr != nil {
+			return app.ListExecutionsResult{}, queryErr
+		}
 	}
 	if err != nil {
 		return app.ListExecutionsResult{}, err

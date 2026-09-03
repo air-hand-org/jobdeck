@@ -33,7 +33,7 @@ func (s *Store) WithinJobTx(ctx context.Context, fn func(ctx context.Context, jo
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	jobs := newJobRepository(s.q.WithTx(tx))
 	if err := fn(ctx, jobs); err != nil {
@@ -51,7 +51,7 @@ func (s *Store) WithinExecutionTx(ctx context.Context, fn func(ctx context.Conte
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	execs := newExecutionRepository(s.q.WithTx(tx))
 	if err := fn(ctx, execs); err != nil {
@@ -69,7 +69,7 @@ func (s *Store) WithinExecutionQueueTx(ctx context.Context, fn func(ctx context.
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	queues := newExecutionQueueRepository(s.q.WithTx(tx))
 	if err := fn(ctx, queues); err != nil {
@@ -87,7 +87,7 @@ func (s *Store) WithinActorTx(ctx context.Context, fn func(ctx context.Context, 
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	actors := newActorRepository(s.q.WithTx(tx))
 	if err := fn(ctx, actors); err != nil {
@@ -105,7 +105,7 @@ func (s *Store) WithinOutboxTx(ctx context.Context, fn func(ctx context.Context,
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	outbox := newOutboxRepository(s.q.WithTx(tx))
 	if err := fn(ctx, outbox); err != nil {

@@ -121,6 +121,9 @@ func (s *jobServiceServer) GetJob(ctx context.Context, req *jobv1.GetJobRequest)
 		return nil, err
 	}
 	protoJob, err := transform.JobToProto(job)
+	if err != nil {
+		return nil, err
+	}
 	return &jobv1.GetJobResponse{
 		Job: protoJob,
 	}, nil

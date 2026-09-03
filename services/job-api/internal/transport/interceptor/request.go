@@ -8,11 +8,12 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// RejectNilRequestUnaryServerInterceptor rejects nil gRPC requests.
 func RejectNilRequestUnaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,
 		req any,
-		info *grpc.UnaryServerInfo,
+		_ *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler,
 	) (resp any, err error) {
 		if req == nil {
