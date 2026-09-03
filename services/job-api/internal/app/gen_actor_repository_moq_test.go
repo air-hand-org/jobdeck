@@ -19,10 +19,10 @@ var _ ActorRepository = &ActorRepositoryMock{}
 //
 //		// make and configure a mocked ActorRepository
 //		mockedActorRepository := &ActorRepositoryMock{
-//			CreateActorFunc: func(ctx context.Context, actor_id domain.ActorId, actor_type domain.ActorType) (domain.Actor, error) {
+//			CreateActorFunc: func(ctx context.Context, actorID domain.ActorId, actorType domain.ActorType) (domain.Actor, error) {
 //				panic("mock out the CreateActor method")
 //			},
-//			GetActorFunc: func(ctx context.Context, actor_id domain.ActorId) (domain.Actor, error) {
+//			GetActorFunc: func(ctx context.Context, actorID domain.ActorId) (domain.Actor, error) {
 //				panic("mock out the GetActor method")
 //			},
 //		}
@@ -33,10 +33,10 @@ var _ ActorRepository = &ActorRepositoryMock{}
 //	}
 type ActorRepositoryMock struct {
 	// CreateActorFunc mocks the CreateActor method.
-	CreateActorFunc func(ctx context.Context, actor_id domain.ActorId, actor_type domain.ActorType) (domain.Actor, error)
+	CreateActorFunc func(ctx context.Context, actorID domain.ActorId, actorType domain.ActorType) (domain.Actor, error)
 
 	// GetActorFunc mocks the GetActor method.
-	GetActorFunc func(ctx context.Context, actor_id domain.ActorId) (domain.Actor, error)
+	GetActorFunc func(ctx context.Context, actorID domain.ActorId) (domain.Actor, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -44,17 +44,17 @@ type ActorRepositoryMock struct {
 		CreateActor []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// Actor_id is the actor_id argument value.
-			Actor_id domain.ActorId
-			// Actor_type is the actor_type argument value.
-			Actor_type domain.ActorType
+			// ActorID is the actorID argument value.
+			ActorID domain.ActorId
+			// ActorType is the actorType argument value.
+			ActorType domain.ActorType
 		}
 		// GetActor holds details about calls to the GetActor method.
 		GetActor []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// Actor_id is the actor_id argument value.
-			Actor_id domain.ActorId
+			// ActorID is the actorID argument value.
+			ActorID domain.ActorId
 		}
 	}
 	lockCreateActor sync.RWMutex
@@ -62,23 +62,23 @@ type ActorRepositoryMock struct {
 }
 
 // CreateActor calls CreateActorFunc.
-func (mock *ActorRepositoryMock) CreateActor(ctx context.Context, actor_id domain.ActorId, actor_type domain.ActorType) (domain.Actor, error) {
+func (mock *ActorRepositoryMock) CreateActor(ctx context.Context, actorID domain.ActorId, actorType domain.ActorType) (domain.Actor, error) {
 	if mock.CreateActorFunc == nil {
 		panic("ActorRepositoryMock.CreateActorFunc: method is nil but ActorRepository.CreateActor was just called")
 	}
 	callInfo := struct {
-		Ctx        context.Context
-		Actor_id   domain.ActorId
-		Actor_type domain.ActorType
+		Ctx       context.Context
+		ActorID   domain.ActorId
+		ActorType domain.ActorType
 	}{
-		Ctx:        ctx,
-		Actor_id:   actor_id,
-		Actor_type: actor_type,
+		Ctx:       ctx,
+		ActorID:   actorID,
+		ActorType: actorType,
 	}
 	mock.lockCreateActor.Lock()
 	mock.calls.CreateActor = append(mock.calls.CreateActor, callInfo)
 	mock.lockCreateActor.Unlock()
-	return mock.CreateActorFunc(ctx, actor_id, actor_type)
+	return mock.CreateActorFunc(ctx, actorID, actorType)
 }
 
 // CreateActorCalls gets all the calls that were made to CreateActor.
@@ -86,14 +86,14 @@ func (mock *ActorRepositoryMock) CreateActor(ctx context.Context, actor_id domai
 //
 //	len(mockedActorRepository.CreateActorCalls())
 func (mock *ActorRepositoryMock) CreateActorCalls() []struct {
-	Ctx        context.Context
-	Actor_id   domain.ActorId
-	Actor_type domain.ActorType
+	Ctx       context.Context
+	ActorID   domain.ActorId
+	ActorType domain.ActorType
 } {
 	var calls []struct {
-		Ctx        context.Context
-		Actor_id   domain.ActorId
-		Actor_type domain.ActorType
+		Ctx       context.Context
+		ActorID   domain.ActorId
+		ActorType domain.ActorType
 	}
 	mock.lockCreateActor.RLock()
 	calls = mock.calls.CreateActor
@@ -102,21 +102,21 @@ func (mock *ActorRepositoryMock) CreateActorCalls() []struct {
 }
 
 // GetActor calls GetActorFunc.
-func (mock *ActorRepositoryMock) GetActor(ctx context.Context, actor_id domain.ActorId) (domain.Actor, error) {
+func (mock *ActorRepositoryMock) GetActor(ctx context.Context, actorID domain.ActorId) (domain.Actor, error) {
 	if mock.GetActorFunc == nil {
 		panic("ActorRepositoryMock.GetActorFunc: method is nil but ActorRepository.GetActor was just called")
 	}
 	callInfo := struct {
-		Ctx      context.Context
-		Actor_id domain.ActorId
+		Ctx     context.Context
+		ActorID domain.ActorId
 	}{
-		Ctx:      ctx,
-		Actor_id: actor_id,
+		Ctx:     ctx,
+		ActorID: actorID,
 	}
 	mock.lockGetActor.Lock()
 	mock.calls.GetActor = append(mock.calls.GetActor, callInfo)
 	mock.lockGetActor.Unlock()
-	return mock.GetActorFunc(ctx, actor_id)
+	return mock.GetActorFunc(ctx, actorID)
 }
 
 // GetActorCalls gets all the calls that were made to GetActor.
@@ -124,12 +124,12 @@ func (mock *ActorRepositoryMock) GetActor(ctx context.Context, actor_id domain.A
 //
 //	len(mockedActorRepository.GetActorCalls())
 func (mock *ActorRepositoryMock) GetActorCalls() []struct {
-	Ctx      context.Context
-	Actor_id domain.ActorId
+	Ctx     context.Context
+	ActorID domain.ActorId
 } {
 	var calls []struct {
-		Ctx      context.Context
-		Actor_id domain.ActorId
+		Ctx     context.Context
+		ActorID domain.ActorId
 	}
 	mock.lockGetActor.RLock()
 	calls = mock.calls.GetActor

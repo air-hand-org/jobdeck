@@ -19,7 +19,7 @@ var _ TokenIssuer = &TokenIssuerMock{}
 //
 //		// make and configure a mocked TokenIssuer
 //		mockedTokenIssuer := &TokenIssuerMock{
-//			TokenFunc: func(actor_id domain.ActorId, actor_type string, audience string, now time.Time) (AccessToken, error) {
+//			TokenFunc: func(actorID domain.ActorId, actorType string, audience string, now time.Time) (AccessToken, error) {
 //				panic("mock out the Token method")
 //			},
 //		}
@@ -30,16 +30,16 @@ var _ TokenIssuer = &TokenIssuerMock{}
 //	}
 type TokenIssuerMock struct {
 	// TokenFunc mocks the Token method.
-	TokenFunc func(actor_id domain.ActorId, actor_type string, audience string, now time.Time) (AccessToken, error)
+	TokenFunc func(actorID domain.ActorId, actorType string, audience string, now time.Time) (AccessToken, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// Token holds details about calls to the Token method.
 		Token []struct {
-			// Actor_id is the actor_id argument value.
-			Actor_id domain.ActorId
-			// Actor_type is the actor_type argument value.
-			Actor_type string
+			// ActorID is the actorID argument value.
+			ActorID domain.ActorId
+			// ActorType is the actorType argument value.
+			ActorType string
 			// Audience is the audience argument value.
 			Audience string
 			// Now is the now argument value.
@@ -50,25 +50,25 @@ type TokenIssuerMock struct {
 }
 
 // Token calls TokenFunc.
-func (mock *TokenIssuerMock) Token(actor_id domain.ActorId, actor_type string, audience string, now time.Time) (AccessToken, error) {
+func (mock *TokenIssuerMock) Token(actorID domain.ActorId, actorType string, audience string, now time.Time) (AccessToken, error) {
 	if mock.TokenFunc == nil {
 		panic("TokenIssuerMock.TokenFunc: method is nil but TokenIssuer.Token was just called")
 	}
 	callInfo := struct {
-		Actor_id   domain.ActorId
-		Actor_type string
-		Audience   string
-		Now        time.Time
+		ActorID   domain.ActorId
+		ActorType string
+		Audience  string
+		Now       time.Time
 	}{
-		Actor_id:   actor_id,
-		Actor_type: actor_type,
-		Audience:   audience,
-		Now:        now,
+		ActorID:   actorID,
+		ActorType: actorType,
+		Audience:  audience,
+		Now:       now,
 	}
 	mock.lockToken.Lock()
 	mock.calls.Token = append(mock.calls.Token, callInfo)
 	mock.lockToken.Unlock()
-	return mock.TokenFunc(actor_id, actor_type, audience, now)
+	return mock.TokenFunc(actorID, actorType, audience, now)
 }
 
 // TokenCalls gets all the calls that were made to Token.
@@ -76,16 +76,16 @@ func (mock *TokenIssuerMock) Token(actor_id domain.ActorId, actor_type string, a
 //
 //	len(mockedTokenIssuer.TokenCalls())
 func (mock *TokenIssuerMock) TokenCalls() []struct {
-	Actor_id   domain.ActorId
-	Actor_type string
-	Audience   string
-	Now        time.Time
+	ActorID   domain.ActorId
+	ActorType string
+	Audience  string
+	Now       time.Time
 } {
 	var calls []struct {
-		Actor_id   domain.ActorId
-		Actor_type string
-		Audience   string
-		Now        time.Time
+		ActorID   domain.ActorId
+		ActorType string
+		Audience  string
+		Now       time.Time
 	}
 	mock.lockToken.RLock()
 	calls = mock.calls.Token
