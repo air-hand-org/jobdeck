@@ -1,3 +1,4 @@
+// Package main creates or verifies a Pub/Sub topic.
 package main
 
 import (
@@ -24,7 +25,7 @@ func ensureTopic(ctx context.Context, projectID string, topicID string) error {
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
 	topicName := fmt.Sprintf("projects/%s/topics/%s", projectID, topicID)
 
@@ -51,7 +52,7 @@ func ensureTopic(ctx context.Context, projectID string, topicID string) error {
 		}
 
 		if code != codes.Unavailable && code != codes.DeadlineExceeded {
-			return fmt.Errorf("Failed %w", err)
+			return fmt.Errorf("failed: %w", err)
 		}
 
 		slog.Info("Retrying...")
