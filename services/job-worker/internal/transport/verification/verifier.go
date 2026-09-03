@@ -6,18 +6,22 @@ import (
 	"net/http"
 )
 
+// Verifier authenticates an HTTP request.
 type Verifier interface {
 	Verify(*http.Request) error
 }
 
+// SharedTokenVerifier authenticates requests with a shared query token.
 type SharedTokenVerifier struct {
 	token string
 }
 
+// NewSharedTokenVerifier creates a shared-token verifier.
 func NewSharedTokenVerifier(token string) *SharedTokenVerifier {
 	return &SharedTokenVerifier{token: token}
 }
 
+// Verify checks the shared token in r.
 func (v *SharedTokenVerifier) Verify(r *http.Request) error {
 	token, ok := r.URL.Query()["token"]
 	if !ok || len(token) != 1 || subtle.ConstantTimeCompare([]byte(token[0]), []byte(v.token)) != 1 {
@@ -26,8 +30,10 @@ func (v *SharedTokenVerifier) Verify(r *http.Request) error {
 	return nil
 }
 
+// PlatformVerifier delegates authentication to the hosting platform.
 type PlatformVerifier struct{}
 
+// NewPlatformVerifier creates a platform verifier.
 func NewPlatformVerifier() *PlatformVerifier {
 	return &PlatformVerifier{}
 }

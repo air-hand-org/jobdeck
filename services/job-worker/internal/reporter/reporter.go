@@ -1,3 +1,4 @@
+// Package reporter reports completed executions to job-api.
 package reporter
 
 import (
@@ -14,12 +15,14 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Reporter sends completed execution results to job-api.
 type Reporter struct {
 	client jobv1.ExecutionQueueServiceClient
 	logger *slog.Logger
 	tracer trace.Tracer
 }
 
+// NewReporter creates a result reporter.
 func NewReporter(conn *grpc.ClientConn, logger *slog.Logger) *Reporter {
 	return &Reporter{
 		client: jobv1.NewExecutionQueueServiceClient(conn),
@@ -28,6 +31,7 @@ func NewReporter(conn *grpc.ClientConn, logger *slog.Logger) *Reporter {
 	}
 }
 
+// Run reports results until ctx is canceled or results is closed.
 func (r *Reporter) Run(ctx context.Context, results <-chan app.QueuedResult) error {
 	for {
 		select {

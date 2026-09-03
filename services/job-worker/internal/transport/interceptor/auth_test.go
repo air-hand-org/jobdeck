@@ -13,10 +13,10 @@ import (
 )
 
 type tokenSourceStub struct {
-	tokens      []AccessToken
-	tokenCalls  int
+	tokens          []AccessToken
+	tokenCalls      int
 	invalidateCalls int
-	err         error
+	err             error
 }
 
 func (s *tokenSourceStub) Token(context.Context) (AccessToken, error) {

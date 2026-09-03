@@ -1,3 +1,4 @@
+// Package main runs the job worker service.
 package main
 
 import (
@@ -27,7 +28,6 @@ import (
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	health_grpc "google.golang.org/grpc/health/grpc_health_v1"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
@@ -60,7 +60,7 @@ func parseFlags() config {
 }
 
 func waitForServing(ctx context.Context, conn *grpc.ClientConn) error {
-	client := health_grpc.NewHealthClient(conn)
+	client := healthpb.NewHealthClient(conn)
 
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
@@ -72,7 +72,7 @@ func waitForServing(ctx context.Context, conn *grpc.ClientConn) error {
 		})
 		rpcCancel()
 
-		if err == nil && res.GetStatus() == health_grpc.HealthCheckResponse_SERVING {
+		if err == nil && res.GetStatus() == healthpb.HealthCheckResponse_SERVING {
 			return nil
 		}
 
@@ -128,7 +128,7 @@ func main() {
 		if !found {
 			return errors.New("AUTH_GRPC_ENDPOINT is required")
 		}
-		auth_conn, err := newTLSClient(authEndpoint,
+		authConn, err := newTLSClient(authEndpoint,
 			grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
 			grpc.WithDefaultCallOptions(
 				grpc.WaitForReady(true),
@@ -137,39 +137,39 @@ func main() {
 		if err != nil {
 			return err
 		}
-		defer auth_conn.Close()
-		auth_conn.Connect()
-		if err := waitForServing(ctx, auth_conn); err != nil {
+		defer func() { _ = authConn.Close() }()
+		authConn.Connect()
+		if err := waitForServing(ctx, authConn); err != nil {
 			return errors.Wrap(err, "auth did not become serving")
 		}
 
-		token_source, err := auth.NewTokenSource(auth_conn, func() time.Time {
+		tokenSource, err := auth.NewTokenSource(authConn, func() time.Time {
 			return time.Now()
 		}, os.Getenv("AUTH_CLIENT_ID"), os.Getenv("AUTH_CLIENT_SECRET"))
 		if err != nil {
 			return err
 		}
 
-		jobApiEndpoint, found := os.LookupEnv("JOB_API_GRPC_ENDPOINT")
+		jobAPIEndpoint, found := os.LookupEnv("JOB_API_GRPC_ENDPOINT")
 		if !found {
 			return errors.New("JOB_API_GRPC_ENDPOINT is required")
 		}
-		api_conn, err := newTLSClient(jobApiEndpoint,
+		apiConn, err := newTLSClient(jobAPIEndpoint,
 			grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
 			grpc.WithDefaultCallOptions(
 				grpc.WaitForReady(true),
 			),
 			grpc.WithChainUnaryInterceptor(
-				interceptor.AuthUnaryInterceptor(token_source),
+				interceptor.AuthUnaryInterceptor(tokenSource),
 			),
 		)
 		if err != nil {
 			return errors.Wrap(err, "failed to new grpc client")
 		}
-		defer api_conn.Close()
-		api_conn.Connect()
+		defer func() { _ = apiConn.Close() }()
+		apiConn.Connect()
 
-		if err := waitForServing(ctx, api_conn); err != nil {
+		if err := waitForServing(ctx, apiConn); err != nil {
 			return errors.Wrap(err, "job-api did not become serving")
 		}
 
@@ -183,11 +183,11 @@ func main() {
 			port = "9092"
 		}
 		server := transport.NewServer(port, app.NewPushUsecase(
-			claimer.NewClaimer(api_conn, items, logger),
+			claimer.NewClaimer(apiConn, items, logger),
 		), pushVerifier)
 
 		g.Go(func() error {
-			reporter := reporter.NewReporter(api_conn, logger)
+			reporter := reporter.NewReporter(apiConn, logger)
 			return reporter.Run(ctx, results)
 		})
 
