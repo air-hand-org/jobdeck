@@ -19,10 +19,9 @@ go-fmt:
 .PHONY: go-lint
 go-lint:
 	@golangci-lint fmt ./... --diff \
-	;
-#	&& for mod in $(GO_MODULES); do \
-#       	(cd $$mod && golangci-lint run ./...) || exit $$?; \
-#	done;
+	&& for mod in $(GO_MODULES); do \
+		(cd $$mod && golangci-lint run ./...) || exit $$?; \
+	done;
 
 .PHONY: go-test
 go-test:
