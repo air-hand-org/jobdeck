@@ -6,11 +6,11 @@ import (
 	"testing"
 	"time"
 
-	authv1 "jobdeck/gen/go/jobdeck/auth/v1"
 	"jobdeck/services/auth/internal/app"
 	"jobdeck/services/auth/internal/domain"
 	"jobdeck/services/auth/internal/secret"
 
+	authv1 "github.com/air-hand-org/api-contracts/packages/jobdeck/auth/go/v1"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

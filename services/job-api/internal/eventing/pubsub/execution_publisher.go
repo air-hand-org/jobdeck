@@ -2,9 +2,10 @@ package pubsub
 
 import (
 	"context"
-	jobv1 "jobdeck/gen/go/jobdeck/job/v1"
 	"jobdeck/services/job-api/internal/domain"
 	"jobdeck/services/job-api/internal/eventing"
+
+	jobv1 "github.com/air-hand-org/api-contracts/packages/jobdeck/job/go/v1"
 
 	"cloud.google.com/go/pubsub/v2"
 	"github.com/cockroachdb/errors"

@@ -14,7 +14,6 @@ import (
 	"syscall"
 	"time"
 
-	jobv1 "jobdeck/gen/go/jobdeck/job/v1"
 	"jobdeck/services/job-api/internal/app"
 	"jobdeck/services/job-api/internal/auth"
 	"jobdeck/services/job-api/internal/domain"
@@ -24,6 +23,8 @@ import (
 	"jobdeck/services/job-api/internal/telemetry"
 	"jobdeck/services/job-api/internal/transport"
 	"jobdeck/services/job-api/internal/transport/interceptor"
+
+	jobv1 "github.com/air-hand-org/api-contracts/packages/jobdeck/job/go/v1"
 
 	"buf.build/go/protovalidate"
 	"cloud.google.com/go/pubsub/v2"

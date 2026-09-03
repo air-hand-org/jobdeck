@@ -14,7 +14,11 @@ jobs:
   test:
     permissions:
       contents: read
+      packages: read
     runs-on: ubuntu-latest
+    env:
+      NuGetPackageSourceCredentials_github: "Username=${{ github.actor }};Password=${{ secrets.GITHUB_TOKEN }}"
+      GOPRIVATE: "github.com/air-hand-org/api-contracts"
     steps:
       - uses: actions/checkout@v7
         with:
@@ -37,6 +41,21 @@ jobs:
               key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
               restore-keys: |
                 nuget-${{ runner.os }}-
+      - name: create GitHub App token for read GOPRIVATE
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.GH_APP_RELEASE_CLIENT_ID }}
+          private-key: ${{ secrets.GH_APP_RELEASE_PRIVATE_KEY }}
+          permission-contents: read
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            api-contracts
+      - name: configure Git for GOPRIVATE modules
+        run: |
+          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf https://github.com
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
       - name: build
         run: make build
       - name: lint

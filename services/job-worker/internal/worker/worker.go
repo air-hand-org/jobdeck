@@ -2,9 +2,9 @@ package worker
 
 import (
 	"context"
-	jobv1 "jobdeck/gen/go/jobdeck/job/v1"
 	"jobdeck/services/job-worker/internal/app"
 
+	jobv1 "github.com/air-hand-org/api-contracts/packages/jobdeck/job/go/v1"
 	"github.com/cockroachdb/errors"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"

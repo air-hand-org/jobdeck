@@ -7,17 +7,17 @@ setup:
 	@aqua i && mise i
 
 .PHONY: generate
-generate: buf-generate
+generate:
 	@sqlc generate
 
 .PHONY: build
 build: generate go-build cs-build
 
 .PHONY: fmt
-fmt: buf-fmt go-fmt cs-fmt tofu-fmt
+fmt: go-fmt cs-fmt tofu-fmt
 
 .PHONY: lint
-lint: buf-lint go-lint cs-lint
+lint: go-lint cs-lint
 
 .PHONY: check-clean
 check-clean:

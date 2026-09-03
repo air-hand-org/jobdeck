@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"net/url"
 
+	jobv1 "github.com/air-hand-org/api-contracts/packages/jobdeck/job/go/v1"
 	"github.com/cockroachdb/errors"
 	"github.com/google/uuid"
 	"github.com/samber/lo"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	jobv1 "jobdeck/gen/go/jobdeck/job/v1"
 	"jobdeck/services/job-api/internal/domain"
 )
 

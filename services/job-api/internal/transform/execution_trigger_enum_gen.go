@@ -4,7 +4,7 @@ package transform
 
 import (
 	"fmt"
-	jobv1 "jobdeck/gen/go/jobdeck/job/v1"
+	jobv1 "github.com/air-hand-org/api-contracts/packages/jobdeck/job/go/v1"
 	domain "jobdeck/services/job-api/internal/domain"
 )
 
