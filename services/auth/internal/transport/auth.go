@@ -21,6 +21,7 @@ type AuthServiceServer struct {
 
 var _ authv1.AuthServiceServer = (*AuthServiceServer)(nil)
 
+// AuthenticateLocalClient authenticates a local client and returns an access token.
 func (s *AuthServiceServer) AuthenticateLocalClient(ctx context.Context, req *authv1.AuthenticateLocalClientRequest) (*authv1.AuthenticateLocalClientResponse, error) {
 	token, err := s.usecase.Authenticate(ctx, req.GetClientId(), req.GetClientSecret(), req.GetAudience())
 	if err != nil {
