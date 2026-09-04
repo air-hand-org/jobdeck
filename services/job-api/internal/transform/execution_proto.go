@@ -11,6 +11,8 @@ import (
 )
 
 // ExecutionIdFromProto parses an execution ID.
+//
+//nolint:revive // Existing internal API name is retained for compatibility.
 func ExecutionIdFromProto(s string) (domain.ExecutionId, error) {
 	return uuid.Parse(s)
 }
