@@ -86,11 +86,11 @@ func (u *JobUsecase) DeleteJob(ctx context.Context, actor domain.Actor, jobID do
 }
 
 // GetJob retrieves a job.
-func (u *JobUsecase) GetJob(ctx context.Context, actor domain.Actor, job_id domain.JobId) (domain.Job, error) {
+func (u *JobUsecase) GetJob(ctx context.Context, actor domain.Actor, jobID domain.JobId) (domain.Job, error) {
 	if !actor.Role.HasCapability(domain.CapJobRead) {
 		return domain.Job{}, errors.Wrapf(domain.ErrPermissionDenied, "actor %s has no cap %s", actor.ID, domain.CapJobRead)
 	}
-	return u.s.Jobs().FindById(ctx, actor.ID, job_id)
+	return u.s.Jobs().FindById(ctx, actor.ID, jobID)
 }
 
 // ListJobs lists jobs for an actor.
