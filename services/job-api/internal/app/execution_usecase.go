@@ -22,13 +22,13 @@ type ExecutionUsecase struct {
 }
 
 // RequestExecution creates an execution request.
-func (u *ExecutionUsecase) RequestExecution(ctx context.Context, actor domain.Actor, job_id domain.JobId, trigger domain.ExecutionTrigger) (domain.Execution, error) {
+func (u *ExecutionUsecase) RequestExecution(ctx context.Context, actor domain.Actor, jobID domain.JobId, trigger domain.ExecutionTrigger) (domain.Execution, error) {
 	if !actor.Role.HasCapability(domain.CapJobWrite) {
 		return domain.Execution{}, errors.Wrapf(domain.ErrPermissionDenied, "actor %s has no cap %s", actor.ID, domain.CapJobWrite)
 	}
 	var execution domain.Execution
 	if err := u.s.WithinExecutionTx(ctx, func(ctx context.Context, execs ExecutionRepository) error {
-		e, err := execs.CreateForCurrentJob(ctx, actor.ID, job_id, trigger)
+		e, err := execs.CreateForCurrentJob(ctx, actor.ID, jobID, trigger)
 		if err != nil {
 			return err
 		}
@@ -52,11 +52,11 @@ func (u *ExecutionUsecase) GetExecution(ctx context.Context, actor domain.Actor,
 }
 
 // ListExecutions lists executions for a job.
-func (u *ExecutionUsecase) ListExecutions(ctx context.Context, actor domain.Actor, job_id domain.JobId, page_size int32, page_token string) (ListExecutionsResult, error) {
+func (u *ExecutionUsecase) ListExecutions(ctx context.Context, actor domain.Actor, jobID domain.JobId, pageSize int32, pageToken string) (ListExecutionsResult, error) {
 	if !actor.Role.HasCapability(domain.CapJobRead) {
 		return ListExecutionsResult{}, errors.Wrapf(domain.ErrPermissionDenied, "actor %s has no cap %s", actor.ID, domain.CapJobRead)
 	}
-	return u.s.Executions().ListByJob(ctx, actor.ID, job_id, page_size, page_token)
+	return u.s.Executions().ListByJob(ctx, actor.ID, jobID, pageSize, pageToken)
 }
 
 // NewExecutionUsecase constructs an execution use case.
