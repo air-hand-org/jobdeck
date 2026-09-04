@@ -1,3 +1,4 @@
+// Package repository implements persistence for the job API.
 package repository
 
 import (
@@ -24,8 +25,8 @@ type actorRepository struct {
 
 var _ app.ActorRepository = (*actorRepository)(nil)
 
-func (r *actorRepository) GetActor(ctx context.Context, actor_id domain.ActorId) (domain.Actor, error) {
-	actor, err := r.q.GetActor(ctx, actor_id)
+func (r *actorRepository) GetActor(ctx context.Context, actorID domain.ActorId) (domain.Actor, error) {
+	actor, err := r.q.GetActor(ctx, actorID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return domain.Actor{}, domain.ErrActorNotFound
@@ -36,16 +37,16 @@ func (r *actorRepository) GetActor(ctx context.Context, actor_id domain.ActorId)
 	return actorFromDB(actor)
 }
 
-func (r *actorRepository) CreateActor(ctx context.Context, actor_id domain.ActorId, actor_type domain.ActorType) (domain.Actor, error) {
-	actor_id, err := r.q.CreateActor(ctx, jobdb.CreateActorParams{
-		ActorID: actor_id,
-		Type:    string(actor_type),
+func (r *actorRepository) CreateActor(ctx context.Context, actorID domain.ActorId, actorType domain.ActorType) (domain.Actor, error) {
+	createdActorID, err := r.q.CreateActor(ctx, jobdb.CreateActorParams{
+		ActorID: actorID,
+		Type:    string(actorType),
 	})
 	if err != nil {
 		return domain.Actor{}, err
 	}
 
-	return r.GetActor(ctx, actor_id)
+	return r.GetActor(ctx, createdActorID)
 }
 
 func newActorRepository(q actorQuerier) *actorRepository {
