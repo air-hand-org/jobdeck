@@ -123,7 +123,7 @@ func httpJobConfigFromProto(p *jobv1.HttpJobConfig) (domain.HttpJobConfig, error
 		return domain.HttpJobConfig{}, err
 	}
 
-	url, err := url.ParseRequestURI(p.GetUrl())
+	parsedURL, err := url.ParseRequestURI(p.GetUrl())
 	if err != nil {
 		return domain.HttpJobConfig{}, err
 	}
@@ -145,7 +145,7 @@ func httpJobConfigFromProto(p *jobv1.HttpJobConfig) (domain.HttpJobConfig, error
 
 	cfg := domain.HttpJobConfig{
 		HttpMethod: method,
-		Url:        *url,
+		Url:        *parsedURL,
 		Headers:    headers,
 		Body:       p.GetBody(),
 
@@ -164,6 +164,8 @@ func httpJobConfigFromProto(p *jobv1.HttpJobConfig) (domain.HttpJobConfig, error
 }
 
 // JobIdFromProto parses a job ID.
+//
+//nolint:revive // Existing internal API name is retained for compatibility.
 func JobIdFromProto(jobID string) (domain.JobId, error) {
 	return uuid.Parse(jobID)
 }
@@ -199,7 +201,7 @@ func JobSpecFromProto(p *jobv1.JobSpec) (domain.JobSpec, error) {
 		return domain.JobSpec{}, err
 	}
 
-	retry_policy, err := retryPolicyFromProto(p.GetRetryPolicy())
+	retryPolicy, err := retryPolicyFromProto(p.GetRetryPolicy())
 	if err != nil {
 		return domain.JobSpec{}, err
 	}
@@ -207,7 +209,7 @@ func JobSpecFromProto(p *jobv1.JobSpec) (domain.JobSpec, error) {
 	spec := domain.JobSpec{
 		Type: jobType,
 
-		RetryPolicy: retry_policy,
+		RetryPolicy: retryPolicy,
 	}
 
 	switch spec.Type {
@@ -255,7 +257,7 @@ func JobFromProto(j *jobv1.Job) (domain.Job, error) {
 		return domain.Job{}, err
 	}
 
-	owner_id, err := uuid.Parse(j.GetOwnerId())
+	ownerID, err := uuid.Parse(j.GetOwnerId())
 	if err != nil {
 		return domain.Job{}, err
 	}
@@ -267,7 +269,7 @@ func JobFromProto(j *jobv1.Job) (domain.Job, error) {
 
 	return domain.Job{
 		Id:        id,
-		OwnerId:   owner_id,
+		OwnerId:   ownerID,
 		Enabled:   j.GetEnabled(),
 		Name:      j.GetName(),
 		Spec:      spec,
