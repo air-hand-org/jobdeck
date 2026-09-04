@@ -19,8 +19,10 @@ const (
 	//nolint:revive // Names mirror the protobuf enum constants.
 	EXECUTION_STATUS_SUCCEEDED ExecutionStatus = "SUCCEEDED"
 	//nolint:revive // Names mirror the protobuf enum constants.
-	EXECUTION_STATUS_FAILED    ExecutionStatus = "FAILED"
+	EXECUTION_STATUS_FAILED ExecutionStatus = "FAILED"
+	//nolint:revive // Names mirror the protobuf enum constants.
 	EXECUTION_STATUS_TIMED_OUT ExecutionStatus = "TIMED_OUT" // running, but too long until reported
+	//nolint:revive // Names mirror the protobuf enum constants.
 	EXECUTION_STATUS_CANCELLED ExecutionStatus = "CANCELLED" // cancelled before running
 )
 
@@ -44,6 +46,7 @@ type ExecutionTrigger string
 
 const (
 	// EXECUTION_TRIGGER_MANUAL identifies a manually initiated execution.
+	//nolint:revive // Name mirrors the protobuf enum constant.
 	EXECUTION_TRIGGER_MANUAL ExecutionTrigger = "MANUAL"
 )
 
