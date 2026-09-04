@@ -12,7 +12,7 @@ import (
 
 type jobPageToken struct {
 	CreatedAt time.Time    `json:"created_at"`
-	JobId     domain.JobId `json:"job_id"`
+	JobID     domain.JobId `json:"job_id"`
 }
 
 func encodeJobPageToken(t jobPageToken) (string, error) {
@@ -32,7 +32,7 @@ func decodeJobPageToken(s string) (jobPageToken, error) {
 	if err := json.Unmarshal(d, &t); err != nil {
 		return jobPageToken{}, err
 	}
-	if t.CreatedAt.IsZero() || t.JobId == uuid.Nil {
+	if t.CreatedAt.IsZero() || t.JobID == uuid.Nil {
 		return jobPageToken{}, errors.New("invalid page token")
 	}
 	return t, nil
@@ -40,7 +40,7 @@ func decodeJobPageToken(s string) (jobPageToken, error) {
 
 type executionPageToken struct {
 	CreatedAt   time.Time          `json:"created_at"`
-	ExecutionId domain.ExecutionId `json:"execution_id"`
+	ExecutionID domain.ExecutionId `json:"execution_id"`
 }
 
 func encodeExecutionPageToken(t executionPageToken) (string, error) {
@@ -60,7 +60,7 @@ func decodeExecutionPageToken(s string) (executionPageToken, error) {
 	if err := json.Unmarshal(d, &t); err != nil {
 		return executionPageToken{}, err
 	}
-	if t.CreatedAt.IsZero() || t.ExecutionId == uuid.Nil {
+	if t.CreatedAt.IsZero() || t.ExecutionID == uuid.Nil {
 		return executionPageToken{}, errors.New("invalid page token")
 	}
 	return t, nil
