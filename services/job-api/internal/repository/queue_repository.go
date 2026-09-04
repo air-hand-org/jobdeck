@@ -21,7 +21,7 @@ type executionQueueQuerier interface {
 	GetExecutionClaimDetail(ctx context.Context, executionID uuid.UUID) (jobdb.JobExecutionClaimDetail, error)
 	GetExecutionDetailDirect(ctx context.Context, executionID uuid.UUID) (jobdb.Execution, error)
 	ListExecutionEvents(ctx context.Context, executionID uuid.UUID) ([]jobdb.JobExecutionEvent, error)
-	ListExecutionClaimDetails(ctx context.Context, executionIdList []uuid.UUID) ([]jobdb.JobExecutionClaimDetail, error)
+	ListExecutionClaimDetails(ctx context.Context, executionIDList []uuid.UUID) ([]jobdb.JobExecutionClaimDetail, error)
 }
 
 var _ executionQueueQuerier = (*jobdb.Queries)(nil)
@@ -32,30 +32,30 @@ type executionQueueRepository struct {
 
 var _ app.ExecutionQueueRepository = (*executionQueueRepository)(nil)
 
-func (r *executionQueueRepository) CreateRetryUnsuccessful(ctx context.Context, execution_id domain.ExecutionId, next_run_at time.Time) (domain.Execution, error) {
-	n, err := timeToPGType(next_run_at)
+func (r *executionQueueRepository) CreateRetryUnsuccessful(ctx context.Context, executionID domain.ExecutionId, nextRunAt time.Time) (domain.Execution, error) {
+	n, err := timeToPGType(nextRunAt)
 	if err != nil {
 		return domain.Execution{}, err
 	}
-	exec_id, err := r.q.CreateRetryForUnsuccessfulExecution(ctx, jobdb.CreateRetryForUnsuccessfulExecutionParams{
-		ExecutionID: execution_id,
+	execID, err := r.q.CreateRetryForUnsuccessfulExecution(ctx, jobdb.CreateRetryForUnsuccessfulExecutionParams{
+		ExecutionID: executionID,
 		NextRunAt:   n,
 	})
 	if err != nil {
 		return domain.Execution{}, err
 	}
-	return r.findById(ctx, exec_id)
+	return r.findByID(ctx, execID)
 }
 
-func (r *executionQueueRepository) Claim(ctx context.Context, execution_id domain.ExecutionId) (domain.ClaimedExecution, error) {
+func (r *executionQueueRepository) Claim(ctx context.Context, executionID domain.ExecutionId) (domain.ClaimedExecution, error) {
 	// TODO
-	lease_expires_at, err := timeToPGType(time.Now().Add(5 * time.Minute))
+	leaseExpiresAt, err := timeToPGType(time.Now().Add(5 * time.Minute))
 	if err != nil {
 		return domain.ClaimedExecution{}, err
 	}
-	claim_exec_id, err := r.q.ClaimExecution(ctx, jobdb.ClaimExecutionParams{
-		ExecutionID:    execution_id,
-		LeaseExpiresAt: lease_expires_at,
+	claimExecID, err := r.q.ClaimExecution(ctx, jobdb.ClaimExecutionParams{
+		ExecutionID:    executionID,
+		LeaseExpiresAt: leaseExpiresAt,
 	})
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -63,49 +63,49 @@ func (r *executionQueueRepository) Claim(ctx context.Context, execution_id domai
 		}
 		return domain.ClaimedExecution{}, errors.Wrap(err, "failed to claim execution")
 	}
-	claim, err := r.q.GetExecutionClaimDetail(ctx, claim_exec_id)
+	claim, err := r.q.GetExecutionClaimDetail(ctx, claimExecID)
 	if err != nil {
 		return domain.ClaimedExecution{}, errors.Wrapf(domain.ErrExecutionNotFound, "failed to get execution claim detail: %v", err)
 	}
 	return claimExecutionFromDB(claim)
 }
 
-func (r *executionQueueRepository) GetReportTarget(ctx context.Context, execution_id domain.ExecutionId, lease_token domain.LeaseToken) (domain.Execution, error) {
-	exec, err := r.findById(ctx, execution_id)
+func (r *executionQueueRepository) GetReportTarget(ctx context.Context, executionID domain.ExecutionId, leaseToken domain.LeaseToken) (domain.Execution, error) {
+	exec, err := r.findByID(ctx, executionID)
 	if err != nil {
 		return domain.Execution{}, err
 	}
 
-	if exec.Status != domain.EXECUTION_STATUS_RUNNING || exec.LeaseToken != lease_token {
+	if exec.Status != domain.EXECUTION_STATUS_RUNNING || exec.LeaseToken != leaseToken {
 		return domain.Execution{}, domain.ErrExecutionNotReportable
 	}
 
 	return exec, nil
 }
 
-func (r *executionQueueRepository) ReportResult(ctx context.Context, execution_id domain.ExecutionId, status domain.ExecutionStatus, lease_token domain.LeaseToken, result domain.ExecutionResult) (domain.Execution, error) {
+func (r *executionQueueRepository) ReportResult(ctx context.Context, executionID domain.ExecutionId, status domain.ExecutionStatus, leaseToken domain.LeaseToken, result domain.ExecutionResult) (domain.Execution, error) {
 	res, err := json.Marshal(result.Result)
 	if err != nil {
 		return domain.Execution{}, err
 	}
 	_, err = r.q.ReportExecutionResult(ctx, jobdb.ReportExecutionResultParams{
-		ExecutionID: execution_id,
-		LeaseToken:  &lease_token,
+		ExecutionID: executionID,
+		LeaseToken:  &leaseToken,
 		Status:      string(status),
 		Result:      res,
 	})
 	if err != nil {
 		return domain.Execution{}, err
 	}
-	return r.findById(ctx, execution_id)
+	return r.findByID(ctx, executionID)
 }
 
 // TODO: duplicate ExecutionRepository.FindById
-func (r *executionQueueRepository) findById(ctx context.Context, execution_id domain.ExecutionId) (domain.Execution, error) {
-	exec, err := r.q.GetExecutionDetailDirect(ctx, execution_id)
+func (r *executionQueueRepository) findByID(ctx context.Context, executionID domain.ExecutionId) (domain.Execution, error) {
+	exec, err := r.q.GetExecutionDetailDirect(ctx, executionID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return domain.Execution{}, errors.Wrapf(domain.ErrExecutionNotFound, "execution %v was not found", execution_id)
+			return domain.Execution{}, errors.Wrapf(domain.ErrExecutionNotFound, "execution %v was not found", executionID)
 		}
 		return domain.Execution{}, err
 	}
@@ -117,11 +117,11 @@ func (r *executionQueueRepository) findById(ctx context.Context, execution_id do
 	if err != nil {
 		return domain.Execution{}, err
 	}
-	execution_events, err := executionEventsFromDB(events)
+	executionEvents, err := executionEventsFromDB(events)
 	if err != nil {
 		return domain.Execution{}, err
 	}
-	execution.Events = execution_events
+	execution.Events = executionEvents
 	return execution, nil
 }
 
