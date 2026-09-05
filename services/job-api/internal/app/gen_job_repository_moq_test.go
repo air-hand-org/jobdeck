@@ -25,8 +25,8 @@ var _ JobRepository = &JobRepositoryMock{}
 //			DeleteFunc: func(contextMoqParam context.Context, v1 domain.ActorId, v2 domain.JobId) error {
 //				panic("mock out the Delete method")
 //			},
-//			FindByIdFunc: func(contextMoqParam context.Context, v1 domain.ActorId, v2 domain.JobId) (domain.Job, error) {
-//				panic("mock out the FindById method")
+//			FindByIDFunc: func(contextMoqParam context.Context, v1 domain.ActorId, v2 domain.JobId) (domain.Job, error) {
+//				panic("mock out the FindByID method")
 //			},
 //			ListByOwnerFunc: func(ctx context.Context, ownerID domain.ActorId, pageSize int32, pageToken string) (ListJobsResult, error) {
 //				panic("mock out the ListByOwner method")
@@ -53,8 +53,8 @@ type JobRepositoryMock struct {
 	// DeleteFunc mocks the Delete method.
 	DeleteFunc func(contextMoqParam context.Context, v1 domain.ActorId, v2 domain.JobId) error
 
-	// FindByIdFunc mocks the FindById method.
-	FindByIdFunc func(contextMoqParam context.Context, v1 domain.ActorId, v2 domain.JobId) (domain.Job, error)
+	// FindByIDFunc mocks the FindByID method.
+	FindByIDFunc func(contextMoqParam context.Context, v1 domain.ActorId, v2 domain.JobId) (domain.Job, error)
 
 	// ListByOwnerFunc mocks the ListByOwner method.
 	ListByOwnerFunc func(ctx context.Context, ownerID domain.ActorId, pageSize int32, pageToken string) (ListJobsResult, error)
@@ -90,8 +90,8 @@ type JobRepositoryMock struct {
 			// V2 is the v2 argument value.
 			V2 domain.JobId
 		}
-		// FindById holds details about calls to the FindById method.
-		FindById []struct {
+		// FindByID holds details about calls to the FindByID method.
+		FindByID []struct {
 			// ContextMoqParam is the contextMoqParam argument value.
 			ContextMoqParam context.Context
 			// V1 is the v1 argument value.
@@ -146,7 +146,7 @@ type JobRepositoryMock struct {
 	}
 	lockCreate      sync.RWMutex
 	lockDelete      sync.RWMutex
-	lockFindById    sync.RWMutex
+	lockFindByID    sync.RWMutex
 	lockListByOwner sync.RWMutex
 	lockRename      sync.RWMutex
 	lockSetEnabled  sync.RWMutex
@@ -237,10 +237,10 @@ func (mock *JobRepositoryMock) DeleteCalls() []struct {
 	return calls
 }
 
-// FindById calls FindByIdFunc.
-func (mock *JobRepositoryMock) FindById(contextMoqParam context.Context, v1 domain.ActorId, v2 domain.JobId) (domain.Job, error) {
-	if mock.FindByIdFunc == nil {
-		panic("JobRepositoryMock.FindByIdFunc: method is nil but JobRepository.FindById was just called")
+// FindByID calls FindByIDFunc.
+func (mock *JobRepositoryMock) FindByID(contextMoqParam context.Context, v1 domain.ActorId, v2 domain.JobId) (domain.Job, error) {
+	if mock.FindByIDFunc == nil {
+		panic("JobRepositoryMock.FindByIDFunc: method is nil but JobRepository.FindByID was just called")
 	}
 	callInfo := struct {
 		ContextMoqParam context.Context
@@ -251,17 +251,17 @@ func (mock *JobRepositoryMock) FindById(contextMoqParam context.Context, v1 doma
 		V1:              v1,
 		V2:              v2,
 	}
-	mock.lockFindById.Lock()
-	mock.calls.FindById = append(mock.calls.FindById, callInfo)
-	mock.lockFindById.Unlock()
-	return mock.FindByIdFunc(contextMoqParam, v1, v2)
+	mock.lockFindByID.Lock()
+	mock.calls.FindByID = append(mock.calls.FindByID, callInfo)
+	mock.lockFindByID.Unlock()
+	return mock.FindByIDFunc(contextMoqParam, v1, v2)
 }
 
-// FindByIdCalls gets all the calls that were made to FindById.
+// FindByIDCalls gets all the calls that were made to FindByID.
 // Check the length with:
 //
-//	len(mockedJobRepository.FindByIdCalls())
-func (mock *JobRepositoryMock) FindByIdCalls() []struct {
+//	len(mockedJobRepository.FindByIDCalls())
+func (mock *JobRepositoryMock) FindByIDCalls() []struct {
 	ContextMoqParam context.Context
 	V1              domain.ActorId
 	V2              domain.JobId
@@ -271,9 +271,9 @@ func (mock *JobRepositoryMock) FindByIdCalls() []struct {
 		V1              domain.ActorId
 		V2              domain.JobId
 	}
-	mock.lockFindById.RLock()
-	calls = mock.calls.FindById
-	mock.lockFindById.RUnlock()
+	mock.lockFindByID.RLock()
+	calls = mock.calls.FindByID
+	mock.lockFindByID.RUnlock()
 	return calls
 }
 

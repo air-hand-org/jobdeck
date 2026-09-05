@@ -19,7 +19,7 @@ var _ ExecutionPublisher = &ExecutionPublisherMock{}
 //
 //		// make and configure a mocked ExecutionPublisher
 //		mockedExecutionPublisher := &ExecutionPublisherMock{
-//			PublishFunc: func(ctx context.Context, executionId domain.ExecutionId) error {
+//			PublishFunc: func(ctx context.Context, executionID domain.ExecutionId) error {
 //				panic("mock out the Publish method")
 //			},
 //		}
@@ -30,7 +30,7 @@ var _ ExecutionPublisher = &ExecutionPublisherMock{}
 //	}
 type ExecutionPublisherMock struct {
 	// PublishFunc mocks the Publish method.
-	PublishFunc func(ctx context.Context, executionId domain.ExecutionId) error
+	PublishFunc func(ctx context.Context, executionID domain.ExecutionId) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -38,29 +38,29 @@ type ExecutionPublisherMock struct {
 		Publish []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// ExecutionId is the executionId argument value.
-			ExecutionId domain.ExecutionId
+			// ExecutionID is the executionID argument value.
+			ExecutionID domain.ExecutionId
 		}
 	}
 	lockPublish sync.RWMutex
 }
 
 // Publish calls PublishFunc.
-func (mock *ExecutionPublisherMock) Publish(ctx context.Context, executionId domain.ExecutionId) error {
+func (mock *ExecutionPublisherMock) Publish(ctx context.Context, executionID domain.ExecutionId) error {
 	if mock.PublishFunc == nil {
 		panic("ExecutionPublisherMock.PublishFunc: method is nil but ExecutionPublisher.Publish was just called")
 	}
 	callInfo := struct {
 		Ctx         context.Context
-		ExecutionId domain.ExecutionId
+		ExecutionID domain.ExecutionId
 	}{
 		Ctx:         ctx,
-		ExecutionId: executionId,
+		ExecutionID: executionID,
 	}
 	mock.lockPublish.Lock()
 	mock.calls.Publish = append(mock.calls.Publish, callInfo)
 	mock.lockPublish.Unlock()
-	return mock.PublishFunc(ctx, executionId)
+	return mock.PublishFunc(ctx, executionID)
 }
 
 // PublishCalls gets all the calls that were made to Publish.
@@ -69,11 +69,11 @@ func (mock *ExecutionPublisherMock) Publish(ctx context.Context, executionId dom
 //	len(mockedExecutionPublisher.PublishCalls())
 func (mock *ExecutionPublisherMock) PublishCalls() []struct {
 	Ctx         context.Context
-	ExecutionId domain.ExecutionId
+	ExecutionID domain.ExecutionId
 } {
 	var calls []struct {
 		Ctx         context.Context
-		ExecutionId domain.ExecutionId
+		ExecutionID domain.ExecutionId
 	}
 	mock.lockPublish.RLock()
 	calls = mock.calls.Publish
