@@ -78,6 +78,7 @@ type HttpErrorType string
 
 const (
 	// HTTP_ERROR_TYPE_TIMEOUT and related constants identify transport failures.
+	//nolint:revive // Names mirror the externally represented error types.
 	HTTP_ERROR_TYPE_TIMEOUT HttpErrorType = "TIMEOUT"
 	//nolint:revive // Name mirrors the protobuf enum constant.
 	HTTP_ERROR_TYPE_NETWORK HttpErrorType = "NETWORK"

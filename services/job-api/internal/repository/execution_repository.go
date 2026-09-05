@@ -75,7 +75,7 @@ func (r *executionRepository) ListByJob(ctx context.Context, ownerID domain.Acto
 	)
 
 	originalPageSize := pageSize
-	pageSize += 1
+	pageSize++
 	if originalPageSize <= 0 {
 		return app.ListExecutionsResult{}, errors.Newf("page size must be positive : %v", originalPageSize)
 	}

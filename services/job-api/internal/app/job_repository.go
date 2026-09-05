@@ -22,6 +22,6 @@ type JobRepository interface {
 	SetEnabled(context.Context, domain.ActorId, domain.JobId, bool) (domain.Job, error)
 	Delete(context.Context, domain.ActorId, domain.JobId) error
 
-	FindById(context.Context, domain.ActorId, domain.JobId) (domain.Job, error)
+	FindByID(context.Context, domain.ActorId, domain.JobId) (domain.Job, error)
 	ListByOwner(ctx context.Context, ownerID domain.ActorId, pageSize int32, pageToken string) (ListJobsResult, error)
 }

@@ -36,6 +36,7 @@ type JobType string
 
 const (
 	// JOB_TYPE_HTTP_REQUEST identifies an HTTP request job.
+	//nolint:revive // Name mirrors the externally represented job type.
 	JOB_TYPE_HTTP_REQUEST JobType = "HTTP_REQUEST"
 )
 
@@ -148,12 +149,17 @@ type HttpMethod string
 
 const (
 	// HTTP_METHOD_GET and related constants are HTTP methods supported by HTTP jobs.
+	//nolint:revive // Names mirror the externally represented HTTP methods.
 	HTTP_METHOD_GET HttpMethod = "GET"
 	//nolint:revive // Name mirrors the protobuf enum constant.
-	HTTP_METHOD_POST   HttpMethod = "POST"
-	HTTP_METHOD_HEAD   HttpMethod = "HEAD"
-	HTTP_METHOD_PUT    HttpMethod = "PUT"
-	HTTP_METHOD_PATCH  HttpMethod = "PATCH"
+	HTTP_METHOD_POST HttpMethod = "POST"
+	//nolint:revive // Name mirrors the externally represented HTTP method.
+	HTTP_METHOD_HEAD HttpMethod = "HEAD"
+	//nolint:revive // Name mirrors the externally represented HTTP method.
+	HTTP_METHOD_PUT HttpMethod = "PUT"
+	//nolint:revive // Name mirrors the externally represented HTTP method.
+	HTTP_METHOD_PATCH HttpMethod = "PATCH"
+	//nolint:revive // Name mirrors the externally represented HTTP method.
 	HTTP_METHOD_DELETE HttpMethod = "DELETE"
 )
 
@@ -237,6 +243,7 @@ type BackoffType string
 
 const (
 	// BACKOFF_TYPE_FIXED identifies fixed retry delays.
+	//nolint:revive // Name mirrors the externally represented retry strategy.
 	BACKOFF_TYPE_FIXED BackoffType = "FIXED"
 )
 

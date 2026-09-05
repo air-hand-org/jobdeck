@@ -90,7 +90,7 @@ func (u *JobUsecase) GetJob(ctx context.Context, actor domain.Actor, jobID domai
 	if !actor.Role.HasCapability(domain.CapJobRead) {
 		return domain.Job{}, errors.Wrapf(domain.ErrPermissionDenied, "actor %s has no cap %s", actor.ID, domain.CapJobRead)
 	}
-	return u.s.Jobs().FindById(ctx, actor.ID, jobID)
+	return u.s.Jobs().FindByID(ctx, actor.ID, jobID)
 }
 
 // ListJobs lists jobs for an actor.

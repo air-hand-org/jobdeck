@@ -1,3 +1,4 @@
+// Package telemetry configures OpenTelemetry tracing for the job API.
 package telemetry
 
 import (
