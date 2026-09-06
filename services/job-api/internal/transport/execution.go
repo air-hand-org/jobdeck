@@ -22,6 +22,7 @@ type ExecutionServiceServer struct {
 
 var _ jobv1.ExecutionServiceServer = (*ExecutionServiceServer)(nil)
 
+// GetExecution returns an execution for the authenticated actor.
 func (s *ExecutionServiceServer) GetExecution(ctx context.Context, req *jobv1.GetExecutionRequest) (*jobv1.GetExecutionResponse, error) {
 	execID, err := transform.ExecutionIdFromProto(req.GetExecutionId())
 	if err != nil {
@@ -44,6 +45,7 @@ func (s *ExecutionServiceServer) GetExecution(ctx context.Context, req *jobv1.Ge
 	}, nil
 }
 
+// ListExecutions returns executions for a job for the authenticated actor.
 func (s *ExecutionServiceServer) ListExecutions(ctx context.Context, req *jobv1.ListExecutionsRequest) (*jobv1.ListExecutionsResponse, error) {
 	jobID, err := transform.JobIdFromProto(req.GetJobId())
 	if err != nil {
@@ -69,6 +71,7 @@ func (s *ExecutionServiceServer) ListExecutions(ctx context.Context, req *jobv1.
 	}, nil
 }
 
+// DoExecution requests a manual execution of a job for the authenticated actor.
 func (s *ExecutionServiceServer) DoExecution(ctx context.Context, req *jobv1.DoExecutionRequest) (*jobv1.DoExecutionResponse, error) {
 	jobID, err := transform.JobIdFromProto(req.GetJobId())
 	if err != nil {

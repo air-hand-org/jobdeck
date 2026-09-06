@@ -91,7 +91,7 @@ func (s *cachedTokenSource) authenticate(ctx context.Context) (*accessToken, err
 }
 
 // NewTokenSource creates a token source backed by the auth service.
-func NewTokenSource(conn *grpc.ClientConn, now NowFunc, clientID string, clientSecret string) (*cachedTokenSource, error) {
+func NewTokenSource(conn *grpc.ClientConn, now NowFunc, clientID string, clientSecret string) (interceptor.TokenSource, error) {
 	if clientID == "" || clientSecret == "" {
 		return nil, errors.New("client_id and client_secret are required")
 	}

@@ -22,6 +22,7 @@ type ExecutionQueueServiceServer struct {
 
 var _ jobv1.ExecutionQueueServiceServer = (*ExecutionQueueServiceServer)(nil)
 
+// ClaimExecution claims an execution for the authenticated actor.
 func (s *ExecutionQueueServiceServer) ClaimExecution(ctx context.Context, req *jobv1.ClaimExecutionRequest) (*jobv1.ClaimExecutionResponse, error) {
 	actor, ok := auth.GetActorContext(ctx)
 	if !ok {
@@ -44,6 +45,7 @@ func (s *ExecutionQueueServiceServer) ClaimExecution(ctx context.Context, req *j
 	}, nil
 }
 
+// ReportExecutionResult reports an execution result for the authenticated actor.
 func (s *ExecutionQueueServiceServer) ReportExecutionResult(ctx context.Context, req *jobv1.ReportExecutionResultRequest) (*jobv1.ReportExecutionResultResponse, error) {
 	execID, err := transform.ExecutionIdFromProto(req.GetExecutionId())
 	if err != nil {

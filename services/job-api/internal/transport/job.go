@@ -21,6 +21,7 @@ type JobServiceServer struct {
 
 var _ jobv1.JobServiceServer = (*JobServiceServer)(nil)
 
+// CreateJob creates a job for the authenticated actor.
 func (s *JobServiceServer) CreateJob(ctx context.Context, req *jobv1.CreateJobRequest) (*jobv1.CreateJobResponse, error) {
 	spec, err := transform.JobSpecFromProto(req.Spec)
 	if err != nil {
@@ -43,6 +44,7 @@ func (s *JobServiceServer) CreateJob(ctx context.Context, req *jobv1.CreateJobRe
 	}, nil
 }
 
+// UpdateJob updates a job for the authenticated actor.
 func (s *JobServiceServer) UpdateJob(ctx context.Context, req *jobv1.UpdateJobRequest) (*jobv1.UpdateJobResponse, error) {
 	jobID, err := transform.JobIdFromProto(req.GetJobId())
 	if err != nil {
@@ -69,6 +71,7 @@ func (s *JobServiceServer) UpdateJob(ctx context.Context, req *jobv1.UpdateJobRe
 	}, nil
 }
 
+// SetJobEnabled changes whether a job is enabled for the authenticated actor.
 func (s *JobServiceServer) SetJobEnabled(ctx context.Context, req *jobv1.SetJobEnabledRequest) (*jobv1.SetJobEnabledResponse, error) {
 	jobID, err := transform.JobIdFromProto(req.GetJobId())
 	if err != nil {
@@ -92,6 +95,7 @@ func (s *JobServiceServer) SetJobEnabled(ctx context.Context, req *jobv1.SetJobE
 	}, nil
 }
 
+// DeleteJob deletes a job for the authenticated actor.
 func (s *JobServiceServer) DeleteJob(ctx context.Context, req *jobv1.DeleteJobRequest) (*jobv1.DeleteJobResponse, error) {
 	jobID, err := transform.JobIdFromProto(req.GetJobId())
 	if err != nil {
@@ -108,6 +112,7 @@ func (s *JobServiceServer) DeleteJob(ctx context.Context, req *jobv1.DeleteJobRe
 	return &jobv1.DeleteJobResponse{}, nil
 }
 
+// GetJob returns a job for the authenticated actor.
 func (s *JobServiceServer) GetJob(ctx context.Context, req *jobv1.GetJobRequest) (*jobv1.GetJobResponse, error) {
 	jobID, err := transform.JobIdFromProto(req.GetJobId())
 	if err != nil {
@@ -130,6 +135,7 @@ func (s *JobServiceServer) GetJob(ctx context.Context, req *jobv1.GetJobRequest)
 	}, nil
 }
 
+// ListJobs returns jobs for the authenticated actor.
 func (s *JobServiceServer) ListJobs(ctx context.Context, req *jobv1.ListJobsRequest) (*jobv1.ListJobsResponse, error) {
 	actor, ok := auth.GetActorContext(ctx)
 	if !ok {
