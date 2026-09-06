@@ -1,3 +1,4 @@
+// Command republish republishes pending executions.
 package main
 
 import (
@@ -36,7 +37,7 @@ func (s *republishStore) WithinTx(ctx context.Context, fn func(ctx context.Conte
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	repo := republishRepository{q: s.q.WithTx(tx)}
 	if err := fn(ctx, repo); err != nil {
@@ -66,19 +67,19 @@ func main() {
 
 	store := newStore(pool)
 
-	var exec_id_list []domain.ExecutionId
+	var execIDList []domain.ExecutionId
 	if err := store.WithinTx(signalCtx, func(ctx context.Context, repo republishRepository) error {
-		exec_ids, err := repo.Republish(ctx)
+		execIDs, err := repo.Republish(ctx)
 		if err != nil {
 			return err
 		}
-		exec_id_list = exec_ids
+		execIDList = execIDs
 		return nil
 	}); err != nil {
 		log.Fatalf("failed to republish: %v", err)
 	}
 	slog.Info(
 		"republish execution ids",
-		"id", exec_id_list,
+		"id", execIDList,
 	)
 }

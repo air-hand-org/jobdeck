@@ -37,13 +37,13 @@ func newJobRepository(q jobQuerier) *jobRepository {
 
 var _ app.JobRepository = (*jobRepository)(nil)
 
-func (r *jobRepository) Create(ctx context.Context, owner_id domain.ActorId, name string, spec domain.JobSpec) (domain.Job, error) {
+func (r *jobRepository) Create(ctx context.Context, ownerID domain.ActorId, name string, spec domain.JobSpec) (domain.Job, error) {
 	cfg, err := json.Marshal(spec.Config)
 	if err != nil {
 		return domain.Job{}, err
 	}
-	job_id, err := r.q.CreateJob(ctx, jobdb.CreateJobParams{
-		OwnerID:             owner_id,
+	jobID, err := r.q.CreateJob(ctx, jobdb.CreateJobParams{
+		OwnerID:             ownerID,
 		Name:                name,
 		Type:                string(spec.Type),
 		Config:              cfg,
@@ -56,10 +56,10 @@ func (r *jobRepository) Create(ctx context.Context, owner_id domain.ActorId, nam
 		return domain.Job{}, err
 	}
 
-	return r.FindById(ctx, owner_id, job_id)
+	return r.FindByID(ctx, ownerID, jobID)
 }
 
-func (r *jobRepository) UpdateSpec(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId, spec domain.JobSpec) (domain.Job, error) {
+func (r *jobRepository) UpdateSpec(ctx context.Context, ownerID domain.ActorId, jobID domain.JobId, spec domain.JobSpec) (domain.Job, error) {
 	cfg, err := json.Marshal(spec.Config)
 	if err != nil {
 		return domain.Job{}, err
@@ -72,23 +72,23 @@ func (r *jobRepository) UpdateSpec(ctx context.Context, owner_id domain.ActorId,
 		RetryBackoffType:    string(spec.RetryPolicy.BackoffType),
 		RetryInitialDelayMs: spec.RetryPolicy.InitialDelay.Milliseconds(),
 		RetryMaxDelayMs:     spec.RetryPolicy.MaxDelay.Milliseconds(),
-		JobID:               job_id,
-		OwnerID:             owner_id,
+		JobID:               jobID,
+		OwnerID:             ownerID,
 	})
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return domain.Job{}, errors.Wrapf(domain.ErrJobNotFound, "job %v was not found", job_id)
+			return domain.Job{}, errors.Wrapf(domain.ErrJobNotFound, "job %v was not found", jobID)
 		}
 		return domain.Job{}, err
 	}
-	return r.FindById(ctx, owner_id, job_id)
+	return r.FindByID(ctx, ownerID, jobID)
 }
 
-func (r *jobRepository) Rename(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId, name string) error {
+func (r *jobRepository) Rename(ctx context.Context, ownerID domain.ActorId, jobID domain.JobId, name string) error {
 	cnt, err := r.q.RenameJob(ctx, jobdb.RenameJobParams{
 		Name:    name,
-		JobID:   job_id,
-		OwnerID: owner_id,
+		JobID:   jobID,
+		OwnerID: ownerID,
 	})
 	if err != nil {
 		return err
@@ -99,93 +99,97 @@ func (r *jobRepository) Rename(ctx context.Context, owner_id domain.ActorId, job
 	return nil
 }
 
-func (r *jobRepository) SetEnabled(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId, enabled bool) (domain.Job, error) {
+func (r *jobRepository) SetEnabled(ctx context.Context, ownerID domain.ActorId, jobID domain.JobId, enabled bool) (domain.Job, error) {
 	_, err := r.q.SetJobEnabled(ctx, jobdb.SetJobEnabledParams{
 		Enabled: enabled,
-		JobID:   job_id,
-		OwnerID: owner_id,
+		JobID:   jobID,
+		OwnerID: ownerID,
 	})
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return domain.Job{}, errors.Wrapf(domain.ErrJobNotFound, "job %v was not found", job_id)
+			return domain.Job{}, errors.Wrapf(domain.ErrJobNotFound, "job %v was not found", jobID)
 		}
 		return domain.Job{}, err
 	}
-	return r.FindById(ctx, owner_id, job_id)
+	return r.FindByID(ctx, ownerID, jobID)
 }
 
-func (r *jobRepository) Delete(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId) error {
+func (r *jobRepository) Delete(ctx context.Context, ownerID domain.ActorId, jobID domain.JobId) error {
 	affected, err := r.q.DeleteJob(ctx, jobdb.DeleteJobParams{
-		JobID:   job_id,
-		OwnerID: owner_id,
+		JobID:   jobID,
+		OwnerID: ownerID,
 	})
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return errors.Wrapf(domain.ErrJobNotFound, "job %v was not found", job_id)
+			return errors.Wrapf(domain.ErrJobNotFound, "job %v was not found", jobID)
 		}
 		return err
 	}
 	if affected != 1 {
-		return errors.Newf("job %v was deleted, but affected: %d", job_id, affected)
+		return errors.Newf("job %v was deleted, but affected: %d", jobID, affected)
 	}
 	return nil
 }
 
-func (r *jobRepository) FindById(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId) (domain.Job, error) {
+func (r *jobRepository) FindByID(ctx context.Context, ownerID domain.ActorId, jobID domain.JobId) (domain.Job, error) {
 	j, err := r.q.GetJob(ctx, jobdb.GetJobParams{
-		JobID:   job_id,
-		OwnerID: owner_id,
+		JobID:   jobID,
+		OwnerID: ownerID,
 	})
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return domain.Job{}, errors.Wrapf(domain.ErrJobNotFound, "job %v was not found", job_id)
+			return domain.Job{}, errors.Wrapf(domain.ErrJobNotFound, "job %v was not found", jobID)
 		}
 		return domain.Job{}, err
 	}
 	return jobFromDB(j)
 }
 
-func (r *jobRepository) ListByOwner(ctx context.Context, owner_id domain.ActorId, page_size int32, page_token string) (app.ListJobsResult, error) {
+func (r *jobRepository) ListByOwner(ctx context.Context, ownerID domain.ActorId, pageSize int32, pageToken string) (app.ListJobsResult, error) {
 	var (
 		jobs []jobdb.Job
 		err  error
 	)
 
 	// for paging
-	org_page_size := page_size
-	page_size += 1
-	if org_page_size <= 0 {
+	orgPageSize := pageSize
+	pageSize++
+	if orgPageSize <= 0 {
 		return app.ListJobsResult{}, errors.New("page size must be positive")
 	}
 
-	if page_token == "" {
+	if pageToken == "" {
 		jobs, err = r.q.ListJobsFirstPage(ctx, jobdb.ListJobsFirstPageParams{
-			OwnerID:  owner_id,
-			PageSize: page_size,
+			OwnerID:  ownerID,
+			PageSize: pageSize,
 		})
 	} else {
-		token, err := decodeJobPageToken(page_token)
+		token, err := decodeJobPageToken(pageToken)
 		if err != nil {
 			return app.ListJobsResult{}, err
 		}
-		c_at, err := timeToPGType(token.CreatedAt)
+		cAt, err := timeToPGType(token.CreatedAt)
 		if err != nil {
 			return app.ListJobsResult{}, err
 		}
-		jobs, err = r.q.ListJobsAfter(ctx, jobdb.ListJobsAfterParams{
-			OwnerID:   owner_id,
-			CreatedAt: c_at,
-			JobID:     token.JobId,
-			PageSize:  page_size,
+		var queryErr error
+		jobs, queryErr = r.q.ListJobsAfter(ctx, jobdb.ListJobsAfterParams{
+			OwnerID:   ownerID,
+			CreatedAt: cAt,
+			JobID:     token.JobID,
+			PageSize:  pageSize,
 		})
+		if queryErr != nil {
+			return app.ListJobsResult{}, queryErr
+		}
 	}
 	if err != nil {
 		return app.ListJobsResult{}, err
 	}
 
-	hasNext := len(jobs) > int(org_page_size)
+	hasNext := len(jobs) > int(orgPageSize)
 	if hasNext {
-		jobs = jobs[:org_page_size]
+		jobs = jobs[:orgPageSize]
 	}
 
 	js, err := lo.MapErr(jobs, func(j jobdb.Job, _ int) (domain.Job, error) {
@@ -197,10 +201,10 @@ func (r *jobRepository) ListByOwner(ctx context.Context, owner_id domain.ActorId
 
 	var nextPageToken string
 	if hasNext {
-		last := js[org_page_size-1]
+		last := js[orgPageSize-1]
 		nextPageToken, err = encodeJobPageToken(jobPageToken{
 			CreatedAt: last.CreatedAt,
-			JobId:     last.Id,
+			JobID:     last.Id,
 		})
 		if err != nil {
 			return app.ListJobsResult{}, err

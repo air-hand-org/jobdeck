@@ -28,26 +28,27 @@ type executionRepository struct {
 
 var _ app.ExecutionRepository = (*executionRepository)(nil)
 
-func (r *executionRepository) CreateForCurrentJob(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId, trigger domain.ExecutionTrigger) (domain.Execution, error) {
-	exec_id, err := r.q.CreateExecutionForCurrentJob(ctx, jobdb.CreateExecutionForCurrentJobParams{
+func (r *executionRepository) CreateForCurrentJob(ctx context.Context, ownerID domain.ActorId, jobID domain.JobId, trigger domain.ExecutionTrigger) (domain.Execution, error) {
+	execID, err := r.q.CreateExecutionForCurrentJob(ctx, jobdb.CreateExecutionForCurrentJobParams{
 		TriggerType: string(trigger),
-		JobID:       job_id,
-		OwnerID:     owner_id,
+		JobID:       jobID,
+		OwnerID:     ownerID,
 	})
 	if err != nil {
 		return domain.Execution{}, err
 	}
-	return r.FindById(ctx, owner_id, exec_id)
+	return r.FindById(ctx, ownerID, execID)
 }
 
-func (r *executionRepository) FindById(ctx context.Context, owner_id domain.ActorId, execution_id domain.ExecutionId) (domain.Execution, error) {
+//nolint:revive // Existing internal API name is retained for compatibility.
+func (r *executionRepository) FindById(ctx context.Context, ownerID domain.ActorId, executionID domain.ExecutionId) (domain.Execution, error) {
 	exec, err := r.q.GetExecutionDetail(ctx, jobdb.GetExecutionDetailParams{
-		ExecutionID: execution_id,
-		OwnerID:     owner_id,
+		ExecutionID: executionID,
+		OwnerID:     ownerID,
 	})
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return domain.Execution{}, errors.Wrapf(domain.ErrExecutionNotFound, "execution %v was not found", execution_id)
+			return domain.Execution{}, errors.Wrapf(domain.ErrExecutionNotFound, "execution %v was not found", executionID)
 		}
 		return domain.Execution{}, err
 	}
@@ -59,56 +60,60 @@ func (r *executionRepository) FindById(ctx context.Context, owner_id domain.Acto
 	if err != nil {
 		return domain.Execution{}, err
 	}
-	execution_events, err := executionEventsFromDB(events)
+	executionEvents, err := executionEventsFromDB(events)
 	if err != nil {
 		return domain.Execution{}, err
 	}
-	execution.Events = execution_events
+	execution.Events = executionEvents
 	return execution, nil
 }
 
-func (r *executionRepository) ListByJob(ctx context.Context, owner_id domain.ActorId, job_id domain.JobId, page_size int32, page_token string) (app.ListExecutionsResult, error) {
+func (r *executionRepository) ListByJob(ctx context.Context, ownerID domain.ActorId, jobID domain.JobId, pageSize int32, pageToken string) (app.ListExecutionsResult, error) {
 	var (
 		execs []jobdb.Execution
 		err   error
 	)
 
-	org_page_size := page_size
-	page_size += 1
-	if org_page_size <= 0 {
-		return app.ListExecutionsResult{}, errors.Newf("page size must be positive : %v", org_page_size)
+	originalPageSize := pageSize
+	pageSize++
+	if originalPageSize <= 0 {
+		return app.ListExecutionsResult{}, errors.Newf("page size must be positive : %v", originalPageSize)
 	}
 
-	if page_token == "" {
+	if pageToken == "" {
 		execs, err = r.q.ListExecutionsFirstPage(ctx, jobdb.ListExecutionsFirstPageParams{
-			JobID:    job_id,
-			OwnerID:  owner_id,
-			PageSize: page_size,
+			JobID:    jobID,
+			OwnerID:  ownerID,
+			PageSize: pageSize,
 		})
 	} else {
-		token, err := decodeExecutionPageToken(page_token)
+		token, err := decodeExecutionPageToken(pageToken)
 		if err != nil {
 			return app.ListExecutionsResult{}, err
 		}
-		c_at, err := timeToPGType(token.CreatedAt)
+		createdAt, err := timeToPGType(token.CreatedAt)
 		if err != nil {
 			return app.ListExecutionsResult{}, err
 		}
-		execs, err = r.q.ListExecutionsAfter(ctx, jobdb.ListExecutionsAfterParams{
-			JobID:       job_id,
-			OwnerID:     owner_id,
-			CreatedAt:   c_at,
-			ExecutionID: token.ExecutionId,
-			PageSize:    page_size,
+		var queryErr error
+		execs, queryErr = r.q.ListExecutionsAfter(ctx, jobdb.ListExecutionsAfterParams{
+			JobID:       jobID,
+			OwnerID:     ownerID,
+			CreatedAt:   createdAt,
+			ExecutionID: token.ExecutionID,
+			PageSize:    pageSize,
 		})
+		if queryErr != nil {
+			return app.ListExecutionsResult{}, queryErr
+		}
 	}
 	if err != nil {
 		return app.ListExecutionsResult{}, err
 	}
 
-	hasNext := len(execs) > int(org_page_size)
+	hasNext := len(execs) > int(originalPageSize)
 	if hasNext {
-		execs = execs[:org_page_size]
+		execs = execs[:originalPageSize]
 	}
 
 	executions, err := lo.MapErr(execs, func(e jobdb.Execution, _ int) (domain.Execution, error) {
@@ -119,10 +124,10 @@ func (r *executionRepository) ListByJob(ctx context.Context, owner_id domain.Act
 	}
 	var nextPageToken string
 	if hasNext {
-		last := executions[org_page_size-1]
+		last := executions[originalPageSize-1]
 		nextPageToken, err = encodeExecutionPageToken(executionPageToken{
 			CreatedAt:   last.CreatedAt,
-			ExecutionId: last.Id,
+			ExecutionID: last.Id,
 		})
 		if err != nil {
 			return app.ListExecutionsResult{}, err

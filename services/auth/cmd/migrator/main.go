@@ -1,3 +1,4 @@
+// Package main runs auth database migrations.
 package main
 
 import (

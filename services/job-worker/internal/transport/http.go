@@ -1,3 +1,4 @@
+// Package transport provides the job-worker HTTP server.
 package transport
 
 import (
@@ -8,15 +9,16 @@ import (
 	"net/http"
 )
 
-func newHttpHandler(push_usecase *app.PushUsecase, verifier verification.Verifier) *http.ServeMux {
+func newHTTPHandler(pushUsecase *app.PushUsecase, verifier verification.Verifier) *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.Handle("/", handlers.NewPushHandler(push_usecase, verifier))
+	mux.Handle("/", handlers.NewPushHandler(pushUsecase, verifier))
 	return mux
 }
 
-func NewServer(port string, push_usecase *app.PushUsecase, verifier verification.Verifier) *http.Server {
+// NewServer creates the job-worker HTTP server.
+func NewServer(port string, pushUsecase *app.PushUsecase, verifier verification.Verifier) *http.Server {
 	return &http.Server{
 		Addr:    fmt.Sprintf(":%s", port),
-		Handler: newHttpHandler(push_usecase, verifier),
+		Handler: newHTTPHandler(pushUsecase, verifier),
 	}
 }

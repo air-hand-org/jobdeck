@@ -13,24 +13,26 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type executionQueueServiceServer struct {
+// ExecutionQueueServiceServer implements the execution queue gRPC service.
+type ExecutionQueueServiceServer struct {
 	u app.ExecutionQueueUsecase
 
 	jobv1.UnsafeExecutionQueueServiceServer
 }
 
-var _ jobv1.ExecutionQueueServiceServer = (*executionQueueServiceServer)(nil)
+var _ jobv1.ExecutionQueueServiceServer = (*ExecutionQueueServiceServer)(nil)
 
-func (s *executionQueueServiceServer) ClaimExecution(ctx context.Context, req *jobv1.ClaimExecutionRequest) (*jobv1.ClaimExecutionResponse, error) {
+// ClaimExecution claims an execution for the authenticated actor.
+func (s *ExecutionQueueServiceServer) ClaimExecution(ctx context.Context, req *jobv1.ClaimExecutionRequest) (*jobv1.ClaimExecutionResponse, error) {
 	actor, ok := auth.GetActorContext(ctx)
 	if !ok {
 		return nil, domain.ErrUnauthenticated
 	}
-	exec_id, err := transform.ExecutionIdFromProto(req.GetExecutionId())
+	execID, err := transform.ExecutionIdFromProto(req.GetExecutionId())
 	if err != nil {
 		return nil, err
 	}
-	claim, err := s.u.ClaimExecution(ctx, actor, exec_id)
+	claim, err := s.u.ClaimExecution(ctx, actor, execID)
 	if err != nil {
 		return nil, err
 	}
@@ -43,16 +45,17 @@ func (s *executionQueueServiceServer) ClaimExecution(ctx context.Context, req *j
 	}, nil
 }
 
-func (s *executionQueueServiceServer) ReportExecutionResult(ctx context.Context, req *jobv1.ReportExecutionResultRequest) (*jobv1.ReportExecutionResultResponse, error) {
-	exec_id, err := transform.ExecutionIdFromProto(req.GetExecutionId())
+// ReportExecutionResult reports an execution result for the authenticated actor.
+func (s *ExecutionQueueServiceServer) ReportExecutionResult(ctx context.Context, req *jobv1.ReportExecutionResultRequest) (*jobv1.ReportExecutionResultResponse, error) {
+	execID, err := transform.ExecutionIdFromProto(req.GetExecutionId())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "failed to transform execution id: %v", err)
 	}
-	exec_result, err := transform.ExecutionResultFromProto(req.GetResult())
+	execResult, err := transform.ExecutionResultFromProto(req.GetResult())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "failed to transform result: %v", err)
 	}
-	lease_token, err := transform.LeaseTokenFromProto(req.GetLeaseToken())
+	leaseToken, err := transform.LeaseTokenFromProto(req.GetLeaseToken())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "failed to transform token: %v", err)
 	}
@@ -61,9 +64,9 @@ func (s *executionQueueServiceServer) ReportExecutionResult(ctx context.Context,
 		return nil, domain.ErrUnauthenticated
 	}
 	cmd := app.ReportExecutionResultCommand{
-		ExecutionId:     exec_id,
-		ExecutionResult: exec_result,
-		LeaseToken:      lease_token,
+		ExecutionId:     execID,
+		ExecutionResult: execResult,
+		LeaseToken:      leaseToken,
 	}
 	err = s.u.ReportExecutionResult(ctx, actor, cmd)
 	if err != nil {
@@ -72,6 +75,7 @@ func (s *executionQueueServiceServer) ReportExecutionResult(ctx context.Context,
 	return &jobv1.ReportExecutionResultResponse{}, nil
 }
 
-func NewExecutionQueueServiceServer(u *app.ExecutionQueueUsecase) *executionQueueServiceServer {
-	return &executionQueueServiceServer{u: *u}
+// NewExecutionQueueServiceServer creates an execution queue gRPC service implementation.
+func NewExecutionQueueServiceServer(u *app.ExecutionQueueUsecase) *ExecutionQueueServiceServer {
+	return &ExecutionQueueServiceServer{u: *u}
 }

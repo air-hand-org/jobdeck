@@ -1,3 +1,4 @@
+// Package handlers provides HTTP request handlers for the job worker.
 package handlers
 
 import (
@@ -18,6 +19,7 @@ type pushRequest struct {
 	Subscription string         `json:"subscription"`
 }
 
+// PushHandler handles Pub/Sub push requests.
 type PushHandler struct {
 	logger   *slog.Logger
 	verifier verification.Verifier
@@ -67,9 +69,10 @@ func (h *PushHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	)
 
 	w.WriteHeader(http.StatusCreated)
-	fmt.Fprint(w, http.StatusText(http.StatusCreated))
+	_, _ = fmt.Fprint(w, http.StatusText(http.StatusCreated))
 }
 
+// NewPushHandler creates a push request handler.
 func NewPushHandler(usecase *app.PushUsecase, verifier verification.Verifier) *PushHandler {
 	return &PushHandler{
 		logger:   slog.Default(),

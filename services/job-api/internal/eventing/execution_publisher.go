@@ -1,3 +1,4 @@
+// Package eventing contains job API event publication and outbox dispatching.
 package eventing
 
 import (
@@ -5,7 +6,9 @@ import (
 	"jobdeck/services/job-api/internal/domain"
 )
 
+// ExecutionPublisher publishes execution-related events.
+//
 //go:generate moq -out gen_execution_publisher_moq_test.go . ExecutionPublisher
 type ExecutionPublisher interface {
-	Publish(ctx context.Context, executionId domain.ExecutionId) error
+	Publish(ctx context.Context, executionID domain.ExecutionId) error
 }

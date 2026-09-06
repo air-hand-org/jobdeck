@@ -1,3 +1,4 @@
+// Package verification authenticates Pub/Sub push requests.
 package verification
 
 import (
@@ -12,6 +13,7 @@ import (
 
 const metadataProjectIDURL = "http://metadata.google.internal/computeMetadata/v1/project/project-id"
 
+// NewFromEnvironment creates a verifier based on the deployment environment.
 func NewFromEnvironment() (Verifier, error) {
 	if token := os.Getenv("LOCAL_PUBSUB_VERIFICATION_TOKEN"); token != "" {
 		return NewSharedTokenVerifier(token), nil
@@ -26,7 +28,7 @@ func NewFromEnvironment() (Verifier, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	if err := verifyGoogleMetadataServer(ctx, http.DefaultClient); err != nil {
-		return nil, fmt.Errorf("Cloud Run environment verification failed: %w", err)
+		return nil, fmt.Errorf("cloud run environment verification failed: %w", err)
 	}
 
 	return NewPlatformVerifier(), nil
@@ -43,7 +45,7 @@ func verifyGoogleMetadataServer(ctx context.Context, client *http.Client) error 
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 
 	if res.StatusCode != http.StatusOK {
 		return fmt.Errorf("metadata server returned %s", res.Status)

@@ -19,10 +19,10 @@ var _ AuthRepository = &AuthRepositoryMock{}
 //
 //		// make and configure a mocked AuthRepository
 //		mockedAuthRepository := &AuthRepositoryMock{
-//			GetLocalAuthClientFunc: func(ctx context.Context, client_id string) (domain.LocalAuthClient, error) {
+//			GetLocalAuthClientFunc: func(ctx context.Context, clientID string) (domain.LocalAuthClient, error) {
 //				panic("mock out the GetLocalAuthClient method")
 //			},
-//			UpdateLocalAuthClientSecretHashFunc: func(ctx context.Context, actor_id domain.ActorId, secret_hash string) error {
+//			UpdateLocalAuthClientSecretHashFunc: func(ctx context.Context, actorID domain.ActorId, secretHash string) error {
 //				panic("mock out the UpdateLocalAuthClientSecretHash method")
 //			},
 //		}
@@ -33,10 +33,10 @@ var _ AuthRepository = &AuthRepositoryMock{}
 //	}
 type AuthRepositoryMock struct {
 	// GetLocalAuthClientFunc mocks the GetLocalAuthClient method.
-	GetLocalAuthClientFunc func(ctx context.Context, client_id string) (domain.LocalAuthClient, error)
+	GetLocalAuthClientFunc func(ctx context.Context, clientID string) (domain.LocalAuthClient, error)
 
 	// UpdateLocalAuthClientSecretHashFunc mocks the UpdateLocalAuthClientSecretHash method.
-	UpdateLocalAuthClientSecretHashFunc func(ctx context.Context, actor_id domain.ActorId, secret_hash string) error
+	UpdateLocalAuthClientSecretHashFunc func(ctx context.Context, actorID domain.ActorId, secretHash string) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -44,17 +44,17 @@ type AuthRepositoryMock struct {
 		GetLocalAuthClient []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// Client_id is the client_id argument value.
-			Client_id string
+			// ClientID is the clientID argument value.
+			ClientID string
 		}
 		// UpdateLocalAuthClientSecretHash holds details about calls to the UpdateLocalAuthClientSecretHash method.
 		UpdateLocalAuthClientSecretHash []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// Actor_id is the actor_id argument value.
-			Actor_id domain.ActorId
-			// Secret_hash is the secret_hash argument value.
-			Secret_hash string
+			// ActorID is the actorID argument value.
+			ActorID domain.ActorId
+			// SecretHash is the secretHash argument value.
+			SecretHash string
 		}
 	}
 	lockGetLocalAuthClient              sync.RWMutex
@@ -62,21 +62,21 @@ type AuthRepositoryMock struct {
 }
 
 // GetLocalAuthClient calls GetLocalAuthClientFunc.
-func (mock *AuthRepositoryMock) GetLocalAuthClient(ctx context.Context, client_id string) (domain.LocalAuthClient, error) {
+func (mock *AuthRepositoryMock) GetLocalAuthClient(ctx context.Context, clientID string) (domain.LocalAuthClient, error) {
 	if mock.GetLocalAuthClientFunc == nil {
 		panic("AuthRepositoryMock.GetLocalAuthClientFunc: method is nil but AuthRepository.GetLocalAuthClient was just called")
 	}
 	callInfo := struct {
-		Ctx       context.Context
-		Client_id string
+		Ctx      context.Context
+		ClientID string
 	}{
-		Ctx:       ctx,
-		Client_id: client_id,
+		Ctx:      ctx,
+		ClientID: clientID,
 	}
 	mock.lockGetLocalAuthClient.Lock()
 	mock.calls.GetLocalAuthClient = append(mock.calls.GetLocalAuthClient, callInfo)
 	mock.lockGetLocalAuthClient.Unlock()
-	return mock.GetLocalAuthClientFunc(ctx, client_id)
+	return mock.GetLocalAuthClientFunc(ctx, clientID)
 }
 
 // GetLocalAuthClientCalls gets all the calls that were made to GetLocalAuthClient.
@@ -84,12 +84,12 @@ func (mock *AuthRepositoryMock) GetLocalAuthClient(ctx context.Context, client_i
 //
 //	len(mockedAuthRepository.GetLocalAuthClientCalls())
 func (mock *AuthRepositoryMock) GetLocalAuthClientCalls() []struct {
-	Ctx       context.Context
-	Client_id string
+	Ctx      context.Context
+	ClientID string
 } {
 	var calls []struct {
-		Ctx       context.Context
-		Client_id string
+		Ctx      context.Context
+		ClientID string
 	}
 	mock.lockGetLocalAuthClient.RLock()
 	calls = mock.calls.GetLocalAuthClient
@@ -98,23 +98,23 @@ func (mock *AuthRepositoryMock) GetLocalAuthClientCalls() []struct {
 }
 
 // UpdateLocalAuthClientSecretHash calls UpdateLocalAuthClientSecretHashFunc.
-func (mock *AuthRepositoryMock) UpdateLocalAuthClientSecretHash(ctx context.Context, actor_id domain.ActorId, secret_hash string) error {
+func (mock *AuthRepositoryMock) UpdateLocalAuthClientSecretHash(ctx context.Context, actorID domain.ActorId, secretHash string) error {
 	if mock.UpdateLocalAuthClientSecretHashFunc == nil {
 		panic("AuthRepositoryMock.UpdateLocalAuthClientSecretHashFunc: method is nil but AuthRepository.UpdateLocalAuthClientSecretHash was just called")
 	}
 	callInfo := struct {
-		Ctx         context.Context
-		Actor_id    domain.ActorId
-		Secret_hash string
+		Ctx        context.Context
+		ActorID    domain.ActorId
+		SecretHash string
 	}{
-		Ctx:         ctx,
-		Actor_id:    actor_id,
-		Secret_hash: secret_hash,
+		Ctx:        ctx,
+		ActorID:    actorID,
+		SecretHash: secretHash,
 	}
 	mock.lockUpdateLocalAuthClientSecretHash.Lock()
 	mock.calls.UpdateLocalAuthClientSecretHash = append(mock.calls.UpdateLocalAuthClientSecretHash, callInfo)
 	mock.lockUpdateLocalAuthClientSecretHash.Unlock()
-	return mock.UpdateLocalAuthClientSecretHashFunc(ctx, actor_id, secret_hash)
+	return mock.UpdateLocalAuthClientSecretHashFunc(ctx, actorID, secretHash)
 }
 
 // UpdateLocalAuthClientSecretHashCalls gets all the calls that were made to UpdateLocalAuthClientSecretHash.
@@ -122,14 +122,14 @@ func (mock *AuthRepositoryMock) UpdateLocalAuthClientSecretHash(ctx context.Cont
 //
 //	len(mockedAuthRepository.UpdateLocalAuthClientSecretHashCalls())
 func (mock *AuthRepositoryMock) UpdateLocalAuthClientSecretHashCalls() []struct {
-	Ctx         context.Context
-	Actor_id    domain.ActorId
-	Secret_hash string
+	Ctx        context.Context
+	ActorID    domain.ActorId
+	SecretHash string
 } {
 	var calls []struct {
-		Ctx         context.Context
-		Actor_id    domain.ActorId
-		Secret_hash string
+		Ctx        context.Context
+		ActorID    domain.ActorId
+		SecretHash string
 	}
 	mock.lockUpdateLocalAuthClientSecretHash.RLock()
 	calls = mock.calls.UpdateLocalAuthClientSecretHash

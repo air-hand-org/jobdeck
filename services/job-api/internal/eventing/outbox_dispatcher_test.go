@@ -71,7 +71,7 @@ func TestOutboxDispatcher_Dispatch(t *testing.T) {
 
 			if tt.wantDispatchErr != nil {
 				require.Error(t, err)
-				assert.Len(t, outbox.MarkAsPublishedExecutionRequestedCalls(), 0)
+				assert.Empty(t, outbox.MarkAsPublishedExecutionRequestedCalls())
 				return
 			}
 

@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestJobUsecase_CreateJob_RepositoryError(t *testing.T) {
@@ -41,7 +42,7 @@ func TestJobUsecase_CreateJob_RepositoryError(t *testing.T) {
 	u := NewJobUsecase(store)
 	_, err := u.CreateJob(context.Background(), actor, name, spec)
 
-	assert.ErrorIs(t, err, expectedErr)
+	require.ErrorIs(t, err, expectedErr)
 	assert.Len(t, repo.CreateCalls(), 1)
 }
 
@@ -55,7 +56,7 @@ func TestJobUsecase_ListJobs_Empty(t *testing.T) {
 			assert.Equal(t, page_size, actualPageSize)
 			assert.Equal(t, page_token, actualPageToken)
 			return ListJobsResult{
-				Jobs: []domain.Job{},
+				Jobs:          []domain.Job{},
 				NextPageToken: "",
 			}, nil
 		},
@@ -73,7 +74,7 @@ func TestJobUsecase_ListJobs_Empty(t *testing.T) {
 	u := NewJobUsecase(store)
 	result, err := u.ListJobs(context.Background(), actor, page_size, page_token)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, result.Jobs)
 	assert.Empty(t, result.NextPageToken)
 }
@@ -84,15 +85,15 @@ func TestJobUsecase_SetJobEnabled(t *testing.T) {
 
 	tests := []struct {
 		testName string
-		enabled bool
+		enabled  bool
 	}{
 		{
 			testName: "enable",
-			enabled: true,
+			enabled:  true,
 		},
 		{
 			testName: "disable",
-			enabled: false,
+			enabled:  false,
 		},
 	}
 
@@ -117,7 +118,8 @@ func TestJobUsecase_SetJobEnabled(t *testing.T) {
 
 			u := NewJobUsecase(store)
 
-			u.SetJobEnabled(context.Background(), actor, job_id, tt.enabled)
+			_, err := u.SetJobEnabled(context.Background(), actor, job_id, tt.enabled)
+			require.NoError(t, err)
 			assert.Len(t, repo.SetEnabledCalls(), 1)
 		})
 	}
@@ -157,7 +159,8 @@ func TestJobUsecase_UpdateJobSpec_ChangeName(t *testing.T) {
 
 	u := NewJobUsecase(store)
 
-	u.UpdateJobMetadata(context.Background(), actor, job_id, expectedJobName, updatedSpec)
+	_, err := u.UpdateJobMetadata(context.Background(), actor, job_id, expectedJobName, updatedSpec)
+	require.NoError(t, err)
 	assert.Len(t, repo.UpdateSpecCalls(), 1)
 }
 

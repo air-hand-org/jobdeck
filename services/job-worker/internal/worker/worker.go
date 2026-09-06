@@ -16,26 +16,29 @@ type executor interface {
 }
 
 func executorFactory(item app.WorkItem) (executor, error) {
-	job_type := item.Execution.GetJobSpec().GetType()
-	switch job_type {
+	jobType := item.Execution.GetJobSpec().GetType()
+	switch jobType {
 	case jobv1.JobType_JOB_TYPE_HTTP_REQUEST:
-		return newHttpExecutor(item)
+		return newHTTPExecutor(item)
 	default:
 		return nil, errors.New("unsupported job type")
 	}
 }
 
+// Worker executes claimed jobs.
 type Worker struct {
 	tracer trace.Tracer
 }
 
+// NewWorker creates a worker.
 func NewWorker() *Worker {
 	return &Worker{
 		tracer: otel.Tracer("job-worker/worker"),
 	}
 }
 
-func (w Worker) Run(ctx context.Context, id int, works <-chan app.QueuedItem, results chan<- app.QueuedResult) error {
+// Run processes work items until ctx is canceled or works is closed.
+func (w Worker) Run(ctx context.Context, _ int, works <-chan app.QueuedItem, results chan<- app.QueuedResult) error {
 	for {
 		select {
 		case <-ctx.Done():

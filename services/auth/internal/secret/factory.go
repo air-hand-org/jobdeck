@@ -2,18 +2,22 @@ package secret
 
 import "jobdeck/services/auth/internal/app"
 
-type phcBuilderFactory struct{}
+// PHCBuilderFactory creates password hashing builders.
+type PHCBuilderFactory struct{}
 
-var _ app.PHCBuilderFactory = (*phcBuilderFactory)(nil)
+var _ app.PHCBuilderFactory = (*PHCBuilderFactory)(nil)
 
-func (f phcBuilderFactory) NewBuilder(salt []byte) app.PHCBuilder {
+// NewBuilder creates a password hashing builder using the provided salt.
+func (f PHCBuilderFactory) NewBuilder(salt []byte) app.PHCBuilder {
 	return newArgon2IDPHCBuilder(salt)
 }
 
-func (f phcBuilderFactory) FromPHC(phc app.PHC) (app.PHCBuilder, error) {
+// FromPHC creates a password hashing builder from parsed PHC parameters.
+func (f PHCBuilderFactory) FromPHC(phc app.PHC) (app.PHCBuilder, error) {
 	return newArgon2IDPHCBuilderFromPHC(phc)
 }
 
-func NewPHCBuilderFactory() *phcBuilderFactory {
-	return &phcBuilderFactory{}
+// NewPHCBuilderFactory creates a password hashing builder factory.
+func NewPHCBuilderFactory() *PHCBuilderFactory {
+	return &PHCBuilderFactory{}
 }

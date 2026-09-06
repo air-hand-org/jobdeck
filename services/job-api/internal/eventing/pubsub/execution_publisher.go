@@ -1,3 +1,4 @@
+// Package pubsub publishes job execution events to Google Cloud Pub/Sub.
 package pubsub
 
 import (
@@ -12,15 +13,17 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+// ExecutionPublisher publishes execution-requested events.
 type ExecutionPublisher struct {
 	publisher *pubsub.Publisher
 }
 
 var _ eventing.ExecutionPublisher = (*ExecutionPublisher)(nil)
 
-func (p *ExecutionPublisher) Publish(ctx context.Context, executionId domain.ExecutionId) error {
+// Publish publishes an execution-requested event for executionID.
+func (p *ExecutionPublisher) Publish(ctx context.Context, executionID domain.ExecutionId) error {
 	payload, err := proto.Marshal(&jobv1.ExecutionRequested{
-		ExecutionId: executionId.String(),
+		ExecutionId: executionID.String(),
 	})
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal ExecutionRequested")
@@ -36,10 +39,12 @@ func (p *ExecutionPublisher) Publish(ctx context.Context, executionId domain.Exe
 	return nil
 }
 
+// Close stops the underlying Pub/Sub publisher.
 func (p *ExecutionPublisher) Close() {
 	p.publisher.Stop()
 }
 
+// NewExecutionPublisher creates an execution event publisher for topicID.
 func NewExecutionPublisher(client *pubsub.Client, topicID string) *ExecutionPublisher {
 	return &ExecutionPublisher{
 		publisher: client.Publisher(topicID),

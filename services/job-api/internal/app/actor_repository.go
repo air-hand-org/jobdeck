@@ -1,3 +1,4 @@
+// Package app contains application use cases and ports.
 package app
 
 import (
@@ -5,8 +6,10 @@ import (
 	"jobdeck/services/job-api/internal/domain"
 )
 
+// ActorRepository persists actors.
+//
 //go:generate moq -out gen_actor_repository_moq_test.go . ActorRepository
 type ActorRepository interface {
-	GetActor(ctx context.Context, actor_id domain.ActorId) (domain.Actor, error)
-	CreateActor(ctx context.Context, actor_id domain.ActorId, actor_type domain.ActorType) (domain.Actor, error)
+	GetActor(ctx context.Context, actorID domain.ActorId) (domain.Actor, error)
+	CreateActor(ctx context.Context, actorID domain.ActorId, actorType domain.ActorType) (domain.Actor, error)
 }

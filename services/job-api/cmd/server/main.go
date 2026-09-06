@@ -1,3 +1,4 @@
+// Command server runs the job API gRPC server.
 package main
 
 // ref: https://github.com/connectrpc/connect-go/blob/main/internal/example/server/main.go
@@ -35,7 +36,6 @@ import (
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
-	healthgrpc "google.golang.org/grpc/health/grpc_health_v1"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 
@@ -52,11 +52,11 @@ func runHealthCheck(ctx context.Context, h *health.Server, pool *pgxpool.Pool) {
 		defer cancel()
 
 		if err := pool.Ping(pingCtx); err != nil {
-			h.SetServingStatus("", healthgrpc.HealthCheckResponse_NOT_SERVING)
+			h.SetServingStatus("", healthpb.HealthCheckResponse_NOT_SERVING)
 			return
 		}
 
-		h.SetServingStatus("", healthgrpc.HealthCheckResponse_SERVING)
+		h.SetServingStatus("", healthpb.HealthCheckResponse_SERVING)
 	}
 
 	check()
@@ -138,24 +138,24 @@ func main() {
 		),
 	)
 
-	pubsub_client, err := pubsub.NewClient(signalCtx, os.Getenv("PUBSUB_PROJECT_ID"))
+	pubsubClient, err := pubsub.NewClient(signalCtx, os.Getenv("PUBSUB_PROJECT_ID"))
 	if err != nil {
 		log.Fatalf("failed to new client: %v", err)
 	}
-	defer pubsub_client.Close()
+	defer func() { _ = pubsubClient.Close() }()
 
-	execution_publisher := job_pubsub.NewExecutionPublisher(pubsub_client, os.Getenv("PUBSUB_WORKER_TOPIC_ID"))
-	defer execution_publisher.Close()
+	executionPublisher := job_pubsub.NewExecutionPublisher(pubsubClient, os.Getenv("PUBSUB_WORKER_TOPIC_ID"))
+	defer executionPublisher.Close()
 
-	outbox_dispatcher := eventing.NewOutboxDispatcher(execution_publisher, store)
+	outboxDispatcher := eventing.NewOutboxDispatcher(executionPublisher, store)
 
 	g, ctx := errgroup.WithContext(signalCtx)
 
 	healthcheck := health.NewServer()
-	healthgrpc.RegisterHealthServer(s, healthcheck)
+	healthpb.RegisterHealthServer(s, healthcheck)
 	jobv1.RegisterJobServiceServer(s, transport.NewJobServiceServer(app.NewJobUsecase(store)))
-	jobv1.RegisterExecutionQueueServiceServer(s, transport.NewExecutionQueueServiceServer(app.NewExecutionQueueUsecase(store, outbox_dispatcher)))
-	jobv1.RegisterExecutionServiceServer(s, transport.NewExecutionServiceServer(app.NewExecutionUsecase(store, outbox_dispatcher)))
+	jobv1.RegisterExecutionQueueServiceServer(s, transport.NewExecutionQueueServiceServer(app.NewExecutionQueueUsecase(store, outboxDispatcher)))
+	jobv1.RegisterExecutionServiceServer(s, transport.NewExecutionServiceServer(app.NewExecutionUsecase(store, outboxDispatcher)))
 	if strings.EqualFold(os.Getenv("GRPC_REFLECTION_ENABLED"), "true") {
 		reflection.Register(s)
 	}
@@ -166,7 +166,7 @@ func main() {
 	})
 
 	g.Go(func() error {
-		return outbox_dispatcher.Run(ctx)
+		return outboxDispatcher.Run(ctx)
 	})
 
 	g.Go(func() error {

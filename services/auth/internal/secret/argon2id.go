@@ -1,3 +1,4 @@
+// Package secret provides password hashing implementations.
 package secret
 
 import (
@@ -21,13 +22,13 @@ type argon2IDPHCBuilder struct {
 }
 
 func (builder argon2IDPHCBuilder) PHC(password []byte) app.PHC {
-	password_hash := builder.hashPassword(password)
+	passwordHash := builder.hashPassword(password)
 	return app.PHC{
 		Algorithm: "argon2id",
 		Version:   19,
 		Params:    fmt.Sprintf("m=%d,t=%d,p=%d", builder.Memory, builder.Time, builder.Parallelism),
 		Salt:      builder.Salt,
-		Hash:      password_hash,
+		Hash:      passwordHash,
 	}
 }
 

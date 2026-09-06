@@ -8,6 +8,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+// ClaimedExecutionToProto converts a domain execution to protobuf.
 func ClaimedExecutionToProto(e domain.ClaimedExecution) (*jobv1.ClaimedExecution, error) {
 	spec, err := JobSpecToProto(e.JobSpec)
 	if err != nil {
@@ -39,6 +40,7 @@ func httpErrorFromProto(p *jobv1.HttpError) (*domain.HttpError, error) {
 	}, nil
 }
 
+// ExecutionResultFromProto converts a protobuf result to the domain model.
 func ExecutionResultFromProto(p *jobv1.ExecutionResult) (domain.ExecutionResult, error) {
 	if p == nil {
 		return domain.ExecutionResult{}, errors.New("execution result is required")

@@ -1,3 +1,4 @@
+// Package auth provides authentication token sources for gRPC clients.
 package auth
 
 import (
@@ -16,15 +17,16 @@ type accessToken struct {
 	ExpiresAt time.Time
 }
 
+// NowFunc returns the current time.
 type NowFunc func() time.Time
 
 type cachedTokenSource struct {
 	cachedToken *accessToken
 
-	now           NowFunc
-	client        authv1.AuthServiceClient
-	client_id     string
-	client_secret string
+	now          NowFunc
+	client       authv1.AuthServiceClient
+	clientID     string
+	clientSecret string
 }
 
 var _ interceptor.TokenSource = (*cachedTokenSource)(nil)
@@ -70,8 +72,8 @@ func (s *cachedTokenSource) authenticate(ctx context.Context) (*accessToken, err
 	defer cancel()
 
 	res, err := s.client.AuthenticateLocalClient(reqCtx, &authv1.AuthenticateLocalClientRequest{
-		ClientId:     s.client_id,
-		ClientSecret: s.client_secret,
+		ClientId:     s.clientID,
+		ClientSecret: s.clientSecret,
 		Audience:     "jobdeck-job-api",
 	})
 	if err != nil {
@@ -88,15 +90,16 @@ func (s *cachedTokenSource) authenticate(ctx context.Context) (*accessToken, err
 	}, nil
 }
 
-func NewTokenSource(conn *grpc.ClientConn, now NowFunc, client_id string, client_secret string) (*cachedTokenSource, error) {
-	if client_id == "" || client_secret == "" {
+// NewTokenSource creates a token source backed by the auth service.
+func NewTokenSource(conn *grpc.ClientConn, now NowFunc, clientID string, clientSecret string) (interceptor.TokenSource, error) {
+	if clientID == "" || clientSecret == "" {
 		return nil, errors.New("client_id and client_secret are required")
 	}
 	return &cachedTokenSource{
-		cachedToken:   nil,
-		client:        authv1.NewAuthServiceClient(conn),
-		now:           now,
-		client_id:     client_id,
-		client_secret: client_secret,
+		cachedToken:  nil,
+		client:       authv1.NewAuthServiceClient(conn),
+		now:          now,
+		clientID:     clientID,
+		clientSecret: clientSecret,
 	}, nil
 }

@@ -1,17 +1,19 @@
+// Package domain contains the job API domain model.
 package domain
 
 import "errors"
 
-var ErrJobNotFound = errors.New("job is not found")
-
-var ErrExecutionNotFound = errors.New("execution is not found")
-var ErrExecutionNotReportable = errors.New("execution is not reportable")
-var ErrExecutionHasAlreadyConsumed = errors.New("execution has already consumed")
-
-var ErrActorNotFound = errors.New("actor is not found")
-var ErrActorInactive = errors.New("actor is not active")
-var ErrActorInvalidRole = errors.New("actor role is invalid")
-var ErrActorNotHasRole = errors.New("actor doesn't have role")
-var ErrTokenInvalid = errors.New("token is invalid")
-var ErrPermissionDenied = errors.New("permission denied")
-var ErrUnauthenticated = errors.New("authenticate required")
+// Domain errors describe expected application failures.
+var (
+	ErrJobNotFound                 = errors.New("job is not found")
+	ErrExecutionNotFound           = errors.New("execution is not found")
+	ErrExecutionNotReportable      = errors.New("execution is not reportable")
+	ErrExecutionHasAlreadyConsumed = errors.New("execution has already consumed")
+	ErrActorNotFound               = errors.New("actor is not found")
+	ErrActorInactive               = errors.New("actor is not active")
+	ErrActorInvalidRole            = errors.New("actor role is invalid")
+	ErrActorNotHasRole             = errors.New("actor doesn't have role")
+	ErrTokenInvalid                = errors.New("token is invalid")
+	ErrPermissionDenied            = errors.New("permission denied")
+	ErrUnauthenticated             = errors.New("authenticate required")
+)

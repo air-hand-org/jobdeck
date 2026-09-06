@@ -48,18 +48,18 @@ func unmarshalJobConfig(t domain.JobType, data []byte) (domain.JobConfig, error)
 	}
 }
 
-func retryPolicyFromParams(max_attempts int32, backoff_type string, initial_delay, max_delay time.Duration) domain.RetryPolicy {
+func retryPolicyFromParams(maxAttempts int32, backoffType string, initialDelay, maxDelay time.Duration) domain.RetryPolicy {
 	return domain.RetryPolicy{
-		MaxAttempts: max_attempts,
-		BackoffType: domain.BackoffType(backoff_type),
+		MaxAttempts: maxAttempts,
+		BackoffType: domain.BackoffType(backoffType),
 
-		InitialDelay: initial_delay,
-		MaxDelay:     max_delay,
+		InitialDelay: initialDelay,
+		MaxDelay:     maxDelay,
 	}
 }
 
-func jobSpecFromParams(job_type string, config []byte, retry_policy domain.RetryPolicy) (domain.JobSpec, error) {
-	t := domain.JobType(job_type)
+func jobSpecFromParams(jobType string, config []byte, retryPolicy domain.RetryPolicy) (domain.JobSpec, error) {
+	t := domain.JobType(jobType)
 	cfg, err := unmarshalJobConfig(t, config)
 	if err != nil {
 		return domain.JobSpec{}, err
@@ -68,18 +68,18 @@ func jobSpecFromParams(job_type string, config []byte, retry_policy domain.Retry
 		Type: t,
 
 		Config:      cfg,
-		RetryPolicy: retry_policy,
+		RetryPolicy: retryPolicy,
 	}, nil
 }
 
 func jobSpecFromDB(j jobdb.Job) (domain.JobSpec, error) {
-	retry_policy := retryPolicyFromParams(
+	retryPolicy := retryPolicyFromParams(
 		j.RetryMaxAttempts,
 		j.RetryBackoffType,
 		time.Duration(j.RetryInitialDelayMs)*time.Millisecond,
 		time.Duration(j.RetryMaxDelayMs)*time.Millisecond,
 	)
-	return jobSpecFromParams(j.Type, j.Config, retry_policy)
+	return jobSpecFromParams(j.Type, j.Config, retryPolicy)
 }
 
 func jobFromDB(j jobdb.Job) (domain.Job, error) {
@@ -88,12 +88,12 @@ func jobFromDB(j jobdb.Job) (domain.Job, error) {
 		return domain.Job{}, err
 	}
 
-	created_at, err := timeFromPGType(j.CreatedAt)
+	createdAt, err := timeFromPGType(j.CreatedAt)
 	if err != nil {
 		return domain.Job{}, err
 	}
 
-	updated_at, err := timeFromPGType(j.UpdatedAt)
+	updatedAt, err := timeFromPGType(j.UpdatedAt)
 	if err != nil {
 		return domain.Job{}, err
 	}
@@ -105,32 +105,32 @@ func jobFromDB(j jobdb.Job) (domain.Job, error) {
 		Name:    j.Name,
 
 		Spec:      spec,
-		CreatedAt: created_at,
-		UpdatedAt: updated_at,
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
 	}, nil
 }
 
-func executionResultFromParams(job_type domain.JobType, result []byte) (domain.Result, error) {
-	switch job_type {
+func executionResultFromParams(jobType domain.JobType, result []byte) (domain.Result, error) {
+	switch jobType {
 	case domain.JOB_TYPE_HTTP_REQUEST:
-		var http_result domain.HttpExecutionResult
-		if err := json.Unmarshal(result, &http_result); err != nil {
+		var httpResult domain.HttpExecutionResult
+		if err := json.Unmarshal(result, &httpResult); err != nil {
 			return nil, err
 		}
-		return &http_result, nil
+		return &httpResult, nil
 	default:
-		return nil, fmt.Errorf("unsupported job type: %v", job_type)
+		return nil, fmt.Errorf("unsupported job type: %v", jobType)
 	}
 }
 
 func executionFromDB(e jobdb.Execution) (domain.Execution, error) {
-	retry_policy := retryPolicyFromParams(
+	retryPolicy := retryPolicyFromParams(
 		e.JobRetryMaxAttempts,
 		e.JobRetryBackoffType,
 		time.Duration(e.JobRetryInitialDelayMs)*time.Millisecond,
 		time.Duration(e.JobRetryMaxDelayMs)*time.Millisecond,
 	)
-	spec, err := jobSpecFromParams(e.JobType, e.JobConfig, retry_policy)
+	spec, err := jobSpecFromParams(e.JobType, e.JobConfig, retryPolicy)
 	if err != nil {
 		return domain.Execution{}, err
 	}
@@ -173,8 +173,8 @@ func executionFromDB(e jobdb.Execution) (domain.Execution, error) {
 
 func claimExecutionFromDB(e jobdb.JobExecutionClaimDetail) (domain.ClaimedExecution, error) {
 	// FIXME
-	retry_policy := domain.RetryPolicy{}
-	spec, err := jobSpecFromParams(e.JobType, e.JobConfig, retry_policy)
+	retryPolicy := domain.RetryPolicy{}
+	spec, err := jobSpecFromParams(e.JobType, e.JobConfig, retryPolicy)
 	if err != nil {
 		return domain.ClaimedExecution{}, err
 	}
@@ -189,21 +189,14 @@ func claimExecutionFromDB(e jobdb.JobExecutionClaimDetail) (domain.ClaimedExecut
 	}, nil
 }
 
-func textToPGType(s string) pgtype.Text {
-	return pgtype.Text{
-		String: s,
-		Valid:  true,
-	}
-}
-
 func executionEventsFromDB(events []jobdb.JobExecutionEvent) ([]domain.ExecutionEvent, error) {
 	return lo.MapErr(events, func(ee jobdb.JobExecutionEvent, _ int) (domain.ExecutionEvent, error) {
-		created_at, err := timeFromPGType(ee.CreatedAt)
+		createdAt, err := timeFromPGType(ee.CreatedAt)
 		if err != nil {
 			return domain.ExecutionEvent{}, err
 		}
 		return domain.ExecutionEvent{
-			CreatedAt: created_at,
+			CreatedAt: createdAt,
 			Status:    domain.ExecutionStatus(ee.Status),
 		}, nil
 	})

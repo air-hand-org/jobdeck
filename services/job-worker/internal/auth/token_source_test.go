@@ -40,10 +40,10 @@ func TestCachedTokenSourceTokenCachesAndRefreshes(t *testing.T) {
 		{Token: &authv1.Token{AccessToken: "third", TokenType: "Bearer", ExpiresInSeconds: 120}},
 	}}
 	source := &cachedTokenSource{
-		now:           func() time.Time { return now },
-		client:        client,
-		client_id:     "worker",
-		client_secret: "secret",
+		now:          func() time.Time { return now },
+		client:       client,
+		clientID:     "worker",
+		clientSecret: "secret",
 	}
 
 	token, err := source.Token(context.Background())

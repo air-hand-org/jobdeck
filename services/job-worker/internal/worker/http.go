@@ -1,3 +1,4 @@
+// Package worker executes claimed HTTP jobs.
 package worker
 
 import (
@@ -19,29 +20,29 @@ type httpExecutor struct {
 }
 
 func (e *httpExecutor) Exec(ctx context.Context, item app.WorkItem) (app.WorkResult, error) {
-	job_config := item.Execution.GetJobSpec().GetHttp()
-	if job_config == nil {
+	jobConfig := item.Execution.GetJobSpec().GetHttp()
+	if jobConfig == nil {
 		return app.WorkResult{}, errors.New("failed to get http")
 	}
 
-	method, err := httpMethodFromProto(job_config.GetMethod())
+	method, err := httpMethodFromProto(jobConfig.GetMethod())
 	if err != nil {
 		return app.WorkResult{}, errors.Wrap(err, "failed to httpMethodFromProto")
 	}
 	var body io.Reader
-	if len(job_config.GetBody()) > 0 && methodAllowsBody(job_config.GetMethod()) {
-		body = bytes.NewReader(job_config.GetBody())
+	if len(jobConfig.GetBody()) > 0 && methodAllowsBody(jobConfig.GetMethod()) {
+		body = bytes.NewReader(jobConfig.GetBody())
 	}
-	req, err := http.NewRequestWithContext(ctx, method, job_config.GetUrl(), body)
+	req, err := http.NewRequestWithContext(ctx, method, jobConfig.GetUrl(), body)
 	if err != nil {
 		return app.WorkResult{}, errors.Wrap(err, "failed to new http request")
 	}
-	for _, h := range job_config.GetHeaders() {
+	for _, h := range jobConfig.GetHeaders() {
 		req.Header.Add(h.GetName(), h.GetValue())
 	}
 	res, err := e.client.Do(req)
 	if err != nil {
-		err_type := classifyHttpError(err)
+		errType := classifyHTTPError(err)
 		return app.WorkResult{
 			ExecutionID: item.Execution.ExecutionId,
 			LeaseToken:  item.Execution.LeaseToken,
@@ -49,7 +50,7 @@ func (e *httpExecutor) Exec(ctx context.Context, item app.WorkItem) (app.WorkRes
 				Result: &jobv1.ExecutionResult_Http{
 					Http: &jobv1.HttpExecutionResult{
 						Error: &jobv1.HttpError{
-							Type:    err_type,
+							Type:    errType,
 							Message: err.Error(),
 						},
 					},
@@ -57,7 +58,7 @@ func (e *httpExecutor) Exec(ctx context.Context, item app.WorkItem) (app.WorkRes
 			},
 		}, nil
 	}
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 	// b, err := io.ReadAll(res.Body)
 	// if err != nil {
 	// 	return app.WorkResult{}, err
@@ -77,7 +78,7 @@ func (e *httpExecutor) Exec(ctx context.Context, item app.WorkItem) (app.WorkRes
 	}, nil
 }
 
-func classifyHttpError(err error) jobv1.HttpErrorType {
+func classifyHTTPError(err error) jobv1.HttpErrorType {
 	if err == nil {
 		return jobv1.HttpErrorType_HTTP_ERROR_TYPE_UNSPECIFIED
 	}
@@ -127,26 +128,26 @@ func httpMethodFromProto(m jobv1.HttpMethod) (string, error) {
 var errProxySettingsNotFound = errors.New("WORKER_HTTP_PROXY env is not set")
 var errRedirectsDisabled = errors.New("redirects disabled")
 
-func newHttpExecutor(item app.WorkItem) (*httpExecutor, error) {
-	proxyUrlStr := os.Getenv("WORKER_HTTP_PROXY")
-	if proxyUrlStr == "" {
+func newHTTPExecutor(item app.WorkItem) (*httpExecutor, error) {
+	proxyURLStr := os.Getenv("WORKER_HTTP_PROXY")
+	if proxyURLStr == "" {
 		return nil, errProxySettingsNotFound
 	}
-	proxyUrl, err := url.Parse(proxyUrlStr)
+	proxyURL, err := url.Parse(proxyURLStr)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse proxy URL")
 	}
 
 	transport := http.DefaultTransport.(*http.Transport).Clone()
-	transport.Proxy = http.ProxyURL(proxyUrl)
+	transport.Proxy = http.ProxyURL(proxyURL)
 
-	job_config := item.Execution.GetJobSpec().GetHttp()
+	jobConfig := item.Execution.GetJobSpec().GetHttp()
 	return &httpExecutor{
 		client: http.Client{
 			Transport: transport,
-			Timeout:   job_config.GetTimeout().AsDuration(),
-			CheckRedirect: func(req *http.Request, via []*http.Request) error {
-				if !job_config.GetFollowRedirects() {
+			Timeout:   jobConfig.GetTimeout().AsDuration(),
+			CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
+				if !jobConfig.GetFollowRedirects() {
 					return errRedirectsDisabled
 				}
 				return nil

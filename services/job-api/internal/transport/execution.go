@@ -1,3 +1,4 @@
+// Package transport provides the job API's gRPC transport implementations.
 package transport
 
 import (
@@ -12,16 +13,18 @@ import (
 	"github.com/samber/lo"
 )
 
-type executionServiceServer struct {
+// ExecutionServiceServer implements the execution gRPC service.
+type ExecutionServiceServer struct {
 	u app.ExecutionUsecase
 
 	jobv1.UnsafeExecutionServiceServer
 }
 
-var _ jobv1.ExecutionServiceServer = (*executionServiceServer)(nil)
+var _ jobv1.ExecutionServiceServer = (*ExecutionServiceServer)(nil)
 
-func (s *executionServiceServer) GetExecution(ctx context.Context, req *jobv1.GetExecutionRequest) (*jobv1.GetExecutionResponse, error) {
-	exec_id, err := transform.ExecutionIdFromProto(req.GetExecutionId())
+// GetExecution returns an execution for the authenticated actor.
+func (s *ExecutionServiceServer) GetExecution(ctx context.Context, req *jobv1.GetExecutionRequest) (*jobv1.GetExecutionResponse, error) {
+	execID, err := transform.ExecutionIdFromProto(req.GetExecutionId())
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +32,7 @@ func (s *executionServiceServer) GetExecution(ctx context.Context, req *jobv1.Ge
 	if !ok {
 		return nil, domain.ErrUnauthenticated
 	}
-	exec, err := s.u.GetExecution(ctx, actor, exec_id)
+	exec, err := s.u.GetExecution(ctx, actor, execID)
 	if err != nil {
 		return nil, err
 	}
@@ -42,8 +45,9 @@ func (s *executionServiceServer) GetExecution(ctx context.Context, req *jobv1.Ge
 	}, nil
 }
 
-func (s *executionServiceServer) ListExecutions(ctx context.Context, req *jobv1.ListExecutionsRequest) (*jobv1.ListExecutionsResponse, error) {
-	job_id, err := transform.JobIdFromProto(req.GetJobId())
+// ListExecutions returns executions for a job for the authenticated actor.
+func (s *ExecutionServiceServer) ListExecutions(ctx context.Context, req *jobv1.ListExecutionsRequest) (*jobv1.ListExecutionsResponse, error) {
+	jobID, err := transform.JobIdFromProto(req.GetJobId())
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +55,7 @@ func (s *executionServiceServer) ListExecutions(ctx context.Context, req *jobv1.
 	if !ok {
 		return nil, domain.ErrUnauthenticated
 	}
-	result, err := s.u.ListExecutions(ctx, actor, job_id, req.GetPageSize(), req.GetPageToken())
+	result, err := s.u.ListExecutions(ctx, actor, jobID, req.GetPageSize(), req.GetPageToken())
 	if err != nil {
 		return nil, err
 	}
@@ -67,8 +71,9 @@ func (s *executionServiceServer) ListExecutions(ctx context.Context, req *jobv1.
 	}, nil
 }
 
-func (s *executionServiceServer) DoExecution(ctx context.Context, req *jobv1.DoExecutionRequest) (*jobv1.DoExecutionResponse, error) {
-	job_id, err := transform.JobIdFromProto(req.GetJobId())
+// DoExecution requests a manual execution of a job for the authenticated actor.
+func (s *ExecutionServiceServer) DoExecution(ctx context.Context, req *jobv1.DoExecutionRequest) (*jobv1.DoExecutionResponse, error) {
+	jobID, err := transform.JobIdFromProto(req.GetJobId())
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +81,7 @@ func (s *executionServiceServer) DoExecution(ctx context.Context, req *jobv1.DoE
 	if !ok {
 		return nil, domain.ErrUnauthenticated
 	}
-	exec, err := s.u.RequestExecution(ctx, actor, job_id, domain.EXECUTION_TRIGGER_MANUAL)
+	exec, err := s.u.RequestExecution(ctx, actor, jobID, domain.EXECUTION_TRIGGER_MANUAL)
 	if err != nil {
 		return nil, err
 	}
@@ -89,6 +94,7 @@ func (s *executionServiceServer) DoExecution(ctx context.Context, req *jobv1.DoE
 	}, nil
 }
 
-func NewExecutionServiceServer(u *app.ExecutionUsecase) *executionServiceServer {
-	return &executionServiceServer{u: *u}
+// NewExecutionServiceServer creates an execution gRPC service implementation.
+func NewExecutionServiceServer(u *app.ExecutionUsecase) *ExecutionServiceServer {
+	return &ExecutionServiceServer{u: *u}
 }

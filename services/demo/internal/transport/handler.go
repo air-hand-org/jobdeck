@@ -1,3 +1,4 @@
+// Package transport provides the demo HTTP handlers.
 package transport
 
 import (
@@ -5,7 +6,8 @@ import (
 	"time"
 )
 
-func NewHttpHandler() *http.ServeMux {
+// NewHTTPHandler returns the demo HTTP handler multiplexer.
+func NewHTTPHandler() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", homeHandler)
 	mux.HandleFunc("/healthz", healthzHandler)
@@ -24,12 +26,12 @@ func healthzHandler(w http.ResponseWriter, _ *http.Request) {
 
 func homeHandler(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Welcome Demo App\n"))
+	_, _ = w.Write([]byte("Welcome Demo App\n"))
 }
 
 func okHandler(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("ok\n"))
+	_, _ = w.Write([]byte("ok\n"))
 }
 
 func notFoundHandler(w http.ResponseWriter, _ *http.Request) {
@@ -45,5 +47,5 @@ func gatewayTimeoutHandler(w http.ResponseWriter, _ *http.Request) {
 func sleep60secHandler(w http.ResponseWriter, _ *http.Request) {
 	time.Sleep(60 * time.Second)
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("sleep 60"))
+	_, _ = w.Write([]byte("sleep 60"))
 }

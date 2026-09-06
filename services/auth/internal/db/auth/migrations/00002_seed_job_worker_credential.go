@@ -1,3 +1,4 @@
+// Package migrations contains auth database migrations.
 package migrations
 
 import (
@@ -17,9 +18,9 @@ var workerActorID = uuid.MustParse("ffffffff-ffff-ffff-ffff-fffffffffffe")
 
 func upSeedJobWorkerCredential(ctx context.Context, tx *sql.Tx) error {
 	// This code is executed when the migration is applied.
-	client_id := os.Getenv("AUTH_JOB_WORKER_CLIENT_ID")
-	secret_hash := os.Getenv("AUTH_JOB_WORKER_SECRET_HASH")
-	if client_id == "" || secret_hash == "" {
+	clientID := os.Getenv("AUTH_JOB_WORKER_CLIENT_ID")
+	secretHash := os.Getenv("AUTH_JOB_WORKER_SECRET_HASH")
+	if clientID == "" || secretHash == "" {
 		return nil
 	}
 	_, err := tx.ExecContext(
@@ -31,8 +32,8 @@ func upSeedJobWorkerCredential(ctx context.Context, tx *sql.Tx) error {
 		VALUES ($1, $2, $3)
 		`,
 		workerActorID,
-		client_id,
-		secret_hash,
+		clientID,
+		secretHash,
 	)
 	if err != nil {
 		return err

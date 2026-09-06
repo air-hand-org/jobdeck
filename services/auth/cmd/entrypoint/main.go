@@ -1,3 +1,4 @@
+// Package main runs database migrations before starting the auth server.
 package main
 
 import (
@@ -103,11 +104,11 @@ func runMigrator(ctx context.Context, startupDeadline, retryInterval time.Durati
 			return fmt.Errorf("migrator canceled: %w", err)
 		}
 
-		if err := run(migratorCtx); err == nil {
+		runErr := run(migratorCtx)
+		if runErr == nil {
 			return nil
-		} else {
-			lastErr = err
 		}
+		lastErr = runErr
 
 		log.Printf("migrator attempt %d failed: %v; retrying in %s", attempt, lastErr, retryInterval)
 		timer := time.NewTimer(retryInterval)

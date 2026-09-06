@@ -1,3 +1,4 @@
+// Package main creates or verifies a Pub/Sub push subscription.
 package main
 
 import (
@@ -23,7 +24,7 @@ func ensureWithEndpoint(ctx context.Context, projectID, topic, subscription, pus
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
 	slog.InfoContext(
 		ctx,
@@ -56,7 +57,7 @@ func ensureWithEndpoint(ctx context.Context, projectID, topic, subscription, pus
 				return nil
 			}
 		} else if code != codes.Unavailable && code != codes.DeadlineExceeded {
-			return fmt.Errorf("Failed: %w", err)
+			return fmt.Errorf("failed: %w", err)
 		}
 
 		slog.Info("Retrying...")

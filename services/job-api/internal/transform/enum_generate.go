@@ -1,3 +1,4 @@
+// Package transform converts between domain and protobuf values.
 package transform
 
 //go:generate go run jobdeck/services/job-api/internal/cmd/enumgen -domain jobdeck/services/job-api/internal/domain.JobType -proto github.com/air-hand-org/api-contracts/packages/jobdeck/job/go/v1.JobType -name jobType -output job_type_enum_gen.go

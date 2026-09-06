@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc"
 )
 
+// LoggingErrorUnaryServerInterceptor logs errors returned by handlers.
 func LoggingErrorUnaryServerInterceptor(logger *slog.Logger) grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,

@@ -10,10 +10,14 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+// ExecutionIdFromProto parses an execution ID.
+//
+//nolint:revive // Existing internal API name is retained for compatibility.
 func ExecutionIdFromProto(s string) (domain.ExecutionId, error) {
 	return uuid.Parse(s)
 }
 
+// LeaseTokenFromProto parses a lease token.
 func LeaseTokenFromProto(s string) (domain.LeaseToken, error) {
 	return uuid.Parse(s)
 }
@@ -39,8 +43,8 @@ func httpExecutionResultToProto(r domain.HttpExecutionResult) *jobv1.HttpExecuti
 	}
 }
 
-func executionResultToProto(job_type domain.JobType, result domain.ExecutionResult) (*jobv1.ExecutionResult, error) {
-	switch job_type {
+func executionResultToProto(jobType domain.JobType, result domain.ExecutionResult) (*jobv1.ExecutionResult, error) {
+	switch jobType {
 	case domain.JOB_TYPE_HTTP_REQUEST:
 		httpResult := result.HttpResult()
 		if httpResult == nil {
@@ -52,15 +56,16 @@ func executionResultToProto(job_type domain.JobType, result domain.ExecutionResu
 			},
 		}, nil
 	default:
-		return nil, errors.Newf("unsupported job type: %v", job_type)
+		return nil, errors.Newf("unsupported job type: %v", jobType)
 	}
 }
 
+// ExecutionToProto converts an execution to protobuf.
 func ExecutionToProto(e domain.Execution) (*jobv1.Execution, error) {
 	events := lo.Map(e.Events, func(e domain.ExecutionEvent, _ int) *jobv1.ExecutionEvent {
 		return executionEventToProto(e)
 	})
-	var result *jobv1.ExecutionResult = nil
+	var result *jobv1.ExecutionResult
 	var err error
 	if e.Result != nil {
 		result, err = executionResultToProto(e.JobSpec.Type, *e.Result)

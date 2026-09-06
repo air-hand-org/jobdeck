@@ -1,3 +1,4 @@
+// Package migrator applies auth database migrations.
 package migrator
 
 import (
@@ -6,7 +7,7 @@ import (
 
 	migrations "jobdeck/services/auth/internal/db/auth"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
+	_ "github.com/jackc/pgx/v5/stdlib" // Register the pgx database driver.
 	"github.com/pressly/goose/v3"
 )
 
@@ -18,12 +19,14 @@ func configure() error {
 	return goose.SetDialect("postgres")
 }
 
+// Up applies all pending auth migrations.
 func Up(ctx context.Context, connectionString string) error {
 	return withDB(connectionString, func(db *sql.DB) error {
 		return up(ctx, db)
 	})
 }
 
+// DownTo0 rolls back all auth migrations.
 func DownTo0(ctx context.Context, connectionString string) error {
 	return withDB(connectionString, func(db *sql.DB) error {
 		return downTo0(ctx, db)
@@ -35,7 +38,7 @@ func withDB(connectionString string, fn func(*sql.DB) error) error {
 	if err != nil {
 		return err
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	return fn(db)
 }

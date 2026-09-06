@@ -1,3 +1,4 @@
+// Command entrypoint initializes and runs the job API process.
 package main
 
 import (
@@ -67,13 +68,14 @@ func runMigrator(ctx context.Context) error {
 func runMigratorUntilReady(ctx context.Context) error {
 	var lastErr error
 	for attempt := 1; attempt <= migratorAttempts; attempt++ {
-		if err := runMigrator(ctx); err == nil {
+		err := runMigrator(ctx)
+		if err == nil {
 			return nil
-		} else if ctx.Err() != nil {
-			return ctx.Err()
-		} else {
-			lastErr = err
 		}
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+		lastErr = err
 
 		if attempt == migratorAttempts {
 			break

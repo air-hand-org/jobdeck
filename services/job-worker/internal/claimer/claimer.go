@@ -1,3 +1,4 @@
+// Package claimer claims executions from job-api.
 package claimer
 
 import (
@@ -15,6 +16,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// Claimer claims executions from job-api and queues them for processing.
 type Claimer struct {
 	client jobv1.ExecutionQueueServiceClient
 	items  chan<- app.QueuedItem
@@ -24,6 +26,7 @@ type Claimer struct {
 
 var _ app.Claimer = (*Claimer)(nil)
 
+// NewClaimer creates an execution claimer.
 func NewClaimer(conn *grpc.ClientConn, items chan<- app.QueuedItem, logger *slog.Logger) *Claimer {
 	return &Claimer{
 		client: jobv1.NewExecutionQueueServiceClient(conn),
@@ -33,10 +36,11 @@ func NewClaimer(conn *grpc.ClientConn, items chan<- app.QueuedItem, logger *slog
 	}
 }
 
-func (c *Claimer) ClaimAndEnqueue(ctx context.Context, execution_id string) error {
+// ClaimAndEnqueue claims an execution and queues it for processing.
+func (c *Claimer) ClaimAndEnqueue(ctx context.Context, executionID string) error {
 	reqCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	res, err := c.client.ClaimExecution(reqCtx, &jobv1.ClaimExecutionRequest{
-		ExecutionId: execution_id,
+		ExecutionId: executionID,
 	})
 	cancel()
 	if err != nil {
@@ -45,7 +49,7 @@ func (c *Claimer) ClaimAndEnqueue(ctx context.Context, execution_id string) erro
 			c.logger.WarnContext(
 				ctx,
 				"invalid execution id",
-				"id", execution_id,
+				"id", executionID,
 				"error", err,
 			)
 			return nil

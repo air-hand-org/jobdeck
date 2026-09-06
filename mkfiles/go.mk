@@ -18,11 +18,12 @@ go-fmt:
 
 .PHONY: go-lint
 go-lint:
-	@golangci-lint fmt ./... --diff \
-	;
-#	&& for mod in $(GO_MODULES); do \
-#       	(cd $$mod && golangci-lint run ./...) || exit $$?; \
-#	done;
+	@status=0; \
+	golangci-lint fmt ./... --diff || status=1; \
+	for mod in $(GO_MODULES); do \
+		(cd $$mod && golangci-lint run ./...) || status=1; \
+	done; \
+	exit $$status
 
 .PHONY: go-test
 go-test:

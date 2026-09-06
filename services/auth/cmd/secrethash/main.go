@@ -1,3 +1,4 @@
+// Package main hashes a supplied or generated test password.
 package main
 
 import (
@@ -14,19 +15,19 @@ func password() (string, error) {
 	if password != "" {
 		return password, nil
 	}
-	random_password := make([]byte, 32)
-	if _, err := rand.Read(random_password); err != nil {
+	randomPassword := make([]byte, 32)
+	if _, err := rand.Read(randomPassword); err != nil {
 		return "", err
 	}
-	encoded_password := base64.RawStdEncoding.EncodeToString(random_password)
-	return encoded_password, nil
+	encodedPassword := base64.RawStdEncoding.EncodeToString(randomPassword)
+	return encodedPassword, nil
 }
 
 func main() {
-	encoded_password, err := password()
+	encodedPassword, err := password()
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
 	factory := secret.NewPHCBuilderFactory()
-	fmt.Printf("pass: [ %s ], hashed string: [ %s ]\n", encoded_password, factory.NewBuilder(nil).PHC([]byte(encoded_password)).String())
+	fmt.Printf("pass: [ %s ], hashed string: [ %s ]\n", encodedPassword, factory.NewBuilder(nil).PHC([]byte(encodedPassword)).String())
 }

@@ -10,11 +10,12 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// ErrorMappingUnaryServerInterceptor maps domain errors to gRPC status errors.
 func ErrorMappingUnaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,
 		req any,
-		info *grpc.UnaryServerInfo,
+		_ *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler,
 	) (any, error) {
 		resp, err := handler(ctx, req)

@@ -21,19 +21,19 @@ func TestJWTIssuerTokenContainsExpectedClaims(t *testing.T) {
 	now := time.Date(2026, time.July, 30, 0, 0, 0, 0, time.UTC)
 	actorID := uuid.New()
 
-	tests := []struct{
-		name string
-		actor_type string
+	tests := []struct {
+		name            string
+		actor_type      string
 		expiresDuration time.Duration
 	}{
 		{
-			name: "user",
-			actor_type: "USER",
+			name:            "user",
+			actor_type:      "USER",
 			expiresDuration: 60 * time.Minute,
 		},
 		{
-			name: "service",
-			actor_type: "SERVICE",
+			name:            "service",
+			actor_type:      "SERVICE",
 			expiresDuration: 10 * time.Minute,
 		},
 	}
@@ -55,8 +55,8 @@ func TestJWTIssuerTokenContainsExpectedClaims(t *testing.T) {
 			require.Equal(t, actorID.String(), claims.Subject)
 			require.Equal(t, tt.actor_type, claims.ActorType)
 			require.Equal(t, []string{"jobdeck-job-api"}, []string(claims.Audience))
-			require.True(t, claims.IssuedAt.Time.Equal(now))
-			require.True(t, claims.ExpiresAt.Time.Equal(now.Add(tt.expiresDuration)))
+			require.True(t, claims.IssuedAt.Equal(now))
+			require.True(t, claims.ExpiresAt.Equal(now.Add(tt.expiresDuration)))
 		})
 	}
 }

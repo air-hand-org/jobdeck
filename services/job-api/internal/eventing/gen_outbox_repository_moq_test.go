@@ -19,10 +19,10 @@ var _ OutboxRepository = &OutboxRepositoryMock{}
 //
 //		// make and configure a mocked OutboxRepository
 //		mockedOutboxRepository := &OutboxRepositoryMock{
-//			MarkAsPublishedExecutionRequestedFunc: func(ctx context.Context, execution_ids []domain.ExecutionId) error {
+//			MarkAsPublishedExecutionRequestedFunc: func(ctx context.Context, executionIDs []domain.ExecutionId) error {
 //				panic("mock out the MarkAsPublishedExecutionRequested method")
 //			},
-//			ReserveForPublishExecutionRequestedFunc: func(ctx context.Context, max_size int) ([]domain.ExecutionId, error) {
+//			ReserveForPublishExecutionRequestedFunc: func(ctx context.Context, maxSize int) ([]domain.ExecutionId, error) {
 //				panic("mock out the ReserveForPublishExecutionRequested method")
 //			},
 //		}
@@ -33,10 +33,10 @@ var _ OutboxRepository = &OutboxRepositoryMock{}
 //	}
 type OutboxRepositoryMock struct {
 	// MarkAsPublishedExecutionRequestedFunc mocks the MarkAsPublishedExecutionRequested method.
-	MarkAsPublishedExecutionRequestedFunc func(ctx context.Context, execution_ids []domain.ExecutionId) error
+	MarkAsPublishedExecutionRequestedFunc func(ctx context.Context, executionIDs []domain.ExecutionId) error
 
 	// ReserveForPublishExecutionRequestedFunc mocks the ReserveForPublishExecutionRequested method.
-	ReserveForPublishExecutionRequestedFunc func(ctx context.Context, max_size int) ([]domain.ExecutionId, error)
+	ReserveForPublishExecutionRequestedFunc func(ctx context.Context, maxSize int) ([]domain.ExecutionId, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -44,15 +44,15 @@ type OutboxRepositoryMock struct {
 		MarkAsPublishedExecutionRequested []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// Execution_ids is the execution_ids argument value.
-			Execution_ids []domain.ExecutionId
+			// ExecutionIDs is the executionIDs argument value.
+			ExecutionIDs []domain.ExecutionId
 		}
 		// ReserveForPublishExecutionRequested holds details about calls to the ReserveForPublishExecutionRequested method.
 		ReserveForPublishExecutionRequested []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// Max_size is the max_size argument value.
-			Max_size int
+			// MaxSize is the maxSize argument value.
+			MaxSize int
 		}
 	}
 	lockMarkAsPublishedExecutionRequested   sync.RWMutex
@@ -60,21 +60,21 @@ type OutboxRepositoryMock struct {
 }
 
 // MarkAsPublishedExecutionRequested calls MarkAsPublishedExecutionRequestedFunc.
-func (mock *OutboxRepositoryMock) MarkAsPublishedExecutionRequested(ctx context.Context, execution_ids []domain.ExecutionId) error {
+func (mock *OutboxRepositoryMock) MarkAsPublishedExecutionRequested(ctx context.Context, executionIDs []domain.ExecutionId) error {
 	if mock.MarkAsPublishedExecutionRequestedFunc == nil {
 		panic("OutboxRepositoryMock.MarkAsPublishedExecutionRequestedFunc: method is nil but OutboxRepository.MarkAsPublishedExecutionRequested was just called")
 	}
 	callInfo := struct {
-		Ctx           context.Context
-		Execution_ids []domain.ExecutionId
+		Ctx          context.Context
+		ExecutionIDs []domain.ExecutionId
 	}{
-		Ctx:           ctx,
-		Execution_ids: execution_ids,
+		Ctx:          ctx,
+		ExecutionIDs: executionIDs,
 	}
 	mock.lockMarkAsPublishedExecutionRequested.Lock()
 	mock.calls.MarkAsPublishedExecutionRequested = append(mock.calls.MarkAsPublishedExecutionRequested, callInfo)
 	mock.lockMarkAsPublishedExecutionRequested.Unlock()
-	return mock.MarkAsPublishedExecutionRequestedFunc(ctx, execution_ids)
+	return mock.MarkAsPublishedExecutionRequestedFunc(ctx, executionIDs)
 }
 
 // MarkAsPublishedExecutionRequestedCalls gets all the calls that were made to MarkAsPublishedExecutionRequested.
@@ -82,12 +82,12 @@ func (mock *OutboxRepositoryMock) MarkAsPublishedExecutionRequested(ctx context.
 //
 //	len(mockedOutboxRepository.MarkAsPublishedExecutionRequestedCalls())
 func (mock *OutboxRepositoryMock) MarkAsPublishedExecutionRequestedCalls() []struct {
-	Ctx           context.Context
-	Execution_ids []domain.ExecutionId
+	Ctx          context.Context
+	ExecutionIDs []domain.ExecutionId
 } {
 	var calls []struct {
-		Ctx           context.Context
-		Execution_ids []domain.ExecutionId
+		Ctx          context.Context
+		ExecutionIDs []domain.ExecutionId
 	}
 	mock.lockMarkAsPublishedExecutionRequested.RLock()
 	calls = mock.calls.MarkAsPublishedExecutionRequested
@@ -96,21 +96,21 @@ func (mock *OutboxRepositoryMock) MarkAsPublishedExecutionRequestedCalls() []str
 }
 
 // ReserveForPublishExecutionRequested calls ReserveForPublishExecutionRequestedFunc.
-func (mock *OutboxRepositoryMock) ReserveForPublishExecutionRequested(ctx context.Context, max_size int) ([]domain.ExecutionId, error) {
+func (mock *OutboxRepositoryMock) ReserveForPublishExecutionRequested(ctx context.Context, maxSize int) ([]domain.ExecutionId, error) {
 	if mock.ReserveForPublishExecutionRequestedFunc == nil {
 		panic("OutboxRepositoryMock.ReserveForPublishExecutionRequestedFunc: method is nil but OutboxRepository.ReserveForPublishExecutionRequested was just called")
 	}
 	callInfo := struct {
-		Ctx      context.Context
-		Max_size int
+		Ctx     context.Context
+		MaxSize int
 	}{
-		Ctx:      ctx,
-		Max_size: max_size,
+		Ctx:     ctx,
+		MaxSize: maxSize,
 	}
 	mock.lockReserveForPublishExecutionRequested.Lock()
 	mock.calls.ReserveForPublishExecutionRequested = append(mock.calls.ReserveForPublishExecutionRequested, callInfo)
 	mock.lockReserveForPublishExecutionRequested.Unlock()
-	return mock.ReserveForPublishExecutionRequestedFunc(ctx, max_size)
+	return mock.ReserveForPublishExecutionRequestedFunc(ctx, maxSize)
 }
 
 // ReserveForPublishExecutionRequestedCalls gets all the calls that were made to ReserveForPublishExecutionRequested.
@@ -118,12 +118,12 @@ func (mock *OutboxRepositoryMock) ReserveForPublishExecutionRequested(ctx contex
 //
 //	len(mockedOutboxRepository.ReserveForPublishExecutionRequestedCalls())
 func (mock *OutboxRepositoryMock) ReserveForPublishExecutionRequestedCalls() []struct {
-	Ctx      context.Context
-	Max_size int
+	Ctx     context.Context
+	MaxSize int
 } {
 	var calls []struct {
-		Ctx      context.Context
-		Max_size int
+		Ctx     context.Context
+		MaxSize int
 	}
 	mock.lockReserveForPublishExecutionRequested.RLock()
 	calls = mock.calls.ReserveForPublishExecutionRequested

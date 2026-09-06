@@ -14,6 +14,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// ActorClaims contains the JWT claims issued for an actor.
 type ActorClaims struct {
 	jwt.RegisteredClaims
 
@@ -22,13 +23,15 @@ type ActorClaims struct {
 
 var _ app.TokenVerifier = (*JWTVerifier)(nil)
 
+// JWTVerifier validates actor JWTs.
 type JWTVerifier struct {
 	publicKey ed25519.PublicKey
 	issuer    string
 	audience  string
 }
 
-func (v JWTVerifier) Verify(ctx context.Context, rawToken string) (domain.AuthenticatedIdentity, error) {
+// Verify validates a token and returns its identity.
+func (v JWTVerifier) Verify(_ context.Context, rawToken string) (domain.AuthenticatedIdentity, error) {
 	claims := ActorClaims{}
 	token, err := jwt.ParseWithClaims(
 		rawToken,
@@ -48,13 +51,13 @@ func (v JWTVerifier) Verify(ctx context.Context, rawToken string) (domain.Authen
 		return domain.AuthenticatedIdentity{}, domain.ErrTokenInvalid
 	}
 
-	actor_id, err := uuid.Parse(claims.Subject)
+	actorID, err := uuid.Parse(claims.Subject)
 	if err != nil {
 		return domain.AuthenticatedIdentity{}, domain.ErrTokenInvalid
 	}
 
 	return domain.AuthenticatedIdentity{
-		ID:   actor_id,
+		ID:   actorID,
 		Type: claims.ActorType,
 	}, nil
 }
@@ -70,6 +73,7 @@ func decodePublicKey(encoded string) (ed25519.PublicKey, error) {
 	return ed25519.PublicKey(decoded), nil
 }
 
+// NewJWTVerifier creates a verifier from a base64-encoded Ed25519 public key.
 func NewJWTVerifier(pubkey string) (*JWTVerifier, error) {
 	decoded, err := decodePublicKey(pubkey)
 	if err != nil {

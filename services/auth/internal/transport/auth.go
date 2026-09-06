@@ -1,3 +1,4 @@
+// Package transport exposes auth application services over gRPC.
 package transport
 
 import (
@@ -10,16 +11,18 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type authSeviceServer struct {
+// AuthServiceServer exposes the auth use case over gRPC.
+type AuthServiceServer struct {
 	usecase app.AuthUsecase
 
 	// TODO: switch to UnsafeAuthServiceServer
 	authv1.UnimplementedAuthServiceServer
 }
 
-var _ authv1.AuthServiceServer = (*authSeviceServer)(nil)
+var _ authv1.AuthServiceServer = (*AuthServiceServer)(nil)
 
-func (s *authSeviceServer) AuthenticateLocalClient(ctx context.Context, req *authv1.AuthenticateLocalClientRequest) (*authv1.AuthenticateLocalClientResponse, error) {
+// AuthenticateLocalClient authenticates a local client and returns an access token.
+func (s *AuthServiceServer) AuthenticateLocalClient(ctx context.Context, req *authv1.AuthenticateLocalClientRequest) (*authv1.AuthenticateLocalClientResponse, error) {
 	token, err := s.usecase.Authenticate(ctx, req.GetClientId(), req.GetClientSecret(), req.GetAudience())
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, "failed to authenticate")
@@ -33,8 +36,9 @@ func (s *authSeviceServer) AuthenticateLocalClient(ctx context.Context, req *aut
 	}, nil
 }
 
-func NewAuthServiceServer(usecase *app.AuthUsecase) *authSeviceServer {
-	return &authSeviceServer{
+// NewAuthServiceServer creates an auth gRPC service server.
+func NewAuthServiceServer(usecase *app.AuthUsecase) *AuthServiceServer {
+	return &AuthServiceServer{
 		usecase: *usecase,
 	}
 }

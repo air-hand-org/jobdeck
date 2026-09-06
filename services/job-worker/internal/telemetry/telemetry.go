@@ -1,3 +1,4 @@
+// Package telemetry configures OpenTelemetry tracing.
 package telemetry
 
 import (
@@ -12,6 +13,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.41.0"
 )
 
+// Init configures OpenTelemetry tracing and returns its shutdown function.
 func Init(ctx context.Context, serviceName string) (func(context.Context) error, error) {
 	if os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT") == "" {
 		return func(context.Context) error {

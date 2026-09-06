@@ -1,3 +1,4 @@
+// Package main starts the demo HTTP server.
 package main
 
 import (
@@ -28,7 +29,7 @@ func main() {
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%s", port),
-		Handler: transport.NewHttpHandler(),
+		Handler: transport.NewHTTPHandler(),
 	}
 
 	g.Go(func() error {
