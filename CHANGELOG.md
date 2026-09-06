@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/air-hand-org/jobdeck/compare/v1.0.3...v1.0.4) (2026-09-06)
+
+
+### Bug Fixes
+
+* run Go linters per module ([#98](https://github.com/air-hand-org/jobdeck/issues/98)) ([c673d81](https://github.com/air-hand-org/jobdeck/commit/c673d81c58b8fa3c18ea9b8d92b5fddd875de590))
+
 ## [1.0.3](https://github.com/air-hand-org/jobdeck/compare/v1.0.2...v1.0.3) (2026-09-03)
 
 
