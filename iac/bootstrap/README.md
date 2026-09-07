@@ -3,6 +3,8 @@
 This root is run by the manually-created `jobdeck-bootstrap` identity through
 GitHub Actions. The state bucket, bootstrap service account, and its GitHub
 Workload Identity Federation binding are the intentionally manual trust root.
+The existing `github` pool/provider also remain part of that manual trust root.
+Service-specific image-publishing pools are managed by this root instead.
 
 Initialize the backend with:
 
@@ -25,3 +27,59 @@ independent.
 
 After apply, delegate `jobdeck.app.air-hand.com` from the Route 53
 `air-hand.com` zone to the four values in `app_dns_nameservers`.
+
+## Auth image publisher
+
+`auth-publisher.tf` creates a separate publishing identity for
+`air-hand-org/jobdeck-auth`:
+
+- WIF pool `jobdeck-auth-publish` and GitHub OIDC provider `github`.
+- Service account `jobdeck-auth-publisher`.
+- `roles/artifactregistry.writer` on the existing `jobdeck-auth` repository only.
+  This grants artifact read/write access, not project-wide deployment rights.
+- `roles/iam.workloadIdentityUser` on that service account for the dedicated
+  pool's `publish` environment identities.
+
+The provider requires repository ID `1360104416`, owner ID `139471655`, and
+repository name `air-hand-org/jobdeck-auth`. Numeric IDs prevent reuse of names
+from granting access to a different repository or organization. Jobs without an
+environment cannot match the service account binding.
+
+Do not add this repository to the existing `github` pool/provider. The existing
+deployer and plan service account bindings select `attribute.environment`
+within that pool; broadening its accepted repositories could authorize those
+repositories to impersonate the existing identities. A separate provider in
+the same pool would not isolate these pool-scoped principal sets.
+
+Before applying, the manually managed `jobdeck-bootstrap` identity needs
+`roles/iam.workloadIdentityPoolAdmin`, or equivalent custom permissions, on the
+project to manage the new pool/provider. Grant this through the manual bootstrap
+process; this root does not grant permissions to its own bootstrap identity.
+See [Google's deployment pipeline WIF guide](https://docs.cloud.google.com/iam/docs/workload-identity-federation-with-deployment-pipelines).
+
+After the bootstrap apply succeeds, create a GitHub Environment named `publish`
+in `air-hand-org/jobdeck-auth` and set these environment variables:
+
+| Variable | Value |
+| --- | --- |
+| `GCP_PROJECT_ID` | `airhand-jobdeck` |
+| `GCP_SERVICE_ACCOUNT` | Output `auth_publisher_service_account` |
+| `GCP_WORKLOAD_IDENTITY_PROVIDER` | Output `auth_publisher_workload_identity_provider` |
+
+Restrict the environment's deployment branches/tags to the intended release
+refs (for example, release tags matching `v*`). The environment name alone does
+not restrict the Git ref or workflow. The image-publishing job must declare
+`environment: publish`, `contents: read`, and `id-token: write`, then authenticate
+with `google-github-actions/auth` using these variables and
+`token_format: access_token`. Use the resulting short-lived token with Docker
+login (`username: oauth2accesstoken`) to push to:
+
+```text
+asia-northeast1-docker.pkg.dev/airhand-jobdeck/jobdeck-auth/auth
+```
+
+Use unique release tags: this registry has immutable tags enabled. No service
+account key is needed. This change provisions the publishing identity; the new
+repository's GitHub Environment and publishing workflow are configured
+separately. Existing monorepo publishing access remains during the transition
+and can be removed when image publication has moved successfully.
