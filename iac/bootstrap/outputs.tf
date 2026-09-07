@@ -21,6 +21,16 @@ output "deployer_service_account" {
   value = google_service_account.deployer.email
 }
 
+output "auth_publisher_service_account" {
+  description = "GCP_SERVICE_ACCOUNT for the jobdeck-auth publish environment."
+  value       = google_service_account.auth_publisher.email
+}
+
+output "auth_publisher_workload_identity_provider" {
+  description = "GCP_WORKLOAD_IDENTITY_PROVIDER for the jobdeck-auth publish environment."
+  value       = google_iam_workload_identity_pool_provider.auth_publisher.name
+}
+
 output "runtime_service_accounts" {
   value = {
     for service, account in google_service_account.runtime :
