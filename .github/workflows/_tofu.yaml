@@ -16,11 +16,6 @@ on:
         description: GitHub Environment that provides GCP OIDC variables
         required: true
         type: string
-      image_tag:
-        description: Immutable image tag to apply for the app root
-        required: false
-        type: string
-        default: v0.0.0
 permissions:
   contents: read
   id-token: write
@@ -33,7 +28,6 @@ jobs:
       TOFU_ROOT: ${{ inputs.root }}
       TOFU_ENVIRONMENT: ${{ inputs.environment }}
       TOFU_COMMAND: ${{ inputs.command }}
-      TOFU_IMAGE_TAG: ${{ inputs.image_tag }}
       TF_VAR_decrypt_secrets: ${{ inputs.root == 'app' }}
       # iac/app uses this during backend state encryption, which is configured
       # before the later `tofu plan -var=...` invocation.
@@ -75,10 +69,6 @@ jobs:
             -out=tfplan
             -var="project_id=${{ vars.GCP_PROJECT_ID }}"
           )
-
-          if [[ "${TOFU_ROOT}" == "app" ]]; then
-            plan_args+=("-var=image_tag=${TOFU_IMAGE_TAG}")
-          fi
 
           tofu plan "${plan_args[@]}"
       - name: Apply

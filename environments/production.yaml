@@ -1,0 +1,19 @@
+images:
+  auth:
+    repository: asia-northeast1-docker.pkg.dev/airhand-jobdeck/jobdeck-auth/auth
+    version: '1.0.4'
+  ui:
+    repository: asia-northeast1-docker.pkg.dev/airhand-jobdeck/jobdeck-ui/ui
+    version: '1.0.4'
+  demo:
+    repository: asia-northeast1-docker.pkg.dev/airhand-jobdeck/jobdeck-demo/demo
+    version: '1.0.4'
+  job-api:
+    repository: asia-northeast1-docker.pkg.dev/airhand-jobdeck/jobdeck-job-api/job-api
+    version: '1.0.4'
+  job-worker:
+    repository: asia-northeast1-docker.pkg.dev/airhand-jobdeck/jobdeck-job-worker/job-worker
+    version: '1.0.4'
+  forward-proxy:
+    repository: asia-northeast1-docker.pkg.dev/airhand-jobdeck/jobdeck-forward-proxy/forward-proxy
+    version: '1.0.4'

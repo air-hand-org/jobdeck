@@ -9,7 +9,7 @@ on:
         type: boolean
         default: false
       image_tag:
-        description: Immutable image tag. Required when push is true.
+        description: Published release tag to check against production.yaml. Required when push is true.
         required: false
         type: string
         default: ""
@@ -28,10 +28,45 @@ concurrency:
 permissions: {}
 
 jobs:
+  images:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      refs: ${{ steps.images.outputs.refs }}
+      registry: ${{ steps.images.outputs.registry }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: aquaproj/aqua-installer@11dd79b4e498d471a9385aa9fb7f62bb5f52a73c # v4.0.4
+        with:
+          aqua_version: v2.60.1
+          aqua_opts: ""
+      - name: Test production image configuration
+        run: |
+          shellcheck .github/scripts/production-images.sh tests/production-images-test.sh
+          bash tests/production-images-test.sh
+      - name: Read production images
+        id: images
+        env:
+          PUSH_IMAGES: ${{ inputs.push }}
+          RELEASE_TAG: ${{ inputs.image_tag }}
+        run: |
+          if [[ "$PUSH_IMAGES" == true ]]; then
+            refs="$(bash .github/scripts/production-images.sh "$RELEASE_TAG" auth ui demo job-api job-worker forward-proxy)"
+          else
+            refs="$(bash .github/scripts/production-images.sh)"
+          fi
+          echo "refs=$refs" >> "$GITHUB_OUTPUT"
+          registry="$(jq -r '.ui | split("/")[0]' <<< "$refs")"
+          echo "registry=$registry" >> "$GITHUB_OUTPUT"
+
   build:
     # CI uses this path. It intentionally has neither a GitHub environment nor
     # OIDC permissions, so it cannot access GCP or push.
     if: ${{ inputs.push == false }}
+    needs: images
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -105,15 +140,13 @@ jobs:
 
   publish:
     if: ${{ inputs.push == true }}
+    needs: images
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'production' }}
     permissions:
       contents: read
       packages: read
       id-token: write
-    env:
-      ARTIFACT_REGISTRY_HOST: asia-northeast1-docker.pkg.dev
-      IMAGE_TAG: ${{ inputs.image_tag }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -129,8 +162,6 @@ jobs:
           repositories: |
             api-contracts
       - uses: docker/setup-buildx-action@v4
-      - name: Validate image tag
-        run: test -n "$IMAGE_TAG"
       - id: google-auth
         uses: google-github-actions/auth@v3
         with:
@@ -144,7 +175,7 @@ jobs:
       - name: Log in to Artifact Registry
         uses: docker/login-action@v4
         with:
-          registry: ${{ env.ARTIFACT_REGISTRY_HOST }}
+          registry: ${{ needs.images.outputs.registry }}
           username: oauth2accesstoken
           password: ${{ steps.google-auth.outputs.access_token }}
       - parallel:
@@ -154,14 +185,14 @@ jobs:
               context: containers/forward-proxy
               file: containers/forward-proxy/Dockerfile
               push: true
-              tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-forward-proxy/forward-proxy:${{ env.IMAGE_TAG }}
+              tags: ${{ fromJSON(needs.images.outputs.refs).forward_proxy }}
           - name: Build and push job-api image
             uses: docker/build-push-action@v7
             with:
               context: .
               file: containers/job-api/Dockerfile
               push: true
-              tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-job-api/job-api:${{ env.IMAGE_TAG }}
+              tags: ${{ fromJSON(needs.images.outputs.refs).job_api }}
               secrets: |
                 github_contents_token=${{ steps.app-token.outputs.token }}
       - parallel:
@@ -171,7 +202,7 @@ jobs:
               context: .
               file: containers/auth/Dockerfile
               push: true
-              tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-auth/auth:${{ env.IMAGE_TAG }}
+              tags: ${{ fromJSON(needs.images.outputs.refs).auth }}
               secrets: |
                 github_contents_token=${{ steps.app-token.outputs.token }}
           - name: Build and push job-worker image
@@ -180,7 +211,7 @@ jobs:
               context: .
               file: containers/job-worker/Dockerfile
               push: true
-              tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-job-worker/job-worker:${{ env.IMAGE_TAG }}
+              tags: ${{ fromJSON(needs.images.outputs.refs).job_worker }}
               secrets: |
                 github_contents_token=${{ steps.app-token.outputs.token }}
       - parallel:
@@ -190,14 +221,14 @@ jobs:
               context: .
               file: containers/demo/Dockerfile
               push: true
-              tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-demo/demo:${{ env.IMAGE_TAG }}
+              tags: ${{ fromJSON(needs.images.outputs.refs).demo }}
           - name: Build and push ui image
             uses: docker/build-push-action@v7
             with:
               context: .
               file: containers/ui/Dockerfile
               push: true
-              tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-ui/ui:${{ env.IMAGE_TAG }}
+              tags: ${{ fromJSON(needs.images.outputs.refs).ui }}
               build-args: |
                 GITHUB_ACTOR=${{ github.actor }}
               secrets: |

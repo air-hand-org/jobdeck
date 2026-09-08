@@ -81,22 +81,30 @@ container の作成や runtime IAM policy の変更は行えない。これは s
 
 ### Image and deployment flow
 
-以下は移行前の共通 release tag による方式である。polyrepo 移行では、後述するサービス別の
-image digest 更新 PR と、system repository での E2E 検証・デプロイに置き換える。
+`environments/production.yaml` をサービス別 image 参照の正とする。現在は auth、ui、demo、
+job-api、job-worker、forward-proxy の 6 image を jobdeck から公開する。release-please の
+`extra-files` は、この repository が公開するサービスを JSONPath で明示して `version` を更新する。
+分離済みサービスは更新対象と build/push 対象から外し、公開後の更新 PR へ順次移行する。
 
 Terraform Docker provider は使わない。CI が各 image を build し、Artifact Registry へ
 release tag (`vX.Y.Z`) を push する。repository は immutable tag を有効にし、OpenTofu は
-release tag を variable として受け取って Cloud Run revision を固定する。
+同じ release commit の YAML にある repository URI と version から `<repository>:v<version>`
+を組み立てて Cloud Run revision に指定する。image 用の共通 `image_tag` input は使わない。
 
 ```text
 main merge
-  -> release-please creates / updates a release PR
+  -> release-please creates / updates a release PR, including production.yaml versions
   -> release PR merge creates the release and vX.Y.Z tag
   -> GitHub Release published
-  -> build / push vX.Y.Z images to Artifact Registry
+  -> verify locally built image versions match vX.Y.Z
+  -> build / push images to repositories recorded in production.yaml
   -> decrypt SOPS secrets
-  -> tofu apply iac/app with immutable image tags
+  -> tofu apply iac/app using production.yaml from the release commit
 ```
+
+release PR の plan は公開前の version を参照するが、apply は image push 完了後に行う。
+現在の E2E はソースから起動する既存構成を維持し、公開候補 image の組み合わせを検証する
+方式は後続の対応とする。`repository_dispatch` による version 更新 PR 作成も別 PR で実装する。
 
 `bootstrap` の apply は基盤変更時に別途実行し、毎回のサービス release の前提ステップにはしない。
 
@@ -177,7 +185,7 @@ protobuf は既に `air-hand-org/api-contracts` に切り出している。次�
 | --- | --- |
 | `api-contracts` | protobuf schema、生成 SDK、lint / breaking change detection |
 | 各 service repository | 実装、DB migration、Dockerfile、unit / integration test、consumer contract と provider verification |
-| `jobdeck-system` | 全体 Aspire AppHost、全体 E2E、IaC、環境別 image digest 一覧、更新 PR と deployment workflow |
+| `jobdeck-system` | 全体 Aspire AppHost、全体 E2E、IaC、環境別 image repository / version 一覧、更新 PR と deployment workflow |
 
 `jobdeck-system` は論理的な役割名であり、現在の `jobdeck` repository からサービスを順に
 切り出して、この役割を残す形でもよい。UI repository に全体 AppHost や全体 E2E を置かない。
@@ -195,31 +203,39 @@ jobdeck-system/
   .github/workflows/
 ```
 
-Aspire と OpenTofu はそれぞれローカル環境とクラウド環境の配線を表現するが、使用する
-サービス image は同じ環境別一覧から読み取る。一覧の形式は実装時に確定する。
-以下は例であり、digest は説明用のプレースホルダーである。
+`environments/production.yaml` には、完全な image repository URI と `v` を付けない
+`X.Y.Z` version を記録する。以下は一部の entry の例である。
 
 ```yaml
 images:
-  auth: registry/auth@sha256:...
-  ui: registry/ui@sha256:...
-  job-api: registry/job-api@sha256:...
-  job-worker: registry/job-worker@sha256:...
-  demo: registry/demo@sha256:...
-  forward-proxy: registry/forward-proxy@sha256:...
+  auth:
+    repository: asia-northeast1-docker.pkg.dev/airhand-jobdeck/jobdeck-auth/auth
+    version: '1.0.4'
+  ui:
+    repository: asia-northeast1-docker.pkg.dev/airhand-jobdeck/jobdeck-ui/ui
+    version: '1.0.4'
 ```
 
-共通の `image_tag` を全サービスへ適用する方式を廃止し、各 image を digest で固定する。
-release tag は人が識別するために残してもよいが、E2E と deployment の対象は digest とする。
+OpenTofu はこの一覧を直接読み取る。Aspire も将来同じ一覧を使う設計とし、起動時に
+OpenTofu state へのアクセスを必要としない。Registry の作成・IAM・immutable tag 設定は
+引き続き bootstrap が所有する。image URI の組み立てには bootstrap の Registry outputs を
+使わないが、runtime SA、Secret、Pub/Sub push SA などの参照には remote state を維持する。
+
+各 image は immutable な version tag で固定する。サービス分離時は release-please の明示的な
+更新対象からそのサービスを外し、公開完了後の dispatch で対応する version だけを更新する。
+通知では `vX.Y.Z` tag を受け取り、YAML には `v` を除いた version を保存する。
 サービスが利用する `api-contracts` / SDK のバージョンも各 repository で固定する。
 
 #### Image publication and promotion PR
 
+以下は分離後の目標フローである。dispatch による PR 作成は次の別 PR、候補 image による
+全体 E2E と更新 PR マージ後の配備への接続は後続の対応とする。
+
 ```mermaid
 flowchart TD
     A[Service repo: unit / integration / contract verification] --> B[Build and publish image]
-    B --> C[Notify system repo: service, digest, source SHA]
-    C --> D[Create PR updating the service digest]
+    B --> C[Notify system repo: service, version tag, source SHA]
+    C --> D[Create PR updating the service version]
     D --> E[Start candidate composition with Aspire]
     E --> F[Contract checks / full E2E / Tofu plan]
     F --> G[Up-to-date branch and required checks pass]
@@ -229,10 +245,10 @@ flowchart TD
 ```
 
 サービス側は image 公開後に system repository へ通知するまでを担当する。通知は
-`repository_dispatch` の `image_published` イベントを基本案とし、service 名、image digest、
+`repository_dispatch` の `image_published` イベントを基本案とし、service 名、version tag、
 source commit SHA、release の参照を渡す。特定 workflow の入力として呼び出す
 `workflow_dispatch` でも実現できる。更新対象ファイルや PR 作成の処理は system 側が所有する。
-同じ通知の再送で重複 PR を作らないよう、service と digest で更新要求を識別する。
+同じ通知の再送で重複 PR を作らないよう、service と version tag で更新要求を識別する。
 
 repo 間の通知と PR 作成には、必要な repository に権限を付与した GitHub App installation token を
 使用する。dispatch の受信 workflow は PR を作成し、検証自体は `pull_request` workflow で
@@ -240,7 +256,7 @@ repo 間の通知と PR 作成には、必要な repository に権限を付与�
 [GitHub workflow の発火条件](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow)
 に従い、PR 作成後の必須チェックまで自動起動することを実装時に確認する。
 
-PR では変更サービスだけを候補 digest に置き換え、他サービスは基準構成の固定 digest を使う。
+PR では変更サービスだけを候補 version tag に置き換え、他サービスは基準構成の固定 version tag を使う。
 全 repository の最新 main を checkout してテストする方式にはしない。E2E で使用した image を
 そのまま production に配備し、deployment 時には再ビルドしない。
 
@@ -253,13 +269,13 @@ main の branch protection / ruleset は、E2E を含む必須チェックと
 #### Deployment ordering and failure handling
 
 最新 main への追従が保証するのは Git 上の構成の整合性であり、production への配備成功ではない。
-環境別一覧は desired state とし、実際に配備した commit、image digest、結果を別途記録する。
+環境別一覧は desired state とし、実際に配備した commit、image tag、解決された digest、結果を別途記録する。
 通常の更新の基準は最後に配備が成功した構成とする。先行更新の配備が未完了の場合、後続 PR の
 検証成功だけで production へ進めず、先行配備の成功を確認する。
 
 production apply は直列化し、進行中の apply を後続更新で cancel しない。Tofu の state lock だけに
 依存せず、古い commit を新しい構成の後に配備しないよう deployment の順序も管理する。
-apply は対象 commit に記録された全サービスの digest 一覧を読み取り、PR で検証した構成へ収束させる。
+apply は対象 commit に記録された全サービスの repository / version 一覧を読み取り、PR で検証した構成へ収束させる。
 
 配備が失敗した場合は後続の自動配備を止め、実際の状態を確認して再実行または revert する。
 部分的に apply された可能性もあるため、失敗を「全サービスが変更前のまま」と解釈しない。
@@ -268,7 +284,7 @@ apply は対象 commit に記録された全サービスの digest 一覧を読�
 
 image 更新を含む Cloud Run の desired state は OpenTofu が所有する。各 service repository から
 別途 `gcloud run deploy` して同じ設定を二重管理しない。`bootstrap` / `app` の state 境界を維持し、
-サービス別 digest の変更で独立更新する。ArgoCD の常時 reconcile は導入せず、GitHub Actions から
+サービス別 version の変更で独立更新する。ArgoCD の常時 reconcile は導入せず、GitHub Actions から
 宣言ファイルの検証と OpenTofu apply を実行する。
 
 #### Test responsibilities
@@ -308,7 +324,8 @@ Pact を導入する場合は Go / .NET と gRPC plugin の利用可否を先に
 
 #### E2E without a standing staging environment
 
-当面は常設 staging を追加せず、system repository の更新 PR ごとに Aspire で使い捨て環境を起動する。
+現在のソース起動による E2E を維持しながら、将来は常設 staging を追加せず、system repository の
+更新 PR ごとに Aspire で使い捨て環境を起動する方式へ移行する。
 候補 image と固定した他サービス image、Postgres、Pub/Sub emulator、テスト専用認証情報を組み合わせ、
 既存の E2E シナリオを維持する。UI 認証、ジョブ実行、proxy 経由の許可先へのアクセスと禁止先の拒否も
 検証対象とし、UI の変更時だけでなくサービス image の更新 PR でも実行する。
@@ -326,6 +343,7 @@ auth の候補 revision を作っても通常の UI は既存 auth を呼ぶた�
 
 #### Local composition
 
+以下は今後の Aspire 対応方針であり、現在のソース起動を今回の変更で置き換えるものではない。
 全体 AppHost は system repository が所有し、通常は環境別一覧の固定 image から起動する。
 全サービスの source checkout を必須にしない。開発対象だけ、隣接 checkout の source 起動または
 local image に override できる構成にする。複数サービスの同時開発では複数の override を許可する。
@@ -341,13 +359,13 @@ external environment
   system E2E -> explicitly configured URLs
 ```
 
-local override は開発用とし、production 昇格の E2E では公開済みの候補 digest を使う。
+local override は開発用とし、production 昇格の E2E では公開済みの候補 version tag を使う。
 service repository の責務はサービス自身の開発・テストと image 公開に留める。
 
 #### Future infra split and larger service groups
 
 サービスごとの infra repository 分離は、全体 CI/CD の廃止とは独立した判断とする。
-分離の初期段階では system repository が組み合わせと全体 E2E を所有し、検証した image digest と
+分離の初期段階では system repository が組み合わせと全体 E2E を所有し、検証した immutable image tag と
 infra 設定バージョンを各 infra workflow へ渡して、配備処理と結果の報告だけを委譲できる。
 その段階でも検証対象の固定、配備順序、失敗からの復旧を全体で管理する必要がある。
 
