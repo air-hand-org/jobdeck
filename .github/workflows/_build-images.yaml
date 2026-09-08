@@ -8,11 +8,6 @@ on:
         required: false
         type: boolean
         default: false
-      image_tag:
-        description: Immutable image tag. Required when push is true.
-        required: false
-        type: string
-        default: ""
       environment:
         description: GitHub environment containing GCP deployment variables.
         required: false
@@ -21,8 +16,8 @@ on:
 
 concurrency:
   # CI build-only runs are disposable and share a group per ref. Publishing is
-  # keyed by immutable release tag and must never be cancelled mid-push.
-  group: build-images-${{ inputs.push && inputs.image_tag || github.ref }}
+  # keyed by release ref and must never be cancelled mid-push.
+  group: build-images-${{ inputs.push }}-${{ github.ref }}
   cancel-in-progress: ${{ inputs.push == false }}
 
 permissions: {}
@@ -69,14 +64,6 @@ jobs:
               secrets: |
                 github_contents_token=${{ steps.app-token.outputs.token }}
       - parallel:
-          - name: Build auth image
-            uses: docker/build-push-action@v7
-            with:
-              context: .
-              file: containers/auth/Dockerfile
-              push: false
-              secrets: |
-                github_contents_token=${{ steps.app-token.outputs.token }}
           - name: Build job-worker image
             uses: docker/build-push-action@v7
             with:
@@ -111,13 +98,19 @@ jobs:
       contents: read
       packages: read
       id-token: write
-    env:
-      ARTIFACT_REGISTRY_HOST: asia-northeast1-docker.pkg.dev
-      IMAGE_TAG: ${{ inputs.image_tag }}
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+      - uses: ./.github/actions/setup-tools
+      - name: Read production image versions
+        id: images
+        run: |
+          registry="$(yq -r '.registry' environments/production.yaml)"
+          versions="$(yq -o=json -I=0 '.images' environments/production.yaml)"
+          echo "registry=$registry" >> "$GITHUB_OUTPUT"
+          echo "host=${registry%%/*}" >> "$GITHUB_OUTPUT"
+          echo "versions=$versions" >> "$GITHUB_OUTPUT"
       - name: create GitHub App token for read GOPRIVATE
         id: app-token
         uses: actions/create-github-app-token@v3
@@ -129,8 +122,6 @@ jobs:
           repositories: |
             api-contracts
       - uses: docker/setup-buildx-action@v4
-      - name: Validate image tag
-        run: test -n "$IMAGE_TAG"
       - id: google-auth
         uses: google-github-actions/auth@v3
         with:
@@ -144,7 +135,7 @@ jobs:
       - name: Log in to Artifact Registry
         uses: docker/login-action@v4
         with:
-          registry: ${{ env.ARTIFACT_REGISTRY_HOST }}
+          registry: ${{ steps.images.outputs.host }}
           username: oauth2accesstoken
           password: ${{ steps.google-auth.outputs.access_token }}
       - parallel:
@@ -154,35 +145,25 @@ jobs:
               context: containers/forward-proxy
               file: containers/forward-proxy/Dockerfile
               push: true
-              tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-forward-proxy/forward-proxy:${{ env.IMAGE_TAG }}
+              tags: ${{ steps.images.outputs.registry }}/jobdeck-forward-proxy/forward-proxy:v${{ fromJSON(steps.images.outputs.versions)['forward-proxy'].version }}
           - name: Build and push job-api image
             uses: docker/build-push-action@v7
             with:
               context: .
               file: containers/job-api/Dockerfile
               push: true
-              tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-job-api/job-api:${{ env.IMAGE_TAG }}
+              tags: ${{ steps.images.outputs.registry }}/jobdeck-job-api/job-api:v${{ fromJSON(steps.images.outputs.versions)['job-api'].version }}
               secrets: |
                 github_contents_token=${{ steps.app-token.outputs.token }}
-      - parallel:
-          - name: Build and push auth image
-            uses: docker/build-push-action@v7
-            with:
-              context: .
-              file: containers/auth/Dockerfile
-              push: true
-              tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-auth/auth:${{ env.IMAGE_TAG }}
-              secrets: |
-                github_contents_token=${{ steps.app-token.outputs.token }}
-          - name: Build and push job-worker image
-            uses: docker/build-push-action@v7
-            with:
-              context: .
-              file: containers/job-worker/Dockerfile
-              push: true
-              tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-job-worker/job-worker:${{ env.IMAGE_TAG }}
-              secrets: |
-                github_contents_token=${{ steps.app-token.outputs.token }}
+      - name: Build and push job-worker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: containers/job-worker/Dockerfile
+          push: true
+          tags: ${{ steps.images.outputs.registry }}/jobdeck-job-worker/job-worker:v${{ fromJSON(steps.images.outputs.versions)['job-worker'].version }}
+          secrets: |
+            github_contents_token=${{ steps.app-token.outputs.token }}
       - parallel:
           - name: Build and push demo image
             uses: docker/build-push-action@v7
@@ -190,14 +171,14 @@ jobs:
               context: .
               file: containers/demo/Dockerfile
               push: true
-              tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-demo/demo:${{ env.IMAGE_TAG }}
+              tags: ${{ steps.images.outputs.registry }}/jobdeck-demo/demo:v${{ fromJSON(steps.images.outputs.versions).demo.version }}
           - name: Build and push ui image
             uses: docker/build-push-action@v7
             with:
               context: .
               file: containers/ui/Dockerfile
               push: true
-              tags: ${{ env.ARTIFACT_REGISTRY_HOST }}/${{ vars.GCP_PROJECT_ID }}/jobdeck-ui/ui:${{ env.IMAGE_TAG }}
+              tags: ${{ steps.images.outputs.registry }}/jobdeck-ui/ui:v${{ fromJSON(steps.images.outputs.versions).ui.version }}
               build-args: |
                 GITHUB_ACTOR=${{ github.actor }}
               secrets: |

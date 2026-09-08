@@ -17,9 +17,17 @@ internal-ingress classification. Other destinations keep Cloud Run's managed
 public egress: the worker's Squid sidecar allowlists only
 `demo.${var.public_domain}:443`, so no Cloud NAT is needed for demo requests.
 
-Every service revision uses the same immutable `image_tag`. Pull-request plans
-use the harmless placeholder `v0.0.0`; release deployment passes the published
-release tag only after the image-push job completes.
+Application and forward-proxy images are selected by
+[`environments/production.yaml`](../../environments/production.yaml). Both this
+root and the image-publish workflow compose
+`${registry}/jobdeck-${service}/${service}:v${version}` from its shared `registry`
+and per-service versions. Bootstrap still owns registries and permissions;
+runtime identities and secret references are read through remote state.
+
+Release-please updates the five images published here. Auth stays pinned at
+`1.0.4` until its separate release flow is connected. PR plans read the proposed
+versions, and release deployment uses the same commit's YAML after image push
+completes. See [the deployment flow](../../docs/cloud-architecture.md#image-and-deployment-flow).
 
 OpenTofu decrypts `iac/secrets/production.enc.yaml` through a provider function
 and adds Secret Manager versions through write-only provider arguments. See

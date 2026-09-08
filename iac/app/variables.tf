@@ -21,17 +21,6 @@ variable "bootstrap_state_prefix" {
   default     = "bootstrap"
 }
 
-variable "image_tag" {
-  description = "Immutable release tag used for every JobDeck application image."
-  type        = string
-  default     = "v0.0.0"
-
-  validation {
-    condition     = can(regex("^v[0-9]+\\.[0-9]+\\.[0-9]+$", var.image_tag))
-    error_message = "image_tag must be a vX.Y.Z release tag."
-  }
-}
-
 variable "cloud_run_subnet_cidr" {
   description = "CIDR allocated to Direct VPC egress interfaces."
   type        = string
