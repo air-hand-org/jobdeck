@@ -18,23 +18,16 @@ public egress: the worker's Squid sidecar allowlists only
 `demo.${var.public_domain}:443`, so no Cloud NAT is needed for demo requests.
 
 Application and forward-proxy images are selected by
-[`environments/production.yaml`](../../environments/production.yaml). Each entry
-contains only a bare `X.Y.Z` version. This root combines bootstrap's
-`artifact_registry_host` and `artifact_registry_repositories` remote state
-outputs with the project ID and service name to resolve the image repository,
-then appends `:v<version>`. Bootstrap owns the registries and their permissions,
-and also supplies runtime service accounts, application secrets, and the Pub/Sub
-push service account through remote state.
+[`environments/production.yaml`](../../environments/production.yaml). Both this
+root and the image-publish workflow compose
+`${registry}/jobdeck-${service}/${service}:v${version}` from its shared `registry`
+and per-service versions. Bootstrap still owns registries and permissions;
+runtime identities and secret references are read through remote state.
 
-Release-please updates versions for services still released from this repository.
-Pull-request plans read those proposed versions directly. Their images do not
-exist until release publication, so release deployment runs only after the
-image-push job completes. Deployments use the manifest from the same release
-commit. As services move to separate repositories, remove their entries from
-release-please's update targets and update their versions through dedicated
-image-update pull requests after publication. Other consumers, such as Aspire,
-can share the version list and resolve their own repository locations without
-accessing OpenTofu state.
+Release-please updates the five images published here. Auth stays pinned at
+`1.0.4` until its separate release flow is connected. PR plans read the proposed
+versions, and release deployment uses the same commit's YAML after image push
+completes. See [the deployment flow](../../docs/cloud-architecture.md#image-and-deployment-flow).
 
 OpenTofu decrypts `iac/secrets/production.enc.yaml` through a provider function
 and adds Secret Manager versions through write-only provider arguments. See

@@ -1,16 +1,13 @@
 locals {
-  artifact_registry_host         = data.terraform_remote_state.bootstrap.outputs.artifact_registry_host
-  artifact_registry_repositories = data.terraform_remote_state.bootstrap.outputs.artifact_registry_repositories
-  runtime_service_accounts       = data.terraform_remote_state.bootstrap.outputs.runtime_service_accounts
-  application_secrets            = data.terraform_remote_state.bootstrap.outputs.application_secrets
-  pubsub_push_service_account    = data.terraform_remote_state.bootstrap.outputs.pubsub_push_service_account
+  runtime_service_accounts    = data.terraform_remote_state.bootstrap.outputs.runtime_service_accounts
+  application_secrets         = data.terraform_remote_state.bootstrap.outputs.application_secrets
+  pubsub_push_service_account = data.terraform_remote_state.bootstrap.outputs.pubsub_push_service_account
 
   production = yamldecode(file("${path.module}/../../environments/production.yaml"))
 
   images = {
-    # Require the same stable X.Y.Z release versions previously accepted by image_tag.
     for name, image in local.production.images :
-    replace(name, "-", "_") => "${local.artifact_registry_host}/${var.project_id}/${local.artifact_registry_repositories[replace(name, "-", "_")]}/${name}:v${regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", image.version)}"
+    replace(name, "-", "_") => "${local.production.registry}/jobdeck-${name}/${name}:v${image.version}"
   }
 
   # Cloud Run runs linux/amd64 images. Pin the multi-architecture manifest so

@@ -19,7 +19,6 @@ jobs:
     uses: ./.github/workflows/_build-images.yaml
     with:
       push: true
-      image_tag: ${{ github.event.release.tag_name }}
       environment: production
     secrets: inherit
     permissions:

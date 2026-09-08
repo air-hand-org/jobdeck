@@ -1,3 +1,5 @@
+registry: asia-northeast1-docker.pkg.dev/airhand-jobdeck
+
 images:
   auth:
     version: '1.0.4'

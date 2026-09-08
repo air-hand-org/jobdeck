@@ -81,26 +81,24 @@ container の作成や runtime IAM policy の変更は行えない。これは s
 
 ### Image and deployment flow
 
-`environments/production.yaml` をサービス別 image version の正とする。現在は auth、ui、demo、
-job-api、job-worker、forward-proxy の 6 image を jobdeck から公開する。release-please の
+`environments/production.yaml` をサービス別 image version の正とする。現在は ui、demo、
+job-api、job-worker、forward-proxy の 5 image を jobdeck から公開する。release-please の
 `extra-files` は、この repository が公開するサービスを JSONPath で明示して `version` を更新する。
-分離済みサービスは更新対象と build/push 対象から外し、公開後の更新 PR へ順次移行する。
+auth は公開・version 更新対象から外し、既存の `1.0.4` に固定する。ローカル build と E2E の
+ソース起動は維持し、公開後の更新 PR は次の対応とする。
 
 Terraform Docker provider は使わない。CI が各 image を build し、Artifact Registry へ
-release tag (`vX.Y.Z`) を push する。repository は immutable tag を有効にし、OpenTofu は
-bootstrap の remote state outputs にある Registry 情報と project ID から repository URI を解決し、
-同じ release commit の YAML にある version と合わせて `<repository>:v<version>` を
-Cloud Run revision に指定する。image 用の共通 `image_tag` input は使わない。
+YAML の version に対応する tag を push する。公開 workflow と OpenTofu はともに YAML から
+`${registry}/jobdeck-${service}/${service}:v${version}` を組み立てる。Registry の作成・権限と
+immutable tag 設定は bootstrap が管理する。
 
 ```text
 main merge
   -> release-please creates / updates a release PR, including production.yaml versions
   -> release PR merge creates the release and vX.Y.Z tag
   -> GitHub Release published
-  -> verify locally built image versions match vX.Y.Z
-  -> authenticate to GCP and read bootstrap Registry outputs
-  -> build / push images to the resolved repositories
-  -> decrypt SOPS secrets
+  -> authenticate to GCP
+  -> build / push the five images using production.yaml
   -> tofu apply iac/app using production.yaml from the release commit
 ```
 
@@ -205,10 +203,11 @@ jobdeck-system/
   .github/workflows/
 ```
 
-`environments/production.yaml` には、各サービスの `v` を付けない
-`X.Y.Z` version だけを記録する。以下は一部の entry の例である。
+`environments/production.yaml` に共通の Registry prefix と、各サービスの `v` を付けない
+version を記録する。以下は一部の entry の例である。
 
 ```yaml
+registry: asia-northeast1-docker.pkg.dev/airhand-jobdeck
 images:
   auth:
     version: '1.0.4'
@@ -216,15 +215,9 @@ images:
     version: '1.0.4'
 ```
 
-OpenTofu はこの version 一覧を直接読み取り、bootstrap の `artifact_registry_host` と
-`artifact_registry_repositories` remote state outputs、project ID、service 名から image URI を
-組み立てる。公開 CI も GCP 認証後に同じ outputs を取得して公開先を解決する。
-公開しない build CI は version の検証だけを行い、GCP や state へのアクセスを必要としない。
-Registry の作成・IAM・immutable tag 設定は引き続き bootstrap が所有する。
-
-Aspire も将来同じ version 一覧を使う設計とし、取得先は GHCR の対応表などで別途解決する。
-ローカル起動に OpenTofu state へのアクセスを要求しない。サービス分離後の publisher には
-state 閲覧権限を追加せず、bootstrap output の公開先 URI を Actions variable などで渡す。
+公開 workflow と OpenTofu は同じ YAML から image URI を組み立てる。公開 workflow は
+OpenTofu state を読まない。Aspire も将来この version 一覧を共有し、ローカル用の取得先は
+GHCR などへ override できるようにする（[Local composition](#local-composition)）。
 
 各 image は immutable な version tag で固定する。サービス分離時は release-please の明示的な
 更新対象からそのサービスを外し、公開完了後の dispatch で対応する version だけを更新する。
@@ -280,8 +273,8 @@ main の branch protection / ruleset は、E2E を含む必須チェックと
 
 production apply は直列化し、進行中の apply を後続更新で cancel しない。Tofu の state lock だけに
 依存せず、古い commit を新しい構成の後に配備しないよう deployment の順序も管理する。
-apply は対象 commit に記録された全サービスの version 一覧を読み、bootstrap の Registry outputs
-で取得先を解決して、PR で検証した構成へ収束させる。
+apply は対象 commit の YAML に記録された Registry と全サービスの version を読み、
+PR で検証した構成へ収束させる。
 
 配備が失敗した場合は後続の自動配備を止め、実際の状態を確認して再実行または revert する。
 部分的に apply された可能性もあるため、失敗を「全サービスが変更前のまま」と解釈しない。
@@ -357,7 +350,7 @@ local image に override できる構成にする。複数サービスの同時�
 image 起動へ移行する際は、ローカル開発者に GCP 権限を付与せずに済むよう、同じ成果物を
 Artifact Registry と GitHub Container Registry（GHCR）へ公開する方式を検討する。
 Cloud Run は Artifact Registry、ローカル Aspire と統合 CI は GHCR から取得する。
-現在は個人開発のため導入を急がず、GHCR 公開とローカルの repository 解決 は後続の対応とする。
+現在は個人開発のため導入を急がず、GHCR 公開とローカルの repository 解決は後続の対応とする。
 
 公開時は一度 build した image を両 Registry へ配布し、Registry ごとには再ビルドしない。
 両方への公開完了を確認してから更新通知を送る。片方の push が失敗した場合も同じ成果物を再送する。
@@ -365,8 +358,8 @@ version tag の上書き防止、両 Registry の成果物の同一性確認、�
 [Docker の複数 Registry への push](https://docs.docker.com/build/ci/github-actions/push-multi-registries/)
 
 version は `production.yaml` を共有し、ローカル用設定で image の `repository` URI を
-別途指定する。production YAML には Registry URI を含めず、version 一覧を別ファイルへ
-複製して個別更新しない。例えば以下の対応表から auth の取得先を解決し、version は
+上書きする。version 一覧を別ファイルへ複製して個別更新しない。
+例えば以下の対応表から auth の取得先を解決し、version は
 `production.yaml` から読む。これは将来の設定形式の例であり、
 現在の AppHost や公開 workflow が対応していることを示すものではない。
 
