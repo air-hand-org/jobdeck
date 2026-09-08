@@ -64,14 +64,6 @@ jobs:
               secrets: |
                 github_contents_token=${{ steps.app-token.outputs.token }}
       - parallel:
-          - name: Build auth image
-            uses: docker/build-push-action@v7
-            with:
-              context: .
-              file: containers/auth/Dockerfile
-              push: false
-              secrets: |
-                github_contents_token=${{ steps.app-token.outputs.token }}
           - name: Build job-worker image
             uses: docker/build-push-action@v7
             with:
