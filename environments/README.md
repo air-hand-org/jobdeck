@@ -1,17 +1,24 @@
 # Deployment images
 
-`production.yaml` is the source of application image references for image
-publication and OpenTofu deployment. Each service declares a full `repository`
-URI without a tag and a string `version` in `X.Y.Z` form. Consumers construct
-`repository:vversion`. Artifact Registry enforces immutable tags.
+`production.yaml` is the source of application image versions for image
+publication and OpenTofu deployment. Each service declares only a string
+`version` in `X.Y.Z` form. Registry locations are resolved by each consumer;
+they are not deployment-version data. Artifact Registry enforces immutable tags.
+
+Bootstrap owns registry creation, IAM, and registry settings. App IaC composes
+`<host>/<project>/<registry>/<service>:v<version>` from bootstrap's
+`artifact_registry_host` and `artifact_registry_repositories` remote state
+outputs, the project ID, and this YAML. The publishing workflow obtains the same
+outputs after GCP authentication. Non-publishing build CI validates the versions
+without accessing GCP or bootstrap state.
 
 This format is also intended for the future container-based Aspire composition;
-the current AppHost still starts local service sources.
-
-Bootstrap owns registry creation, IAM, and registry settings. Image repository
-URIs are explicit here so consumers do not need access to bootstrap state.
-OpenTofu still reads runtime identities and secret resource names from bootstrap
-outputs. When changing a registry location or name, update its URI here too.
+the current AppHost still starts local service sources. Aspire will resolve its
+repositories separately, such as through a local GHCR repository mapping, while
+sharing versions from `production.yaml`. It will not need bootstrap state access
+or a separately maintained version list. Publishing the same built image to both
+registries and adding that mapping are deferred; see the
+[local composition design](../docs/cloud-architecture.md#local-composition).
 
 ## Release ownership during extraction
 

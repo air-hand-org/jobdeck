@@ -81,15 +81,16 @@ container の作成や runtime IAM policy の変更は行えない。これは s
 
 ### Image and deployment flow
 
-`environments/production.yaml` をサービス別 image 参照の正とする。現在は auth、ui、demo、
+`environments/production.yaml` をサービス別 image version の正とする。現在は auth、ui、demo、
 job-api、job-worker、forward-proxy の 6 image を jobdeck から公開する。release-please の
 `extra-files` は、この repository が公開するサービスを JSONPath で明示して `version` を更新する。
 分離済みサービスは更新対象と build/push 対象から外し、公開後の更新 PR へ順次移行する。
 
 Terraform Docker provider は使わない。CI が各 image を build し、Artifact Registry へ
 release tag (`vX.Y.Z`) を push する。repository は immutable tag を有効にし、OpenTofu は
-同じ release commit の YAML にある repository URI と version から `<repository>:v<version>`
-を組み立てて Cloud Run revision に指定する。image 用の共通 `image_tag` input は使わない。
+bootstrap の remote state outputs にある Registry 情報と project ID から repository URI を解決し、
+同じ release commit の YAML にある version と合わせて `<repository>:v<version>` を
+Cloud Run revision に指定する。image 用の共通 `image_tag` input は使わない。
 
 ```text
 main merge
@@ -97,7 +98,8 @@ main merge
   -> release PR merge creates the release and vX.Y.Z tag
   -> GitHub Release published
   -> verify locally built image versions match vX.Y.Z
-  -> build / push images to repositories recorded in production.yaml
+  -> authenticate to GCP and read bootstrap Registry outputs
+  -> build / push images to the resolved repositories
   -> decrypt SOPS secrets
   -> tofu apply iac/app using production.yaml from the release commit
 ```
@@ -185,7 +187,7 @@ protobuf は既に `air-hand-org/api-contracts` に切り出している。次�
 | --- | --- |
 | `api-contracts` | protobuf schema、生成 SDK、lint / breaking change detection |
 | 各 service repository | 実装、DB migration、Dockerfile、unit / integration test、consumer contract と provider verification |
-| `jobdeck-system` | 全体 Aspire AppHost、全体 E2E、IaC、環境別 image repository / version 一覧、更新 PR と deployment workflow |
+| `jobdeck-system` | 全体 Aspire AppHost、全体 E2E、IaC、環境別 image version 一覧、更新 PR と deployment workflow |
 
 `jobdeck-system` は論理的な役割名であり、現在の `jobdeck` repository からサービスを順に
 切り出して、この役割を残す形でもよい。UI repository に全体 AppHost や全体 E2E を置かない。
@@ -203,23 +205,26 @@ jobdeck-system/
   .github/workflows/
 ```
 
-`environments/production.yaml` には、完全な image repository URI と `v` を付けない
-`X.Y.Z` version を記録する。以下は一部の entry の例である。
+`environments/production.yaml` には、各サービスの `v` を付けない
+`X.Y.Z` version だけを記録する。以下は一部の entry の例である。
 
 ```yaml
 images:
   auth:
-    repository: asia-northeast1-docker.pkg.dev/airhand-jobdeck/jobdeck-auth/auth
     version: '1.0.4'
   ui:
-    repository: asia-northeast1-docker.pkg.dev/airhand-jobdeck/jobdeck-ui/ui
     version: '1.0.4'
 ```
 
-OpenTofu はこの一覧を直接読み取る。Aspire も将来同じ一覧を使う設計とし、起動時に
-OpenTofu state へのアクセスを必要としない。Registry の作成・IAM・immutable tag 設定は
-引き続き bootstrap が所有する。image URI の組み立てには bootstrap の Registry outputs を
-使わないが、runtime SA、Secret、Pub/Sub push SA などの参照には remote state を維持する。
+OpenTofu はこの version 一覧を直接読み取り、bootstrap の `artifact_registry_host` と
+`artifact_registry_repositories` remote state outputs、project ID、service 名から image URI を
+組み立てる。公開 CI も GCP 認証後に同じ outputs を取得して公開先を解決する。
+公開しない build CI は version の検証だけを行い、GCP や state へのアクセスを必要としない。
+Registry の作成・IAM・immutable tag 設定は引き続き bootstrap が所有する。
+
+Aspire も将来同じ version 一覧を使う設計とし、取得先は GHCR の対応表などで別途解決する。
+ローカル起動に OpenTofu state へのアクセスを要求しない。サービス分離後の publisher には
+state 閲覧権限を追加せず、bootstrap output の公開先 URI を Actions variable などで渡す。
 
 各 image は immutable な version tag で固定する。サービス分離時は release-please の明示的な
 更新対象からそのサービスを外し、公開完了後の dispatch で対応する version だけを更新する。
@@ -275,7 +280,8 @@ main の branch protection / ruleset は、E2E を含む必須チェックと
 
 production apply は直列化し、進行中の apply を後続更新で cancel しない。Tofu の state lock だけに
 依存せず、古い commit を新しい構成の後に配備しないよう deployment の順序も管理する。
-apply は対象 commit に記録された全サービスの repository / version 一覧を読み取り、PR で検証した構成へ収束させる。
+apply は対象 commit に記録された全サービスの version 一覧を読み、bootstrap の Registry outputs
+で取得先を解決して、PR で検証した構成へ収束させる。
 
 配備が失敗した場合は後続の自動配備を止め、実際の状態を確認して再実行または revert する。
 部分的に apply された可能性もあるため、失敗を「全サービスが変更前のまま」と解釈しない。
@@ -348,9 +354,40 @@ auth の候補 revision を作っても通常の UI は既存 auth を呼ぶた�
 全サービスの source checkout を必須にしない。開発対象だけ、隣接 checkout の source 起動または
 local image に override できる構成にする。複数サービスの同時開発では複数の override を許可する。
 
+image 起動へ移行する際は、ローカル開発者に GCP 権限を付与せずに済むよう、同じ成果物を
+Artifact Registry と GitHub Container Registry（GHCR）へ公開する方式を検討する。
+Cloud Run は Artifact Registry、ローカル Aspire と統合 CI は GHCR から取得する。
+現在は個人開発のため導入を急がず、GHCR 公開とローカルの repository 解決 は後続の対応とする。
+
+公開時は一度 build した image を両 Registry へ配布し、Registry ごとには再ビルドしない。
+両方への公開完了を確認してから更新通知を送る。片方の push が失敗した場合も同じ成果物を再送する。
+version tag の上書き防止、両 Registry の成果物の同一性確認、保持・削除方針を合わせて設計する。
+[Docker の複数 Registry への push](https://docs.docker.com/build/ci/github-actions/push-multi-registries/)
+
+version は `production.yaml` を共有し、ローカル用設定で image の `repository` URI を
+別途指定する。production YAML には Registry URI を含めず、version 一覧を別ファイルへ
+複製して個別更新しない。例えば以下の対応表から auth の取得先を解決し、version は
+`production.yaml` から読む。これは将来の設定形式の例であり、
+現在の AppHost や公開 workflow が対応していることを示すものではない。
+
+```yaml
+images:
+  auth:
+    repository: ghcr.io/air-hand-org/jobdeck-auth
+```
+
+private GHCR package は対象 repository と紐付け、アクセス権を継承させる。repo の clone 権限だけで
+Docker が認証されるわけではなく、ローカルでは通常 `read:packages` を持つ classic PAT で
+`docker login ghcr.io` が必要になる。統合 CI には package の Actions read access を付与し、
+`GITHUB_TOKEN` を利用する。認証は GitHub 側で完結させ、ローカル起動に GCP IAM 権限を要求しない。
+[GitHub Container Registry の認証と権限](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry)
+
+GHCR package の公開と GitHub Release のファイル添付は別の仕組みである。image 本体は Registry で
+配布し、Release notes には image URI、digest、pull 方法を記載する方針とする。
+
 ```text
-default / CI
-  system AppHost + E2E -> pinned service images
+default local / integration CI (after GHCR support)
+  system AppHost + E2E -> GHCR images at production.yaml versions
 
 auth development
   system AppHost + E2E -> local auth source or image + other pinned images
@@ -359,7 +396,8 @@ external environment
   system E2E -> explicitly configured URLs
 ```
 
-local override は開発用とし、production 昇格の E2E では公開済みの候補 version tag を使う。
+source / local image override は開発用とし、production 昇格の E2E では公開済みの候補 version tag を使う。
+取得先に GHCR を使う場合も、production に配備する成果物との同一性を確認する。
 service repository の責務はサービス自身の開発・テストと image 公開に留める。
 
 #### Future infra split and larger service groups

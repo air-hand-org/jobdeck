@@ -33,8 +33,7 @@ jobs:
     permissions:
       contents: read
     outputs:
-      refs: ${{ steps.images.outputs.refs }}
-      registry: ${{ steps.images.outputs.registry }}
+      versions: ${{ steps.images.outputs.versions }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -54,13 +53,11 @@ jobs:
           RELEASE_TAG: ${{ inputs.image_tag }}
         run: |
           if [[ "$PUSH_IMAGES" == true ]]; then
-            refs="$(bash .github/scripts/production-images.sh "$RELEASE_TAG" auth ui demo job-api job-worker forward-proxy)"
+            versions="$(bash .github/scripts/production-images.sh "$RELEASE_TAG" auth ui demo job-api job-worker forward-proxy)"
           else
-            refs="$(bash .github/scripts/production-images.sh)"
+            versions="$(bash .github/scripts/production-images.sh)"
           fi
-          echo "refs=$refs" >> "$GITHUB_OUTPUT"
-          registry="$(jq -r '.ui | split("/")[0]' <<< "$refs")"
-          echo "registry=$registry" >> "$GITHUB_OUTPUT"
+          echo "versions=$versions" >> "$GITHUB_OUTPUT"
 
   build:
     # CI uses this path. It intentionally has neither a GitHub environment nor
@@ -151,6 +148,10 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+      - uses: aquaproj/aqua-installer@11dd79b4e498d471a9385aa9fb7f62bb5f52a73c # v4.0.4
+        with:
+          aqua_version: v2.60.1
+          aqua_opts: ""
       - name: create GitHub App token for read GOPRIVATE
         id: app-token
         uses: actions/create-github-app-token@v3
@@ -172,10 +173,29 @@ jobs:
           # password. This avoids configuring mutable Docker credential-helper
           # state with gcloud.
           token_format: access_token
+      - name: Resolve image repositories from bootstrap
+        id: images
+        env:
+          IMAGE_VERSIONS: ${{ needs.images.outputs.versions }}
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+        run: |
+          tofu -chdir=iac/bootstrap init -input=false \
+            -backend-config="bucket=airhand-jobdeck-bucket" \
+            -backend-config="prefix=bootstrap"
+          registry="$(tofu -chdir=iac/bootstrap output -raw artifact_registry_host)"
+          repositories="$(tofu -chdir=iac/bootstrap output -json artifact_registry_repositories)"
+          refs="$(jq -cne \
+            --arg registry "$registry" \
+            --arg project "$GCP_PROJECT_ID" \
+            --argjson repositories "$repositories" \
+            --argjson versions "$IMAGE_VERSIONS" \
+            -f .github/scripts/image-references.jq)"
+          echo "registry=$registry" >> "$GITHUB_OUTPUT"
+          echo "refs=$refs" >> "$GITHUB_OUTPUT"
       - name: Log in to Artifact Registry
         uses: docker/login-action@v4
         with:
-          registry: ${{ needs.images.outputs.registry }}
+          registry: ${{ steps.images.outputs.registry }}
           username: oauth2accesstoken
           password: ${{ steps.google-auth.outputs.access_token }}
       - parallel:
@@ -185,14 +205,14 @@ jobs:
               context: containers/forward-proxy
               file: containers/forward-proxy/Dockerfile
               push: true
-              tags: ${{ fromJSON(needs.images.outputs.refs).forward_proxy }}
+              tags: ${{ fromJSON(steps.images.outputs.refs).forward_proxy }}
           - name: Build and push job-api image
             uses: docker/build-push-action@v7
             with:
               context: .
               file: containers/job-api/Dockerfile
               push: true
-              tags: ${{ fromJSON(needs.images.outputs.refs).job_api }}
+              tags: ${{ fromJSON(steps.images.outputs.refs).job_api }}
               secrets: |
                 github_contents_token=${{ steps.app-token.outputs.token }}
       - parallel:
@@ -202,7 +222,7 @@ jobs:
               context: .
               file: containers/auth/Dockerfile
               push: true
-              tags: ${{ fromJSON(needs.images.outputs.refs).auth }}
+              tags: ${{ fromJSON(steps.images.outputs.refs).auth }}
               secrets: |
                 github_contents_token=${{ steps.app-token.outputs.token }}
           - name: Build and push job-worker image
@@ -211,7 +231,7 @@ jobs:
               context: .
               file: containers/job-worker/Dockerfile
               push: true
-              tags: ${{ fromJSON(needs.images.outputs.refs).job_worker }}
+              tags: ${{ fromJSON(steps.images.outputs.refs).job_worker }}
               secrets: |
                 github_contents_token=${{ steps.app-token.outputs.token }}
       - parallel:
@@ -221,14 +241,14 @@ jobs:
               context: .
               file: containers/demo/Dockerfile
               push: true
-              tags: ${{ fromJSON(needs.images.outputs.refs).demo }}
+              tags: ${{ fromJSON(steps.images.outputs.refs).demo }}
           - name: Build and push ui image
             uses: docker/build-push-action@v7
             with:
               context: .
               file: containers/ui/Dockerfile
               push: true
-              tags: ${{ fromJSON(needs.images.outputs.refs).ui }}
+              tags: ${{ fromJSON(steps.images.outputs.refs).ui }}
               build-args: |
                 GITHUB_ACTOR=${{ github.actor }}
               secrets: |

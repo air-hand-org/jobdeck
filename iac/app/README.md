@@ -19,11 +19,12 @@ public egress: the worker's Squid sidecar allowlists only
 
 Application and forward-proxy images are selected by
 [`environments/production.yaml`](../../environments/production.yaml). Each entry
-contains a full image repository URI and a bare `X.Y.Z` version; this root
-combines them as `<repository>:v<version>`. Image selection does not require
-Artifact Registry outputs from bootstrap. Bootstrap still owns the registries
-and their permissions, and supplies runtime service accounts, application
-secrets, and the Pub/Sub push service account through remote state.
+contains only a bare `X.Y.Z` version. This root combines bootstrap's
+`artifact_registry_host` and `artifact_registry_repositories` remote state
+outputs with the project ID and service name to resolve the image repository,
+then appends `:v<version>`. Bootstrap owns the registries and their permissions,
+and also supplies runtime service accounts, application secrets, and the Pub/Sub
+push service account through remote state.
 
 Release-please updates versions for services still released from this repository.
 Pull-request plans read those proposed versions directly. Their images do not
@@ -31,9 +32,9 @@ exist until release publication, so release deployment runs only after the
 image-push job completes. Deployments use the manifest from the same release
 commit. As services move to separate repositories, remove their entries from
 release-please's update targets and update their versions through dedicated
-image-update pull requests after publication. The repository URI is shared
-deployment data that other consumers, such as Aspire, can read without accessing
-OpenTofu state.
+image-update pull requests after publication. Other consumers, such as Aspire,
+can share the version list and resolve their own repository locations without
+accessing OpenTofu state.
 
 OpenTofu decrypts `iac/secrets/production.enc.yaml` through a provider function
 and adds Secret Manager versions through write-only provider arguments. See

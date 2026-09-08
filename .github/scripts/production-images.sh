@@ -17,16 +17,13 @@ yq -o=json '.' "${PRODUCTION_MANIFEST:-environments/production.yaml}" |
     | if (keys | map(gsub("-"; "_")) | unique | length) != length
       then error("service names must remain unique after normalization") else . end
     | if all(.[];
-        (.repository | type == "string") and
-        (.repository | test("^[a-z0-9][a-z0-9.-]*(:[0-9]+)?/[a-z0-9._/-]+$")) and
+        (keys == ["version"]) and
         (.version | type == "string") and
         (.version | test("^[0-9]+\\.[0-9]+\\.[0-9]+$")))
-      then . else error("images require a repository URI and an X.Y.Z version string") end
-    | if ([.[].repository | split("/")[0]] | unique | length) != 1
-      then error("the publishing workflow requires a single registry host") else . end
+      then . else error("each image must contain only an X.Y.Z version string") end
     | . as $images
     | if all($ARGS.positional[]; . as $service |
         $images[$service] != null and ("v" + $images[$service].version) == $release_tag)
       then . else error("published release tag must match each locally built image version") end
-    | with_entries(.key |= gsub("-"; "_") | .value |= (.repository + ":v" + .version))
+    | with_entries(.key |= gsub("-"; "_") | .value |= .version)
   ' "$@"
