@@ -6,7 +6,8 @@ playwright/.auth
 playwright-traces
 .env.local
 
-# Optional local checkout used by the Aspire AppHost for auth debugging.
+# Optional local checkout used by the Aspire AppHost for debugging.
+/api
 services/auth/
 
 # OpenTofu local working files. Remote state is stored in GCS.
