@@ -12,9 +12,12 @@ public sealed class AuthBuilder(
     , IResourceBuilder<PostgresServerResource> postgres
     , string workerClientId
     , string imageTag
-    , string? localAppDirectory
+    , string repoRoot
+    , bool useLocal
 )
 {
+    private readonly string? localAppDirectory = GetLocalAppDirectory(repoRoot, useLocal);
+
     public EndpointReference Build(int port, bool isDebug, string grpcReflectionFlag)
     {
         var authDB = postgres.AddDatabase("jobdeck-auth");
@@ -144,5 +147,25 @@ public sealed class AuthBuilder(
                 context.EnvironmentVariables["AUTH_TEST_USER_SECRET_HASH"] = testUserSecretHash;
             })
             .WaitFor(authDB);
+    }
+
+    private static string? GetLocalAppDirectory(string repoRoot, bool useLocal)
+    {
+        if (!useLocal)
+        {
+            return null;
+        }
+        var path = Path.Combine(repoRoot, "services", "auth");
+        if (!Directory.Exists(path))
+        {
+            return null;
+        }
+        if (!File.Exists(Path.Combine(path, "go.mod")))
+        {
+            throw new InvalidOperationException(
+                $"The local auth checkout at '{path}' does not contain a go.mod file."
+            );
+        }
+        return path;
     }
 }
