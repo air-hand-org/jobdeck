@@ -87,6 +87,7 @@ public sealed class AuthBuilder(
             packagePath: "./cmd/migrator"
         )
         .WithReference(authDB)
+        .WithEnvironment("GOWORK", "off")
         .WithEnvironment(context =>
         {
             context.EnvironmentVariables["POSTGRESDB_URI"] = authDB.Resource.UriExpression;
@@ -112,6 +113,7 @@ public sealed class AuthBuilder(
         workerClientSecretHash,
         testUserSecretHash
         )
+        .WithEnvironment("GOWORK", "off")
         .WaitForCompletion(migrator);
         if (isDebug)
         {
