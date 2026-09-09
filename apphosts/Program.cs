@@ -2,6 +2,8 @@ using System.Net;
 using Microsoft.Extensions.Configuration;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Yarp;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 using apphosts;
 
@@ -11,9 +13,20 @@ var repoRoot = Path.GetFullPath(
     Path.Combine(builder.Environment.ContentRootPath, "..")
 );
 
+var production = new DeserializerBuilder()
+    .WithNamingConvention(CamelCaseNamingConvention.Instance)
+    .IgnoreUnmatchedProperties()
+    .Build()
+    .Deserialize<ProductionManifest>(File.ReadAllText(
+        Path.Combine(repoRoot, "environments", "production.yaml")
+    ));
+var authImageTag = $"v{production.Images["auth"].Version}";
+
 var workerClientId = "job-worker";
 
 var useVolumes = builder.Configuration.GetValue<bool>("UseVolumes", true);
+
+var useLocal = builder.Configuration.GetValue<bool>("USE_LOCAL");
 
 var IS_DEBUG = string.Equals(builder.Configuration["DEBUG"], "true", StringComparison.OrdinalIgnoreCase);
 
@@ -35,7 +48,14 @@ var pubsubBuilder = new PubSubBuilder(builder);
 var pubsub = pubsubBuilder.PubSub();
 var pubsubWorkerTopic = pubsub.Topic("job-worker-topic");
 
-var authGrpcEndpoint = new AuthBuilder(builder, postgres, workerClientId)
+var authGrpcEndpoint = new AuthBuilder(
+    builder,
+    postgres,
+    workerClientId,
+    authImageTag,
+    repoRoot,
+    useLocal
+)
     .Build(
         port: 9091,
         isDebug: IS_DEBUG,
@@ -85,3 +105,13 @@ var ui = builder.AddProject("ui", "../services/ui/ui.csproj")
 ;
 
 builder.Build().Run();
+
+file sealed class ProductionManifest
+{
+    public required Dictionary<string, ProductionImage> Images { get; init; }
+}
+
+file sealed class ProductionImage
+{
+    public required string Version { get; init; }
+}

@@ -11,13 +11,19 @@ public sealed class AuthBuilder(
     IDistributedApplicationBuilder builder
     , IResourceBuilder<PostgresServerResource> postgres
     , string workerClientId
+    , string imageTag
+    , string repoRoot
+    , bool useLocal
 )
 {
+    private readonly string? localAppDirectory = GetLocalAppDirectory(repoRoot, useLocal);
+
     public EndpointReference Build(int port, bool isDebug, string grpcReflectionFlag)
     {
         var authDB = postgres.AddDatabase("jobdeck-auth");
-        var migrator = DBMigration(authDB);
-        var backend = Backend(isDebug, grpcReflectionFlag, authDB, migrator);
+        var backend = localAppDirectory is null
+            ? ContainerBackend(grpcReflectionFlag, authDB)
+            : LocalBackend(isDebug, grpcReflectionFlag, authDB);
         return ReverseProxy(port, backend);
     }
 
@@ -40,34 +46,75 @@ public sealed class AuthBuilder(
             .GetEndpoint("https");
     }
 
-    private EndpointReference Backend(
-        bool isDebug,
+    private EndpointReference ContainerBackend(
         string grpcReflectionFlag,
-        IResourceBuilder<PostgresDatabaseResource> authDB,
-        IResourceBuilder<ExecutableResource> dbMigrator
+        IResourceBuilder<PostgresDatabaseResource> authDB
     )
     {
         var authJwtPrivateKey = builder.AddParameter("auth-jwt-private-key", secret: true);
-        var backend = builder.AddGoApp(
+        var workerClientSecretHash = builder.AddParameter("job-worker-client-secret-hash", secret: true);
+        var testUserSecretHash = builder.AddParameter("test-user-client-secret-hash", secret: true);
+        return ConfigureBackend(builder.AddContainer(
             name: "auth",
-            appDirectory: "../services/auth",
+            image: "ghcr.io/air-hand-org/jobdeck-auth",
+            tag: imageTag
+        )
+        .WithHttpEndpoint(
+            name: "grpc-backend",
+            targetPort: 9091
+        )
+        .AsHttp2Service()
+        , authDB,
+        grpcReflectionFlag,
+        authJwtPrivateKey,
+        workerClientSecretHash,
+        testUserSecretHash
+        ).GetEndpoint("grpc-backend");
+    }
+
+    private EndpointReference LocalBackend(
+        bool isDebug,
+        string grpcReflectionFlag,
+        IResourceBuilder<PostgresDatabaseResource> authDB
+    )
+    {
+        var authJwtPrivateKey = builder.AddParameter("auth-jwt-private-key", secret: true);
+        var workerClientSecretHash = builder.AddParameter("job-worker-client-secret-hash", secret: true);
+        var testUserSecretHash = builder.AddParameter("test-user-client-secret-hash", secret: true);
+        var migrator = builder.AddGoApp(
+            name: "auth-db-migrator",
+            appDirectory: localAppDirectory!,
+            packagePath: "./cmd/migrator"
+        )
+        .WithReference(authDB)
+        .WithEnvironment("GOWORK", "off")
+        .WithEnvironment(context =>
+        {
+            context.EnvironmentVariables["POSTGRESDB_URI"] = authDB.Resource.UriExpression;
+            context.EnvironmentVariables["AUTH_JOB_WORKER_SECRET_HASH"] = workerClientSecretHash;
+            context.EnvironmentVariables["AUTH_JOB_WORKER_CLIENT_ID"] = workerClientId;
+            context.EnvironmentVariables["AUTH_TEST_USER_SECRET_HASH"] = testUserSecretHash;
+        })
+        .WaitFor(authDB);
+
+        var backend = ConfigureBackend(builder.AddGoApp(
+            name: "auth",
+            appDirectory: localAppDirectory!,
             packagePath: "./cmd/server"
         )
         .WithHttpEndpoint(
             name: "grpc-backend",
             env: "GRPC_PORT"
         )
-        .AsHttp2Service()
-        .WithReference(authDB)
-        .WithEnvironment(context =>
-        {
-            context.EnvironmentVariables["POSTGRESDB_URI"] = authDB.Resource.UriExpression;
-            context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = grpcReflectionFlag;
-            context.EnvironmentVariables["AUTH_JWT_PRIVATE_KEY"] = authJwtPrivateKey;
-        })
-        .WaitFor(authDB)
-        .WaitForCompletion(dbMigrator)
-        ;
+        .AsHttp2Service(),
+        authDB,
+        grpcReflectionFlag,
+        authJwtPrivateKey,
+        workerClientSecretHash,
+        testUserSecretHash
+        )
+        .WithEnvironment("GOWORK", "off")
+        .WaitForCompletion(migrator);
         if (isDebug)
         {
             backend.WithDelveServer(new DelveServerOptions
@@ -81,24 +128,46 @@ public sealed class AuthBuilder(
         return backend.GetEndpoint("grpc-backend");
     }
 
-    private IResourceBuilder<ExecutableResource> DBMigration(IResourceBuilder<PostgresDatabaseResource> authDB)
+    private IResourceBuilder<T> ConfigureBackend<T>(
+        IResourceBuilder<T> backend,
+        IResourceBuilder<PostgresDatabaseResource> authDB,
+        string grpcReflectionFlag,
+        IResourceBuilder<ParameterResource> authJwtPrivateKey,
+        IResourceBuilder<ParameterResource> workerClientSecretHash,
+        IResourceBuilder<ParameterResource> testUserSecretHash
+    ) where T : IResource, IResourceWithEnvironment, IResourceWithWaitSupport
     {
-        var workerClientSecretHash = builder.AddParameter("job-worker-client-secret-hash", secret: true);
-        var testUserSecretHash = builder.AddParameter("test-user-client-secret-hash", secret: true);
+        return backend
+            .WithReference(authDB)
+            .WithEnvironment(context =>
+            {
+                context.EnvironmentVariables["POSTGRESDB_URI"] = authDB.Resource.UriExpression;
+                context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = grpcReflectionFlag;
+                context.EnvironmentVariables["AUTH_JWT_PRIVATE_KEY"] = authJwtPrivateKey;
+                context.EnvironmentVariables["AUTH_JOB_WORKER_SECRET_HASH"] = workerClientSecretHash;
+                context.EnvironmentVariables["AUTH_JOB_WORKER_CLIENT_ID"] = workerClientId;
+                context.EnvironmentVariables["AUTH_TEST_USER_SECRET_HASH"] = testUserSecretHash;
+            })
+            .WaitFor(authDB);
+    }
 
-        return builder.AddGoApp(
-            name: "auth-db-migrator",
-            appDirectory: "../services/auth",
-            packagePath: "./cmd/migrator"
-          )
-          .WithReference(authDB)
-          .WithEnvironment(context =>
-          {
-              context.EnvironmentVariables["POSTGRESDB_URI"] = authDB.Resource.UriExpression;
-              context.EnvironmentVariables["AUTH_JOB_WORKER_SECRET_HASH"] = workerClientSecretHash;
-              context.EnvironmentVariables["AUTH_JOB_WORKER_CLIENT_ID"] = workerClientId;
-              context.EnvironmentVariables["AUTH_TEST_USER_SECRET_HASH"] = testUserSecretHash;
-          })
-          .WaitFor(authDB);
+    private static string? GetLocalAppDirectory(string repoRoot, bool useLocal)
+    {
+        if (!useLocal)
+        {
+            return null;
+        }
+        var path = Path.Combine(repoRoot, "services", "auth");
+        if (!Directory.Exists(path))
+        {
+            return null;
+        }
+        if (!File.Exists(Path.Combine(path, "go.mod")))
+        {
+            throw new InvalidOperationException(
+                $"The local auth checkout at '{path}' does not contain a go.mod file."
+            );
+        }
+        return path;
     }
 }

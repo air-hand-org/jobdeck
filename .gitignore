@@ -6,6 +6,9 @@ playwright/.auth
 playwright-traces
 .env.local
 
+# Optional local checkout used by the Aspire AppHost for auth debugging.
+services/auth/
+
 # OpenTofu local working files. Remote state is stored in GCS.
 **/.terraform/
 *.tfplan
