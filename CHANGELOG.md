@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.0](https://github.com/air-hand-org/jobdeck/compare/v1.0.4...v1.1.0) (2026-09-09)
+
+
+### Features
+
+* **iac:** add dedicated auth image publisher identity ([#101](https://github.com/air-hand-org/jobdeck/issues/101)) ([5d91fe7](https://github.com/air-hand-org/jobdeck/commit/5d91fe765f8dda2d1ba22f7e0d9a74c7d2caa46a))
+
+
+### Bug Fixes
+
+* change auth publisher condition ([#106](https://github.com/air-hand-org/jobdeck/issues/106)) ([2ae24b7](https://github.com/air-hand-org/jobdeck/commit/2ae24b7098763c2bdcd4f7da2b2bf05b400c5fb9))
+* deploy image versions from the production manifest ([#103](https://github.com/air-hand-org/jobdeck/issues/103)) ([1767b42](https://github.com/air-hand-org/jobdeck/commit/1767b422445c6c92dfbefc3991974b8b7c9a3c9f))
+
 ## [1.0.4](https://github.com/air-hand-org/jobdeck/compare/v1.0.3...v1.0.4) (2026-09-06)
 
 
