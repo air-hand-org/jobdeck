@@ -14,7 +14,6 @@ public sealed class AppFixture : IAsyncLifetime
     private static readonly string[] ResourceLogNames =
     [
         "auth",
-        "auth-db-migrator",
         "auth-tls",
         "demo",
         "demo-backend",

@@ -2,6 +2,8 @@ using System.Net;
 using Microsoft.Extensions.Configuration;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Yarp;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 using apphosts;
 
@@ -10,6 +12,15 @@ var builder = DistributedApplication.CreateBuilder(args);
 var repoRoot = Path.GetFullPath(
     Path.Combine(builder.Environment.ContentRootPath, "..")
 );
+
+var production = new DeserializerBuilder()
+    .WithNamingConvention(CamelCaseNamingConvention.Instance)
+    .IgnoreUnmatchedProperties()
+    .Build()
+    .Deserialize<ProductionManifest>(File.ReadAllText(
+        Path.Combine(repoRoot, "environments", "production.yaml")
+    ));
+var authImageTag = $"v{production.Images["auth"].Version}";
 
 var workerClientId = "job-worker";
 
@@ -35,10 +46,9 @@ var pubsubBuilder = new PubSubBuilder(builder);
 var pubsub = pubsubBuilder.PubSub();
 var pubsubWorkerTopic = pubsub.Topic("job-worker-topic");
 
-var authGrpcEndpoint = new AuthBuilder(builder, postgres, workerClientId)
+var authGrpcEndpoint = new AuthBuilder(builder, postgres, workerClientId, authImageTag)
     .Build(
         port: 9091,
-        isDebug: IS_DEBUG,
         grpcReflectionFlag: enableGrpcReflection
     );
 
@@ -85,3 +95,13 @@ var ui = builder.AddProject("ui", "../services/ui/ui.csproj")
 ;
 
 builder.Build().Run();
+
+file sealed class ProductionManifest
+{
+    public required Dictionary<string, ProductionImage> Images { get; init; }
+}
+
+file sealed class ProductionImage
+{
+    public required string Version { get; init; }
+}
