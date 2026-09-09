@@ -34,6 +34,25 @@ This starts the AppHost and the local resources it defines, including the UI, jo
 
 The Aspire dashboard URL is printed by the Aspire CLI.
 
+## Auth Source Debugging
+
+By default, Aspire runs auth from the versioned GHCR image declared in
+`environments/production.yaml`. To work on auth together with this repository,
+clone `jobdeck-auth` into the fixed local checkout path:
+
+```sh
+git clone git@github.com:air-hand-org/jobdeck-auth.git services/auth
+USE_LOCAL=true DEBUG=true make run
+```
+
+`USE_LOCAL=true` selects local source mode. It requires `services/auth/go.mod`,
+then starts the auth server and its database migrator with `AddGoApp`;
+`DEBUG=true` also enables the auth Delve server on port 2347. Without
+`USE_LOCAL=true`, Aspire uses the GHCR image even if the checkout exists. The
+checkout is intentionally not part of this repository's `go.work` and is
+ignored by its Git worktree. CI does not set `USE_LOCAL`, so it continues to
+use the GHCR image.
+
 ## Containerized Local Runs
 
 Normal local development remains source-first: the AppHost starts Go applications and
