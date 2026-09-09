@@ -12,12 +12,15 @@ public sealed class AuthBuilder(
     , IResourceBuilder<PostgresServerResource> postgres
     , string workerClientId
     , string imageTag
+    , string? localAppDirectory
 )
 {
-    public EndpointReference Build(int port, string grpcReflectionFlag)
+    public EndpointReference Build(int port, bool isDebug, string grpcReflectionFlag)
     {
         var authDB = postgres.AddDatabase("jobdeck-auth");
-        var backend = Backend(grpcReflectionFlag, authDB);
+        var backend = localAppDirectory is null
+            ? ContainerBackend(grpcReflectionFlag, authDB)
+            : LocalBackend(isDebug, grpcReflectionFlag, authDB);
         return ReverseProxy(port, backend);
     }
 
@@ -40,7 +43,7 @@ public sealed class AuthBuilder(
             .GetEndpoint("https");
     }
 
-    private EndpointReference Backend(
+    private EndpointReference ContainerBackend(
         string grpcReflectionFlag,
         IResourceBuilder<PostgresDatabaseResource> authDB
     )
@@ -48,7 +51,7 @@ public sealed class AuthBuilder(
         var authJwtPrivateKey = builder.AddParameter("auth-jwt-private-key", secret: true);
         var workerClientSecretHash = builder.AddParameter("job-worker-client-secret-hash", secret: true);
         var testUserSecretHash = builder.AddParameter("test-user-client-secret-hash", secret: true);
-        var backend = builder.AddContainer(
+        return ConfigureBackend(builder.AddContainer(
             name: "auth",
             image: "ghcr.io/air-hand-org/jobdeck-auth",
             tag: imageTag
@@ -58,18 +61,88 @@ public sealed class AuthBuilder(
             targetPort: 9091
         )
         .AsHttp2Service()
+        , authDB,
+        grpcReflectionFlag,
+        authJwtPrivateKey,
+        workerClientSecretHash,
+        testUserSecretHash
+        ).GetEndpoint("grpc-backend");
+    }
+
+    private EndpointReference LocalBackend(
+        bool isDebug,
+        string grpcReflectionFlag,
+        IResourceBuilder<PostgresDatabaseResource> authDB
+    )
+    {
+        var authJwtPrivateKey = builder.AddParameter("auth-jwt-private-key", secret: true);
+        var workerClientSecretHash = builder.AddParameter("job-worker-client-secret-hash", secret: true);
+        var testUserSecretHash = builder.AddParameter("test-user-client-secret-hash", secret: true);
+        var migrator = builder.AddGoApp(
+            name: "auth-db-migrator",
+            appDirectory: localAppDirectory!,
+            packagePath: "./cmd/migrator"
+        )
         .WithReference(authDB)
         .WithEnvironment(context =>
         {
             context.EnvironmentVariables["POSTGRESDB_URI"] = authDB.Resource.UriExpression;
-            context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = grpcReflectionFlag;
-            context.EnvironmentVariables["AUTH_JWT_PRIVATE_KEY"] = authJwtPrivateKey;
             context.EnvironmentVariables["AUTH_JOB_WORKER_SECRET_HASH"] = workerClientSecretHash;
             context.EnvironmentVariables["AUTH_JOB_WORKER_CLIENT_ID"] = workerClientId;
             context.EnvironmentVariables["AUTH_TEST_USER_SECRET_HASH"] = testUserSecretHash;
         })
-        .WaitFor(authDB)
-        ;
+        .WaitFor(authDB);
+
+        var backend = ConfigureBackend(builder.AddGoApp(
+            name: "auth",
+            appDirectory: localAppDirectory!,
+            packagePath: "./cmd/server"
+        )
+        .WithHttpEndpoint(
+            name: "grpc-backend",
+            env: "GRPC_PORT"
+        )
+        .AsHttp2Service(),
+        authDB,
+        grpcReflectionFlag,
+        authJwtPrivateKey,
+        workerClientSecretHash,
+        testUserSecretHash
+        )
+        .WaitForCompletion(migrator);
+        if (isDebug)
+        {
+            backend.WithDelveServer(new DelveServerOptions
+            {
+                Port = 2347,
+                AcceptMultiClient = true,
+                ContinueOnStart = true,
+                OnlySameUser = false
+            });
+        }
         return backend.GetEndpoint("grpc-backend");
+    }
+
+    private IResourceBuilder<T> ConfigureBackend<T>(
+        IResourceBuilder<T> backend,
+        IResourceBuilder<PostgresDatabaseResource> authDB,
+        string grpcReflectionFlag,
+        IResourceBuilder<ParameterResource> authJwtPrivateKey,
+        IResourceBuilder<ParameterResource> workerClientSecretHash,
+        IResourceBuilder<ParameterResource> testUserSecretHash
+    ) where T : IResource, IResourceWithEnvironment, IResourceWithWaitSupport
+    {
+        return backend
+            .WithReference(authDB)
+            .WithEnvironment(context =>
+            {
+                context.EnvironmentVariables["POSTGRESDB_URI"] = authDB.Resource.UriExpression;
+                context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = grpcReflectionFlag;
+                context.EnvironmentVariables["AUTH_JWT_PRIVATE_KEY"] = authJwtPrivateKey;
+                context.EnvironmentVariables["AUTH_JOB_WORKER_SECRET_HASH"] = workerClientSecretHash;
+                context.EnvironmentVariables["AUTH_JOB_WORKER_CLIENT_ID"] = workerClientId;
+                context.EnvironmentVariables["AUTH_TEST_USER_SECRET_HASH"] = testUserSecretHash;
+            })
+            .WaitFor(authDB);
     }
 }

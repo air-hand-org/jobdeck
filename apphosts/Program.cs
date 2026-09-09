@@ -21,6 +21,13 @@ var production = new DeserializerBuilder()
         Path.Combine(repoRoot, "environments", "production.yaml")
     ));
 var authImageTag = $"v{production.Images["auth"].Version}";
+var localAuthAppDirectory = Path.Combine(repoRoot, "services", "auth");
+if (Directory.Exists(localAuthAppDirectory) && !File.Exists(Path.Combine(localAuthAppDirectory, "go.mod")))
+{
+    throw new InvalidOperationException(
+        $"The local auth checkout at '{localAuthAppDirectory}' does not contain a go.mod file."
+    );
+}
 
 var workerClientId = "job-worker";
 
@@ -46,9 +53,16 @@ var pubsubBuilder = new PubSubBuilder(builder);
 var pubsub = pubsubBuilder.PubSub();
 var pubsubWorkerTopic = pubsub.Topic("job-worker-topic");
 
-var authGrpcEndpoint = new AuthBuilder(builder, postgres, workerClientId, authImageTag)
+var authGrpcEndpoint = new AuthBuilder(
+    builder,
+    postgres,
+    workerClientId,
+    authImageTag,
+    Directory.Exists(localAuthAppDirectory) ? localAuthAppDirectory : null
+)
     .Build(
         port: 9091,
+        isDebug: IS_DEBUG,
         grpcReflectionFlag: enableGrpcReflection
     );
 
