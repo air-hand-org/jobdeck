@@ -3,12 +3,12 @@ images:
   auth:
     version: 1.0.5
   ui:
-    version: 1.1.0
+    version: 1.1.1
   demo:
-    version: 1.1.0
+    version: 1.1.1
   job-api:
-    version: 1.1.0
+    version: 1.1.1
   job-worker:
-    version: 1.1.0
+    version: 1.1.1
   forward-proxy:
-    version: 1.1.0
+    version: 1.1.1
