@@ -133,6 +133,11 @@ resource "google_cloud_run_v2_service" "auth" {
       }
 
       env {
+        name  = "AUTH_JWT_KEY_ID"
+        value = "jobdeck-auth-1"
+      }
+
+      env {
         name  = "POSTGRES_HOST"
         value = "127.0.0.1"
       }

@@ -85,6 +85,10 @@ public sealed class AppFixture : IAsyncLifetime
             "Parameters__auth-jwt-private-key",
             "9y7KNcPRFzIlYFVe4jJu7BFJbdD4b+pkqY4ppx0vwk3VHAmReDOetM/brsVpJ3Nep4LvDEgvXQRyZWYAvapJ5Q=="
         );
+        Environment.SetEnvironmentVariable(
+            "Parameters__auth-jwt-key-id",
+            "jobdeck-auth-e2e-1"
+        );
 
         var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.Apphosts>(
             [

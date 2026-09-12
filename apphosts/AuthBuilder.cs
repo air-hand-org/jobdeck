@@ -52,6 +52,7 @@ public sealed class AuthBuilder(
     )
     {
         var authJwtPrivateKey = builder.AddParameter("auth-jwt-private-key", secret: true);
+        var authJwtKeyID = builder.AddParameter("auth-jwt-key-id");
         var workerClientSecretHash = builder.AddParameter("job-worker-client-secret-hash", secret: true);
         var testUserSecretHash = builder.AddParameter("test-user-client-secret-hash", secret: true);
         return ConfigureBackend(builder.AddContainer(
@@ -67,6 +68,7 @@ public sealed class AuthBuilder(
         , authDB,
         grpcReflectionFlag,
         authJwtPrivateKey,
+        authJwtKeyID,
         workerClientSecretHash,
         testUserSecretHash
         ).GetEndpoint("grpc-backend");
@@ -79,6 +81,7 @@ public sealed class AuthBuilder(
     )
     {
         var authJwtPrivateKey = builder.AddParameter("auth-jwt-private-key", secret: true);
+        var authJwtKeyID = builder.AddParameter("auth-jwt-key-id");
         var workerClientSecretHash = builder.AddParameter("job-worker-client-secret-hash", secret: true);
         var testUserSecretHash = builder.AddParameter("test-user-client-secret-hash", secret: true);
         var migrator = builder.AddGoApp(
@@ -110,6 +113,7 @@ public sealed class AuthBuilder(
         authDB,
         grpcReflectionFlag,
         authJwtPrivateKey,
+        authJwtKeyID,
         workerClientSecretHash,
         testUserSecretHash
         )
@@ -133,6 +137,7 @@ public sealed class AuthBuilder(
         IResourceBuilder<PostgresDatabaseResource> authDB,
         string grpcReflectionFlag,
         IResourceBuilder<ParameterResource> authJwtPrivateKey,
+        IResourceBuilder<ParameterResource> authJwtKeyID,
         IResourceBuilder<ParameterResource> workerClientSecretHash,
         IResourceBuilder<ParameterResource> testUserSecretHash
     ) where T : IResource, IResourceWithEnvironment, IResourceWithWaitSupport
@@ -144,6 +149,7 @@ public sealed class AuthBuilder(
                 context.EnvironmentVariables["POSTGRESDB_URI"] = authDB.Resource.UriExpression;
                 context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = grpcReflectionFlag;
                 context.EnvironmentVariables["AUTH_JWT_PRIVATE_KEY"] = authJwtPrivateKey;
+                context.EnvironmentVariables["AUTH_JWT_KEY_ID"] = authJwtKeyID;
                 context.EnvironmentVariables["AUTH_JOB_WORKER_SECRET_HASH"] = workerClientSecretHash;
                 context.EnvironmentVariables["AUTH_JOB_WORKER_CLIENT_ID"] = workerClientId;
                 context.EnvironmentVariables["AUTH_TEST_USER_SECRET_HASH"] = testUserSecretHash;
