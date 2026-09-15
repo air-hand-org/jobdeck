@@ -1,6 +1,11 @@
 // Existing jobdeck-auth governance is adopted before this root is allowed to
 // apply. These imports must remain until the first successful bootstrap apply.
 import {
+  to = github_repository.auth
+  id = "jobdeck-auth"
+}
+
+import {
   to = github_repository_ruleset.auth_main
   id = "jobdeck-auth:22442155"
 }

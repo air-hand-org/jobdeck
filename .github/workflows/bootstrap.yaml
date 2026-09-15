@@ -10,8 +10,10 @@ on:
       - ".github/workflows/_tofu.yaml"
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
+  issues: write
+  pull-requests: write
 
 concurrency:
   group: bootstrap-production
@@ -24,7 +26,10 @@ jobs:
       root: bootstrap
       command: apply
       environment: bootstrap
+      comment: true
     secrets: inherit
     permissions:
-      contents: read
+      contents: write
       id-token: write
+      issues: write
+      pull-requests: write

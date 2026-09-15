@@ -32,16 +32,24 @@ It is a manually registered Environment secret in `air-hand-org/jobdeck`:
 | `plan` | read-only | Refresh and plan governance changes on internal PRs. |
 | `bootstrap` | read/write | Apply governance changes after a protected `main` push. |
 
-Each Environment provides `GH_IAC_APP_ID`,
-`GH_IAC_APP_INSTALLATION_ID`, and `GH_IAC_APP_PRIVATE_KEY`; the reusable
-OpenTofu workflow maps them to the GitHub provider's `GITHUB_APP_*` variables.
-The app need only be installed in repositories managed by this root. It does
-not need an installation in `jobdeck` merely because the workflow executes
-there.
+Each Environment provides `GH_IAC_APP_CLIENT_ID` and
+`GH_IAC_APP_PRIVATE_KEY`. The reusable OpenTofu workflow exchanges them for a
+short-lived installation token with `actions/create-github-app-token`, and
+passes that token to the GitHub provider as `GITHUB_TOKEN`. The app need only
+be installed in repositories managed by this root. It does not need an
+installation in `jobdeck` merely because the workflow executes there.
 
-GitHub resources use `prevent_destroy`. Before retiring GCP bootstrap
-infrastructure, move their state to another root (or intentionally remove them
-from state while retaining the remote settings); do not run a blanket destroy.
+Both roots post their plan and apply results through `tfcmt`. Plan results are
+updated on internal pull requests; apply results are posted to the triggering
+commit. The comment and label token is GitHub Actions' scoped `GITHUB_TOKEN`;
+the nested bootstrap OpenTofu command continues to use the read-only or
+write-capable App token. This keeps GitHub comment permission separate from
+GitHub governance permission.
+
+Repository resources use `prevent_destroy`. Before retiring GCP bootstrap
+infrastructure, move repository state to another root (or intentionally remove
+it from state while retaining the remote repository); do not run a blanket
+destroy.
 
 `tofu-state` encrypts the `app` root's OpenTofu state and plans. `sops` encrypts
 the random data keys used by version-controlled SOPS secret files. They are

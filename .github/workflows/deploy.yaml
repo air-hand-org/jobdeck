@@ -6,8 +6,10 @@ on:
       - published
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
+  issues: write
+  pull-requests: write
 
 concurrency:
   group: deploy-production
@@ -36,7 +38,10 @@ jobs:
       root: app
       command: apply
       environment: production
+      comment: true
     secrets: inherit
     permissions:
-      contents: read
+      contents: write
       id-token: write
+      issues: write
+      pull-requests: write

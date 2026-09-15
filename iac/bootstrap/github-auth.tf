@@ -1,9 +1,30 @@
-locals {
-  auth_repository = "jobdeck-auth"
+data "github_app" "release" {
+  slug = "air-hand-release-app"
+}
+
+resource "github_repository" "auth" {
+  name         = "jobdeck-auth"
+  visibility   = "private"
+  has_issues   = true
+  has_projects = true
+  has_wiki     = true
+
+  has_discussions             = false
+  allow_merge_commit          = false
+  allow_squash_merge          = true
+  allow_rebase_merge          = false
+  allow_auto_merge            = true
+  allow_update_branch         = false
+  delete_branch_on_merge      = true
+  web_commit_signoff_required = false
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "github_repository_ruleset" "auth_main" {
-  repository  = local.auth_repository
+  repository  = github_repository.auth.name
   name        = "main"
   target      = "branch"
   enforcement = "active"
@@ -42,13 +63,10 @@ resource "github_repository_ruleset" "auth_main" {
     }
   }
 
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "github_repository_ruleset" "auth_release_tag" {
-  repository  = local.auth_repository
+  repository  = github_repository.auth.name
   name        = "release-tag"
   target      = "tag"
   enforcement = "active"
@@ -61,24 +79,22 @@ resource "github_repository_ruleset" "auth_release_tag" {
   }
 
   bypass_actors {
-    actor_id    = 3404920
+    actor_id    = data.github_app.release.id
     actor_type  = "Integration"
     bypass_mode = "exempt"
   }
 
   rules {
-    creation = true
-    update   = true
-    deletion = true
+    creation         = true
+    update           = true
+    deletion         = true
+    non_fast_forward = true
   }
 
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "github_repository_environment" "auth_production" {
-  repository          = local.auth_repository
+  repository          = github_repository.auth.name
   environment         = "production"
   can_admins_bypass   = true
   prevent_self_review = false
@@ -88,34 +104,24 @@ resource "github_repository_environment" "auth_production" {
     custom_branch_policies = true
   }
 
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "github_repository_environment_deployment_policy" "auth_production_release_tag" {
-  repository  = local.auth_repository
+  repository  = github_repository.auth.name
   environment = github_repository_environment.auth_production.environment
   tag_pattern = "v*.*.*"
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "github_actions_environment_variable" "auth_production" {
   for_each = {
-    GCP_PROJECT_ID                 = "airhand-jobdeck"
-    GCP_SERVICE_ACCOUNT            = "jobdeck-auth-publisher@airhand-jobdeck.iam.gserviceaccount.com"
-    GCP_WORKLOAD_IDENTITY_PROVIDER = "projects/540051760819/locations/global/workloadIdentityPools/jobdeck-auth-publish/providers/github"
+    GCP_PROJECT_ID                 = data.google_project.current.project_id
+    GCP_SERVICE_ACCOUNT            = google_service_account.auth_publisher.email
+    GCP_WORKLOAD_IDENTITY_PROVIDER = google_iam_workload_identity_pool_provider.auth_publisher.name
   }
 
-  repository    = local.auth_repository
+  repository    = github_repository.auth.name
   environment   = github_repository_environment.auth_production.environment
   variable_name = each.key
   value         = each.value
 
-  lifecycle {
-    prevent_destroy = true
-  }
 }
