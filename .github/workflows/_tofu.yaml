@@ -32,6 +32,12 @@ jobs:
       # iac/app uses this during backend state encryption, which is configured
       # before the later `tofu plan -var=...` invocation.
       TF_VAR_project_id: ${{ vars.GCP_PROJECT_ID }}
+      # Only the bootstrap root manages GitHub resources. The selected
+      # Environment supplies the read App for PR plans and the write App for
+      # protected main applies.
+      GITHUB_APP_ID: ${{ inputs.root == 'bootstrap' && vars.GH_IAC_APP_ID || '' }}
+      GITHUB_APP_INSTALLATION_ID: ${{ inputs.root == 'bootstrap' && vars.GH_IAC_APP_INSTALLATION_ID || '' }}
+      GITHUB_APP_PEM_FILE: ${{ inputs.root == 'bootstrap' && secrets.GH_IAC_APP_PRIVATE_KEY || '' }}
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-tools

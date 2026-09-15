@@ -20,6 +20,29 @@ root, so they cannot encrypt the state required to create them. GCS encryption,
 uniform bucket-level access, public access prevention, and object versioning
 protect the bucket itself.
 
+## GitHub repository governance
+
+This root manages the rulesets, GitHub Environments, deployment ref policies,
+and non-secret Actions variables for repositories in the JobDeck platform. The
+GitHub App private key is deliberately not an OpenTofu resource or state value.
+It is a manually registered Environment secret in `air-hand-org/jobdeck`:
+
+| Environment | App permission | Purpose |
+| --- | --- | --- |
+| `plan` | read-only | Refresh and plan governance changes on internal PRs. |
+| `bootstrap` | read/write | Apply governance changes after a protected `main` push. |
+
+Each Environment provides `GH_IAC_APP_ID`,
+`GH_IAC_APP_INSTALLATION_ID`, and `GH_IAC_APP_PRIVATE_KEY`; the reusable
+OpenTofu workflow maps them to the GitHub provider's `GITHUB_APP_*` variables.
+The app need only be installed in repositories managed by this root. It does
+not need an installation in `jobdeck` merely because the workflow executes
+there.
+
+GitHub resources use `prevent_destroy`. Before retiring GCP bootstrap
+infrastructure, move their state to another root (or intentionally remove them
+from state while retaining the remote settings); do not run a blanket destroy.
+
 `tofu-state` encrypts the `app` root's OpenTofu state and plans. `sops` encrypts
 the random data keys used by version-controlled SOPS secret files. They are
 separate keys so that their IAM, rotation, and incident response scopes remain
