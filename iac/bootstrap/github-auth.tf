@@ -1,5 +1,7 @@
-data "github_app" "release" {
-  slug = "air-hand-release-app"
+locals {
+  # GitHub's numeric App ID for air-hand-release-app. This ID is the ruleset
+  # Integration actor ID, not its installation ID or client ID.
+  release_app_integration_id = 3404920
 }
 
 resource "github_repository" "auth" {
@@ -79,7 +81,7 @@ resource "github_repository_ruleset" "auth_release_tag" {
   }
 
   bypass_actors {
-    actor_id    = data.github_app.release.id
+    actor_id    = local.release_app_integration_id
     actor_type  = "Integration"
     bypass_mode = "exempt"
   }
