@@ -98,9 +98,9 @@ jobs:
 
           if [[ "$TOFU_COMMAND" == "plan" && "$TOFU_COMMENT" == "true" ]]; then
             if [[ "$TOFU_ROOT" == "bootstrap" ]]; then
-              tfcmt plan --patch -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu plan "${plan_args[@]}"
+              tfcmt -var "target:${TOFU_ROOT}" plan --patch -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu plan "${plan_args[@]}"
             else
-              tfcmt plan --patch -- tofu plan "${plan_args[@]}"
+              tfcmt -var "target:${TOFU_ROOT}" plan --patch -- tofu plan "${plan_args[@]}"
             fi
           elif [[ "$TOFU_ROOT" == "bootstrap" ]]; then
             GITHUB_TOKEN="$GH_IAC_TOKEN" tofu plan "${plan_args[@]}"
@@ -118,9 +118,9 @@ jobs:
           cd "iac/${TOFU_ROOT}"
           if [[ "$TOFU_COMMENT" == "true" ]]; then
             if [[ "$TOFU_ROOT" == "bootstrap" ]]; then
-              tfcmt apply -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -auto-approve tfplan
+              tfcmt -var "target:${TOFU_ROOT}" apply -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -auto-approve tfplan
             else
-              tfcmt apply -- tofu apply -auto-approve tfplan
+              tfcmt -var "target:${TOFU_ROOT}" apply -- tofu apply -auto-approve tfplan
             fi
           elif [[ "$TOFU_ROOT" == "bootstrap" ]]; then
             GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -auto-approve tfplan
