@@ -6,7 +6,7 @@ on:
       - published
 
 permissions:
-  contents: write
+  contents: read
   id-token: write
   issues: write
   pull-requests: write

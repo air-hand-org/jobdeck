@@ -20,7 +20,7 @@ on:
         description: Post the OpenTofu plan or apply result with tfcmt.
         required: false
         type: boolean
-        default: false
+        default: true
 permissions:
   contents: read
   id-token: write
@@ -42,16 +42,13 @@ jobs:
       TF_VAR_project_id: ${{ vars.GCP_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v7
-      - name: Create GitHub App token for bootstrap governance
-        if: ${{ inputs.root == 'bootstrap' }}
+      - name: Create GitHub App token for governance
         id: github-app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
           client-id: ${{ vars.GH_IAC_APP_CLIENT_ID }}
           private-key: ${{ secrets.GH_IAC_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-          repositories: |
-            jobdeck-auth
       - uses: ./.github/actions/setup-tools
       - name: Lint OpenTofu
         run: make tofu-lint
@@ -85,8 +82,7 @@ jobs:
       - name: Plan
         env:
           # tfcmt uses the workflow token to update the PR comment and labels.
-          # The OpenTofu subprocess instead receives the read-only GitHub App
-          # token so GitHub provider reads retain their least-privilege scope.
+          # OpenTofu always uses the Environment-selected GitHub App token.
           GITHUB_TOKEN: ${{ github.token }}
           GH_IAC_TOKEN: ${{ steps.github-app-token.outputs.token }}
         run: |
@@ -97,33 +93,21 @@ jobs:
           )
 
           if [[ "$TOFU_COMMAND" == "plan" && "$TOFU_COMMENT" == "true" ]]; then
-            if [[ "$TOFU_ROOT" == "bootstrap" ]]; then
-              tfcmt -var "target:${TOFU_ROOT}" plan --patch -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu plan "${plan_args[@]}"
-            else
-              tfcmt -var "target:${TOFU_ROOT}" plan --patch -- tofu plan "${plan_args[@]}"
-            fi
-          elif [[ "$TOFU_ROOT" == "bootstrap" ]]; then
-            GITHUB_TOKEN="$GH_IAC_TOKEN" tofu plan "${plan_args[@]}"
+            tfcmt -var "target:${TOFU_ROOT}" plan --patch -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu plan "${plan_args[@]}"
           else
-            tofu plan "${plan_args[@]}"
+            GITHUB_TOKEN="$GH_IAC_TOKEN" tofu plan "${plan_args[@]}"
           fi
       - name: Apply
         if: ${{ inputs.command == 'apply' }}
         env:
-          # tfcmt uses the workflow token to post the apply result. Bootstrap
-          # OpenTofu continues to use its governance App token.
+          # tfcmt uses the workflow token to post the apply result; OpenTofu
+          # uses the Environment-selected GitHub App token.
           GITHUB_TOKEN: ${{ github.token }}
           GH_IAC_TOKEN: ${{ steps.github-app-token.outputs.token }}
         run: |
           cd "iac/${TOFU_ROOT}"
           if [[ "$TOFU_COMMENT" == "true" ]]; then
-            if [[ "$TOFU_ROOT" == "bootstrap" ]]; then
-              tfcmt -var "target:${TOFU_ROOT}" apply -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -auto-approve tfplan
-            else
-              tfcmt -var "target:${TOFU_ROOT}" apply -- tofu apply -auto-approve tfplan
-            fi
-          elif [[ "$TOFU_ROOT" == "bootstrap" ]]; then
-            GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -auto-approve tfplan
+            tfcmt -var "target:${TOFU_ROOT}" apply -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -auto-approve tfplan
           else
-            tofu apply -auto-approve tfplan
+            GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -auto-approve tfplan
           fi
