@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.3](https://github.com/air-hand-org/jobdeck/compare/v1.1.2...v1.1.3) (2026-09-15)
+
+
+### Bug Fixes
+
+* **auth:** promote image to v1.1.1 ([#116](https://github.com/air-hand-org/jobdeck/issues/116)) ([ace78b8](https://github.com/air-hand-org/jobdeck/commit/ace78b82b0da253cf6878f62283be78454349b99))
+
 ## [1.1.2](https://github.com/air-hand-org/jobdeck/compare/v1.1.1...v1.1.2) (2026-09-12)
 
 
