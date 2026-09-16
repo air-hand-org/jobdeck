@@ -21,7 +21,6 @@ resource "google_iam_workload_identity_pool_provider" "auth_publisher" {
     "attribute.environment" = "'environment' in assertion ? assertion.environment : ''"
   }
 
-  # Numeric IDs prevent name reuse from authorizing another repo or owner.
   attribute_condition = join(" && ", [
     "assertion.repository == '${github_repository.auth.full_name}'",
   ])
