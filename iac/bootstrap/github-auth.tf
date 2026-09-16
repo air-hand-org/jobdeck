@@ -26,6 +26,9 @@ resource "github_repository" "auth" {
   delete_branch_on_merge      = true
   web_commit_signoff_required = false
 
+  squash_merge_commit_message = "COMMIT_MESSAGES"
+  squash_merge_commit_title   = "COMMIT_OR_PR_TITLE"
+
   lifecycle {
     prevent_destroy = true
 
@@ -34,9 +37,9 @@ resource "github_repository" "auth" {
     # import stable; repository resources created by this root do not use this
     # exception.
     ignore_changes = [
-      allow_auto_merge,
-      allow_squash_merge,
-      delete_branch_on_merge,
+      ignore_vulnerability_alerts_during_read,
+      merge_commit_message,
+      merge_commit_title,
     ]
   }
 }
