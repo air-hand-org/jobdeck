@@ -23,7 +23,7 @@ resource "google_iam_workload_identity_pool_provider" "auth_publisher" {
 
   # Numeric IDs prevent name reuse from authorizing another repo or owner.
   attribute_condition = join(" && ", [
-    "assertion.repository == 'air-hand-org/jobdeck-auth'",
+    "assertion.repository == '${github_repository.auth.full_name}'",
   ])
 
   oidc {
@@ -51,7 +51,7 @@ resource "google_artifact_registry_repository_iam_member" "auth_publisher" {
 resource "google_service_account_iam_member" "auth_publisher_wif" {
   service_account_id = google_service_account.auth_publisher.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.auth_publisher.name}/attribute.environment/production"
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.auth_publisher.name}/attribute.environment/${github_repository_environment.auth_production.environment}"
 
   depends_on = [google_iam_workload_identity_pool_provider.auth_publisher]
 }
