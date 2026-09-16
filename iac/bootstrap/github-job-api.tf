@@ -1,10 +1,9 @@
 resource "github_repository" "job_api" {
-  name           = "jobdeck-job-api"
-  visibility     = "private"
-  has_issues     = true
-  has_projects   = true
-  has_wiki       = true
-  default_branch = "main"
+  name         = "jobdeck-job-api"
+  visibility   = "private"
+  has_issues   = true
+  has_projects = true
+  has_wiki     = true
 
   has_discussions             = false
   allow_merge_commit          = false
@@ -18,6 +17,16 @@ resource "github_repository" "job_api" {
   lifecycle {
     prevent_destroy = true
   }
+}
+
+resource "github_branch" "job_api_main" {
+  repository = github_repository.job_api.name
+  branch     = "main"
+}
+
+resource "github_branch_default" "job_api_default" {
+  repository = github_repository.job_api.name
+  branch     = github_branch.job_api_main.branch
 }
 
 resource "github_repository_ruleset" "job_api_main" {
