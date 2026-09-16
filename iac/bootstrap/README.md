@@ -20,6 +20,46 @@ root, so they cannot encrypt the state required to create them. GCS encryption,
 uniform bucket-level access, public access prevention, and object versioning
 protect the bucket itself.
 
+## GitHub repository governance
+
+This root manages the rulesets, GitHub Environments, deployment ref policies,
+and non-secret Actions variables for repositories in the JobDeck platform. The
+GitHub App private key is deliberately not an OpenTofu resource or state value.
+It is a manually registered Environment secret in `air-hand-org/jobdeck`:
+
+| Environment | App permission | Purpose |
+| --- | --- | --- |
+| `plan` | read-only | Refresh and plan governance changes on internal PRs. |
+| `bootstrap` | read/write | Apply governance changes after a protected `main` push. |
+
+Each Environment provides `GH_IAC_APP_CLIENT_ID` and
+`GH_IAC_APP_PRIVATE_KEY`. The reusable OpenTofu workflow exchanges them for a
+short-lived installation token with `actions/create-github-app-token`, and
+passes that token to the GitHub provider as `GITHUB_TOKEN`. The app need only
+be installed in repositories managed by this root. It does not need an
+installation in `jobdeck` merely because the workflow executes there.
+
+For the current `jobdeck-auth` import, an installation restricted to that
+repository is sufficient. Before this root creates a new repository such as
+`jobdeck-job-api`, change both Apps' organization installations to **All
+repositories**. The workflow intentionally does not name a repository when it
+creates the token: the `repositories` input accepts only repositories that
+already exist, so it cannot grant access to a repository created by the same
+OpenTofu run.
+
+Both roots post their plan and apply results through `tfcmt`. Plan results are
+updated on internal pull requests. For an apply, the workflow finds a merged
+pull request associated with the triggering commit and posts there; it skips
+the comment if none is found. The comment and label token is GitHub Actions'
+scoped `GITHUB_TOKEN`; the nested OpenTofu command uses the read-only or
+write-capable App token from the selected Environment. This keeps GitHub
+comment permission separate from GitHub governance permission.
+
+Repository resources use `prevent_destroy`. Before retiring GCP bootstrap
+infrastructure, move repository state to another root (or intentionally remove
+it from state while retaining the remote repository); do not run a blanket
+destroy.
+
 `tofu-state` encrypts the `app` root's OpenTofu state and plans. `sops` encrypts
 the random data keys used by version-controlled SOPS secret files. They are
 separate keys so that their IAM, rotation, and incident response scopes remain

@@ -19,6 +19,8 @@ jobs:
       contents: read
       packages: read
       id-token: write
+      issues: write
+      pull-requests: write
     secrets: inherit
 
   check-result:

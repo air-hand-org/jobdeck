@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/google"
       version = "~> 7.0"
     }
+    github = {
+      source  = "integrations/github"
+      version = "~> 6.0"
+    }
   }
 
   backend "gcs" {}
@@ -14,4 +18,8 @@ terraform {
 provider "google" {
   project = var.project_id
   region  = var.region
+}
+
+provider "github" {
+  owner = "air-hand-org"
 }

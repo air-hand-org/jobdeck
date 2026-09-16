@@ -43,6 +43,8 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      issues: write
+      pull-requests: write
 
   application-infrastructure-plan:
     # The app root reads the bootstrap state, so planning it here also verifies
@@ -59,3 +61,5 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      issues: write
+      pull-requests: write

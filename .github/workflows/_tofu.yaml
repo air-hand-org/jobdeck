@@ -19,6 +19,8 @@ on:
 permissions:
   contents: read
   id-token: write
+  issues: write
+  pull-requests: write
 
 jobs:
   tofu:
@@ -34,6 +36,16 @@ jobs:
       TF_VAR_project_id: ${{ vars.GCP_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v7
+      - name: Create GitHub App token for governance
+        id: github-app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.GH_IAC_APP_CLIENT_ID }}
+          private-key: ${{ secrets.GH_IAC_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          # Do not set `repositories`: a repository created by this OpenTofu
+          # run does not exist yet and therefore cannot scope the token. Apps
+          # that create repositories must be installed for all repositories.
       - uses: ./.github/actions/setup-tools
       - name: Lint OpenTofu
         run: make tofu-lint
@@ -59,10 +71,17 @@ jobs:
             -backend-config="bucket=airhand-jobdeck-bucket" \
             -backend-config="prefix=${TOFU_ROOT}"
       - name: Validate
+        env:
+          GITHUB_TOKEN: ${{ steps.github-app-token.outputs.token }}
         run: |
           cd "iac/${TOFU_ROOT}"
           tofu validate -no-color
       - name: Plan
+        env:
+          # tfcmt uses the workflow token to update the PR comment and labels.
+          # OpenTofu always uses the Environment-selected GitHub App token.
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_IAC_TOKEN: ${{ steps.github-app-token.outputs.token }}
         run: |
           cd "iac/${TOFU_ROOT}"
           plan_args=(
@@ -70,9 +89,27 @@ jobs:
             -var="project_id=${{ vars.GCP_PROJECT_ID }}"
           )
 
-          tofu plan "${plan_args[@]}"
+          tfcmt -var "target:${TOFU_ROOT}" plan --patch -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu plan "${plan_args[@]}"
+      - name: Find associated pull request
+        id: pull-request
+        if: ${{ inputs.command == 'apply' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pull_request_number="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/pulls" --paginate --jq '[.[] | select(.merged_at != null)] | first | .number // empty')"
+          echo "number=${pull_request_number}" >> "$GITHUB_OUTPUT"
       - name: Apply
         if: ${{ inputs.command == 'apply' }}
+        env:
+          # tfcmt uses the workflow token to post to the associated PR;
+          # OpenTofu uses the Environment-selected GitHub App token.
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_IAC_TOKEN: ${{ steps.github-app-token.outputs.token }}
+          TFCMT_PR_NUMBER: ${{ steps.pull-request.outputs.number }}
         run: |
           cd "iac/${TOFU_ROOT}"
-          tofu apply -auto-approve tfplan
+          if [[ -n "$TFCMT_PR_NUMBER" ]]; then
+            tfcmt -var "target:${TOFU_ROOT}" apply -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -auto-approve tfplan
+          else
+            GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -auto-approve tfplan
+          fi

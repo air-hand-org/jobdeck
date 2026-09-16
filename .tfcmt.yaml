@@ -1,0 +1,13 @@
+# Keep OpenTofu warnings visible in plan comments, except for the intentional
+# bootstrap-state migration reader in iac/app/versions.tf. GCS encrypts the
+# bootstrap state at rest; this explicit reader is needed until that state is
+# migrated to OpenTofu-layer encryption.
+templates:
+  warning: |
+    {{- range $warning := regexSplit `(?m)^Warning: ` .Warning -1 }}
+    {{- if and $warning (not (and (contains "Unencrypted method configured" $warning) (contains "on versions.tf line 20, in terraform:" $warning))) }}
+    ## :warning: Warnings :warning:
+
+    {{wrapCode (trim (printf "Warning: %s" $warning))}}
+    {{- end }}
+    {{- end }}

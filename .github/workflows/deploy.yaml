@@ -8,6 +8,8 @@ on:
 permissions:
   contents: read
   id-token: write
+  issues: write
+  pull-requests: write
 
 concurrency:
   group: deploy-production
@@ -40,3 +42,5 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      issues: write
+      pull-requests: write
