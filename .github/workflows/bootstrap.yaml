@@ -26,7 +26,6 @@ jobs:
       root: bootstrap
       command: apply
       environment: bootstrap
-      comment: true
     secrets: inherit
     permissions:
       contents: write

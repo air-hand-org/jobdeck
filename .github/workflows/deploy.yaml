@@ -38,7 +38,6 @@ jobs:
       root: app
       command: apply
       environment: production
-      comment: true
     secrets: inherit
     permissions:
       contents: write

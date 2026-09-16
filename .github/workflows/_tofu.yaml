@@ -16,11 +16,6 @@ on:
         description: GitHub Environment that provides GCP OIDC variables
         required: true
         type: string
-      comment:
-        description: Post the OpenTofu plan or apply result with tfcmt.
-        required: false
-        type: boolean
-        default: true
 permissions:
   contents: read
   id-token: write
@@ -35,7 +30,6 @@ jobs:
       TOFU_ROOT: ${{ inputs.root }}
       TOFU_ENVIRONMENT: ${{ inputs.environment }}
       TOFU_COMMAND: ${{ inputs.command }}
-      TOFU_COMMENT: ${{ inputs.comment }}
       TF_VAR_decrypt_secrets: ${{ inputs.root == 'app' }}
       # iac/app uses this during backend state encryption, which is configured
       # before the later `tofu plan -var=...` invocation.
@@ -92,11 +86,7 @@ jobs:
             -var="project_id=${{ vars.GCP_PROJECT_ID }}"
           )
 
-          if [[ "$TOFU_COMMAND" == "plan" && "$TOFU_COMMENT" == "true" ]]; then
-            tfcmt -var "target:${TOFU_ROOT}" plan --patch -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu plan "${plan_args[@]}"
-          else
-            GITHUB_TOKEN="$GH_IAC_TOKEN" tofu plan "${plan_args[@]}"
-          fi
+          tfcmt -var "target:${TOFU_ROOT}" plan --patch -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu plan "${plan_args[@]}"
       - name: Apply
         if: ${{ inputs.command == 'apply' }}
         env:
@@ -106,8 +96,4 @@ jobs:
           GH_IAC_TOKEN: ${{ steps.github-app-token.outputs.token }}
         run: |
           cd "iac/${TOFU_ROOT}"
-          if [[ "$TOFU_COMMENT" == "true" ]]; then
-            tfcmt -var "target:${TOFU_ROOT}" apply -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -auto-approve tfplan
-          else
-            GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -auto-approve tfplan
-          fi
+          tfcmt -var "target:${TOFU_ROOT}" apply -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -auto-approve tfplan

@@ -4,6 +4,12 @@ locals {
   release_app_integration_id = 3404920
 }
 
+# This is GitHub's public App for Actions checks. Unlike private Apps, it can
+# be resolved by an installation token through the public Apps endpoint.
+data "github_app" "github_actions" {
+  slug = "github-actions"
+}
+
 resource "github_repository" "auth" {
   name         = "jobdeck-auth"
   visibility   = "private"
@@ -60,7 +66,7 @@ resource "github_repository_ruleset" "auth_main" {
 
       required_check {
         context        = "check-result"
-        integration_id = 15368
+        integration_id = data.github_app.github_actions.id
       }
     }
   }
