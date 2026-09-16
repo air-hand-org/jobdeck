@@ -1,15 +1,3 @@
-locals {
-  # GitHub's numeric App ID for air-hand-release-app. This ID is the ruleset
-  # Integration actor ID, not its installation ID or client ID.
-  release_app_integration_id = 3404920
-}
-
-# This is GitHub's public App for Actions checks. Unlike private Apps, it can
-# be resolved by an installation token through the public Apps endpoint.
-data "github_app" "github_actions" {
-  slug = "github-actions"
-}
-
 resource "github_repository" "auth" {
   name         = "jobdeck-auth"
   visibility   = "private"
@@ -26,6 +14,9 @@ resource "github_repository" "auth" {
   delete_branch_on_merge      = true
   web_commit_signoff_required = false
 
+  squash_merge_commit_message = "COMMIT_MESSAGES"
+  squash_merge_commit_title   = "COMMIT_OR_PR_TITLE"
+
   lifecycle {
     prevent_destroy = true
 
@@ -34,9 +25,9 @@ resource "github_repository" "auth" {
     # import stable; repository resources created by this root do not use this
     # exception.
     ignore_changes = [
-      allow_auto_merge,
-      allow_squash_merge,
-      delete_branch_on_merge,
+      ignore_vulnerability_alerts_during_read,
+      merge_commit_message,
+      merge_commit_title,
     ]
   }
 }
