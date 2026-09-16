@@ -98,7 +98,7 @@ jobs:
         run: |
           pull_request_number="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/pulls" --paginate --jq '[.[] | select(.merged_at != null)] | first | .number // empty')"
           echo "number=${pull_request_number}" >> "$GITHUB_OUTPUT"
-      - name: Apply
+      - name: Apply and post result
         if: ${{ inputs.command == 'apply' && steps.pull-request.outputs.number != '' }}
         env:
           # tfcmt uses the workflow token to post to the associated PR;
@@ -109,3 +109,10 @@ jobs:
         run: |
           cd "iac/${TOFU_ROOT}"
           tfcmt -var "target:${TOFU_ROOT}" apply -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -auto-approve tfplan
+      - name: Apply without pull request comment
+        if: ${{ inputs.command == 'apply' && steps.pull-request.outputs.number == '' }}
+        env:
+          GITHUB_TOKEN: ${{ steps.github-app-token.outputs.token }}
+        run: |
+          cd "iac/${TOFU_ROOT}"
+          tofu apply -auto-approve tfplan

@@ -28,6 +28,16 @@ resource "github_repository" "auth" {
 
   lifecycle {
     prevent_destroy = true
+
+    # The GitHub provider's import/read path reports these enabled settings as
+    # false, despite GitHub returning true. Keep the existing repository
+    # import stable; repository resources created by this root do not use this
+    # exception.
+    ignore_changes = [
+      allow_auto_merge,
+      allow_squash_merge,
+      delete_branch_on_merge,
+    ]
   }
 }
 
@@ -97,6 +107,13 @@ resource "github_repository_ruleset" "auth_release_tag" {
     update           = true
     deletion         = true
     non_fast_forward = true
+  }
+
+  lifecycle {
+    # Provider v6.13 does not read existing bypass actors during import. The
+    # GitHub ruleset already contains this actor; avoid a perpetual update for
+    # this imported ruleset only.
+    ignore_changes = [bypass_actors]
   }
 
 }
