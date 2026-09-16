@@ -43,14 +43,17 @@ For the current `jobdeck-auth` import, an installation restricted to that
 repository is sufficient. Before this root creates a new repository such as
 `jobdeck-job-api`, change both Apps' organization installations to **All
 repositories**. The workflow intentionally does not name a repository when it
-creates the token, so a new repository is not coupled to workflow source.
+creates the token: the `repositories` input accepts only repositories that
+already exist, so it cannot grant access to a repository created by the same
+OpenTofu run.
 
 Both roots post their plan and apply results through `tfcmt`. Plan results are
-updated on internal pull requests; apply results are posted to the triggering
-commit. The comment and label token is GitHub Actions' scoped `GITHUB_TOKEN`;
-the nested OpenTofu command uses the read-only or write-capable App token from
-the selected Environment. This keeps GitHub comment permission separate from
-GitHub governance permission.
+updated on internal pull requests. For an apply, the workflow finds a merged
+pull request associated with the triggering commit and posts there; it skips
+the comment if none is found. The comment and label token is GitHub Actions'
+scoped `GITHUB_TOKEN`; the nested OpenTofu command uses the read-only or
+write-capable App token from the selected Environment. This keeps GitHub
+comment permission separate from GitHub governance permission.
 
 Repository resources use `prevent_destroy`. Before retiring GCP bootstrap
 infrastructure, move repository state to another root (or intentionally remove

@@ -43,6 +43,9 @@ jobs:
           client-id: ${{ vars.GH_IAC_APP_CLIENT_ID }}
           private-key: ${{ secrets.GH_IAC_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          # Do not set `repositories`: a repository created by this OpenTofu
+          # run does not exist yet and therefore cannot scope the token. Apps
+          # that create repositories must be installed for all repositories.
       - uses: ./.github/actions/setup-tools
       - name: Lint OpenTofu
         run: make tofu-lint
@@ -87,13 +90,22 @@ jobs:
           )
 
           tfcmt -var "target:${TOFU_ROOT}" plan --patch -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu plan "${plan_args[@]}"
-      - name: Apply
+      - name: Find associated pull request
+        id: pull-request
         if: ${{ inputs.command == 'apply' }}
         env:
-          # tfcmt uses the workflow token to post the apply result; OpenTofu
-          # uses the Environment-selected GitHub App token.
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pull_request_number="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/pulls" --paginate --jq '[.[] | select(.merged_at != null)] | first | .number // empty')"
+          echo "number=${pull_request_number}" >> "$GITHUB_OUTPUT"
+      - name: Apply
+        if: ${{ inputs.command == 'apply' && steps.pull-request.outputs.number != '' }}
+        env:
+          # tfcmt uses the workflow token to post to the associated PR;
+          # OpenTofu uses the Environment-selected GitHub App token.
           GITHUB_TOKEN: ${{ github.token }}
           GH_IAC_TOKEN: ${{ steps.github-app-token.outputs.token }}
+          TFCMT_PR_NUMBER: ${{ steps.pull-request.outputs.number }}
         run: |
           cd "iac/${TOFU_ROOT}"
           tfcmt -var "target:${TOFU_ROOT}" apply -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -auto-approve tfplan
