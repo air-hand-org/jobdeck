@@ -24,7 +24,6 @@ resource "github_repository" "job_api" {
 resource "github_branch" "job_api_main" {
   repository    = github_repository.job_api.name
   branch        = "main"
-  source_branch = github_repository.job_api.default_branch
 }
 
 resource "github_branch_default" "job_api_default" {
