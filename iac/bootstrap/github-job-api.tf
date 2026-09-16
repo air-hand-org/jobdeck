@@ -8,11 +8,13 @@ resource "github_repository" "job_api" {
   has_discussions             = false
   allow_merge_commit          = false
   allow_squash_merge          = true
-  allow_rebase_merge          = false
+  allow_rebase_merge          = true // TODO: allow rebase for git filter-repo migration
   allow_auto_merge            = true
   allow_update_branch         = false
   delete_branch_on_merge      = true
   web_commit_signoff_required = false
+
+  auto_init = true
 
   lifecycle {
     prevent_destroy = true
@@ -20,8 +22,9 @@ resource "github_repository" "job_api" {
 }
 
 resource "github_branch" "job_api_main" {
-  repository = github_repository.job_api.name
-  branch     = "main"
+  repository    = github_repository.job_api.name
+  branch        = "main"
+  source_branch = github_repository.job_api.default_branch
 }
 
 resource "github_branch_default" "job_api_default" {
@@ -55,7 +58,7 @@ resource "github_repository_ruleset" "job_api_main" {
       # GitHub's "require additional approval for un-attributed changes"
       # setting is enabled on this ruleset, but provider v6.13 does not expose
       # it. It remains configured in GitHub until the provider supports it.
-      allowed_merge_methods = ["squash"]
+      allowed_merge_methods = ["merge", "squash", "rebase"]
     }
 
     required_status_checks {
