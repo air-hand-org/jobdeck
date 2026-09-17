@@ -98,3 +98,8 @@ resource "github_repository_ruleset" "actions_release_tag" {
     non_fast_forward = true
   }
 }
+
+resource "github_actions_repository_access_level" "actions" {
+  repository   = github_repository.actions.name
+  access_level = "organization"
+}
