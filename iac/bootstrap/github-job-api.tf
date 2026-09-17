@@ -8,7 +8,7 @@ resource "github_repository" "job_api" {
   has_discussions             = false
   allow_merge_commit          = false
   allow_squash_merge          = true
-  allow_rebase_merge          = true // TODO: allow rebase for git filter-repo migration
+  allow_rebase_merge          = false
   allow_auto_merge            = true
   allow_update_branch         = false
   delete_branch_on_merge      = true
