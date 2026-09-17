@@ -21,6 +21,7 @@ var production = new DeserializerBuilder()
         Path.Combine(repoRoot, "environments", "production.yaml")
     ));
 var authImageTag = $"v{production.Images["auth"].Version}";
+var jobApiImageTag = $"v{production.Images["job-api"].Version}";
 
 var workerClientId = "job-worker";
 
@@ -65,7 +66,10 @@ var authGrpcEndpoint = new AuthBuilder(
 var jobApiGrpcEndpoint = new JobAPIBuilder(
         builder: builder,
         postgres: postgres,
-        jobWorkerTopic: pubsubWorkerTopic.Topic
+        jobWorkerTopic: pubsubWorkerTopic.Topic,
+        imageTag: jobApiImageTag,
+        repoRoot: repoRoot,
+        useLocal: useLocal
     ).Build(
         port: 9090,
         isDebug: IS_DEBUG,

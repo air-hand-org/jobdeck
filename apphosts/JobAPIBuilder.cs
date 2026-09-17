@@ -11,14 +11,19 @@ public sealed class JobAPIBuilder(
     IDistributedApplicationBuilder builder
     , IResourceBuilder<PostgresServerResource> postgres
     , PubSubTopicResource jobWorkerTopic
+    , string imageTag
+    , string repoRoot
+    , bool useLocal
 )
 {
+    private readonly string? localAppDirectory = GetLocalAppDirectory(repoRoot, useLocal);
+
     public EndpointReference Build(int port, bool isDebug, string grpcReflectionFlag, string apiAuthMode)
     {
         var db = postgres.AddDatabase("jobdeck");
-        var migrator = DBMigration(db);
-        var republisher = RepublishOutbox(db, migrator);
-        var backend = Backend(isDebug, grpcReflectionFlag, apiAuthMode, db, migrator, republisher, jobWorkerTopic);
+        var backend = localAppDirectory is null
+            ? ContainerBackend(grpcReflectionFlag, apiAuthMode, db, jobWorkerTopic)
+            : LocalBackend(isDebug, grpcReflectionFlag, apiAuthMode, db, jobWorkerTopic);
         return ReverseProxy(port, backend);
     }
 
@@ -41,45 +46,62 @@ public sealed class JobAPIBuilder(
             .GetEndpoint("https");
     }
 
-    private EndpointReference Backend(
+    private EndpointReference ContainerBackend(
+        string grpcReflectionFlag,
+        string apiAuthMode,
+        IResourceBuilder<PostgresDatabaseResource> db,
+        PubSubTopicResource workerTopic
+    )
+    {
+        var authJwtPublicKey = builder.AddParameter("auth-jwt-public-key", secret: false);
+        return ConfigureBackend(builder.AddContainer(
+            name: "job-api",
+            image: "ghcr.io/air-hand-org/jobdeck-job-api",
+            tag: imageTag
+        )
+        .WithHttpEndpoint(
+            name: "grpc-backend",
+            targetPort: 9090
+        )
+        .AsHttp2Service(),
+        db,
+        workerTopic,
+        grpcReflectionFlag,
+        apiAuthMode,
+        authJwtPublicKey
+        ).GetEndpoint("grpc-backend");
+    }
+
+    private EndpointReference LocalBackend(
         bool isDebug,
         string grpcReflectionFlag,
         string apiAuthMode,
         IResourceBuilder<PostgresDatabaseResource> db,
-        IResourceBuilder<ExecutableResource> dbMigrator,
-        IResourceBuilder<ExecutableResource> republisher,
         PubSubTopicResource workerTopic
     )
     {
-        // TODO: get pubkey from auth-service
+        var migrator = DBMigration(db);
+        var republisher = RepublishOutbox(db, migrator);
         var authJwtPublicKey = builder.AddParameter("auth-jwt-public-key", secret: false);
-        var backend = builder.AddGoApp(
+        var backend = ConfigureBackend(builder.AddGoApp(
             name: "job-api",
-            appDirectory: "../services/job-api",
+            appDirectory: localAppDirectory!,
             packagePath: "./cmd/server"
         )
         .WithHttpEndpoint(
             name: "grpc-backend",
             env: "GRPC_PORT"
         )
-        .AsHttp2Service()
-        .WithReference(db)
-        .WithReference(workerTopic.PubsubEndpoint)
-        .WithEnvironment(context =>
-        {
-            context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
-            context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = grpcReflectionFlag;
-            context.EnvironmentVariables["AUTH_JWT_PUBLIC_KEY"] = authJwtPublicKey;
-            context.EnvironmentVariables["API_AUTH_MODE"] = apiAuthMode;
-            context.EnvironmentVariables["PUBSUB_EMULATOR_HOST"] = workerTopic.PubsubEndpoint.Property(EndpointProperty.HostAndPort);
-            context.EnvironmentVariables["PUBSUB_PROJECT_ID"] = workerTopic.ProjectID;
-            context.EnvironmentVariables["PUBSUB_WORKER_TOPIC_ID"] = workerTopic.TopicID;
-        })
-        .WaitFor(db)
-        .WaitForCompletion(dbMigrator)
-        .WaitForCompletion(republisher)
-        .WaitForCompletion(workerTopic.Creator)
-        ;
+        .AsHttp2Service(),
+        db,
+        workerTopic,
+        grpcReflectionFlag,
+        apiAuthMode,
+        authJwtPublicKey
+        )
+        .WithEnvironment("GOWORK", "off")
+        .WaitForCompletion(migrator)
+        .WaitForCompletion(republisher);
 
         if (isDebug)
         {
@@ -99,10 +121,11 @@ public sealed class JobAPIBuilder(
     {
         return builder.AddGoApp(
             name: "job-db-migrator",
-            appDirectory: "../services/job-api",
+            appDirectory: localAppDirectory!,
             packagePath: "./cmd/migrator"
           )
           .WithReference(db)
+          .WithEnvironment("GOWORK", "off")
           .WithEnvironment(context =>
           {
               context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
@@ -114,15 +137,62 @@ public sealed class JobAPIBuilder(
     {
         return builder.AddGoApp(
                 name: "job-outbox-republisher",
-                appDirectory: "../services/job-api",
+                appDirectory: localAppDirectory!,
                 packagePath: "./cmd/republish"
             )
             .WithReference(db)
+            .WithEnvironment("GOWORK", "off")
             .WithEnvironment(context =>
             {
                 context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
             })
             .WaitForCompletion(migrator)
         ;
+    }
+
+    private IResourceBuilder<T> ConfigureBackend<T>(
+        IResourceBuilder<T> backend,
+        IResourceBuilder<PostgresDatabaseResource> db,
+        PubSubTopicResource workerTopic,
+        string grpcReflectionFlag,
+        string apiAuthMode,
+        IResourceBuilder<ParameterResource> authJwtPublicKey
+    ) where T : IResource, IResourceWithEnvironment, IResourceWithWaitSupport
+    {
+        return backend
+            .WithReference(db)
+            .WithReference(workerTopic.PubsubEndpoint)
+            .WithEnvironment(context =>
+            {
+                context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
+                context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = grpcReflectionFlag;
+                context.EnvironmentVariables["AUTH_JWT_PUBLIC_KEY"] = authJwtPublicKey;
+                context.EnvironmentVariables["API_AUTH_MODE"] = apiAuthMode;
+                context.EnvironmentVariables["PUBSUB_EMULATOR_HOST"] = workerTopic.PubsubEndpoint.Property(EndpointProperty.HostAndPort);
+                context.EnvironmentVariables["PUBSUB_PROJECT_ID"] = workerTopic.ProjectID;
+                context.EnvironmentVariables["PUBSUB_WORKER_TOPIC_ID"] = workerTopic.TopicID;
+            })
+            .WaitFor(db)
+            .WaitForCompletion(workerTopic.Creator);
+    }
+
+    private static string? GetLocalAppDirectory(string repoRoot, bool useLocal)
+    {
+        if (!useLocal)
+        {
+            return null;
+        }
+        var path = Path.Combine(repoRoot, "services", "job-api");
+        if (!Directory.Exists(path))
+        {
+            return null;
+        }
+        if (!File.Exists(Path.Combine(path, "go.mod")))
+        {
+            throw new InvalidOperationException(
+                $"The local job-api checkout at '{path}' does not contain a go.mod file."
+            );
+        }
+        return path;
     }
 }
