@@ -55,14 +55,6 @@ jobs:
               context: containers/forward-proxy
               file: containers/forward-proxy/Dockerfile
               push: false
-          - name: Build job-api image
-            uses: docker/build-push-action@v7
-            with:
-              context: .
-              file: containers/job-api/Dockerfile
-              push: false
-              secrets: |
-                github_contents_token=${{ steps.app-token.outputs.token }}
       - parallel:
           - name: Build job-worker image
             uses: docker/build-push-action@v7
@@ -146,15 +138,6 @@ jobs:
               file: containers/forward-proxy/Dockerfile
               push: true
               tags: ${{ steps.images.outputs.registry }}/jobdeck-forward-proxy/forward-proxy:v${{ fromJSON(steps.images.outputs.versions)['forward-proxy'].version }}
-          - name: Build and push job-api image
-            uses: docker/build-push-action@v7
-            with:
-              context: .
-              file: containers/job-api/Dockerfile
-              push: true
-              tags: ${{ steps.images.outputs.registry }}/jobdeck-job-api/job-api:v${{ fromJSON(steps.images.outputs.versions)['job-api'].version }}
-              secrets: |
-                github_contents_token=${{ steps.app-token.outputs.token }}
       - name: Build and push job-worker image
         uses: docker/build-push-action@v7
         with:

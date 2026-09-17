@@ -9,6 +9,7 @@ playwright-traces
 # Optional local checkout used by the Aspire AppHost for debugging.
 /api
 services/auth/
+services/job-api/
 
 # OpenTofu local working files. Remote state is stored in GCS.
 **/.terraform/
