@@ -7,7 +7,7 @@ images:
   demo:
     version: 1.1.3
   job-api:
-    version: 1.1.3
+    version: 1.1.4
   job-worker:
     version: 1.1.3
   forward-proxy:
