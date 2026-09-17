@@ -99,14 +99,6 @@ resource "github_repository_ruleset" "auth_release_tag" {
     deletion         = true
     non_fast_forward = true
   }
-
-  lifecycle {
-    # Provider v6.13 does not read existing bypass actors during import. The
-    # GitHub ruleset already contains this actor; avoid a perpetual update for
-    # this imported ruleset only.
-    ignore_changes = [bypass_actors]
-  }
-
 }
 
 resource "github_repository_environment" "auth_production" {
