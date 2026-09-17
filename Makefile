@@ -6,12 +6,8 @@ include ./mkfiles/*.mk
 setup:
 	@aqua i && mise i
 
-.PHONY: generate
-generate:
-	@sqlc generate
-
 .PHONY: build
-build: generate go-build cs-build
+build: go-build cs-build
 
 .PHONY: fmt
 fmt: go-fmt cs-fmt tofu-fmt
