@@ -20,7 +20,6 @@ public sealed class AppFixture : IAsyncLifetime
         "forward-proxy",
         "job-api",
         "job-api-tls",
-        "job-db-migrator",
         "job-worker",
         "postgres",
         "pubsub",
