@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.2.0](https://github.com/air-hand-org/jobdeck/compare/v1.1.3...v1.2.0) (2026-09-18)
+
+
+### Features
+
+* add auth proxy image promotion ([#125](https://github.com/air-hand-org/jobdeck/issues/125)) ([6ef018c](https://github.com/air-hand-org/jobdeck/commit/6ef018c2e6c76e55f599df0682476d739488e4f8))
+* create actions repo ([#121](https://github.com/air-hand-org/jobdeck/issues/121)) ([4987981](https://github.com/air-hand-org/jobdeck/commit/4987981ffcccafb24fbbddc4adf61a2f6e4b4426))
+* **iac:** import auth GitHub governance ([#118](https://github.com/air-hand-org/jobdeck/issues/118)) ([19ebc80](https://github.com/air-hand-org/jobdeck/commit/19ebc80d4fa04c17fbf997112d59e16caa91e21f))
+
+
+### Bug Fixes
+
+* **iac:** setup job-api repo ([#120](https://github.com/air-hand-org/jobdeck/issues/120)) ([3ed4f4f](https://github.com/air-hand-org/jobdeck/commit/3ed4f4f2ed873febcc9fedeba893459839941343))
+* **images:** promote auth, auth-proxy to v1.2.0 ([#127](https://github.com/air-hand-org/jobdeck/issues/127)) ([95a3485](https://github.com/air-hand-org/jobdeck/commit/95a3485b054b873f7d7524337d498a3747e1f62b))
+* **job-api:** promote image to v1.1.4 ([#122](https://github.com/air-hand-org/jobdeck/issues/122)) ([2f8550e](https://github.com/air-hand-org/jobdeck/commit/2f8550e1786dda9962b340407882360e26c919ab))
+* read image promotion dispatch payload ([#126](https://github.com/air-hand-org/jobdeck/issues/126)) ([79781a7](https://github.com/air-hand-org/jobdeck/commit/79781a72f92e565610ad02e97adf77ccf4c1d7da))
+* split job-api ([#123](https://github.com/air-hand-org/jobdeck/issues/123)) ([480ab73](https://github.com/air-hand-org/jobdeck/commit/480ab733d146aca5afe08faae6fd23187aec95e2))
+
 ## [1.1.3](https://github.com/air-hand-org/jobdeck/compare/v1.1.2...v1.1.3) (2026-09-15)
 
 
