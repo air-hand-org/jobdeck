@@ -5,12 +5,12 @@ images:
   auth-proxy:
     version: 1.2.0
   ui:
-    version: 1.2.1
+    version: 1.2.2
   demo:
-    version: 1.2.1
+    version: 1.2.2
   job-api:
     version: 1.1.4
   job-worker:
-    version: 1.2.1
+    version: 1.2.2
   forward-proxy:
-    version: 1.2.1
+    version: 1.2.2
