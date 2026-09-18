@@ -8,10 +8,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.client_payload.service }}
-  cancel-in-progress: false
-
 jobs:
   promote:
     runs-on: ubuntu-latest
@@ -29,48 +25,44 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: ./.github/actions/setup-tools
+      - uses: air-hand-org/jobdeck-actions/actions/setup-tools@v1.2.0
 
-      - name: Update the managed service image version
+      - name: Validate the dispatched image promotion
+        id: payload
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const normalize = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/normalize-image-promotion-payload.js`);
+            const outputs = normalize(context.payload);
+            for (const [name, value] of Object.entries(outputs)) {
+              core.setOutput(name, value);
+            }
+
+      - name: Update the managed service image versions
         id: image
         run: |
-          if [[ ! "$SERVICE" =~ ^[a-z0-9][a-z0-9-]*$ ]]; then
-            echo "Invalid service name: $SERVICE" >&2
-            exit 1
-          fi
-
-          if [[ ! "$TAG" =~ ^v[0-9]+(\.[0-9]+){2}([-.][0-9A-Za-z.-]+)?$ ]]; then
-            echo "Image tag must be a v-prefixed semantic version: $TAG" >&2
-            exit 1
-          fi
-
-          if ! yq -e '.images | has(strenv(SERVICE))' environments/production.yaml >/dev/null; then
-            echo "Service is not managed in environments/production.yaml: $SERVICE" >&2
-            exit 1
-          fi
-
-          version="${TAG#v}"
-          export VERSION="$version"
-          yq -i '.images[strenv(SERVICE)].version = strenv(VERSION)' \
-            environments/production.yaml
-          {
-            echo "service=$SERVICE"
-            echo "tag=$TAG"
-            echo "version=$version"
-          } >> "$GITHUB_OUTPUT"
+          while IFS= read -r service; do
+            export SERVICE="$service"
+            if ! yq -e '.images | has(strenv(SERVICE))' environments/production.yaml >/dev/null; then
+              echo "Service is not managed in environments/production.yaml: $SERVICE" >&2
+              exit 1
+            fi
+            yq -i '.images[strenv(SERVICE)].version = strenv(VERSION)' \
+              environments/production.yaml
+          done < <(jq -r '.[]' <<< "$SERVICES")
         env:
-          SERVICE: ${{ github.event.client_payload.service }}
-          TAG: ${{ github.event.client_payload.tag }}
+          SERVICES: ${{ steps.payload.outputs.services }}
+          VERSION: ${{ steps.payload.outputs.version }}
 
       - name: Create or update promotion PR
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ steps.app-token.outputs.token }}
-          branch: image-promotion/${{ steps.image.outputs.service }}-${{ steps.image.outputs.version }}
+          branch: image-promotion/${{ steps.payload.outputs.serviceSlug }}-${{ steps.payload.outputs.version }}
           delete-branch: true
-          commit-message: "fix(${{ steps.image.outputs.service }}): promote image to ${{ steps.image.outputs.tag }}"
-          title: "fix(${{ steps.image.outputs.service }}): promote image to ${{ steps.image.outputs.tag }}"
+          commit-message: "fix(images): promote ${{ steps.payload.outputs.serviceNames }} to ${{ steps.payload.outputs.tag }}"
+          title: "fix(images): promote ${{ steps.payload.outputs.serviceNames }} to ${{ steps.payload.outputs.tag }}"
           body: |
-            Updates the managed `${{ steps.image.outputs.service }}` image to `${{ steps.image.outputs.tag }}`.
+            Updates the managed `${{ steps.payload.outputs.serviceNames }}` images to `${{ steps.payload.outputs.tag }}`.
 
             Source release: ${{ github.event.client_payload.release_url }}

@@ -47,6 +47,14 @@ resource "google_artifact_registry_repository_iam_member" "auth_publisher" {
   member     = "serviceAccount:${google_service_account.auth_publisher.email}"
 }
 
+resource "google_artifact_registry_repository_iam_member" "auth_proxy_publisher" {
+  project    = var.project_id
+  location   = google_artifact_registry_repository.service["auth_proxy"].location
+  repository = google_artifact_registry_repository.service["auth_proxy"].repository_id
+  role       = "roles/artifactregistry.writer"
+  member     = "serviceAccount:${google_service_account.auth_publisher.email}"
+}
+
 resource "google_service_account_iam_member" "auth_publisher_wif" {
   service_account_id = google_service_account.auth_publisher.name
   role               = "roles/iam.workloadIdentityUser"
