@@ -21,7 +21,7 @@ check-clean:
 	@test -z "$$(git status --porcelain)"
 
 .PHONY: test
-test: go-test cs-test node-test
+test: node-test go-test cs-test
 
 .PHONY: node-test
 node-test:
