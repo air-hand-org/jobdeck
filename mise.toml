@@ -2,6 +2,7 @@
 dotnet = "10.0"
 go = "1.26.4"
 grpcurl = "1.9.3"
+node = "24"
 watchexec = "2.5.1"
 
 powershell = '7.5.0'

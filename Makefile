@@ -21,4 +21,8 @@ check-clean:
 	@test -z "$$(git status --porcelain)"
 
 .PHONY: test
-test: go-test cs-test
+test: go-test cs-test node-test
+
+.PHONY: node-test
+node-test:
+	@node .github/scripts/normalize-image-promotion-payload.test.js
