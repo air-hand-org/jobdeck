@@ -33,7 +33,7 @@ jobs:
         with:
           script: |
             const normalize = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/normalize-image-promotion-payload.js`);
-            const outputs = normalize(context.payload);
+            const outputs = normalize(context.payload.client_payload);
             for (const [name, value] of Object.entries(outputs)) {
               core.setOutput(name, value);
             }

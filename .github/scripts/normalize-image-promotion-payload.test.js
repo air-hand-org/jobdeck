@@ -2,8 +2,12 @@ const assert = require('node:assert/strict');
 
 const normalize = require('./normalize-image-promotion-payload.js');
 
+const repositoryDispatchEvent = {
+  client_payload: { services: ['auth', 'auth-proxy'], tag: 'v1.2.3' },
+};
+
 assert.deepEqual(
-  normalize({ services: ['auth', 'auth-proxy'], tag: 'v1.2.3' }),
+  normalize(repositoryDispatchEvent.client_payload),
   {
     services: '["auth","auth-proxy"]',
     serviceNames: 'auth, auth-proxy',
