@@ -117,19 +117,57 @@ resource "google_cloud_run_v2_service" "auth" {
       }
     }
 
+    # Cloud Run sends traffic to the first container. Envoy terminates the
+    # Cloud Run TLS connection and dispatches HTTP JWKS or h2c gRPC locally.
+    containers {
+      name       = "auth-proxy"
+      image      = local.images.auth_proxy
+      depends_on = ["auth"]
+
+      ports {
+        container_port = 8080
+        name           = "http"
+      }
+
+      env {
+        name  = "PROXY_PORT"
+        value = "8080"
+      }
+
+      env {
+        name  = "AUTH_GRPC_HOST"
+        value = "127.0.0.1"
+      }
+
+      env {
+        name  = "AUTH_GRPC_PORT"
+        value = "9091"
+      }
+
+      env {
+        name  = "AUTH_JWKS_HOST"
+        value = "127.0.0.1"
+      }
+
+      env {
+        name  = "AUTH_JWKS_PORT"
+        value = "8081"
+      }
+    }
+
     containers {
       name       = "auth"
       image      = local.images.auth
       depends_on = ["postgres"]
 
-      ports {
-        container_port = 9091
-        name           = "h2c"
-      }
-
       env {
         name  = "GRPC_PORT"
         value = "9091"
+      }
+
+      env {
+        name  = "HTTP_PORT"
+        value = "8081"
       }
 
       env {
@@ -308,13 +346,8 @@ resource "google_cloud_run_v2_service" "job_api" {
       }
 
       env {
-        name = "AUTH_JWT_PUBLIC_KEY"
-        value_source {
-          secret_key_ref {
-            secret  = local.application_secrets["auth-jwt-public-key"]
-            version = "latest"
-          }
-        }
+        name  = "AUTH_JWKS_URL"
+        value = "${google_cloud_run_v2_service.auth.uri}/.well-known/jwks.json"
       }
 
       startup_probe {
