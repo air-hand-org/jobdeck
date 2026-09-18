@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/air-hand-org/jobdeck/compare/v1.2.1...v1.2.2) (2026-09-18)
+
+
+### Bug Fixes
+
+* h2c port ([#131](https://github.com/air-hand-org/jobdeck/issues/131)) ([6b2aaf0](https://github.com/air-hand-org/jobdeck/commit/6b2aaf08a363ebaea639f8e5610ddc996405b1d1))
+
 ## [1.2.1](https://github.com/air-hand-org/jobdeck/compare/v1.2.0...v1.2.1) (2026-09-18)
 
 
