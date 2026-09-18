@@ -8,10 +8,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.client_payload.service }}
-  cancel-in-progress: false
-
 jobs:
   promote:
     runs-on: ubuntu-latest
@@ -31,11 +27,30 @@ jobs:
 
       - uses: ./.github/actions/setup-tools
 
-      - name: Update the managed service image version
+      - name: Normalize the dispatched services
+        id: payload
+        run: |
+          services="$(jq -ce '
+            if (.services | type?) == "array" then .services
+            elif (.service | type?) == "string" then [.service]
+            else error("Expected services array or service string.")
+            end
+          ' <<< "$PAYLOAD")"
+          echo "services=$services" >> "$GITHUB_OUTPUT"
+        env:
+          PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+
+      - name: Update the managed service image versions
         id: image
         run: |
-          if [[ ! "$SERVICE" =~ ^[a-z0-9][a-z0-9-]*$ ]]; then
-            echo "Invalid service name: $SERVICE" >&2
+          if ! jq -e 'type == "array" and length > 0 and all(.[]; type == "string" and test("^[a-z0-9][a-z0-9-]*$"))' \
+              <<< "$SERVICES" >/dev/null; then
+            echo "Services must be a non-empty array of valid service names." >&2
+            exit 1
+          fi
+
+          if [[ "$(jq 'length' <<< "$SERVICES")" != "$(jq 'unique | length' <<< "$SERVICES")" ]]; then
+            echo "Services must not contain duplicates." >&2
             exit 1
           fi
 
@@ -44,33 +59,37 @@ jobs:
             exit 1
           fi
 
-          if ! yq -e '.images | has(strenv(SERVICE))' environments/production.yaml >/dev/null; then
-            echo "Service is not managed in environments/production.yaml: $SERVICE" >&2
-            exit 1
-          fi
-
           version="${TAG#v}"
           export VERSION="$version"
-          yq -i '.images[strenv(SERVICE)].version = strenv(VERSION)' \
-            environments/production.yaml
+          while IFS= read -r service; do
+            export SERVICE="$service"
+            if ! yq -e '.images | has(strenv(SERVICE))' environments/production.yaml >/dev/null; then
+              echo "Service is not managed in environments/production.yaml: $SERVICE" >&2
+              exit 1
+            fi
+            yq -i '.images[strenv(SERVICE)].version = strenv(VERSION)' \
+              environments/production.yaml
+          done < <(jq -r '.[]' <<< "$SERVICES")
+
           {
-            echo "service=$SERVICE"
+            echo "services=$(jq -r 'join(", ")' <<< "$SERVICES")"
+            echo "service_slug=$(jq -r 'join("-")' <<< "$SERVICES")"
             echo "tag=$TAG"
             echo "version=$version"
           } >> "$GITHUB_OUTPUT"
         env:
-          SERVICE: ${{ github.event.client_payload.service }}
+          SERVICES: ${{ steps.payload.outputs.services }}
           TAG: ${{ github.event.client_payload.tag }}
 
       - name: Create or update promotion PR
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ steps.app-token.outputs.token }}
-          branch: image-promotion/${{ steps.image.outputs.service }}-${{ steps.image.outputs.version }}
+          branch: image-promotion/${{ steps.image.outputs.service_slug }}-${{ steps.image.outputs.version }}
           delete-branch: true
-          commit-message: "fix(${{ steps.image.outputs.service }}): promote image to ${{ steps.image.outputs.tag }}"
-          title: "fix(${{ steps.image.outputs.service }}): promote image to ${{ steps.image.outputs.tag }}"
+          commit-message: "fix(images): promote ${{ steps.image.outputs.services }} to ${{ steps.image.outputs.tag }}"
+          title: "fix(images): promote ${{ steps.image.outputs.services }} to ${{ steps.image.outputs.tag }}"
           body: |
-            Updates the managed `${{ steps.image.outputs.service }}` image to `${{ steps.image.outputs.tag }}`.
+            Updates the managed `${{ steps.image.outputs.services }}` images to `${{ steps.image.outputs.tag }}`.
 
             Source release: ${{ github.event.client_payload.release_url }}
