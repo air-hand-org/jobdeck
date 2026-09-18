@@ -346,8 +346,13 @@ resource "google_cloud_run_v2_service" "job_api" {
       }
 
       env {
-        name  = "AUTH_JWKS_URL"
-        value = "${google_cloud_run_v2_service.auth.uri}/.well-known/jwks.json"
+        name = "AUTH_JWT_PUBLIC_KEY"
+        value_source {
+          secret_key_ref {
+            secret  = local.application_secrets["auth-jwt-public-key"]
+            version = "latest"
+          }
+        }
       }
 
       startup_probe {
