@@ -117,8 +117,8 @@ resource "google_cloud_run_v2_service" "auth" {
       }
     }
 
-    # Cloud Run sends traffic to the first container. Envoy terminates the
-    # Cloud Run TLS connection and dispatches HTTP JWKS or h2c gRPC locally.
+    # Cloud Run sends traffic to the first container.
+    # Envoy dispatches HTTP JWKS or h2c gRPC locally.
     containers {
       name       = "auth-proxy"
       image      = local.images.auth_proxy
@@ -126,7 +126,7 @@ resource "google_cloud_run_v2_service" "auth" {
 
       ports {
         container_port = 8080
-        name           = "http"
+        name           = "h2c"
       }
 
       env {
