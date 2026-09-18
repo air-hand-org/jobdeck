@@ -77,10 +77,6 @@ public sealed class AppFixture : IAsyncLifetime
         );
 
         Environment.SetEnvironmentVariable(
-            "Parameters__auth-jwt-public-key",
-            "1RwJkXgznrTP267FaSdzXqeC7wxIL10EcmVmAL2qSeU="
-        );
-        Environment.SetEnvironmentVariable(
             "Parameters__auth-jwt-private-key",
             "9y7KNcPRFzIlYFVe4jJu7BFJbdD4b+pkqY4ppx0vwk3VHAmReDOetM/brsVpJ3Nep4LvDEgvXQRyZWYAvapJ5Q=="
         );

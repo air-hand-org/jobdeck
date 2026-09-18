@@ -11,6 +11,7 @@ public sealed class JobAPIBuilder(
     IDistributedApplicationBuilder builder
     , IResourceBuilder<PostgresServerResource> postgres
     , PubSubTopicResource jobWorkerTopic
+    , EndpointReference authJwksEndpoint
     , string imageTag
     , string repoRoot
     , bool useLocal
@@ -53,7 +54,6 @@ public sealed class JobAPIBuilder(
         PubSubTopicResource workerTopic
     )
     {
-        var authJwtPublicKey = builder.AddParameter("auth-jwt-public-key", secret: false);
         return ConfigureBackend(builder.AddContainer(
             name: "job-api",
             image: "ghcr.io/air-hand-org/jobdeck-job-api",
@@ -66,9 +66,9 @@ public sealed class JobAPIBuilder(
         .AsHttp2Service(),
         db,
         workerTopic,
+        authJwksEndpoint,
         grpcReflectionFlag,
-        apiAuthMode,
-        authJwtPublicKey
+        apiAuthMode
         ).GetEndpoint("grpc-backend");
     }
 
@@ -82,7 +82,6 @@ public sealed class JobAPIBuilder(
     {
         var migrator = DBMigration(db);
         var republisher = RepublishOutbox(db, migrator);
-        var authJwtPublicKey = builder.AddParameter("auth-jwt-public-key", secret: false);
         var backend = ConfigureBackend(builder.AddGoApp(
             name: "job-api",
             appDirectory: localAppDirectory!,
@@ -95,9 +94,9 @@ public sealed class JobAPIBuilder(
         .AsHttp2Service(),
         db,
         workerTopic,
+        authJwksEndpoint,
         grpcReflectionFlag,
-        apiAuthMode,
-        authJwtPublicKey
+        apiAuthMode
         )
         .WithEnvironment("GOWORK", "off")
         .WaitForCompletion(migrator)
@@ -154,19 +153,20 @@ public sealed class JobAPIBuilder(
         IResourceBuilder<T> backend,
         IResourceBuilder<PostgresDatabaseResource> db,
         PubSubTopicResource workerTopic,
+        EndpointReference authJwksEndpoint,
         string grpcReflectionFlag,
-        string apiAuthMode,
-        IResourceBuilder<ParameterResource> authJwtPublicKey
+        string apiAuthMode
     ) where T : IResource, IResourceWithEnvironment, IResourceWithWaitSupport
     {
         return backend
             .WithReference(db)
             .WithReference(workerTopic.PubsubEndpoint)
+            .WithReference(authJwksEndpoint)
             .WithEnvironment(context =>
             {
                 context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
                 context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = grpcReflectionFlag;
-                context.EnvironmentVariables["AUTH_JWT_PUBLIC_KEY"] = authJwtPublicKey;
+                context.EnvironmentVariables["AUTH_JWKS_URL"] = authJwksEndpoint.Property(EndpointProperty.Url);
                 context.EnvironmentVariables["API_AUTH_MODE"] = apiAuthMode;
                 context.EnvironmentVariables["PUBSUB_EMULATOR_HOST"] = workerTopic.PubsubEndpoint.Property(EndpointProperty.HostAndPort);
                 context.EnvironmentVariables["PUBSUB_PROJECT_ID"] = workerTopic.ProjectID;

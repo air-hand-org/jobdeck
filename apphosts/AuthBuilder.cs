@@ -7,6 +7,11 @@ using Aspire.Hosting.Yarp;
 
 namespace apphosts;
 
+public sealed record AuthEndpoints(
+    EndpointReference Grpc,
+    EndpointReference Jwks
+);
+
 public sealed class AuthBuilder(
     IDistributedApplicationBuilder builder
     , IResourceBuilder<PostgresServerResource> postgres
@@ -18,16 +23,17 @@ public sealed class AuthBuilder(
 {
     private readonly string? localAppDirectory = GetLocalAppDirectory(repoRoot, useLocal);
 
-    public EndpointReference Build(int port, bool isDebug, string grpcReflectionFlag)
+    public AuthEndpoints Build(int port, bool isDebug, string grpcReflectionFlag)
     {
         var authDB = postgres.AddDatabase("jobdeck-auth");
         var backend = localAppDirectory is null
             ? ContainerBackend(grpcReflectionFlag, authDB)
             : LocalBackend(isDebug, grpcReflectionFlag, authDB);
-        return ReverseProxy(port, backend);
+        var proxy = ReverseProxy(port, backend);
+        return new AuthEndpoints(Grpc: proxy, Jwks: proxy);
     }
 
-    private EndpointReference ReverseProxy(int port, EndpointReference backend)
+    private EndpointReference ReverseProxy(int port, BackendEndpoints backend)
     {
         return builder.AddYarp("auth-tls")
             .WithHostHttpsPort(port)
@@ -35,18 +41,21 @@ public sealed class AuthBuilder(
             .WithEnvironment("REVERSEPROXY__CLUSTERS__cluster_auth__HTTPREQUEST__VERSIONPOLICY", HttpVersionPolicy.RequestVersionExact.ToString())
             .WithConfiguration(yarp =>
             {
-                var cluster = yarp.AddCluster(backend)
+                var grpcCluster = yarp.AddCluster(backend.Grpc)
                     .WithForwarderRequestConfig(new()
                     {
                         Version = HttpVersion.Version20,
                         VersionPolicy = HttpVersionPolicy.RequestVersionExact,
                     });
-                yarp.AddRoute(cluster);
+                yarp.AddRoute(grpcCluster).WithOrder(1);
+
+                var jwksCluster = yarp.AddCluster(backend.Jwks);
+                yarp.AddRoute("/.well-known/jwks.json", jwksCluster).WithOrder(0);
             })
             .GetEndpoint("https");
     }
 
-    private EndpointReference ContainerBackend(
+    private BackendEndpoints ContainerBackend(
         string grpcReflectionFlag,
         IResourceBuilder<PostgresDatabaseResource> authDB
     )
@@ -55,7 +64,7 @@ public sealed class AuthBuilder(
         var authJwtKeyID = builder.AddParameter("auth-jwt-key-id");
         var workerClientSecretHash = builder.AddParameter("job-worker-client-secret-hash", secret: true);
         var testUserSecretHash = builder.AddParameter("test-user-client-secret-hash", secret: true);
-        return ConfigureBackend(builder.AddContainer(
+        var backend = ConfigureBackend(builder.AddContainer(
             name: "auth",
             image: "ghcr.io/air-hand-org/jobdeck-auth",
             tag: imageTag
@@ -64,6 +73,10 @@ public sealed class AuthBuilder(
             name: "grpc-backend",
             targetPort: 9091
         )
+        .WithHttpEndpoint(
+            name: "jwks",
+            targetPort: 8080
+        )
         .AsHttp2Service()
         , authDB,
         grpcReflectionFlag,
@@ -71,10 +84,14 @@ public sealed class AuthBuilder(
         authJwtKeyID,
         workerClientSecretHash,
         testUserSecretHash
-        ).GetEndpoint("grpc-backend");
+        );
+        return new BackendEndpoints(
+            Grpc: backend.GetEndpoint("grpc-backend"),
+            Jwks: backend.GetEndpoint("jwks")
+        );
     }
 
-    private EndpointReference LocalBackend(
+    private BackendEndpoints LocalBackend(
         bool isDebug,
         string grpcReflectionFlag,
         IResourceBuilder<PostgresDatabaseResource> authDB
@@ -109,6 +126,10 @@ public sealed class AuthBuilder(
             name: "grpc-backend",
             env: "GRPC_PORT"
         )
+        .WithHttpEndpoint(
+            name: "jwks",
+            env: "HTTP_PORT"
+        )
         .AsHttp2Service(),
         authDB,
         grpcReflectionFlag,
@@ -129,7 +150,10 @@ public sealed class AuthBuilder(
                 OnlySameUser = false
             });
         }
-        return backend.GetEndpoint("grpc-backend");
+        return new BackendEndpoints(
+            Grpc: backend.GetEndpoint("grpc-backend"),
+            Jwks: backend.GetEndpoint("jwks")
+        );
     }
 
     private IResourceBuilder<T> ConfigureBackend<T>(
@@ -176,4 +200,6 @@ public sealed class AuthBuilder(
         }
         return path;
     }
+
+    private sealed record BackendEndpoints(EndpointReference Grpc, EndpointReference Jwks);
 }
