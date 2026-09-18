@@ -55,7 +55,7 @@ jobs:
           VERSION: ${{ steps.payload.outputs.version }}
 
       - name: Create or update promotion PR
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ steps.app-token.outputs.token }}
           branch: image-promotion/${{ steps.payload.outputs.serviceSlug }}-${{ steps.payload.outputs.version }}
