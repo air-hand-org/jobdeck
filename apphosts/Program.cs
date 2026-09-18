@@ -49,7 +49,7 @@ var pubsubBuilder = new PubSubBuilder(builder);
 var pubsub = pubsubBuilder.PubSub();
 var pubsubWorkerTopic = pubsub.Topic("job-worker-topic");
 
-var authGrpcEndpoint = new AuthBuilder(
+var authEndpoints = new AuthBuilder(
     builder,
     postgres,
     workerClientId,
@@ -62,11 +62,13 @@ var authGrpcEndpoint = new AuthBuilder(
         isDebug: IS_DEBUG,
         grpcReflectionFlag: enableGrpcReflection
     );
+var authGrpcEndpoint = authEndpoints.Grpc;
 
 var jobApiGrpcEndpoint = new JobAPIBuilder(
         builder: builder,
         postgres: postgres,
         jobWorkerTopic: pubsubWorkerTopic.Topic,
+        authJwksEndpoint: authEndpoints.Jwks,
         imageTag: jobApiImageTag,
         repoRoot: repoRoot,
         useLocal: useLocal
