@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/air-hand-org/jobdeck/compare/v1.2.0...v1.2.1) (2026-09-18)
+
+
+### Bug Fixes
+
+* app apply ([#129](https://github.com/air-hand-org/jobdeck/issues/129)) ([487e875](https://github.com/air-hand-org/jobdeck/commit/487e875ab16aacf49f62d64b9df80d29770294e9))
+
 ## [1.2.0](https://github.com/air-hand-org/jobdeck/compare/v1.1.3...v1.2.0) (2026-09-18)
 
 
