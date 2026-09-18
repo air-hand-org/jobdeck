@@ -72,6 +72,8 @@ jobs:
         run: make go-test
       - name: C# test
         run: make cs-test
+      - name: Test image promotion payload normalization
+        run: node .github/scripts/normalize-image-promotion-payload.test.js
       - name: upload Playwright traces
         if: ${{ failure() }}
         uses: actions/upload-artifact@v7
