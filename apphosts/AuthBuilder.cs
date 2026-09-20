@@ -92,6 +92,8 @@ public sealed class AuthBuilder(
             image: "ghcr.io/air-hand-org/jobdeck-auth",
             tag: imageTag
         )
+        .WithEnvironment("GRPC_PORT", "9091")
+        .WithEnvironment("HTTP_PORT", "8081")
         .WithHttpEndpoint(
             name: "grpc-backend",
             targetPort: 9091

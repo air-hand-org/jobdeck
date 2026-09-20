@@ -14,6 +14,7 @@ public sealed class AppFixture : IAsyncLifetime
     private static readonly string[] ResourceLogNames =
     [
         "auth",
+        "auth-proxy",
         "auth-tls",
         "demo",
         "demo-backend",
