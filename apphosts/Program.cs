@@ -21,6 +21,7 @@ var production = new DeserializerBuilder()
         Path.Combine(repoRoot, "environments", "production.yaml")
     ));
 var authImageTag = $"v{production.Images["auth"].Version}";
+var authProxyImageTag = $"v{production.Images["auth-proxy"].Version}";
 var jobApiImageTag = $"v{production.Images["job-api"].Version}";
 
 var workerClientId = "job-worker";
@@ -54,6 +55,7 @@ var authEndpoints = new AuthBuilder(
     postgres,
     workerClientId,
     authImageTag,
+    authProxyImageTag,
     repoRoot,
     useLocal
 )
@@ -68,7 +70,7 @@ var jobApiGrpcEndpoint = new JobAPIBuilder(
         builder: builder,
         postgres: postgres,
         jobWorkerTopic: pubsubWorkerTopic.Topic,
-        authJwksEndpoint: authEndpoints.Jwks,
+        authHttpEndpoint: authEndpoints.Http,
         imageTag: jobApiImageTag,
         repoRoot: repoRoot,
         useLocal: useLocal

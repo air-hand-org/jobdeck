@@ -11,7 +11,7 @@ public sealed class JobAPIBuilder(
     IDistributedApplicationBuilder builder
     , IResourceBuilder<PostgresServerResource> postgres
     , PubSubTopicResource jobWorkerTopic
-    , EndpointReference authJwksEndpoint
+    , EndpointReference authHttpEndpoint
     , string imageTag
     , string repoRoot
     , bool useLocal
@@ -66,7 +66,7 @@ public sealed class JobAPIBuilder(
         .AsHttp2Service(),
         db,
         workerTopic,
-        authJwksEndpoint,
+        authHttpEndpoint,
         grpcReflectionFlag,
         apiAuthMode
         ).GetEndpoint("grpc-backend");
@@ -94,7 +94,7 @@ public sealed class JobAPIBuilder(
         .AsHttp2Service(),
         db,
         workerTopic,
-        authJwksEndpoint,
+        authHttpEndpoint,
         grpcReflectionFlag,
         apiAuthMode
         )
@@ -153,7 +153,7 @@ public sealed class JobAPIBuilder(
         IResourceBuilder<T> backend,
         IResourceBuilder<PostgresDatabaseResource> db,
         PubSubTopicResource workerTopic,
-        EndpointReference authJwksEndpoint,
+        EndpointReference authHttpEndpoint,
         string grpcReflectionFlag,
         string apiAuthMode
     ) where T : IResource, IResourceWithEnvironment, IResourceWithWaitSupport
@@ -161,12 +161,12 @@ public sealed class JobAPIBuilder(
         return backend
             .WithReference(db)
             .WithReference(workerTopic.PubsubEndpoint)
-            .WithReference(authJwksEndpoint)
+            .WithReference(authHttpEndpoint)
             .WithEnvironment(context =>
             {
                 context.EnvironmentVariables["POSTGRESDB_URI"] = db.Resource.UriExpression;
                 context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = grpcReflectionFlag;
-                context.EnvironmentVariables["AUTH_JWKS_URL"] = authJwksEndpoint.Property(EndpointProperty.Url);
+                context.EnvironmentVariables["AUTH_HTTP_ENDPOINT"] = authHttpEndpoint.Property(EndpointProperty.Url);
                 context.EnvironmentVariables["API_AUTH_MODE"] = apiAuthMode;
                 context.EnvironmentVariables["PUBSUB_EMULATOR_HOST"] = workerTopic.PubsubEndpoint.Property(EndpointProperty.HostAndPort);
                 context.EnvironmentVariables["PUBSUB_PROJECT_ID"] = workerTopic.ProjectID;
