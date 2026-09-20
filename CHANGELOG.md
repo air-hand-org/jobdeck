@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.3](https://github.com/air-hand-org/jobdeck/compare/v1.2.2...v1.2.3) (2026-09-20)
+
+
+### Bug Fixes
+
+* **images:** promote job-api to v1.1.6 ([#133](https://github.com/air-hand-org/jobdeck/issues/133)) ([e121b5d](https://github.com/air-hand-org/jobdeck/commit/e121b5d3c3ad2a9861c0c9b95420411b5f3e3841))
+
 ## [1.2.2](https://github.com/air-hand-org/jobdeck/compare/v1.2.1...v1.2.2) (2026-09-18)
 
 
