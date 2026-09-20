@@ -14,6 +14,7 @@ public sealed class AppFixture : IAsyncLifetime
     private static readonly string[] ResourceLogNames =
     [
         "auth",
+        "auth-proxy",
         "auth-tls",
         "demo",
         "demo-backend",
@@ -76,10 +77,6 @@ public sealed class AppFixture : IAsyncLifetime
             "$argon2id$v=19$m=19456,t=2,p=1$uuhh20q0GZt7RTIT2TttQw$WoXQCPm3wGZt89DsiyUfueugcmG1DbrdlSk4m/R8qKw"
         );
 
-        Environment.SetEnvironmentVariable(
-            "Parameters__auth-jwt-public-key",
-            "1RwJkXgznrTP267FaSdzXqeC7wxIL10EcmVmAL2qSeU="
-        );
         Environment.SetEnvironmentVariable(
             "Parameters__auth-jwt-private-key",
             "9y7KNcPRFzIlYFVe4jJu7BFJbdD4b+pkqY4ppx0vwk3VHAmReDOetM/brsVpJ3Nep4LvDEgvXQRyZWYAvapJ5Q=="

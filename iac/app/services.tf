@@ -346,13 +346,8 @@ resource "google_cloud_run_v2_service" "job_api" {
       }
 
       env {
-        name = "AUTH_JWT_PUBLIC_KEY"
-        value_source {
-          secret_key_ref {
-            secret  = local.application_secrets["auth-jwt-public-key"]
-            version = "latest"
-          }
-        }
+        name  = "AUTH_HTTP_ENDPOINT"
+        value = google_cloud_run_v2_service.auth.uri
       }
 
       startup_probe {

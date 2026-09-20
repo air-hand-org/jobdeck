@@ -21,6 +21,7 @@ var production = new DeserializerBuilder()
         Path.Combine(repoRoot, "environments", "production.yaml")
     ));
 var authImageTag = $"v{production.Images["auth"].Version}";
+var authProxyImageTag = $"v{production.Images["auth-proxy"].Version}";
 var jobApiImageTag = $"v{production.Images["job-api"].Version}";
 
 var workerClientId = "job-worker";
@@ -49,11 +50,12 @@ var pubsubBuilder = new PubSubBuilder(builder);
 var pubsub = pubsubBuilder.PubSub();
 var pubsubWorkerTopic = pubsub.Topic("job-worker-topic");
 
-var authGrpcEndpoint = new AuthBuilder(
+var authEndpoints = new AuthBuilder(
     builder,
     postgres,
     workerClientId,
     authImageTag,
+    authProxyImageTag,
     repoRoot,
     useLocal
 )
@@ -62,11 +64,13 @@ var authGrpcEndpoint = new AuthBuilder(
         isDebug: IS_DEBUG,
         grpcReflectionFlag: enableGrpcReflection
     );
+var authGrpcEndpoint = authEndpoints.Grpc;
 
 var jobApiGrpcEndpoint = new JobAPIBuilder(
         builder: builder,
         postgres: postgres,
         jobWorkerTopic: pubsubWorkerTopic.Topic,
+        authHttpEndpoint: authEndpoints.Http,
         imageTag: jobApiImageTag,
         repoRoot: repoRoot,
         useLocal: useLocal
