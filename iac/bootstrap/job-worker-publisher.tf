@@ -3,7 +3,7 @@
 resource "google_iam_workload_identity_pool" "job_worker_publisher" {
   project                   = var.project_id
   workload_identity_pool_id = "jobdeck-job-worker-publish"
-  display_name              = "JobDeck job-worker image publishing"
+  display_name              = "Publish job-worker image"
   description               = "Dedicated trust boundary for jobdeck-job-worker image publication."
 
   depends_on = [google_project_service.required["iam.googleapis.com"]]
