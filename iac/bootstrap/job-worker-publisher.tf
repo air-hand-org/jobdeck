@@ -13,7 +13,7 @@ resource "google_iam_workload_identity_pool_provider" "job_worker_publisher" {
   project                            = var.project_id
   workload_identity_pool_id          = google_iam_workload_identity_pool.job_worker_publisher.workload_identity_pool_id
   workload_identity_pool_provider_id = "github"
-  display_name                       = "JobDeck job-worker GitHub Actions"
+  display_name                       = "job-worker by GitHub Actions"
 
   attribute_mapping = {
     "google.subject" = "assertion.sub"
