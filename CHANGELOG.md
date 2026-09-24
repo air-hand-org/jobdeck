@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.0](https://github.com/air-hand-org/jobdeck/compare/v1.2.3...v1.3.0) (2026-09-24)
+
+
+### Features
+
+* add local auth proxy build ([#143](https://github.com/air-hand-org/jobdeck/issues/143)) ([cc8b7e0](https://github.com/air-hand-org/jobdeck/commit/cc8b7e0a3514c2a60322b23bba13c871801d7094))
+
+
+### Bug Fixes
+
+* **images:** promote job-worker, forward-proxy to v1.2.5 ([#142](https://github.com/air-hand-org/jobdeck/issues/142)) ([b976a0b](https://github.com/air-hand-org/jobdeck/commit/b976a0b508708384fecb111d0a1eeff062700d28))
+* job-worker publisher permission ([#140](https://github.com/air-hand-org/jobdeck/issues/140)) ([c3917b6](https://github.com/air-hand-org/jobdeck/commit/c3917b60dad2b6add1069c7b00ff6198bb8067dd))
+
 ## [1.2.3](https://github.com/air-hand-org/jobdeck/compare/v1.2.2...v1.2.3) (2026-09-20)
 
 
