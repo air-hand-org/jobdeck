@@ -1,6 +1,3 @@
 go 1.26.4
 
-use (
-	./services/demo
-	./tools/pubsub
-)
+use ./tools/pubsub
