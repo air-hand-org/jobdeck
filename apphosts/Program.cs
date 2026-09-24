@@ -22,6 +22,7 @@ var production = new DeserializerBuilder()
     ));
 var authImageTag = $"v{production.Images["auth"].Version}";
 var authProxyImageTag = $"v{production.Images["auth-proxy"].Version}";
+var demoImageTag = $"v{production.Images["demo"].Version}";
 var jobApiImageTag = $"v{production.Images["job-api"].Version}";
 var jobWorkerImageTag = $"v{production.Images["job-worker"].Version}";
 var forwardProxyImageTag = $"v{production.Images["forward-proxy"].Version}";
@@ -84,7 +85,12 @@ var jobApiGrpcEndpoint = new JobAPIBuilder(
     )
     ;
 
-var demoContainerEndpoint = new DemoBuilder(builder: builder).Build(8080, KnownNetworkIdentifiers.DefaultAspireContainerNetwork);
+var demoContainerEndpoint = new DemoBuilder(
+    builder: builder,
+    imageTag: demoImageTag,
+    repoRoot: repoRoot,
+    useLocal: useLocal
+).Build(8080, KnownNetworkIdentifiers.DefaultAspireContainerNetwork);
 
 var workerPubsubVerificationToken = Guid.NewGuid().ToString("N");
 
