@@ -34,24 +34,28 @@ This starts the AppHost and the local resources it defines, including the UI, jo
 
 The Aspire dashboard URL is printed by the Aspire CLI.
 
-## Auth Source Debugging
+## Auth and Job Worker Source Debugging
 
-By default, Aspire runs auth from the versioned GHCR image declared in
-`environments/production.yaml`. To work on auth together with this repository,
-clone `jobdeck-auth` into the fixed local checkout path:
+By default, Aspire runs auth, job-worker, and its forward-proxy from the versioned
+GHCR images declared in `environments/production.yaml`. To work on auth and
+job-worker together with this repository, clone them into their fixed local checkout
+paths:
 
 ```sh
 git clone git@github.com:air-hand-org/jobdeck-auth.git services/auth
+git clone git@github.com:air-hand-org/jobdeck-job-worker.git services/job-worker
 USE_LOCAL=true DEBUG=true make run
 ```
 
-`USE_LOCAL=true` selects local source mode. It requires `services/auth/go.mod`,
-then starts the auth server and its database migrator with `AddGoApp`;
-`DEBUG=true` also enables the auth Delve server on port 2347. Without
-`USE_LOCAL=true`, Aspire uses the GHCR image even if the checkout exists. The
-checkout is intentionally not part of this repository's `go.work` and is
-ignored by its Git worktree. CI does not set `USE_LOCAL`, so it continues to
-use the GHCR image.
+`USE_LOCAL=true` selects local source mode independently for each checkout. It
+requires `services/auth/go.mod` and/or `services/job-worker/go.mod`; auth and
+job-worker then start with `AddGoApp`, while the worker's forward-proxy is built
+from `services/job-worker/containers/forward-proxy`. `DEBUG=true` also enables
+the auth and job-worker Delve servers on ports 2347 and 2346. Without
+`USE_LOCAL=true`, or when a checkout is absent, Aspire uses the corresponding GHCR
+image even if another local checkout exists. The checkouts are intentionally not
+part of this repository's `go.work` and are ignored by its Git worktree. CI does
+not set `USE_LOCAL`, so it continues to use GHCR images.
 
 ## Containerized Local Runs
 
