@@ -102,7 +102,6 @@ resource "github_repository_ruleset" "job_api_release_tag" {
 resource "github_repository_environment" "job_api_production" {
   repository          = github_repository.job_api.name
   environment         = "production"
-  can_admins_bypass   = false
   prevent_self_review = false
 
   deployment_branch_policy {
