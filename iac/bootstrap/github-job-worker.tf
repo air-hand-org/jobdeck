@@ -102,7 +102,6 @@ resource "github_repository_ruleset" "job_worker_release_tag" {
 resource "github_repository_environment" "job_worker_production" {
   repository          = github_repository.job_worker.name
   environment         = "production"
-  can_admins_bypass   = false
   prevent_self_review = false
 
   deployment_branch_policy {
