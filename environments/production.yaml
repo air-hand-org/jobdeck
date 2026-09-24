@@ -7,7 +7,7 @@ images:
   ui:
     version: 1.3.0
   demo:
-    version: 1.3.0
+    version: 1.3.2
   job-api:
     version: 1.1.6
   job-worker:

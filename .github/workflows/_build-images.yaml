@@ -49,12 +49,6 @@ jobs:
       # Keep pairs small enough for the hosted runner while sharing its Docker
       # layer and BuildKit cache with every following build.
       - parallel:
-          - name: Build demo image
-            uses: docker/build-push-action@v7
-            with:
-              context: .
-              file: containers/demo/Dockerfile
-              push: false
           - name: Build ui image
             uses: docker/build-push-action@v7
             with:
@@ -115,13 +109,6 @@ jobs:
           username: oauth2accesstoken
           password: ${{ steps.google-auth.outputs.access_token }}
       - parallel:
-          - name: Build and push demo image
-            uses: docker/build-push-action@v7
-            with:
-              context: .
-              file: containers/demo/Dockerfile
-              push: true
-              tags: ${{ steps.images.outputs.registry }}/jobdeck-demo/demo:v${{ fromJSON(steps.images.outputs.versions).demo.version }}
           - name: Build and push ui image
             uses: docker/build-push-action@v7
             with:
