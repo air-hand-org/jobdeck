@@ -23,6 +23,8 @@ var production = new DeserializerBuilder()
 var authImageTag = $"v{production.Images["auth"].Version}";
 var authProxyImageTag = $"v{production.Images["auth-proxy"].Version}";
 var jobApiImageTag = $"v{production.Images["job-api"].Version}";
+var jobWorkerImageTag = $"v{production.Images["job-worker"].Version}";
+var forwardProxyImageTag = $"v{production.Images["forward-proxy"].Version}";
 
 var workerClientId = "job-worker";
 
@@ -93,6 +95,10 @@ var workerPushEndpoint = new JobWorkerBuilder(
     , demoContainerEndpoint: demoContainerEndpoint
     , workerClientId: workerClientId
     , pubsubVerificationToken: workerPubsubVerificationToken
+    , imageTag: jobWorkerImageTag
+    , forwardProxyImageTag: forwardProxyImageTag
+    , repoRoot: repoRoot
+    , useLocal: useLocal
 ).Build(
     port: 9092,
     isDebug: IS_DEBUG
