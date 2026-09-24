@@ -56,11 +56,18 @@ public sealed class AuthBuilder(
 
     private EndpointReference EnvoyProxy(BackendEndpoints backend)
     {
-        return builder.AddContainer(
-            name: "auth-proxy",
-            image: "ghcr.io/air-hand-org/jobdeck-auth-proxy",
-            tag: proxyImageTag
-        )
+        var proxy = localAppDirectory is null
+            ? builder.AddContainer(
+                name: "auth-proxy",
+                image: "ghcr.io/air-hand-org/jobdeck-auth-proxy",
+                tag: proxyImageTag
+            )
+            : builder.AddDockerfile(
+                name: "auth-proxy",
+                contextPath: Path.Combine(localAppDirectory, "containers", "auth-proxy")
+            );
+
+        return proxy
         .WithHttpEndpoint(
             name: "h2c",
             targetPort: 8080
