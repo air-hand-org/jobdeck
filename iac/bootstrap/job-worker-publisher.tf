@@ -52,7 +52,7 @@ resource "google_artifact_registry_repository_iam_member" "forward_proxy_publish
   location   = google_artifact_registry_repository.service["forward_proxy"].location
   repository = google_artifact_registry_repository.service["forward_proxy"].repository_id
   role       = "roles/artifactregistry.writer"
-  member     = "serviceAccount:${google_service_account.auth_publisher.email}"
+  member     = "serviceAccount:${google_service_account.job_worker_publisher.email}"
 }
 
 resource "google_service_account_iam_member" "job_worker_publisher_wif" {
