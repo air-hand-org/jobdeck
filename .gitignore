@@ -11,6 +11,7 @@ playwright-traces
 services/auth/
 services/job-api/
 services/job-worker/
+services/demo/
 
 # OpenTofu local working files. Remote state is stored in GCS.
 **/.terraform/
