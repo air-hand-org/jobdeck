@@ -215,8 +215,8 @@ images:
 OpenTofu state を読まない。Aspire も将来この version 一覧を共有し、ローカル用の取得先は
 GHCR などへ override できるようにする（[Local composition](#local-composition)）。
 
-各 image は immutable な version tag で固定する。サービス分離時は release-please の明示的な
-更新対象からそのサービスを外し、公開完了後の dispatch で対応する version だけを更新する。
+各 image は immutable な version tag で固定する。サービス公開完了後の dispatch では、
+対応する service の version だけを promotion PR で更新する。
 通知では `vX.Y.Z` tag を受け取り、YAML には `v` を除いた version を保存する。
 サービスが利用する `api-contracts` / SDK のバージョンも各 repository で固定する。
 
