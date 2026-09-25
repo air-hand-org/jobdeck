@@ -8,41 +8,18 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-slim
     permissions:
+      contents: read
       pull-requests: read
     outputs:
       bootstrap: ${{ steps.filter.outputs.bootstrap }}
       app: ${{ steps.filter.outputs.app }}
     steps:
-      - uses: dorny/paths-filter@v4
-        id: filter
+      - uses: actions/checkout@v7
         with:
-          filters: |
-            bootstrap:
-              - 'iac/bootstrap/**'
-              - '.github/actions/setup-tools/**'
-              - '.github/workflows/_ci.yaml'
-              - '.github/workflows/_tofu.yaml'
-              - 'aqua.yaml'
-              - 'mise.toml'
-              - 'Makefile'
-              - 'mkfiles/tofu.mk'
-            app:
-              # The app root reads bootstrap state, so bootstrap changes also
-              # need an app plan to verify the roots remain compatible.
-              - 'iac/app/**'
-              - 'iac/bootstrap/**'
-              - 'iac/secrets/**'
-              - 'environments/production.yaml'
-              - '.github/actions/setup-tools/**'
-              - '.github/workflows/_ci.yaml'
-              - '.github/workflows/_tofu.yaml'
-              - 'aqua.yaml'
-              - 'mise.toml'
-              - 'Makefile'
-              - 'mkfiles/tofu.mk'
+          persist-credentials: false
+      - uses: ./.github/actions/infrastructure-changes
+        id: filter
 
-  # This nested reusable workflow owns test-only concurrency, so cancelling a
-  # superseded test run never cancels this workflow's infrastructure plan.
   test:
     uses: ./.github/workflows/_test.yaml
     permissions:
@@ -51,9 +28,6 @@ jobs:
     secrets: inherit
 
   infrastructure-plan:
-    # Fork PRs run the test job, but never receive a GCP OIDC token. This
-    # condition is defence in depth; the Workload Identity Provider must also
-    # restrict tokens to the air-hand-org/jobdeck repository.
     if: >-
       github.event_name == 'pull_request' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
@@ -72,8 +46,6 @@ jobs:
       pull-requests: write
 
   application-infrastructure-plan:
-    # The app root reads the bootstrap state, so planning it here also verifies
-    # that the two OpenTofu roots remain compatible.
     if: >-
       github.event_name == 'pull_request' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
