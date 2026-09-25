@@ -67,7 +67,7 @@ jobs:
   bootstrap:
     if: needs.changes.outputs.bootstrap == 'true'
     needs: changes
-    uses: ./.github/workflows/_tofu.yaml
+    uses: $/.github/workflows/_tofu.yaml
     with:
       root: bootstrap
       command: ${{ inputs.command }}
@@ -82,7 +82,7 @@ jobs:
   app:
     if: needs.changes.outputs.app == 'true'
     needs: changes
-    uses: ./.github/workflows/_tofu.yaml
+    uses: $/.github/workflows/_tofu.yaml
     with:
       root: app
       command: ${{ inputs.command }}
