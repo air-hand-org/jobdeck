@@ -12,27 +12,14 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: deploy-production
+  group: ${{ github.workflow }}
   cancel-in-progress: false
 
 jobs:
-  images:
-    if: ${{ github.event.release.prerelease == false }}
-    uses: ./.github/workflows/_build-images.yaml
-    with:
-      push: true
-      environment: production
-    secrets: inherit
-    permissions:
-      contents: read
-      packages: read
-      id-token: write
-
   app:
     # Keep the image push and revision apply in one release chain: app resources
     # must never refer to an Artifact Registry tag that has not been pushed.
     if: ${{ github.event.release.prerelease == false }}
-    needs: images
     uses: ./.github/workflows/_tofu.yaml
     with:
       root: app

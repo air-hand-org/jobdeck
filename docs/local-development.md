@@ -34,38 +34,37 @@ This starts the AppHost and the local resources it defines, including the UI, jo
 
 The Aspire dashboard URL is printed by the Aspire CLI.
 
-## Auth and Job Worker Source Debugging
+## Local Service Checkouts
 
-By default, Aspire runs auth, job-worker, and its forward-proxy from the versioned
-GHCR images declared in `environments/production.yaml`. To work on auth and
-job-worker together with this repository, clone them into their fixed local checkout
-paths:
+By default, Aspire runs all services from the versioned GHCR images declared in
+`environments/production.yaml`. To run a service from source, clone its repository
+into the corresponding path below and set `USE_LOCAL=true`:
 
 ```sh
 git clone git@github.com:air-hand-org/jobdeck-auth.git services/auth
+git clone git@github.com:air-hand-org/jobdeck-job-api.git services/job-api
 git clone git@github.com:air-hand-org/jobdeck-job-worker.git services/job-worker
+git clone git@github.com:air-hand-org/jobdeck-ui.git services/ui
+git clone git@github.com:air-hand-org/jobdeck-demo.git services/demo
 USE_LOCAL=true DEBUG=true make run
 ```
 
 `USE_LOCAL=true` selects local source mode independently for each checkout. It
-requires `services/auth/go.mod` and/or `services/job-worker/go.mod`; auth and
-job-worker then start with `AddGoApp`, while the worker's forward-proxy is built
-from `services/job-worker/containers/forward-proxy`. `DEBUG=true` also enables
-the auth and job-worker Delve servers on ports 2347 and 2346. Without
-`USE_LOCAL=true`, or when a checkout is absent, Aspire uses the corresponding GHCR
-image even if another local checkout exists. The checkouts are intentionally not
-part of this repository's `go.work` and are ignored by its Git worktree. CI does
-not set `USE_LOCAL`, so it continues to use GHCR images.
+It requires the respective `go.mod` file for auth, job-api, job-worker, and demo,
+or `services/ui/src/ui.csproj` for UI. The Go services start with `AddGoApp`, UI
+starts as a local .NET project, and the auth / job-worker proxies are built from
+their local checkout. `DEBUG=true` also enables the auth and job-worker Delve
+servers on ports 2347 and 2346. A missing checkout falls back to the corresponding
+versioned container image, even when other services run from source. The checkouts
+are intentionally ignored by this repository's Git worktree. CI does not set
+`USE_LOCAL`, so it continues to use container images.
 
 ## Containerized Local Runs
 
-Normal local development remains source-first: the AppHost starts Go applications and
-the .NET UI directly so that Hot Reload and debugger support, including Delve, stay
-fast and straightforward.
-
-The production Dockerfiles are the canonical release-image build contract. A future
-AppHost option should allow selected services to run from those Dockerfiles for
-production-parity checks, without making container builds the default inner loop.
+The default local composition is image-first, so a system-repository checkout does
+not require every service repository. Use a checkout under `services/` together
+with `USE_LOCAL=true` when changing that service and needing source-level debugging
+or Hot Reload.
 
 ## Common Commands
 

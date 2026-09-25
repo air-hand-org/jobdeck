@@ -6,14 +6,7 @@
       "draft": false,
       "include-component-in-tag": false,
       "force-tag-creation": true,
-      "always-update": true,
-      "extra-files": [
-        {
-          "type": "yaml",
-          "path": "environments/production.yaml",
-          "jsonpath": "$.images[ui].version"
-        }
-      ]
+      "always-update": true
     }
   }
 }
