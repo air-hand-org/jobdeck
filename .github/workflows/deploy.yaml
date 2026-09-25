@@ -1,25 +1,50 @@
 name: Deploy
 
 on:
-  release:
-    types:
-      - published
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
-  id-token: write
-  issues: write
-  pull-requests: write
 
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 
 jobs:
+  infrastructure-changes:
+    runs-on: ubuntu-slim
+    permissions:
+      contents: read
+    outputs:
+      bootstrap: ${{ steps.filter.outputs.bootstrap }}
+      app: ${{ steps.filter.outputs.app }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/infrastructure-changes
+        id: filter
+
+  bootstrap:
+    if: needs.infrastructure-changes.outputs.bootstrap == 'true'
+    needs: infrastructure-changes
+    uses: ./.github/workflows/_tofu.yaml
+    with:
+      root: bootstrap
+      command: apply
+      environment: bootstrap
+    secrets: inherit
+    permissions:
+      contents: read
+      id-token: write
+      issues: write
+      pull-requests: write
+
   app:
-    # Keep the image push and revision apply in one release chain: app resources
-    # must never refer to an Artifact Registry tag that has not been pushed.
-    if: ${{ github.event.release.prerelease == false }}
+    if: needs.infrastructure-changes.outputs.app == 'true'
+    needs: infrastructure-changes
     uses: ./.github/workflows/_tofu.yaml
     with:
       root: app
