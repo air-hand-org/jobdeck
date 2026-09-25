@@ -20,7 +20,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          persist-credentials: false
+          # dorny/paths-filter may fetch the previous commit on push events.
+          persist-credentials: true
       - name: Validate command
         env:
           COMMAND: ${{ inputs.command }}
