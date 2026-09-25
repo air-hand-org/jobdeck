@@ -1,0 +1,56 @@
+on:
+  workflow_call:
+    outputs:
+      bootstrap:
+        description: Whether bootstrap infrastructure changed.
+        value: ${{ jobs.filter.outputs.bootstrap }}
+      app:
+        description: Whether application infrastructure changed.
+        value: ${{ jobs.filter.outputs.app }}
+
+permissions: {}
+
+jobs:
+  filter:
+    runs-on: ubuntu-slim
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      bootstrap: ${{ steps.filter.outputs.bootstrap }}
+      app: ${{ steps.filter.outputs.app }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            bootstrap:
+              - 'iac/bootstrap/**'
+              - '.github/actions/setup-tools/**'
+              - '.github/workflows/_ci.yaml'
+              - '.github/workflows/_infrastructure-changes.yaml'
+              - '.github/workflows/deploy.yaml'
+              - '.github/workflows/_tofu.yaml'
+              - 'aqua.yaml'
+              - 'mise.toml'
+              - 'Makefile'
+              - 'mkfiles/tofu.mk'
+            app:
+              # The app root reads bootstrap state, so bootstrap changes also
+              # need app validation/apply to verify the roots remain compatible.
+              - 'iac/app/**'
+              - 'iac/bootstrap/**'
+              - 'iac/secrets/**'
+              - 'environments/production.yaml'
+              - '.github/actions/setup-tools/**'
+              - '.github/workflows/_ci.yaml'
+              - '.github/workflows/_infrastructure-changes.yaml'
+              - '.github/workflows/deploy.yaml'
+              - '.github/workflows/_tofu.yaml'
+              - 'aqua.yaml'
+              - 'mise.toml'
+              - 'Makefile'
+              - 'mkfiles/tofu.mk'
