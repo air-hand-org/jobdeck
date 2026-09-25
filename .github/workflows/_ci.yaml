@@ -6,19 +6,10 @@ permissions: {}
 jobs:
   infrastructure-changes:
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-slim
+    uses: ./.github/workflows/_infrastructure-changes.yaml
     permissions:
       contents: read
       pull-requests: read
-    outputs:
-      bootstrap: ${{ steps.filter.outputs.bootstrap }}
-      app: ${{ steps.filter.outputs.app }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/infrastructure-changes
-        id: filter
 
   test:
     uses: ./.github/workflows/_test.yaml
