@@ -24,10 +24,10 @@ root and the image-publish workflow compose
 and per-service versions. Bootstrap still owns registries and permissions;
 runtime identities and secret references are read through remote state.
 
-Release-please updates the five images published here. Auth stays pinned at
-`1.0.4` until its separate release flow is connected. PR plans read the proposed
-versions, and release deployment uses the same commit's YAML after image push
-completes. See [the deployment flow](../../docs/cloud-architecture.md#image-and-deployment-flow).
+Service repositories publish images and update `environments/production.yaml`
+through promotion PRs. PR plans validate the proposed versions, and merging to
+`main` applies the affected infrastructure roots using that commit's YAML.
+See [the deployment flow](../../docs/cloud-architecture.md#image-and-deployment-flow).
 
 OpenTofu decrypts `iac/secrets/production.enc.yaml` through a provider function
 and adds Secret Manager versions through write-only provider arguments. See

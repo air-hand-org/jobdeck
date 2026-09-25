@@ -1,0 +1,95 @@
+on:
+  workflow_call:
+    inputs:
+      command:
+        description: OpenTofu command to run for affected roots.
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  changes:
+    runs-on: ubuntu-slim
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      bootstrap: ${{ steps.filter.outputs.bootstrap }}
+      app: ${{ steps.filter.outputs.app }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Validate command
+        env:
+          COMMAND: ${{ inputs.command }}
+        run: |
+          case "$COMMAND" in
+            plan|apply) ;;
+            *)
+              echo "Unsupported OpenTofu command: $COMMAND" >&2
+              exit 1
+              ;;
+          esac
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            bootstrap:
+              - 'iac/bootstrap/**'
+              - '.github/actions/setup-tools/**'
+              - '.github/workflows/_ci.yaml'
+              - '.github/workflows/_infrastructure-changes.yaml'
+              - '.github/workflows/deploy.yaml'
+              - '.github/workflows/_tofu.yaml'
+              - 'aqua.yaml'
+              - 'mise.toml'
+              - 'Makefile'
+              - 'mkfiles/tofu.mk'
+            app:
+              # The app root reads bootstrap state, so bootstrap changes also
+              # need app validation/apply to verify the roots remain compatible.
+              - 'iac/app/**'
+              - 'iac/bootstrap/**'
+              - 'iac/secrets/**'
+              - 'environments/production.yaml'
+              - '.github/actions/setup-tools/**'
+              - '.github/workflows/_ci.yaml'
+              - '.github/workflows/_infrastructure-changes.yaml'
+              - '.github/workflows/deploy.yaml'
+              - '.github/workflows/_tofu.yaml'
+              - 'aqua.yaml'
+              - 'mise.toml'
+              - 'Makefile'
+              - 'mkfiles/tofu.mk'
+
+  bootstrap:
+    if: needs.changes.outputs.bootstrap == 'true'
+    needs: changes
+    uses: $/.github/workflows/_tofu.yaml
+    with:
+      root: bootstrap
+      command: ${{ inputs.command }}
+      environment: ${{ inputs.command == 'plan' && 'plan' || 'bootstrap' }}
+    secrets: inherit
+    permissions:
+      contents: read
+      id-token: write
+      issues: write
+      pull-requests: write
+
+  app:
+    if: needs.changes.outputs.app == 'true'
+    needs: changes
+    uses: $/.github/workflows/_tofu.yaml
+    with:
+      root: app
+      command: ${{ inputs.command }}
+      environment: ${{ inputs.command == 'plan' && 'plan' || 'production' }}
+    secrets: inherit
+    permissions:
+      contents: read
+      id-token: write
+      issues: write
+      pull-requests: write
