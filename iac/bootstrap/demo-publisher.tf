@@ -1,0 +1,56 @@
+# The existing `github` pool has environment-only SA bindings. Keep publishing
+# in a separate pool so this repository cannot impersonate the deployer.
+resource "google_iam_workload_identity_pool" "demo_publisher" {
+  project                   = var.project_id
+  workload_identity_pool_id = "jobdeck-demo-publish"
+  display_name              = "JobDeck demo image publishing"
+  description               = "Dedicated trust boundary for jobdeck-demo image publication."
+
+  depends_on = [google_project_service.required["iam.googleapis.com"]]
+}
+
+resource "google_iam_workload_identity_pool_provider" "demo_publisher" {
+  project                            = var.project_id
+  workload_identity_pool_id          = google_iam_workload_identity_pool.demo_publisher.workload_identity_pool_id
+  workload_identity_pool_provider_id = "github"
+  display_name                       = "JobDeck demo GitHub Actions"
+
+  attribute_mapping = {
+    "google.subject" = "assertion.sub"
+    # Jobs without a GitHub Environment cannot match the publisher SA binding.
+    "attribute.environment" = "'environment' in assertion ? assertion.environment : ''"
+  }
+
+  attribute_condition = join(" && ", [
+    "assertion.repository == '${github_repository.demo.full_name}'",
+  ])
+
+  oidc {
+    issuer_uri = "https://token.actions.githubusercontent.com"
+  }
+}
+
+resource "google_service_account" "demo_publisher" {
+  project      = var.project_id
+  account_id   = "jobdeck-demo-publisher"
+  display_name = "JobDeck demo image publisher"
+  description  = "Publishes images only to the jobdeck-demo Artifact Registry repository."
+
+  depends_on = [google_project_service.required["iam.googleapis.com"]]
+}
+
+resource "google_artifact_registry_repository_iam_member" "demo_publisher" {
+  project    = var.project_id
+  location   = google_artifact_registry_repository.service["demo"].location
+  repository = google_artifact_registry_repository.service["demo"].repository_id
+  role       = "roles/artifactregistry.writer"
+  member     = "serviceAccount:${google_service_account.demo_publisher.email}"
+}
+
+resource "google_service_account_iam_member" "demo_publisher_wif" {
+  service_account_id = google_service_account.demo_publisher.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.demo_publisher.name}/attribute.environment/${github_repository_environment.demo_production.environment}"
+
+  depends_on = [google_iam_workload_identity_pool_provider.demo_publisher]
+}

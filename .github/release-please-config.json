@@ -11,7 +11,7 @@
         {
           "type": "yaml",
           "path": "environments/production.yaml",
-          "jsonpath": "$.images[ui,demo].version"
+          "jsonpath": "$.images[ui].version"
         }
       ]
     }

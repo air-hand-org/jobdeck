@@ -4,6 +4,43 @@ on:
 permissions: {}
 
 jobs:
+  infrastructure-changes:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-slim
+    permissions:
+      pull-requests: read
+    outputs:
+      bootstrap: ${{ steps.filter.outputs.bootstrap }}
+      app: ${{ steps.filter.outputs.app }}
+    steps:
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            bootstrap:
+              - 'iac/bootstrap/**'
+              - '.github/actions/setup-tools/**'
+              - '.github/workflows/_ci.yaml'
+              - '.github/workflows/_tofu.yaml'
+              - 'aqua.yaml'
+              - 'mise.toml'
+              - 'Makefile'
+              - 'mkfiles/tofu.mk'
+            app:
+              # The app root reads bootstrap state, so bootstrap changes also
+              # need an app plan to verify the roots remain compatible.
+              - 'iac/app/**'
+              - 'iac/bootstrap/**'
+              - 'iac/secrets/**'
+              - 'environments/production.yaml'
+              - '.github/actions/setup-tools/**'
+              - '.github/workflows/_ci.yaml'
+              - '.github/workflows/_tofu.yaml'
+              - 'aqua.yaml'
+              - 'mise.toml'
+              - 'Makefile'
+              - 'mkfiles/tofu.mk'
+
   # This nested reusable workflow owns test-only concurrency, so cancelling a
   # superseded test run never cancels this workflow's infrastructure plan.
   test:
@@ -33,7 +70,9 @@ jobs:
     # restrict tokens to the air-hand-org/jobdeck repository.
     if: >-
       github.event_name == 'pull_request' &&
-      github.event.pull_request.head.repo.full_name == github.repository
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      needs.infrastructure-changes.outputs.bootstrap == 'true'
+    needs: infrastructure-changes
     uses: ./.github/workflows/_tofu.yaml
     with:
       root: bootstrap
@@ -51,7 +90,9 @@ jobs:
     # that the two OpenTofu roots remain compatible.
     if: >-
       github.event_name == 'pull_request' &&
-      github.event.pull_request.head.repo.full_name == github.repository
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      needs.infrastructure-changes.outputs.app == 'true'
+    needs: infrastructure-changes
     uses: ./.github/workflows/_tofu.yaml
     with:
       root: app

@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.1](https://github.com/air-hand-org/jobdeck/compare/v1.3.0...v1.3.1) (2026-09-24)
+
+
+### Bug Fixes
+
+* **images:** promote demo to v1.3.2 ([#150](https://github.com/air-hand-org/jobdeck/issues/150)) ([c40edbd](https://github.com/air-hand-org/jobdeck/commit/c40edbd24f2bc5e979e761ee9922bb5f7e6810ec))
+* remove demo ([#147](https://github.com/air-hand-org/jobdeck/issues/147)) ([45621a7](https://github.com/air-hand-org/jobdeck/commit/45621a720b946d5d168f8aca86a6db982e9856cb))
+
 ## [1.3.0](https://github.com/air-hand-org/jobdeck/compare/v1.2.3...v1.3.0) (2026-09-24)
 
 
