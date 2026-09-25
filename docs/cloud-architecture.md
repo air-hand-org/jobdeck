@@ -81,36 +81,32 @@ container の作成や runtime IAM policy の変更は行えない。これは s
 
 ### Image and deployment flow
 
-`environments/production.yaml` をサービス別 image version の正とする。現在は ui、demo、
-job-api、job-worker、forward-proxy の 5 image を jobdeck から公開する。release-please の
-`extra-files` は、この repository が公開するサービスを JSONPath で明示して `version` を更新する。
-auth は公開・version 更新対象から外し、既存の `1.0.4` に固定する。ローカル build と E2E の
-ソース起動は維持し、公開後の更新 PR は次の対応とする。
+`environments/production.yaml` をサービス別 image version の正とする。各 service repository は
+image を公開した後、jobdeck repository へ version 更新 PR を作成する。PR では既存の E2E と
+OpenTofu plan を実行し、検証済みの immutable image version を production 構成へ昇格する。
 
-Terraform Docker provider は使わない。CI が各 image を build し、Artifact Registry へ
-YAML の version に対応する tag を push する。公開 workflow と OpenTofu はともに YAML から
-`${registry}/jobdeck-${service}/${service}:v${version}` を組み立てる。Registry の作成・権限と
-immutable tag 設定は bootstrap が管理する。
+Terraform Docker provider は使わない。各 service repository が image を build / publish し、
+OpenTofu は `production.yaml` から image URI を組み立てる。Registry の作成・権限と immutable
+tag 設定は bootstrap が管理する。
 
 ```text
-main merge
-  -> release-please creates / updates a release PR, including production.yaml versions
-  -> release PR merge creates the release and vX.Y.Z tag
-  -> GitHub Release published
-  -> authenticate to GCP
-  -> build / push the five images using production.yaml
-  -> tofu apply iac/app using production.yaml from the release commit
+service image published
+  -> promotion PR updates production.yaml
+  -> PR E2E / OpenTofu plan
+  -> merge to main
+  -> detect affected infrastructure roots
+  -> tofu apply bootstrap and/or app
 ```
 
-release PR の plan は公開前の version を参照するが、apply は image push 完了後に行う。
-現在の E2E はソースから起動する既存構成を維持し、公開候補 image の組み合わせを検証する
-方式は後続の対応とする。`repository_dispatch` による version 更新 PR 作成も別 PR で実装する。
+PR と main merge の変更判定は同じ path filter を共有する。`bootstrap` と `app` は独立した
+apply job とし、変更が両方に影響する場合は同じ push event から並列に実行できる。
+`iac/bootstrap/**` は app root の remote state 契約にも影響するため、bootstrap 変更時は
+app plan / apply も対象とする。`environments/production.yaml` や `iac/app/**` の変更は app
+のみを対象とする。
 
-`bootstrap` の apply は基盤変更時に別途実行し、毎回のサービス release の前提ステップにはしない。
-
-`_tofu` は `root` と `command` を受け取る reusable workflow であり、release publish 時、PR CI
-の infrastructure plan、必要時の手動 apply から呼ぶ。backend prefix は `root` (`bootstrap` または
-`app`) とし、認証 service account は選択した GitHub Environment の
+`_tofu` は `root` と `command` を受け取る reusable workflow であり、main merge 時の apply、
+PR CI の infrastructure plan、必要時の手動 apply から呼ぶ。backend prefix は `root`
+(`bootstrap` または `app`) とし、認証 service account は選択した GitHub Environment の
 `GCP_SERVICE_ACCOUNT` をそのまま使う。workflow は誤用防止のため、
 `plan/bootstrap/plan`、`apply/bootstrap/bootstrap`、`plan/app/plan`、
 `apply/app/production` の command/root/environment 組み合わせだけを許可する。
@@ -118,8 +114,8 @@ destroy workflow は `iac/app` だけに対して実行する。bootstrap resour
 
 PR の infrastructure plan は、手動で作成する専用の `jobdeck-plan` service account を GitHub
 Environment `plan` の OIDC binding で利用する。同 SA は project/IAM policy の read、state bucket
-の read、state lock object の create/delete、state KMS key の decrypt のみを持つ。`_ci` の子 job と
-して実行し、fork PR ではスキップする。
+の read、state lock object の create/delete、state KMS key の decrypt のみを持つ。fork PR では
+plan をスキップする。
 
 ### Runtime topology
 
