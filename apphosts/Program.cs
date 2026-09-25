@@ -22,6 +22,7 @@ var production = new DeserializerBuilder()
     ));
 var authImageTag = $"v{production.Images["auth"].Version}";
 var authProxyImageTag = $"v{production.Images["auth-proxy"].Version}";
+var uiImageTag = $"v{production.Images["ui"].Version}";
 var demoImageTag = $"v{production.Images["demo"].Version}";
 var jobApiImageTag = $"v{production.Images["job-api"].Version}";
 var jobWorkerImageTag = $"v{production.Images["job-worker"].Version}";
@@ -112,17 +113,14 @@ var workerPushEndpoint = new JobWorkerBuilder(
 
 pubsubWorkerTopic.PushSubscription("job-worker-subscription", workerPushEndpoint, workerPubsubVerificationToken);
 
-var ui = builder.AddProject("ui", "../services/ui/ui.csproj")
-  .WithExternalHttpEndpoints()
-  .WithReference(jobApiGrpcEndpoint)
-  .WithReference(authGrpcEndpoint)
-  .WithEnvironment(context =>
-  {
-      context.EnvironmentVariables["JOB_API_GRPC_ENDPOINT"] = jobApiGrpcEndpoint.Property(EndpointProperty.Url);
-      context.EnvironmentVariables["AUTH_GRPC_ENDPOINT"] = authGrpcEndpoint.Property(EndpointProperty.Url);
-  })
-  .WithHttpHealthCheck("/health/ready")
-;
+new UiBuilder(
+    builder: builder,
+    jobApiGrpcEndpoint: jobApiGrpcEndpoint,
+    authGrpcEndpoint: authGrpcEndpoint,
+    imageTag: uiImageTag,
+    repoRoot: repoRoot,
+    useLocal: useLocal
+).Build();
 
 builder.Build().Run();
 

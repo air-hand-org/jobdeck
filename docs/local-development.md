@@ -44,18 +44,20 @@ paths:
 ```sh
 git clone git@github.com:air-hand-org/jobdeck-auth.git services/auth
 git clone git@github.com:air-hand-org/jobdeck-job-worker.git services/job-worker
+git clone git@github.com:air-hand-org/jobdeck-ui.git services/ui
 USE_LOCAL=true DEBUG=true make run
 ```
 
 `USE_LOCAL=true` selects local source mode independently for each checkout. It
-requires `services/auth/go.mod` and/or `services/job-worker/go.mod`; auth and
-job-worker then start with `AddGoApp`, while the worker's forward-proxy is built
-from `services/job-worker/containers/forward-proxy`. `DEBUG=true` also enables
-the auth and job-worker Delve servers on ports 2347 and 2346. Without
-`USE_LOCAL=true`, or when a checkout is absent, Aspire uses the corresponding GHCR
-image even if another local checkout exists. The checkouts are intentionally not
-part of this repository's `go.work` and are ignored by its Git worktree. CI does
-not set `USE_LOCAL`, so it continues to use GHCR images.
+requires `services/auth/go.mod`, `services/job-worker/go.mod`, and/or
+`services/ui/src/ui.csproj`. Auth and job-worker then start with `AddGoApp`, the
+worker's forward-proxy is built from `services/job-worker/containers/forward-proxy`,
+and UI starts as a local .NET project. `DEBUG=true` also enables the auth and
+job-worker Delve servers on ports 2347 and 2346. Without `USE_LOCAL=true`, or when
+a checkout is absent, Aspire uses the corresponding versioned container image even
+if another local checkout exists. The checkouts are intentionally ignored by this
+repository's Git worktree. CI does not set `USE_LOCAL`, so it continues to use
+container images.
 
 ## Containerized Local Runs
 
