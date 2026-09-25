@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   infrastructure:
-    uses: ./.github/workflows/_infrastructure-changes.yaml
+    uses: $/.github/workflows/_infrastructure-changes.yaml
     with:
       command: apply
     secrets: inherit
