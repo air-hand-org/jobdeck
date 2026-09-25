@@ -4,12 +4,19 @@ on:
 permissions: {}
 
 jobs:
-  infrastructure-changes:
-    if: github.event_name == 'pull_request'
+  infrastructure:
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
     uses: ./.github/workflows/_infrastructure-changes.yaml
+    with:
+      command: plan
+    secrets: inherit
     permissions:
       contents: read
-      pull-requests: read
+      id-token: write
+      issues: write
+      pull-requests: write
 
   test:
     uses: ./.github/workflows/_test.yaml
@@ -17,39 +24,3 @@ jobs:
       contents: read
       packages: read
     secrets: inherit
-
-  infrastructure-plan:
-    if: >-
-      github.event_name == 'pull_request' &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      needs.infrastructure-changes.outputs.bootstrap == 'true'
-    needs: infrastructure-changes
-    uses: ./.github/workflows/_tofu.yaml
-    with:
-      root: bootstrap
-      command: plan
-      environment: plan
-    secrets: inherit
-    permissions:
-      contents: read
-      id-token: write
-      issues: write
-      pull-requests: write
-
-  application-infrastructure-plan:
-    if: >-
-      github.event_name == 'pull_request' &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      needs.infrastructure-changes.outputs.app == 'true'
-    needs: infrastructure-changes
-    uses: ./.github/workflows/_tofu.yaml
-    with:
-      root: app
-      command: plan
-      environment: plan
-    secrets: inherit
-    permissions:
-      contents: read
-      id-token: write
-      issues: write
-      pull-requests: write
