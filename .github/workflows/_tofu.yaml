@@ -24,7 +24,7 @@ permissions:
 
 jobs:
   tofu:
-    runs-on: ${{ inputs.command == 'apply' && 'ubuntu-latest' || 'ubuntu-slim' }}
+    runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     env:
       TOFU_ROOT: ${{ inputs.root }}
