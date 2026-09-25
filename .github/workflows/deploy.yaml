@@ -14,18 +14,9 @@ concurrency:
 
 jobs:
   infrastructure-changes:
-    runs-on: ubuntu-slim
+    uses: ./.github/workflows/_infrastructure-changes.yaml
     permissions:
       contents: read
-    outputs:
-      bootstrap: ${{ steps.filter.outputs.bootstrap }}
-      app: ${{ steps.filter.outputs.app }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/infrastructure-changes
-        id: filter
 
   bootstrap:
     if: needs.infrastructure-changes.outputs.bootstrap == 'true'
