@@ -77,7 +77,7 @@ public sealed class DemoBuilder(
             return null;
         }
 
-        var path = Path.GetFullPath(Path.Combine(repoRoot, "..", "jobdeck-demo"));
+        var path = Path.Combine(repoRoot, "services", "demo");
         if (!Directory.Exists(path))
         {
             return null;

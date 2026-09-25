@@ -25,6 +25,7 @@ public sealed class AppFixture : IAsyncLifetime
         "postgres",
         "pubsub",
         "ui",
+        "ui-backend",
     ];
 
     public AppTestTarget Target { get; private set; } = null!;

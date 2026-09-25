@@ -16,7 +16,7 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: bootstrap-production
+  group: ${{ github.workflow }}
   cancel-in-progress: false
 
 jobs:
