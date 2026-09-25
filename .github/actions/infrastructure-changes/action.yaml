@@ -1,0 +1,45 @@
+name: Detect infrastructure changes
+description: Detect whether bootstrap or application infrastructure needs validation or apply.
+
+outputs:
+  bootstrap:
+    description: Whether bootstrap infrastructure changed.
+    value: ${{ steps.filter.outputs.bootstrap }}
+  app:
+    description: Whether application infrastructure changed.
+    value: ${{ steps.filter.outputs.app }}
+
+runs:
+  using: composite
+  steps:
+    - uses: dorny/paths-filter@v4
+      id: filter
+      with:
+        filters: |
+          bootstrap:
+            - 'iac/bootstrap/**'
+            - '.github/actions/setup-tools/**'
+            - '.github/actions/infrastructure-changes/**'
+            - '.github/workflows/_ci.yaml'
+            - '.github/workflows/deploy.yaml'
+            - '.github/workflows/_tofu.yaml'
+            - 'aqua.yaml'
+            - 'mise.toml'
+            - 'Makefile'
+            - 'mkfiles/tofu.mk'
+          app:
+            # The app root reads bootstrap state, so bootstrap changes also
+            # need app validation/apply to verify the roots remain compatible.
+            - 'iac/app/**'
+            - 'iac/bootstrap/**'
+            - 'iac/secrets/**'
+            - 'environments/production.yaml'
+            - '.github/actions/setup-tools/**'
+            - '.github/actions/infrastructure-changes/**'
+            - '.github/workflows/_ci.yaml'
+            - '.github/workflows/deploy.yaml'
+            - '.github/workflows/_tofu.yaml'
+            - 'aqua.yaml'
+            - 'mise.toml'
+            - 'Makefile'
+            - 'mkfiles/tofu.mk'
