@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.3.2](https://github.com/air-hand-org/jobdeck/compare/v1.3.1...v1.3.2) (2026-09-25)
+
+
+### Bug Fixes
+
+* **images:** promote job-api to v1.1.7 ([#144](https://github.com/air-hand-org/jobdeck/issues/144)) ([f09a111](https://github.com/air-hand-org/jobdeck/commit/f09a111396fc1c5ea372b275eddc44bd4a3d706c))
+* **images:** promote ui to v1.3.2 ([#156](https://github.com/air-hand-org/jobdeck/issues/156)) ([e57e83a](https://github.com/air-hand-org/jobdeck/commit/e57e83a7fe46d49bc7a4d9f76fd269e57cada45a))
+
+## [1.3.1](https://github.com/air-hand-org/jobdeck/compare/v1.3.0...v1.3.1) (2026-09-24)
+
+
+### Bug Fixes
+
+* **images:** promote demo to v1.3.2 ([#150](https://github.com/air-hand-org/jobdeck/issues/150)) ([c40edbd](https://github.com/air-hand-org/jobdeck/commit/c40edbd24f2bc5e979e761ee9922bb5f7e6810ec))
+* remove demo ([#147](https://github.com/air-hand-org/jobdeck/issues/147)) ([45621a7](https://github.com/air-hand-org/jobdeck/commit/45621a720b946d5d168f8aca86a6db982e9856cb))
+
 ## [1.3.0](https://github.com/air-hand-org/jobdeck/compare/v1.2.3...v1.3.0) (2026-09-24)
 
 

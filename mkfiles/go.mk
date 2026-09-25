@@ -1,14 +1,8 @@
 # Find repository-owned Go modules, excluding external checkouts.
 GO_MODULES := $(shell find . \( -path './api' -o -path './services' \) -prune -o -name go.mod -exec dirname {} \; | sort)
 
-.PHONY: go-work-use
-go-work-use:
-	@for mod in $(GO_MODULES); do \
-		go work use $$mod || exit $$?; \
-	done
-
 .PHONY: go-build
-go-build: go-work-use
+go-build:
 	@for mod in $(GO_MODULES); do \
        	(cd $$mod && go generate ./... && go mod tidy && go build ./...) || exit $$?; \
 	done;

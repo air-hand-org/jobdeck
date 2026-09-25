@@ -1,7 +1,4 @@
 <Solution>
-  <Folder Name="/services/">
-    <Project Path="services/ui/ui.csproj" />
-  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/e2e/e2e.csproj" />
   </Folder>

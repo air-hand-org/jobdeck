@@ -24,7 +24,7 @@ permissions:
 
 jobs:
   tofu:
-    runs-on: ${{ inputs.command == 'apply' && 'ubuntu-latest' || 'ubuntu-slim' }}
+    runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     env:
       TOFU_ROOT: ${{ inputs.root }}
@@ -47,7 +47,7 @@ jobs:
           # Do not set `repositories`: a repository created by this OpenTofu
           # run does not exist yet and therefore cannot scope the token. Apps
           # that create repositories must be installed for all repositories.
-      - uses: ./.github/actions/setup-tools
+      - uses: air-hand-org/jobdeck-actions/actions/setup-tools@v1.4.1
       - name: Lint OpenTofu
         run: make tofu-lint
       - name: Validate root and environment
