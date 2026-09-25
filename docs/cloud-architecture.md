@@ -104,6 +104,11 @@ apply job とし、変更が両方に影響する場合は同じ push event か�
 app plan / apply も対象とする。`environments/production.yaml` や `iac/app/**` の変更は app
 のみを対象とする。
 
+ただし、bootstrap output の変更など app が更新後の bootstrap state に依存する変更は、同一 PR で
+並列 apply しない。bootstrap と app の変更を別 PR に分け、bootstrap 側の merge / apply 完了後に
+app 側を merge する。通常の bootstrap 変更で app が更新後 state を必要としない場合は、並列 apply を
+許容する。
+
 `_tofu` は `root` と `command` を受け取る reusable workflow であり、main merge 時の apply、
 PR CI の infrastructure plan、必要時の手動 apply から呼ぶ。backend prefix は `root`
 (`bootstrap` または `app`) とし、認証 service account は選択した GitHub Environment の
