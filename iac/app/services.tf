@@ -117,12 +117,10 @@ resource "google_cloud_run_v2_service" "auth" {
       }
     }
 
-    # Cloud Run sends traffic to the first container.
-    # Envoy dispatches HTTP JWKS or h2c gRPC locally.
     containers {
-      name       = "auth-proxy"
-      image      = local.images.auth_proxy
-      depends_on = ["auth"]
+      name       = "auth"
+      image      = local.images.auth
+      depends_on = ["postgres"]
 
       ports {
         container_port = 8080
@@ -130,44 +128,8 @@ resource "google_cloud_run_v2_service" "auth" {
       }
 
       env {
-        name  = "PROXY_PORT"
+        name  = "PORT"
         value = "8080"
-      }
-
-      env {
-        name  = "AUTH_GRPC_HOST"
-        value = "127.0.0.1"
-      }
-
-      env {
-        name  = "AUTH_GRPC_PORT"
-        value = "9091"
-      }
-
-      env {
-        name  = "AUTH_JWKS_HOST"
-        value = "127.0.0.1"
-      }
-
-      env {
-        name  = "AUTH_JWKS_PORT"
-        value = "8081"
-      }
-    }
-
-    containers {
-      name       = "auth"
-      image      = local.images.auth
-      depends_on = ["postgres"]
-
-      env {
-        name  = "GRPC_PORT"
-        value = "9091"
-      }
-
-      env {
-        name  = "HTTP_PORT"
-        value = "8081"
       }
 
       env {
@@ -232,7 +194,7 @@ resource "google_cloud_run_v2_service" "auth" {
 
       startup_probe {
         grpc {
-          port = 9091
+          port = 8080
         }
         failure_threshold = 30
         period_seconds    = 3
