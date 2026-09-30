@@ -33,7 +33,7 @@ public sealed class AuthBuilder(
         return new AuthEndpoints(Grpc: proxy, Http: proxy);
     }
 
-    private EndpointReference ReverseProxy(int port, EndpointReference envoy)
+    private EndpointReference ReverseProxy(int port, EndpointReference backend)
     {
         return builder.AddYarp("auth-tls")
             .WithHostHttpsPort(port)
@@ -41,7 +41,7 @@ public sealed class AuthBuilder(
             .WithEnvironment("REVERSEPROXY__CLUSTERS__cluster_auth-proxy__HTTPREQUEST__VERSIONPOLICY", HttpVersionPolicy.RequestVersionExact.ToString())
             .WithConfiguration(yarp =>
             {
-                var grpcCluster = yarp.AddCluster(envoy)
+                var grpcCluster = yarp.AddCluster(backend)
                     .WithForwarderRequestConfig(new()
                     {
                         Version = HttpVersion.Version20,
@@ -66,7 +66,7 @@ public sealed class AuthBuilder(
             image: "ghcr.io/air-hand-org/jobdeck-auth",
             tag: imageTag
         )
-.WithEnvironment("PORT", "8080")
+        .WithEnvironment("PORT", "8080")
         .WithHttpEndpoint(
             name: "backend",
             targetPort: 8080
