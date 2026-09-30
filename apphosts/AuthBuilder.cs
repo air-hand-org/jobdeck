@@ -17,7 +17,6 @@ public sealed class AuthBuilder(
     , IResourceBuilder<PostgresServerResource> postgres
     , string workerClientId
     , string imageTag
-    , string proxyImageTag
     , string repoRoot
     , bool useLocal
 )
@@ -30,8 +29,7 @@ public sealed class AuthBuilder(
         var backend = localAppDirectory is null
             ? ContainerBackend(grpcReflectionFlag, authDB)
             : LocalBackend(isDebug, grpcReflectionFlag, authDB);
-        var envoy = EnvoyProxy(backend);
-        var proxy = ReverseProxy(port, envoy);
+        var proxy = ReverseProxy(port, backend.Endpoint);
         return new AuthEndpoints(Grpc: proxy, Http: proxy);
     }
 
@@ -54,37 +52,6 @@ public sealed class AuthBuilder(
             .GetEndpoint("https");
     }
 
-    private EndpointReference EnvoyProxy(BackendEndpoints backend)
-    {
-        var proxy = localAppDirectory is null
-            ? builder.AddContainer(
-                name: "auth-proxy",
-                image: "ghcr.io/air-hand-org/jobdeck-auth-proxy",
-                tag: proxyImageTag
-            )
-            : builder.AddDockerfile(
-                name: "auth-proxy",
-                contextPath: Path.Combine(localAppDirectory, "containers", "auth-proxy")
-            );
-
-        return proxy
-        .WithHttpEndpoint(
-            name: "h2c",
-            targetPort: 8080
-        )
-        .WithReference(backend.Grpc)
-        .WithReference(backend.Http)
-        .WithEnvironment(context =>
-        {
-            context.EnvironmentVariables["PROXY_PORT"] = "8080";
-            context.EnvironmentVariables["AUTH_GRPC_HOST"] = backend.Grpc.Property(EndpointProperty.Host);
-            context.EnvironmentVariables["AUTH_GRPC_PORT"] = backend.Grpc.Property(EndpointProperty.TargetPort);
-            context.EnvironmentVariables["AUTH_JWKS_HOST"] = backend.Http.Property(EndpointProperty.Host);
-            context.EnvironmentVariables["AUTH_JWKS_PORT"] = backend.Http.Property(EndpointProperty.TargetPort);
-        })
-        .GetEndpoint("h2c");
-    }
-
     private BackendEndpoints ContainerBackend(
         string grpcReflectionFlag,
         IResourceBuilder<PostgresDatabaseResource> authDB
@@ -99,15 +66,10 @@ public sealed class AuthBuilder(
             image: "ghcr.io/air-hand-org/jobdeck-auth",
             tag: imageTag
         )
-        .WithEnvironment("GRPC_PORT", "9091")
-        .WithEnvironment("HTTP_PORT", "8081")
+.WithEnvironment("PORT", "8080")
         .WithHttpEndpoint(
-            name: "grpc-backend",
-            targetPort: 9091
-        )
-        .WithHttpEndpoint(
-            name: "http-backend",
-            targetPort: 8081
+            name: "backend",
+            targetPort: 8080
         )
         .AsHttp2Service()
         , authDB,
@@ -117,10 +79,7 @@ public sealed class AuthBuilder(
         workerClientSecretHash,
         testUserSecretHash
         );
-        return new BackendEndpoints(
-            Grpc: backend.GetEndpoint("grpc-backend"),
-            Http: backend.GetEndpoint("http-backend")
-        );
+        return new BackendEndpoints(backend.GetEndpoint("backend"));
     }
 
     private BackendEndpoints LocalBackend(
@@ -155,12 +114,8 @@ public sealed class AuthBuilder(
             packagePath: "./cmd/server"
         )
         .WithHttpEndpoint(
-            name: "grpc-backend",
-            env: "GRPC_PORT"
-        )
-        .WithHttpEndpoint(
-            name: "http-backend",
-            env: "HTTP_PORT"
+            name: "backend",
+            env: "PORT"
         )
         .AsHttp2Service(),
         authDB,
@@ -182,10 +137,7 @@ public sealed class AuthBuilder(
                 OnlySameUser = false
             });
         }
-        return new BackendEndpoints(
-            Grpc: backend.GetEndpoint("grpc-backend"),
-            Http: backend.GetEndpoint("http-backend")
-        );
+        return new BackendEndpoints(backend.GetEndpoint("backend"));
     }
 
     private IResourceBuilder<T> ConfigureBackend<T>(
@@ -233,5 +185,5 @@ public sealed class AuthBuilder(
         return path;
     }
 
-    private sealed record BackendEndpoints(EndpointReference Grpc, EndpointReference Http);
+    private sealed record BackendEndpoints(EndpointReference Endpoint);
 }
