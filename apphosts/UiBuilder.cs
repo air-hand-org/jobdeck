@@ -57,7 +57,8 @@ public sealed class UiBuilder(
             .WithHttpEndpoint(
                 name: "http",
                 env: "ASPNETCORE_HTTP_PORTS"
-            ))
+            )
+            .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development"))
             .GetEndpoint("http");
     }
 
