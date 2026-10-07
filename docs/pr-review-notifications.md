@@ -3,8 +3,9 @@
 `.github/workflows/request-pr-review.yaml` calls the reusable Slack notification
 workflow in `air-hand-org/jobdeck-actions` v1.5.0, pinned to release commit
 `19271b7a2a9332bc2066ae136c0b2dc1d8751747`. It requests Hermes reviews for all
-open, non-draft PRs from branches in this repository, including image promotion
-PRs. Fork PRs are excluded because `pull_request` does not receive their secrets.
+open, non-draft PRs targeting `main` from branches in this repository, including
+image promotion PRs. Fork PRs are excluded because `pull_request` does not receive
+their secrets.
 
 ## Setup
 
@@ -35,6 +36,7 @@ update the pinned commit and version comment together.
 | `synchronize` | Request review of the updated head if the PR is not a draft. |
 | Draft PR, title/body edits, labels | No review request. |
 | Fork PR | No review request. |
+| PR targeting a branch other than `main` | No review request. |
 
 The reusable workflow checks the PR again through GitHub's API before sending.
 A closed PR, draft PR, or event whose head SHA is no longer current is skipped.
