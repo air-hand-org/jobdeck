@@ -1,0 +1,21 @@
+name: Request PR review
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
+
+permissions: {}
+
+jobs:
+  notify:
+    if: >-
+      github.event.pull_request.state == 'open' &&
+      !github.event.pull_request.draft &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      pull-requests: read
+    uses: air-hand-org/jobdeck-actions/.github/workflows/reusable-slack-pr-review-request.yaml@19271b7a2a9332bc2066ae136c0b2dc1d8751747 # v1.5.0
+    secrets:
+      channel-id: ${{ secrets.SLACK_REVIEW_CHANNEL_ID }}
+      reviewer-user-id: ${{ secrets.SLACK_REVIEWER_USER_ID }}
+      slack-bot-token: ${{ secrets.SLACK_REVIEW_NOTIFIER_BOT_TOKEN }}
