@@ -1,5 +1,6 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
+using Aspire.Hosting.Go;
 using Aspire.Hosting.Testing;
 using Microsoft.Extensions.Logging;
 using Xunit;
@@ -14,12 +15,15 @@ public sealed class AppFixture : IAsyncLifetime
     private static readonly string[] ResourceLogNames =
     [
         "auth",
+        "auth-db-migrator",
         "auth-tls",
         "demo",
         "demo-backend",
         "forward-proxy",
         "job-api",
         "job-api-tls",
+        "job-db-migrator",
+        "job-outbox-republisher",
         "job-worker",
         "postgres",
         "pubsub",
@@ -44,16 +48,18 @@ public sealed class AppFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
+        var useLocal = string.Equals(Environment.GetEnvironmentVariable("USE_LOCAL"), "true", StringComparison.OrdinalIgnoreCase);
         var uiBaseUrl = Environment.GetEnvironmentVariable("E2E_UI_BASE_URL");
         var demoBaseUrl = Environment.GetEnvironmentVariable("E2E_DEMO_BASE_URL");
         if (!string.IsNullOrWhiteSpace(uiBaseUrl) && !string.IsNullOrWhiteSpace(demoBaseUrl))
         {
+            Assert.False(useLocal, "Local-source E2E must start its own AppHost to verify source selection.");
             var demoUri = ValidUri(demoBaseUrl);
             Target = new(UIBaseUri: ValidUri(uiBaseUrl), DemoBaseUri: demoUri, DemoBaseUriFromContainerNetwork: demoUri);
             return;
         }
 
-        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(10));
 
         Environment.SetEnvironmentVariable(
             "API_AUTH_MODE", "REQUIRED" // disable fallback
@@ -89,6 +95,7 @@ public sealed class AppFixture : IAsyncLifetime
         var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.Apphosts>(
             [
                 "UseVolumes=false",
+                $"USE_LOCAL={useLocal}",
             ],
             cts.Token
         );
@@ -104,6 +111,8 @@ public sealed class AppFixture : IAsyncLifetime
         try
         {
             app = await appHost.BuildAsync(cts.Token);
+            var model = app.Services.GetRequiredService<DistributedApplicationModel>();
+            VerifyServiceSources(model, useLocal);
             await app.StartAsync(cts.Token);
 
             await app.ResourceNotifications.WaitForResourceHealthyAsync("ui", cts.Token);
@@ -119,9 +128,45 @@ public sealed class AppFixture : IAsyncLifetime
         }
         catch
         {
-            await DisposeAsync();
+            try
+            {
+                await DisposeAsync();
+            }
+            catch (Exception cleanupException)
+            {
+                Console.Error.WriteLine($"AppHost cleanup failed: {cleanupException.GetType().Name}");
+            }
             throw;
         }
+    }
+
+    private static void VerifyServiceSources(DistributedApplicationModel model, bool useLocal)
+    {
+        var ui = model.Resources.Single(resource => resource.Name == "ui-backend");
+        if (useLocal)
+        {
+            Assert.IsType<ProjectResource>(ui);
+        }
+        else
+        {
+            Assert.IsType<ContainerResource>(ui);
+        }
+
+        foreach (var name in new[] { "auth", "job-api", "job-worker", "demo-backend" })
+        {
+            var resource = model.Resources.Single(resource => resource.Name == name);
+            if (useLocal)
+            {
+                Assert.IsType<GoAppResource>(resource);
+            }
+            else
+            {
+                Assert.IsType<ContainerResource>(resource);
+            }
+        }
+
+        var forwardProxy = model.Resources.Single(resource => resource.Name == "forward-proxy");
+        Assert.Equal(useLocal, forwardProxy.Annotations.OfType<DockerfileBuildAnnotation>().Any());
     }
 
     public async Task DisposeAsync()
@@ -138,6 +183,7 @@ public sealed class AppFixture : IAsyncLifetime
         finally
         {
             await app.DisposeAsync();
+            app = null;
         }
     }
 

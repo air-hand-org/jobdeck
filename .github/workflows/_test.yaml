@@ -58,3 +58,75 @@ jobs:
           name: aspire-resource-logs
           path: '**/TestResults/aspire-logs/*.log'
           if-no-files-found: ignore
+
+  local-source:
+    permissions:
+      contents: read
+      packages: read
+    runs-on: ubuntu-latest
+    env:
+      USE_LOCAL: 'true'
+      GITHUB_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Isolate NuGet caches
+        run: |
+          nuget_cache_root=$(mktemp -d "${RUNNER_TEMP}/local-source-nuget.XXXXXX")
+          printf 'NUGET_PACKAGES=%s/packages\nNUGET_HTTP_CACHE_PATH=%s/http-cache\n' \
+            "$nuget_cache_root" "$nuget_cache_root" >> "$GITHUB_ENV"
+      - name: Isolate Go caches
+        run: |
+          go_cache_root=$(mktemp -d "${RUNNER_TEMP}/local-source-go.XXXXXX")
+          printf 'GOMODCACHE=%s/modules\nGOCACHE=%s/build\n' \
+            "$go_cache_root" "$go_cache_root" >> "$GITHUB_ENV"
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: air-hand-org/jobdeck-actions/actions/setup-tools@v1.4.1
+      - name: Create a service source checkout token
+        id: service-source-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.GH_APP_RELEASE_CLIENT_ID }}
+          private-key: ${{ secrets.GH_APP_RELEASE_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            jobdeck-auth
+            jobdeck-job-api
+            jobdeck-job-worker
+            jobdeck-ui
+            jobdeck-demo
+            api-contracts
+          permission-contents: read
+      - name: Check out local service sources
+        run: |
+          gh auth setup-git --hostname github.com
+          mise exec -- make clone-service-repo
+        env:
+          GH_TOKEN: ${{ steps.service-source-token.outputs.token }}
+      # The dynamically registered UI project is outside the root solution.
+      - name: Restore and build the local UI
+        run: mise exec -- dotnet build services/ui/src/ui.csproj
+      - name: Run the complete E2E suite against local sources
+        run: mise exec -- make cs-test
+        env:
+          GH_TOKEN: ${{ steps.service-source-token.outputs.token }}
+      - name: Upload local-source Playwright traces
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: local-source-playwright-traces
+          path: '**/playwright-traces/*.zip'
+          if-no-files-found: ignore
+      - name: Upload local-source Aspire resource logs
+        if: ${{ failure() || runner.debug == '1' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: local-source-aspire-resource-logs
+          path: '**/TestResults/aspire-logs/*.log'
+          if-no-files-found: ignore

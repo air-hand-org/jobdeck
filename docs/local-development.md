@@ -24,10 +24,25 @@ This installs the tool versions declared for the project.
 
 ## Run Locally
 
+Create an ignored `.env.local` in the repository root with a GitHub classic PAT
+that has `read:packages` access to the private GHCR images and NuGet packages:
+
+```dotenv
+GITHUB_PACKAGES_TOKEN=<your-classic-PAT>
+```
+
+Authenticate the GitHub CLI with `gh auth login` and run
+`gh auth setup-git --hostname github.com` to enable authenticated Git downloads
+of the Go services' private `api-contracts` modules. `mise.toml` sets `GOPRIVATE`
+for those modules and uses the active GitHub CLI
+account as `GITHUB_ACTOR`, unless that variable is already set. The same
+`GITHUB_PACKAGES_TOKEN` supplies both GHCR login and the UI's `github` NuGet source
+credentials. Do not print these environment variables or commit the token.
+
 Start the local environment through Aspire:
 
 ```sh
-make run
+mise exec -- make run
 ```
 
 This starts the AppHost and the local resources it defines, including the UI, job API, worker, and PostgreSQL.
@@ -41,23 +56,49 @@ By default, Aspire runs all services from the versioned GHCR images declared in
 into the corresponding path below and set `USE_LOCAL=true`:
 
 ```sh
-git clone git@github.com:air-hand-org/jobdeck-auth.git services/auth
-git clone git@github.com:air-hand-org/jobdeck-job-api.git services/job-api
-git clone git@github.com:air-hand-org/jobdeck-job-worker.git services/job-worker
-git clone git@github.com:air-hand-org/jobdeck-ui.git services/ui
-git clone git@github.com:air-hand-org/jobdeck-demo.git services/demo
-USE_LOCAL=true DEBUG=true make run
+mise exec -- make clone-service-repo
+USE_LOCAL=true DEBUG=true mise exec -- make run
 ```
 
+`clone-service-repo` clones missing service repositories in parallel at the
+`v<version>` tags declared in `environments/production.yaml`. Existing paths are
+kept without fetching, switching branches, or changing local edits. Use Git in
+each checkout to select a development branch when needed. Your GitHub CLI account
+must have read access to the private service repositories.
+
 `USE_LOCAL=true` selects local source mode independently for each checkout. It
-It requires the respective `go.mod` file for auth, job-api, job-worker, and demo,
+requires the respective `go.mod` file for auth, job-api, job-worker, and demo,
 or `services/ui/src/ui.csproj` for UI. The Go services start with `AddGoApp`, UI
-starts as a local .NET project, and the auth / job-worker proxies are built from
-their local checkout. `DEBUG=true` also enables the auth and job-worker Delve
+starts as a local .NET project, and the job-worker forward proxy is built from
+its local checkout. The TLS reverse proxies remain YARP resources.
+`DEBUG=true` also enables the auth and job-worker Delve
 servers on ports 2347 and 2346. A missing checkout falls back to the corresponding
 versioned container image, even when other services run from source. The checkouts
-are intentionally ignored by this repository's Git worktree. CI does not set
-`USE_LOCAL`, so it continues to use container images.
+are intentionally ignored by this repository's Git worktree.
+
+## Test Local Sources
+
+After cloning all services, run the full E2E suite with an isolated, initially
+empty NuGet package and HTTP cache without clearing your normal cache:
+
+```sh
+nuget_cache_root=$(mktemp -d)
+export NUGET_PACKAGES="$nuget_cache_root/packages"
+export NUGET_HTTP_CACHE_PATH="$nuget_cache_root/http-cache"
+mise exec -- dotnet build services/ui/src/ui.csproj
+USE_LOCAL=true mise exec -- make cs-test
+```
+
+The UI project is dynamically added by the AppHost and is outside the system
+solution, so build it explicitly before testing. The E2E fixture verifies that
+all five services use local sources and that the worker's forward proxy is built
+from its checkout; missing checkouts fail instead of silently passing via images.
+The suite checks readiness, login, and job execution. Browser and development
+certificate setup uses the existing `cs-test` preparation, which may require sudo.
+
+CI keeps the existing container E2E job and runs this full local-source suite in
+a separate job with fresh NuGet caches. CI supplies authentication inputs before
+setup-tools loads the shared `mise.toml` environment.
 
 ## Containerized Local Runs
 

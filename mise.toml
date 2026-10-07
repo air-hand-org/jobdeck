@@ -11,6 +11,12 @@ powershell = '7.5.0'
 # set GITHUB_PACKAGES_TOKEN that has read:packages classic token in .env.local
 _.file = ".env.local"
 
+GOPRIVATE = { default = "github.com/air-hand-org/api-contracts" }
+
 GITHUB_ACTOR = {
     default = '''{{ exec(command="gh auth status --hostname github.com --json hosts --jq '.hosts[][] | select(.active) | .login'") }}''',
+}
+NuGetPackageSourceCredentials_github = {
+    default = "Username=$GITHUB_ACTOR;Password=$GITHUB_PACKAGES_TOKEN",
+    redact = true,
 }
