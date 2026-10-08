@@ -108,29 +108,21 @@ public sealed class AppFixture : IAsyncLifetime
             // To output logs to the xUnit.net ITestOutputHelper, consider adding a package from https://www.nuget.org/packages?q=xunit+logging
         });
 
-        try
-        {
-            app = await appHost.BuildAsync(cts.Token);
-            var model = app.Services.GetRequiredService<DistributedApplicationModel>();
-            VerifyServiceSources(model, useLocal);
-            await app.StartAsync(cts.Token);
+        app = await appHost.BuildAsync(cts.Token);
+        var model = app.Services.GetRequiredService<DistributedApplicationModel>();
+        VerifyServiceSources(model, useLocal);
+        await app.StartAsync(cts.Token);
 
-            await app.ResourceNotifications.WaitForResourceHealthyAsync("ui", cts.Token);
-            Target = new(
-                UIBaseUri: app.GetEndpoint("ui", "https"),
-                DemoBaseUri: app.GetEndpoint("demo", "https"),
-                DemoBaseUriFromContainerNetwork: app.GetEndpointForNetwork(
-                    "demo",
-                    KnownNetworkIdentifiers.DefaultAspireContainerNetwork,
-                    "https"
-                )
-            );
-        }
-        catch
-        {
-            await DisposeAsync();
-            throw;
-        }
+        await app.ResourceNotifications.WaitForResourceHealthyAsync("ui", cts.Token);
+        Target = new(
+            UIBaseUri: app.GetEndpoint("ui", "https"),
+            DemoBaseUri: app.GetEndpoint("demo", "https"),
+            DemoBaseUriFromContainerNetwork: app.GetEndpointForNetwork(
+                "demo",
+                KnownNetworkIdentifiers.DefaultAspireContainerNetwork,
+                "https"
+            )
+        );
     }
 
     private static void VerifyServiceSources(DistributedApplicationModel model, bool useLocal)
