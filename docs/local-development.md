@@ -14,6 +14,10 @@ Project tool versions are managed by `mise.toml` and `aqua.yaml`.
 
 ## First Setup
 
+Enable [mise shell integration](https://mise.jdx.dev/cli/activate.html)
+so entering this repository loads its tool PATH and `mise.toml` environment
+variables. The local commands below assume this integration is active.
+
 Run this once after cloning the repository:
 
 ```sh
@@ -42,7 +46,7 @@ credentials. Do not print these environment variables or commit the token.
 Start the local environment through Aspire:
 
 ```sh
-mise exec -- make run
+make run
 ```
 
 This starts the AppHost and the local resources it defines, including the UI, job API, worker, and PostgreSQL.
@@ -56,8 +60,8 @@ By default, Aspire runs all services from the versioned GHCR images declared in
 into the corresponding path below and set `USE_LOCAL=true`:
 
 ```sh
-mise exec -- make clone-service-repo
-USE_LOCAL=true DEBUG=true mise exec -- make run
+make clone-service-repo
+USE_LOCAL=true DEBUG=true make run
 ```
 
 `clone-service-repo` clones missing service repositories in parallel at the
@@ -76,7 +80,7 @@ servers on ports 2347 and 2346. A missing checkout falls back to the correspondi
 versioned container image, even when other services run from source. The checkouts
 are intentionally ignored by this repository's Git worktree.
 
-Local Go services inherit the Go executable on the root `mise exec` PATH; their
+Local Go services use the Go executable available on the AppHost's PATH; their
 own `mise.toml` files are not automatically loaded. With `GOTOOLCHAIN=auto` (the
 Go default), Go can select a newer toolchain when a service's `go.mod` requires it
 through its `go` or `toolchain` directive. Keep this in mind when updating Go
@@ -93,7 +97,7 @@ Aspire.
 After cloning all services, run the full E2E suite:
 
 ```sh
-USE_LOCAL=true mise exec -- make cs-test
+USE_LOCAL=true make cs-test
 ```
 
 Aspire builds the Go services and UI when starting them; no separate service

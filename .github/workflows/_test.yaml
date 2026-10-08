@@ -47,7 +47,7 @@ jobs:
       - name: Check out local service sources
         run: |
           gh auth setup-git --hostname github.com
-          mise exec -- make clone-service-repo
+          make clone-service-repo
         env:
           GH_TOKEN: ${{ steps.service-source-token.outputs.token }}
       # Service checkouts must exist before computing dependency cache keys.
@@ -83,13 +83,9 @@ jobs:
           path: '**/TestResults/aspire-logs/*.log'
           if-no-files-found: ignore
 
-      - name: Preserve container E2E artifacts before testing local sources
+      - name: Clear container E2E artifacts before testing local sources
         run: |
-          while IFS= read -r -d '' artifact_dir; do
-            destination="${RUNNER_TEMP}/container-e2e/${artifact_dir}"
-            mkdir -p "$(dirname "$destination")"
-            mv "$artifact_dir" "$destination"
-          done < <(find tests/e2e -type d \( -name playwright-traces -o -path '*/TestResults/aspire-logs' \) -prune -print0)
+          find tests/e2e -type d \( -name playwright-traces -o -path '*/TestResults/aspire-logs' \) -prune -exec rm -rf -- {} +
       - name: Run the complete E2E suite against local sources
         id: local-source-test
         run: mise exec -- make cs-test
