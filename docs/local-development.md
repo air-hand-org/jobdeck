@@ -76,29 +76,41 @@ servers on ports 2347 and 2346. A missing checkout falls back to the correspondi
 versioned container image, even when other services run from source. The checkouts
 are intentionally ignored by this repository's Git worktree.
 
+Local Go services inherit the Go executable on the root `mise exec` PATH; their
+own `mise.toml` files are not automatically loaded. With `GOTOOLCHAIN=auto` (the
+Go default), Go can select a newer toolchain when a service's `go.mod` requires it
+through its `go` or `toolchain` directive. Keep this in mind when updating Go
+versions across repositories.
+
+The UI also inherits the root .NET SDK environment. Unlike Go, .NET does not
+automatically download a required SDK; a newer UI target framework or SDK
+requirement must be supported by the SDKs installed for JobDeck. Keep the .NET
+versions in the root and UI `mise.toml` files aligned when upgrading the UI or
+Aspire.
+
 ## Test Local Sources
 
-After cloning all services, run the full E2E suite with an isolated, initially
-empty NuGet package and HTTP cache without clearing your normal cache:
+After cloning all services, run the full E2E suite:
 
 ```sh
-nuget_cache_root=$(mktemp -d)
-export NUGET_PACKAGES="$nuget_cache_root/packages"
-export NUGET_HTTP_CACHE_PATH="$nuget_cache_root/http-cache"
-mise exec -- dotnet build services/ui/src/ui.csproj
 USE_LOCAL=true mise exec -- make cs-test
 ```
 
-The UI project is dynamically added by the AppHost and is outside the system
-solution, so build it explicitly before testing. The E2E fixture verifies that
+Aspire builds the Go services and UI when starting them; no separate service
+build is required. The E2E fixture verifies that
 all five services use local sources and that the worker's forward proxy is built
 from its checkout; missing checkouts fail instead of silently passing via images.
 The suite checks readiness, login, and job execution. Browser and development
 certificate setup uses the existing `cs-test` preparation, which may require sudo.
 
-CI keeps the existing container E2E job and runs this full local-source suite in
-a separate job with fresh NuGet caches. CI supplies authentication inputs before
+CI runs the container suite followed by this full local-source suite in the same
+test job, reusing Docker images and NuGet and Go caches. Logs and traces are
+uploaded separately for each mode. CI supplies authentication inputs before
 setup-tools loads the shared `mise.toml` environment.
+
+To investigate NuGet authentication with an empty cache, set `NUGET_PACKAGES`
+and `NUGET_HTTP_CACHE_PATH` to directories under a temporary directory before
+running the command. This leaves your normal caches intact.
 
 ## Containerized Local Runs
 
