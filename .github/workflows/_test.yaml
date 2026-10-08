@@ -16,6 +16,8 @@ jobs:
       contents: read
       packages: read
     runs-on: ubuntu-latest
+    env:
+      GITHUB_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -27,6 +29,28 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: air-hand-org/jobdeck-actions/actions/setup-tools@v1.4.1
+      - name: Create a service source checkout token
+        id: service-source-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.GH_APP_RELEASE_CLIENT_ID }}
+          private-key: ${{ secrets.GH_APP_RELEASE_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            jobdeck-auth
+            jobdeck-job-api
+            jobdeck-job-worker
+            jobdeck-ui
+            jobdeck-demo
+            api-contracts
+          permission-contents: read
+      - name: Check out local service sources
+        run: |
+          gh auth setup-git --hostname github.com
+          make clone-service-repo
+        env:
+          GH_TOKEN: ${{ steps.service-source-token.outputs.token }}
+      # Service checkouts must exist before computing dependency cache keys.
       - parallel:
           - uses: air-hand-org/jobdeck-actions/actions/cache-go@v1.4.1
           - name: Restore NuGet cache
@@ -56,5 +80,29 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: aspire-resource-logs
+          path: '**/TestResults/aspire-logs/*.log'
+          if-no-files-found: ignore
+
+      - name: Clear container E2E artifacts before testing local sources
+        run: |
+          find tests/e2e -type d \( -name playwright-traces -o -path '*/TestResults/aspire-logs' \) -prune -exec rm -rf -- {} +
+      - name: Run the complete E2E suite against local sources
+        id: local-source-test
+        run: mise exec -- make cs-test
+        env:
+          USE_LOCAL: 'true'
+          GH_TOKEN: ${{ steps.service-source-token.outputs.token }}
+      - name: Upload local-source Playwright traces
+        if: ${{ failure() && steps.local-source-test.outcome == 'failure' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: local-source-playwright-traces
+          path: '**/playwright-traces/*.zip'
+          if-no-files-found: ignore
+      - name: Upload local-source Aspire resource logs
+        if: ${{ (failure() || runner.debug == '1') && steps.local-source-test.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: local-source-aspire-resource-logs
           path: '**/TestResults/aspire-logs/*.log'
           if-no-files-found: ignore

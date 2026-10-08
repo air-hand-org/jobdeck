@@ -10,6 +10,15 @@ public class IntegrationTest(AppFixture fixture)
     private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(30);
 
     [Fact]
+    public async Task GetUIReadinessReturnsOkStatusCode()
+    {
+        using var cts = new CancellationTokenSource(DefaultTimeout);
+        using var httpClient = new HttpClient { BaseAddress = fixture.Target.UIBaseUri };
+        using var response = await httpClient.GetAsync("/health/ready", cts.Token);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
     public async Task GetUIResourceRootReturnsOkStatusCode()
     {
         // Arrange
