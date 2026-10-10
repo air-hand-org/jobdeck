@@ -106,3 +106,16 @@ jobs:
           name: local-source-aspire-resource-logs
           path: '**/TestResults/aspire-logs/*.log'
           if-no-files-found: ignore
+
+      # Free disk space before post-job dependency cache archives are created.
+      - name: Clean up Docker after E2E tests
+        run: |
+          echo "::group::Disk usage before Docker cleanup"
+          df -h
+          docker system df
+          echo "::endgroup::"
+          docker system prune -af
+          echo "::group::Disk usage after Docker cleanup"
+          df -h
+          docker system df
+          echo "::endgroup::"
