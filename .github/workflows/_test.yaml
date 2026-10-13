@@ -31,15 +31,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      # Match setup-tools@v1.4.1's pinned installers, but lazily install aqua
-      # packages so this test job does not download unused IaC/development tools.
-      - uses: aquaproj/aqua-installer@11dd79b4e498d471a9385aa9fb7f62bb5f52a73c # v4.0.4
-        with:
-          aqua_version: v2.60.1
-          aqua_opts: '-l'
-      - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
-        with:
-          cache: true
+      - uses: air-hand-org/jobdeck-actions/actions/setup-tools@v1.4.1
       - name: Create a service source checkout token
         id: service-source-token
         uses: actions/create-github-app-token@v3

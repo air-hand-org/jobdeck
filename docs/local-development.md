@@ -164,11 +164,11 @@ does not prove that all of the observed NuGet usage was unnecessary.
 
 ### Tool installation audit for runner capacity
 
-The test workflow uses the same pinned aqua/mise installers and aqua version as
-shared `setup-tools@v1.4.1`, with [aqua lazy installation](https://aquaproj.github.io/docs/reference/usage/)
-(`aqua_opts: '-l'`) instead of eagerly downloading every aqua package. Tools
-download when first called. IaC and normal `make setup` retain the full tool
-configuration, and the shared action and other repositories are unchanged.
+The test workflow continues to use shared `setup-tools@v1.4.1` with its existing
+eager installation behavior. Lazy aqua installation is deferred to a separate
+[jobdeck-actions #18](https://github.com/air-hand-org/jobdeck-actions/issues/18) enhancement so callers can opt in through the shared action
+instead of duplicating installer steps. IaC and normal `make setup` retain all
+required tools; no shared action or other repository is changed by this PR.
 
 | Tool | Decision and verified use |
 | --- | --- |
@@ -176,8 +176,8 @@ configuration, and the shared action and other repositories are unchanged.
 | moq | Remove from aqua: no repository-owned Go source has a `go:generate` directive or moq call; `go-build` still runs `go generate`, but has no mock generation here. External service source generation belongs to its repository. |
 | golangci-lint | Retain; `mkfiles/go.mk` formats and lints repository-owned Go modules. |
 | jq / yq | Retain; smoke tests use jq, and service checkout reads the production manifest with yq. |
-| OpenTofu / tfcmt / SOPS | Retain for IaC validation, plan/apply, and local secret editing; the test workflow does not eagerly download them. |
-| gcloud | Retain for `iac/secrets/README.md` application-default login; the emulator's container-provided gcloud is independent. The test workflow does not eagerly download the host SDK. |
+| OpenTofu / tfcmt / SOPS | Retain for IaC validation, plan/apply, and local secret editing. |
+| gcloud | Retain for `iac/secrets/README.md` application-default login; the emulator's container-provided gcloud is independent. |
 | .NET / Go / Node / PowerShell / grpcurl | Retain for AppHost/E2E, Pub/Sub helpers/local services, workflow script tests, Playwright preparation, and the job-execution smoke script respectively. |
 | buf | No direct aqua/mise declaration in JobDeck; nothing removed. Contract generation belongs to api-contracts. |
 
