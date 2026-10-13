@@ -96,6 +96,7 @@ public sealed class AppFixture : IAsyncLifetime
         var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.Apphosts>(
             [
                 "UseVolumes=false",
+                "UsePgAdmin=false",
                 $"USE_LOCAL={useLocal}",
             ],
             cts.Token
@@ -128,6 +129,8 @@ public sealed class AppFixture : IAsyncLifetime
 
     private static void VerifyServiceSources(DistributedApplicationModel model, bool useLocal)
     {
+        Assert.DoesNotContain(model.Resources, resource => resource.Name == "pgadmin");
+
         var ui = model.Resources.Single(resource => resource.Name == "ui-backend");
         if (useLocal)
         {
