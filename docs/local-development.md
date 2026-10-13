@@ -112,6 +112,41 @@ test job, reusing Docker images and NuGet and Go caches. Logs and traces are
 uploaded separately for each mode. CI supplies authentication inputs before
 setup-tools loads the shared `mise.toml` environment.
 
+### E2E startup and runner capacity
+
+The fixture shares one five-minute deadline across AppHost creation, build,
+start, and the UI Healthy wait. E2E continues to pass `UseVolumes=false`.
+pgAdmin remains enabled in both suites so capacity diagnostics can observe the
+existing composition before any resource reduction.
+
+Aspire 13.6.1's [testing factory](https://github.com/microsoft/aspire/blob/v13.6.1/src/Aspire.Hosting.Testing/DistributedApplicationFactory.cs)
+already sets `DisableDashboard=true` and enables resource logging. Therefore
+these E2Es do not start the dashboard or create its persistent SQLite state;
+no extra dashboard persistence override is needed. This is separate from DB
+volumes and resource lifetimes. The AppHost has no persistent resource lifetime
+opt-ins, and the testing factory waits for resource cleanup.
+For ordinary AppHost runs, [dashboard persistence](https://aspire.dev/dashboard/configuration/#data-persistence)
+defaults to `Run` under `${ASPIRE_HOME:-~/.aspire}/dashboard` (or
+`ASPIRE_DASHBOARD_DATA_DIRECTORY`). `ASPIRE_DASHBOARD_PERSISTENCE_MODE=None`
+uses a temporary SQLite database instead; it does not eliminate disk writes.
+
+To compare runner usage, rerun CI with debug logging enabled (`runner.debug=1`).
+Read-only diagnostics run after dependency cache restore, before container E2E,
+after container E2E / before local E2E, and after local E2E. The post-test
+snapshots also run on failure, before artifact upload and Docker cleanup.
+They include filesystem bytes/inodes, detailed Docker usage, selected Go/NuGet
+cache paths, service checkouts and build outputs, and Aspire home/session state.
+Only sizes and paths are printed; configuration files and credentials are not.
+Commands are bounded and unavailable diagnostics do not fail the test job.
+Normal CI does not run these detailed snapshots. Existing resource-log artifacts
+remain available on failure, including startup timeouts, and debug runs.
+
+Keep Docker cleanup after both suites so local-source E2E can reuse images.
+Do not clear dependency caches or move cleanup between suites until the capacity
+snapshots identify which interval and storage area grows. The observed
+`no space left on device` does not by itself identify the occupying component
+or distinguish byte exhaustion from inode exhaustion.
+
 To investigate NuGet authentication with an empty cache, set `NUGET_PACKAGES`
 and `NUGET_HTTP_CACHE_PATH` to directories under a temporary directory before
 running the command. This leaves your normal caches intact.

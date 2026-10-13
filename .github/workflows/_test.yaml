@@ -60,14 +60,24 @@ jobs:
               key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
               restore-keys: |
                 nuget-${{ runner.os }}-
+      - name: Diagnose runner capacity after cache restore
+        if: ${{ runner.debug == '1' }}
+        run: bash .github/scripts/diagnose-e2e-capacity.sh after-cache-restore
       - name: build
         run: make build
       - name: lint
         run: make lint
       - name: check clean
         run: make check-clean
+      - name: Diagnose runner capacity before container E2E
+        if: ${{ runner.debug == '1' }}
+        run: bash .github/scripts/diagnose-e2e-capacity.sh before-container-e2e
       - name: test
+        id: container-test
         run: make test
+      - name: Diagnose runner capacity after container E2E / before local E2E
+        if: ${{ always() && runner.debug == '1' && steps.container-test.outcome != 'skipped' }}
+        run: bash .github/scripts/diagnose-e2e-capacity.sh after-container-e2e
       - name: upload Playwright traces
         if: ${{ failure() }}
         uses: actions/upload-artifact@v7
@@ -92,6 +102,9 @@ jobs:
         env:
           USE_LOCAL: 'true'
           GH_TOKEN: ${{ steps.service-source-token.outputs.token }}
+      - name: Diagnose runner capacity after local E2E
+        if: ${{ always() && runner.debug == '1' && steps.local-source-test.outcome != 'skipped' }}
+        run: bash .github/scripts/diagnose-e2e-capacity.sh after-local-e2e
       - name: Upload local-source Playwright traces
         if: ${{ failure() && steps.local-source-test.outcome == 'failure' }}
         uses: actions/upload-artifact@v7

@@ -59,7 +59,8 @@ public sealed class AppFixture : IAsyncLifetime
             return;
         }
 
-        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(10));
+        // One overall deadline shared by AppHost creation, Build, Start, and UI Healthy wait.
+        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
 
         Environment.SetEnvironmentVariable(
             "API_AUTH_MODE", "REQUIRED" // disable fallback
