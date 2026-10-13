@@ -22,6 +22,9 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+      - name: Diagnose runner capacity after checkout
+        if: ${{ runner.debug == '1' }}
+        run: bash .github/scripts/diagnose-e2e-capacity.sh after-checkout
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v4
         with:
@@ -50,6 +53,9 @@ jobs:
           make clone-service-repo
         env:
           GH_TOKEN: ${{ steps.service-source-token.outputs.token }}
+      - name: Diagnose runner capacity before cache restore
+        if: ${{ runner.debug == '1' }}
+        run: bash .github/scripts/diagnose-e2e-capacity.sh before-cache-restore
       # Service checkouts must exist before computing dependency cache keys.
       - parallel:
           - uses: air-hand-org/jobdeck-actions/actions/cache-go@v1.4.1

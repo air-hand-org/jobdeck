@@ -131,8 +131,10 @@ defaults to `Run` under `${ASPIRE_HOME:-~/.aspire}/dashboard` (or
 uses a temporary SQLite database instead; it does not eliminate disk writes.
 
 To compare runner usage, rerun CI with debug logging enabled (`runner.debug=1`).
-Read-only diagnostics run after dependency cache restore, before container E2E,
-after container E2E / before local E2E, and after local E2E. The post-test
+Read-only diagnostics run immediately after checkout, immediately before and
+after dependency cache restore, before container E2E, after container E2E /
+before local E2E, and after local E2E. The before/after cache snapshots isolate
+cache restoration from tool setup and service checkout growth. The post-test
 snapshots also run on failure, before artifact upload and Docker cleanup.
 They include filesystem bytes/inodes, detailed Docker usage, selected Go/NuGet
 cache paths, service checkouts and build outputs, and Aspire home/session state.
