@@ -53,6 +53,9 @@ This starts the AppHost and the local resources it defines, including the UI, jo
 
 The Aspire dashboard URL is printed by the Aspire CLI.
 
+pgAdmin starts by default. To omit it, run `UsePgAdmin=false make run`;
+this is independent of PostgreSQL data volume configuration.
+
 ## Local Service Checkouts
 
 By default, Aspire runs all services from the versioned GHCR images declared in
@@ -112,78 +115,9 @@ test job, reusing Docker images and NuGet and Go caches. Logs and traces are
 uploaded separately for each mode. CI supplies authentication inputs before
 setup-tools loads the shared `mise.toml` environment.
 
-### E2E startup and runner capacity
-
-The fixture shares one five-minute deadline across AppHost creation, build,
-start, and the UI Healthy wait. E2E passes `UseVolumes=false` and
-`UsePgAdmin=false` independently. Normal local runs still start pgAdmin and use a
-DB volume. Both E2E modes verify that the pgAdmin resource is absent.
-
-Aspire 13.6.1's [testing factory](https://github.com/microsoft/aspire/blob/v13.6.1/src/Aspire.Hosting.Testing/DistributedApplicationFactory.cs)
-already sets `DisableDashboard=true` and enables resource logging. Therefore
-these E2Es do not start the dashboard or create its persistent SQLite state;
-no extra dashboard persistence override is needed. This is separate from DB
-volumes and resource lifetimes. The AppHost has no persistent resource lifetime
-opt-ins, and the testing factory waits for resource cleanup.
-For ordinary AppHost runs, [dashboard persistence](https://aspire.dev/dashboard/configuration/#data-persistence)
-defaults to `Run` under `${ASPIRE_HOME:-~/.aspire}/dashboard` (or
-`ASPIRE_DASHBOARD_DATA_DIRECTORY`). `ASPIRE_DASHBOARD_PERSISTENCE_MODE=None`
-uses a temporary SQLite database instead; it does not eliminate disk writes.
-
-To compare runner usage, rerun CI with debug logging enabled (`runner.debug=1`).
-Read-only diagnostics run immediately after checkout, immediately before and
-after dependency cache restore, before container E2E, after container E2E /
-before local E2E, and after local E2E. The before/after cache snapshots isolate
-cache restoration from tool setup and service checkout growth. The post-test
-snapshots also run on failure, before artifact upload and Docker cleanup.
-They include filesystem bytes/inodes, detailed Docker usage, selected Go/NuGet
-cache paths, service checkouts and build outputs, and Aspire home/session state.
-Only sizes and paths are printed; configuration files and credentials are not.
-Commands are bounded and unavailable diagnostics do not fail the test job.
-Normal CI does not run these detailed snapshots. Existing resource-log artifacts
-remain available on failure, including startup timeouts, and debug runs.
-
-Keep Docker cleanup after both suites so local-source E2E can reuse images.
-Do not clear dependency caches or move cleanup between suites until the capacity
-snapshots identify which interval and storage area grows. The observed
-`no space left on device` does not by itself identify the occupying component
-or distinguish byte exhaustion from inode exhaustion.
-
-The run 38391833925 attempt 2 diagnostics showed free space falling from 13G
-after checkout to 9.7G before cache restore, 4.3G after restore, 3.5G before
-container E2E, and 1.4G after failure (rounded `df -h` values). Inode usage was
-14%; PostgreSQL initialization and Pub/Sub image extraction reported disk-full
-errors. NuGet restored a fallback cache (1.9G, then 2.4G after build), Go module
-and build caches occupied 2.6G and 932M, and the pgAdmin image was 507MB.
-
-NuGet now restores only the exact existing `nuget-${runner.os}-${hashFiles}`
-key; the prefix is unchanged and no existing cache is deleted. An exact-match
-cache can still contain old packages from its original creation. Removing
-fallback restores avoids carrying an unrelated dependency set forward, but
-does not prove that all of the observed NuGet usage was unnecessary.
-
-### Tool installation audit for runner capacity
-
-The test workflow continues to use shared `setup-tools@v1.4.1` with its existing
-eager installation behavior. Lazy aqua installation is deferred to a separate
-[jobdeck-actions #18](https://github.com/air-hand-org/jobdeck-actions/issues/18) enhancement so callers can opt in through the shared action
-instead of duplicating installer steps. IaC and normal `make setup` retain all
-required tools; no shared action or other repository is changed by this PR.
-
-| Tool | Decision and verified use |
-| --- | --- |
-| watchexec | Remove from mise: no CI, Makefile, script, AppHost, or documented development command calls it; `make run` uses Aspire directly. |
-| moq | Remove from aqua: no repository-owned Go source has a `go:generate` directive or moq call; `go-build` still runs `go generate`, but has no mock generation here. External service source generation belongs to its repository. |
-| golangci-lint | Retain; `mkfiles/go.mk` formats and lints repository-owned Go modules. |
-| jq / yq | Retain; smoke tests use jq, and service checkout reads the production manifest with yq. |
-| OpenTofu / tfcmt / SOPS | Retain for IaC validation, plan/apply, and local secret editing. |
-| gcloud | Retain for `iac/secrets/README.md` application-default login; the emulator's container-provided gcloud is independent. |
-| .NET / Go / Node / PowerShell / grpcurl | Retain for AppHost/E2E, Pub/Sub helpers/local services, workflow script tests, Playwright preparation, and the job-execution smoke script respectively. |
-| buf | No direct aqua/mise declaration in JobDeck; nothing removed. Contract generation belongs to api-contracts. |
-
-Compare the same debug snapshots after these reductions and verify both E2E
-modes; a passing container suite alone does not establish sufficient capacity
-for local-source builds.
+To investigate CI disk usage, rerun the job with debug logging enabled.
+Capacity snapshots appear in the job log; Aspire resource logs are uploaded as
+separate artifacts for container and local-source E2E.
 
 To investigate NuGet authentication with an empty cache, set `NUGET_PACKAGES`
 and `NUGET_HTTP_CACHE_PATH` to directories under a temporary directory before
