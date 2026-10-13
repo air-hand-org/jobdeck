@@ -32,8 +32,6 @@ public sealed class JobAPIBuilder(
     {
         return builder.AddYarp("job-api-tls")
             .WithHostHttpsPort(port)
-            // Aspire.Hosting.Yarp 13.5.2 does not flatten enum values in cluster configuration.
-            .WithEnvironment("REVERSEPROXY__CLUSTERS__cluster_job-api__HTTPREQUEST__VERSIONPOLICY", HttpVersionPolicy.RequestVersionExact.ToString())
             .WithConfiguration(yarp =>
             {
                 var cluster = yarp.AddCluster(backend)

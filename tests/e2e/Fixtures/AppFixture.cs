@@ -59,7 +59,8 @@ public sealed class AppFixture : IAsyncLifetime
             return;
         }
 
-        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(10));
+        // One overall deadline shared by AppHost creation, Build, Start, and UI Healthy wait.
+        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
 
         Environment.SetEnvironmentVariable(
             "API_AUTH_MODE", "REQUIRED" // disable fallback
@@ -95,6 +96,7 @@ public sealed class AppFixture : IAsyncLifetime
         var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.Apphosts>(
             [
                 "UseVolumes=false",
+                "UsePgAdmin=false",
                 $"USE_LOCAL={useLocal}",
             ],
             cts.Token
@@ -127,6 +129,8 @@ public sealed class AppFixture : IAsyncLifetime
 
     private static void VerifyServiceSources(DistributedApplicationModel model, bool useLocal)
     {
+        Assert.DoesNotContain(model.Resources, resource => resource.Name == "pgadmin");
+
         var ui = model.Resources.Single(resource => resource.Name == "ui-backend");
         if (useLocal)
         {

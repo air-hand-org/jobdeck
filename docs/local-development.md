@@ -53,6 +53,9 @@ This starts the AppHost and the local resources it defines, including the UI, jo
 
 The Aspire dashboard URL is printed by the Aspire CLI.
 
+pgAdmin starts by default. To omit it, run `UsePgAdmin=false make run`;
+this is independent of PostgreSQL data volume configuration.
+
 ## Local Service Checkouts
 
 By default, Aspire runs all services from the versioned GHCR images declared in
@@ -111,6 +114,10 @@ CI runs the container suite followed by this full local-source suite in the same
 test job, reusing Docker images and NuGet and Go caches. Logs and traces are
 uploaded separately for each mode. CI supplies authentication inputs before
 setup-tools loads the shared `mise.toml` environment.
+
+To investigate CI disk usage, rerun the job with debug logging enabled.
+Capacity snapshots appear in the job log; Aspire resource logs are uploaded as
+separate artifacts for container and local-source E2E.
 
 To investigate NuGet authentication with an empty cache, set `NUGET_PACKAGES`
 and `NUGET_HTTP_CACHE_PATH` to directories under a temporary directory before
