@@ -15,7 +15,7 @@ resource "github_repository" "auth" {
   web_commit_signoff_required = false
 
   squash_merge_commit_message = "COMMIT_MESSAGES"
-  squash_merge_commit_title   = "COMMIT_OR_PR_TITLE"
+  squash_merge_commit_title   = "PR_TITLE"
 
   lifecycle {
     prevent_destroy = true

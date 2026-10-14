@@ -14,6 +14,8 @@ resource "github_repository" "job_worker" {
   delete_branch_on_merge      = true
   web_commit_signoff_required = false
 
+  squash_merge_commit_title = "PR_TITLE"
+
   auto_init = true
 
   lifecycle {
