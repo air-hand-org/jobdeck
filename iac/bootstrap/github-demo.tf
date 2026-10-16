@@ -74,6 +74,51 @@ resource "github_repository_ruleset" "demo_main" {
   }
 }
 
+# Demo-only experiment: approval bypass must never include the baseline above.
+# User actors are supported by GitHub's current repository-rules REST API and
+# integrations/github v6.13.0. Use the exact user rather than all repository admins.
+# See docs/renovate-demo-experiment.md for compatibility evidence and test gates.
+data "github_app" "demo_renovate" {
+  slug = "renovate"
+}
+
+resource "github_repository_ruleset" "demo_review_approval" {
+  repository  = github_repository.demo.name
+  name        = "main-review-approval"
+  target      = "branch"
+  enforcement = "active"
+
+  conditions {
+    ref_name {
+      include = ["~DEFAULT_BRANCH"]
+      exclude = []
+    }
+  }
+
+  bypass_actors {
+    actor_id    = 45233435 # air-hand; user ID, not an organization/team ID
+    actor_type  = "User"
+    bypass_mode = "pull_request"
+  }
+
+  bypass_actors {
+    actor_id    = data.github_app.demo_renovate.id
+    actor_type  = "Integration"
+    bypass_mode = "pull_request"
+  }
+
+  rules {
+    pull_request {
+      required_approving_review_count   = 1
+      dismiss_stale_reviews_on_push     = false
+      require_code_owner_review         = false
+      require_last_push_approval        = false
+      required_review_thread_resolution = false
+      allowed_merge_methods             = ["squash"]
+    }
+  }
+}
+
 resource "github_repository_ruleset" "demo_release_tag" {
   repository  = github_repository.demo.name
   name        = "release-tag"
