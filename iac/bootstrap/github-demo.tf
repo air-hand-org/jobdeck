@@ -75,9 +75,6 @@ resource "github_repository_ruleset" "demo_main" {
 }
 
 # Demo-only experiment: approval bypass must never include the baseline above.
-# User actors are supported by GitHub's current repository-rules REST API and
-# integrations/github v6.13.0. Use the exact user rather than all repository admins.
-# See docs/renovate-demo-experiment.md for compatibility evidence and test gates.
 data "github_app" "demo_renovate" {
   slug = "renovate"
 }
@@ -96,7 +93,7 @@ resource "github_repository_ruleset" "demo_review_approval" {
   }
 
   bypass_actors {
-    actor_id    = 45233435 # air-hand; user ID, not an organization/team ID
+    actor_id    = local.air_hand_user_id
     actor_type  = "User"
     bypass_mode = "pull_request"
   }
@@ -110,7 +107,7 @@ resource "github_repository_ruleset" "demo_review_approval" {
   rules {
     pull_request {
       required_approving_review_count   = 1
-      dismiss_stale_reviews_on_push     = false
+      dismiss_stale_reviews_on_push     = true
       require_code_owner_review         = false
       require_last_push_approval        = false
       required_review_thread_resolution = false
