@@ -95,13 +95,13 @@ resource "github_repository_ruleset" "demo_review_approval" {
   bypass_actors {
     actor_id    = local.air_hand_user_id
     actor_type  = "User"
-    bypass_mode = "pull_request"
+    bypass_mode = "exempt"
   }
 
   bypass_actors {
     actor_id    = data.github_app.demo_renovate.id
     actor_type  = "Integration"
-    bypass_mode = "pull_request"
+    bypass_mode = "exempt"
   }
 
   rules {
