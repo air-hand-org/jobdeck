@@ -1,8 +1,6 @@
 # Keep approval exemptions separate from the existing baseline CI/PR rulesets.
 resource "github_repository_ruleset" "platform_review_approval" {
   for_each = toset([
-    "jobdeck",
-    "api-contracts",
     github_repository.auth.name,
     github_repository.ui.name,
     github_repository.job_api.name,
