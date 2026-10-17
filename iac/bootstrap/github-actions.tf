@@ -138,7 +138,10 @@ resource "github_repository_ruleset" "actions_release_tag" {
   }
 }
 
-resource "github_actions_repository_access_level" "actions" {
-  repository   = github_repository.actions.name
-  access_level = "organization"
+removed {
+  from = github_actions_repository_access_level.actions
+
+  lifecycle {
+    destroy = false
+  }
 }
