@@ -137,11 +137,3 @@ resource "github_repository_ruleset" "actions_release_tag" {
     non_fast_forward = true
   }
 }
-
-removed {
-  from = github_actions_repository_access_level.actions
-
-  lifecycle {
-    destroy = false
-  }
-}
