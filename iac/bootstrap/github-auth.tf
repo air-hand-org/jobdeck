@@ -61,16 +61,6 @@ resource "github_repository_ruleset" "auth_main" {
       allowed_merge_methods = ["merge", "squash", "rebase"]
     }
 
-    merge_queue {
-      check_response_timeout_minutes    = 60
-      grouping_strategy                 = "ALLGREEN"
-      max_entries_to_build              = 5
-      max_entries_to_merge              = 1
-      merge_method                      = "SQUASH"
-      min_entries_to_merge              = 1
-      min_entries_to_merge_wait_minutes = 5
-    }
-
     required_status_checks {
       strict_required_status_checks_policy = true
       do_not_enforce_on_create             = false
