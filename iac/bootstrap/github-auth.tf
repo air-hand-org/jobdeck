@@ -1,6 +1,6 @@
 resource "github_repository" "auth" {
   name         = "jobdeck-auth"
-  visibility   = "private"
+  visibility   = "public"
   has_issues   = true
   has_projects = true
   has_wiki     = true
