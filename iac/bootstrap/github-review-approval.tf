@@ -37,7 +37,7 @@ resource "github_repository_ruleset" "platform_review_approval" {
       dismiss_stale_reviews_on_push     = true
       require_code_owner_review         = contains([github_repository.auth.name, github_repository.job_api.name], each.value)
       require_last_push_approval        = false
-      required_review_thread_resolution = contains([github_repository.auth.name, github_repository.job_api.name], each.value)
+      required_review_thread_resolution = true
       allowed_merge_methods             = ["squash"]
     }
   }
