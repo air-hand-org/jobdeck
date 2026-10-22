@@ -1,7 +1,7 @@
 registry: asia-northeast1-docker.pkg.dev/airhand-jobdeck
 images:
   auth:
-    version: 1.2.1
+    version: 1.2.2
   auth-proxy:
     version: 1.2.0
   ui:
@@ -9,7 +9,7 @@ images:
   demo:
     version: 1.4.2
   job-api:
-    version: 1.1.7
+    version: 1.1.8
   job-worker:
     version: 1.2.6
   forward-proxy:

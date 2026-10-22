@@ -1,6 +1,6 @@
 resource "github_repository" "job_api" {
   name         = "jobdeck-job-api"
-  visibility   = "private"
+  visibility   = "public"
   has_issues   = true
   has_projects = true
   has_wiki     = true
