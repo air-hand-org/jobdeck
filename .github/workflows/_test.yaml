@@ -58,7 +58,7 @@ jobs:
         run: bash .github/scripts/diagnose-e2e-capacity.sh before-cache-restore
       # Service checkouts must exist before computing dependency cache keys.
       - parallel:
-          - uses: air-hand-org/jobdeck-actions/actions/cache-go@c7dbdbe4aeadfe42913ceb598d3e413633ca6ce3
+          - uses: air-hand-org/jobdeck-actions/actions/cache-go@v1.6.0
             with:
               exact-key-only: 'true'
           - name: Restore NuGet cache
