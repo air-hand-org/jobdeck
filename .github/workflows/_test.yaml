@@ -11,7 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
+  container-e2e:
+    name: Container E2E
     permissions:
       contents: read
       packages: read
@@ -60,12 +61,14 @@ jobs:
       - parallel:
           - uses: air-hand-org/jobdeck-actions/actions/cache-go@v1.6.0
             with:
-              exact-key-only: 'true'
+              exact-key-only: 'false'
           - name: Restore NuGet cache
             uses: actions/cache@v5
             with:
               path: ~/.nuget/packages
               key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+      - name: Report available disk after cache restore
+        run: df -h /
       - name: Diagnose runner capacity after cache restore
         if: ${{ runner.debug == '1' }}
         run: bash .github/scripts/diagnose-e2e-capacity.sh after-cache-restore
@@ -81,7 +84,10 @@ jobs:
       - name: test
         id: container-test
         run: make test
-      - name: Diagnose runner capacity after container E2E / before local E2E
+      - name: Report available disk after container E2E
+        if: ${{ always() && steps.container-test.outcome != 'skipped' }}
+        run: df -h /
+      - name: Diagnose runner capacity after container E2E
         if: ${{ always() && runner.debug == '1' && steps.container-test.outcome != 'skipped' }}
         run: bash .github/scripts/diagnose-e2e-capacity.sh after-container-e2e
       - name: upload Playwright traces
@@ -99,15 +105,92 @@ jobs:
           path: '**/TestResults/aspire-logs/*.log'
           if-no-files-found: ignore
 
-      - name: Clear container E2E artifacts before testing local sources
+      # Free disk space before post-job dependency cache archives are created.
+      - name: Clean up Docker after E2E tests
         run: |
-          find tests/e2e -type d \( -name playwright-traces -o -path '*/TestResults/aspire-logs' \) -prune -exec rm -rf -- {} +
+          echo "::group::Disk usage before Docker cleanup"
+          df -h
+          docker system df
+          echo "::endgroup::"
+          docker system prune -af
+          echo "::group::Disk usage after Docker cleanup"
+          df -h
+          docker system df
+          echo "::endgroup::"
+
+  local-source-e2e:
+    name: Local-source E2E
+    permissions:
+      contents: read
+      packages: read
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Diagnose runner capacity after checkout
+        if: ${{ runner.debug == '1' }}
+        run: bash .github/scripts/diagnose-e2e-capacity.sh after-checkout
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: air-hand-org/jobdeck-actions/actions/setup-tools@v1.4.1
+      - name: Create a service source checkout token
+        id: service-source-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.GH_APP_RELEASE_CLIENT_ID }}
+          private-key: ${{ secrets.GH_APP_RELEASE_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            jobdeck-auth
+            jobdeck-job-api
+            jobdeck-job-worker
+            jobdeck-ui
+            jobdeck-demo
+            api-contracts
+          permission-contents: read
+      - name: Check out local service sources
+        run: |
+          gh auth setup-git --hostname github.com
+          make clone-service-repo
+        env:
+          GH_TOKEN: ${{ steps.service-source-token.outputs.token }}
+      - name: Diagnose runner capacity before cache restore
+        if: ${{ runner.debug == '1' }}
+        run: bash .github/scripts/diagnose-e2e-capacity.sh before-cache-restore
+      # Service checkouts must exist before computing dependency cache keys.
+      - parallel:
+          - uses: air-hand-org/jobdeck-actions/actions/cache-go@v1.6.0
+            with:
+              exact-key-only: 'false'
+          - name: Restore NuGet cache
+            uses: actions/cache@v5
+            with:
+              path: ~/.nuget/packages
+              key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+      - name: Report available disk after cache restore
+        run: df -h /
+      - name: Diagnose runner capacity after cache restore
+        if: ${{ runner.debug == '1' }}
+        run: bash .github/scripts/diagnose-e2e-capacity.sh after-cache-restore
+      - name: Diagnose runner capacity before local E2E
+        if: ${{ runner.debug == '1' }}
+        run: bash .github/scripts/diagnose-e2e-capacity.sh before-local-e2e
       - name: Run the complete E2E suite against local sources
         id: local-source-test
         run: mise exec -- make cs-test
         env:
           USE_LOCAL: 'true'
           GH_TOKEN: ${{ steps.service-source-token.outputs.token }}
+      - name: Report available disk after local E2E
+        if: ${{ always() && steps.local-source-test.outcome != 'skipped' }}
+        run: df -h /
       - name: Diagnose runner capacity after local E2E
         if: ${{ always() && runner.debug == '1' && steps.local-source-test.outcome != 'skipped' }}
         run: bash .github/scripts/diagnose-e2e-capacity.sh after-local-e2e
