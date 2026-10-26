@@ -33,31 +33,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: air-hand-org/jobdeck-actions/actions/setup-tools@v1.4.1
-      - name: Create a service source checkout token
-        id: service-source-token
-        uses: actions/create-github-app-token@v3
-        with:
-          client-id: ${{ vars.GH_APP_RELEASE_CLIENT_ID }}
-          private-key: ${{ secrets.GH_APP_RELEASE_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: |
-            jobdeck-auth
-            jobdeck-job-api
-            jobdeck-job-worker
-            jobdeck-ui
-            jobdeck-demo
-            api-contracts
-          permission-contents: read
-      - name: Check out local service sources
-        run: |
-          gh auth setup-git --hostname github.com
-          make clone-service-repo
-        env:
-          GH_TOKEN: ${{ steps.service-source-token.outputs.token }}
       - name: Diagnose runner capacity before cache restore
         if: ${{ runner.debug == '1' }}
         run: bash .github/scripts/diagnose-e2e-capacity.sh before-cache-restore
-      # Service checkouts must exist before computing dependency cache keys.
       - parallel:
           - uses: air-hand-org/jobdeck-actions/actions/cache-go@v1.6.0
             with:
