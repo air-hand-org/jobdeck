@@ -67,8 +67,6 @@ jobs:
             with:
               path: ~/.nuget/packages
               key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
-      - name: Report available disk after cache restore
-        run: df -h /
       - name: Diagnose runner capacity after cache restore
         if: ${{ runner.debug == '1' }}
         run: bash .github/scripts/diagnose-e2e-capacity.sh after-cache-restore
@@ -84,9 +82,6 @@ jobs:
       - name: test
         id: container-test
         run: make test
-      - name: Report available disk after container E2E
-        if: ${{ always() && steps.container-test.outcome != 'skipped' }}
-        run: df -h /
       - name: Diagnose runner capacity after container E2E
         if: ${{ always() && runner.debug == '1' && steps.container-test.outcome != 'skipped' }}
         run: bash .github/scripts/diagnose-e2e-capacity.sh after-container-e2e
@@ -174,8 +169,6 @@ jobs:
             with:
               path: ~/.nuget/packages
               key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
-      - name: Report available disk after cache restore
-        run: df -h /
       - name: Diagnose runner capacity after cache restore
         if: ${{ runner.debug == '1' }}
         run: bash .github/scripts/diagnose-e2e-capacity.sh after-cache-restore
@@ -188,9 +181,6 @@ jobs:
         env:
           USE_LOCAL: 'true'
           GH_TOKEN: ${{ steps.service-source-token.outputs.token }}
-      - name: Report available disk after local E2E
-        if: ${{ always() && steps.local-source-test.outcome != 'skipped' }}
-        run: df -h /
       - name: Diagnose runner capacity after local E2E
         if: ${{ always() && runner.debug == '1' && steps.local-source-test.outcome != 'skipped' }}
         run: bash .github/scripts/diagnose-e2e-capacity.sh after-local-e2e
