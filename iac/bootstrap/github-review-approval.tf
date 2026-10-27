@@ -35,7 +35,7 @@ resource "github_repository_ruleset" "platform_review_approval" {
     pull_request {
       required_approving_review_count   = 1
       dismiss_stale_reviews_on_push     = true
-      require_code_owner_review         = contains([github_repository.auth.name, github_repository.job_api.name], each.value)
+      require_code_owner_review         = contains([github_repository.auth.name, github_repository.job_api.name, github_repository.job_worker.name], each.value)
       require_last_push_approval        = false
       required_review_thread_resolution = true
       allowed_merge_methods             = ["squash"]
