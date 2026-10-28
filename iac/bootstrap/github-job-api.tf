@@ -20,7 +20,18 @@ resource "github_repository" "job_api" {
 
   lifecycle {
     prevent_destroy = true
+    ignore_changes  = [pages]
   }
+}
+
+import {
+  to = github_repository_pages.job_api
+  id = "jobdeck-job-api"
+}
+
+resource "github_repository_pages" "job_api" {
+  repository = github_repository.job_api.name
+  build_type = "workflow"
 }
 
 resource "github_branch" "job_api_main" {
