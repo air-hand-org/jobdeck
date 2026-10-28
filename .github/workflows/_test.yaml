@@ -150,6 +150,10 @@ jobs:
       - name: Diagnose runner capacity after cache restore
         if: ${{ runner.debug == '1' }}
         run: bash .github/scripts/diagnose-e2e-capacity.sh after-cache-restore
+      - name: Prebuild job-worker in the host Go cache
+        run: mise exec -- aspire do prebuild-job-worker --apphost apphosts/Apphosts.csproj --non-interactive
+        env:
+          GH_TOKEN: ${{ steps.service-source-token.outputs.token }}
       - name: Diagnose runner capacity before local E2E
         if: ${{ runner.debug == '1' }}
         run: bash .github/scripts/diagnose-e2e-capacity.sh before-local-e2e

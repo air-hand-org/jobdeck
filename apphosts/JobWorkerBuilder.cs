@@ -63,7 +63,7 @@ public sealed class JobWorkerBuilder(
         var backend = ConfigureBackend(builder.AddGoApp(
             name: "job-worker",
             appDirectory: localAppDirectory!,
-            packagePath: "./cmd/worker"
+            packagePath: JobWorkerPrebuild.PackagePath
         )
         .WithAppArgs("-worker", "3")
         .WithHttpEndpoint(

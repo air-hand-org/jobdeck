@@ -123,6 +123,8 @@ new UiBuilder(
     useLocal: useLocal
 ).Build();
 
+JobWorkerPrebuild.Register(builder, repoRoot);
+
 builder.Build().Run();
 
 file sealed class ProductionManifest
