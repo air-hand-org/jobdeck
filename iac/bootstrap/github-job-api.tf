@@ -34,6 +34,39 @@ resource "github_repository_pages" "job_api" {
   build_type = "workflow"
 }
 
+import {
+  to = github_repository_environment.job_api_pages
+  id = "jobdeck-job-api:github-pages"
+}
+
+resource "github_repository_environment" "job_api_pages" {
+  repository          = github_repository.job_api.name
+  environment         = "github-pages"
+  prevent_self_review = false
+
+  deployment_branch_policy {
+    protected_branches     = false
+    custom_branch_policies = true
+  }
+}
+
+import {
+  to = github_repository_environment_deployment_policy.job_api_pages_main
+  id = "jobdeck-job-api:github-pages:64654825"
+}
+
+resource "github_repository_environment_deployment_policy" "job_api_pages_main" {
+  repository     = github_repository.job_api.name
+  environment    = github_repository_environment.job_api_pages.environment
+  branch_pattern = "main"
+}
+
+resource "github_repository_environment_deployment_policy" "job_api_pages_release_tag" {
+  repository  = github_repository.job_api.name
+  environment = github_repository_environment.job_api_pages.environment
+  tag_pattern = "v*.*.*"
+}
+
 resource "github_branch" "job_api_main" {
   repository = github_repository.job_api.name
   branch     = "main"
