@@ -20,7 +20,6 @@ resource "github_repository" "job_api" {
 
   lifecycle {
     prevent_destroy = true
-    ignore_changes  = [pages]
   }
 }
 
