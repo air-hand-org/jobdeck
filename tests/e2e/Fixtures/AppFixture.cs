@@ -59,8 +59,8 @@ public sealed class AppFixture : IAsyncLifetime
             return;
         }
 
-        // One overall deadline shared by AppHost creation, Build, Start, and UI Healthy wait.
-        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+        // Bound cold local-source builds and dependency startup, while failing early on FailedToStart.
+        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(10));
 
         Environment.SetEnvironmentVariable(
             "API_AUTH_MODE", "REQUIRED" // disable fallback
@@ -113,9 +113,27 @@ public sealed class AppFixture : IAsyncLifetime
         app = await appHost.BuildAsync(cts.Token);
         var model = app.Services.GetRequiredService<DistributedApplicationModel>();
         VerifyServiceSources(model, useLocal);
-        await app.StartAsync(cts.Token);
-
-        await app.ResourceNotifications.WaitForResourceHealthyAsync("ui", cts.Token);
+        try
+        {
+            await AppStartup.RunAsync(app.ResourceNotifications, async token =>
+            {
+                await app.StartAsync(token);
+                await app.ResourceNotifications.WaitForResourceHealthyAsync("ui", token);
+            }, cts.Token);
+        }
+        catch
+        {
+            // Initialization failures must retain resource logs even if fixture disposal is skipped.
+            try
+            {
+                await CaptureResourceLogsAsync();
+            }
+            catch (Exception logError)
+            {
+                Console.Error.WriteLine($"Failed to capture startup resource logs: {logError}");
+            }
+            throw;
+        }
         Target = new(
             UIBaseUri: app.GetEndpoint("ui", "https"),
             DemoBaseUri: app.GetEndpoint("demo", "https"),
