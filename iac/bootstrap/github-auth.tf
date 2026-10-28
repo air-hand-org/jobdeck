@@ -32,6 +32,28 @@ resource "github_repository" "auth" {
   }
 }
 
+resource "github_repository_pages" "auth" {
+  repository = github_repository.auth.name
+  build_type = "workflow"
+}
+
+resource "github_repository_environment" "auth_pages" {
+  repository          = github_repository.auth.name
+  environment         = "github-pages"
+  prevent_self_review = false
+
+  deployment_branch_policy {
+    protected_branches     = false
+    custom_branch_policies = true
+  }
+}
+
+resource "github_repository_environment_deployment_policy" "auth_pages_release_tag" {
+  repository  = github_repository.auth.name
+  environment = github_repository_environment.auth_pages.environment
+  tag_pattern = "v*.*.*"
+}
+
 resource "github_repository_ruleset" "auth_main" {
   repository  = github_repository.auth.name
   name        = "main"
