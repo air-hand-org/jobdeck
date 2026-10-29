@@ -11,19 +11,20 @@ mkdir -p "${REPO_ROOT}/services"
 
 for service in "${SERVICES[@]}"; do
     destination="${REPO_ROOT}/services/${service}"
-    if [[ -e "${destination}" || -L "${destination}" ]]; then
-        printf 'Keeping existing service checkout: %s\n' "${service}"
-        continue
-    fi
-
     (
         version=$(SERVICE="${service}" yq -er '.images[strenv(SERVICE)].version' "${REPO_ROOT}/environments/production.yaml")
         if [[ -z "${version}" || "${version}" == null ]]; then
             printf 'Missing production version for %s\n' "${service}" >&2
             exit 1
         fi
-        printf 'Cloning %s at v%s\n' "${service}" "${version}"
-        gh repo clone "air-hand-org/jobdeck-${service}" "${destination}" -- --branch "v${version}" --depth 1
+        if [[ -e "${destination}" || -L "${destination}" ]]; then
+            printf 'Switch %s to v%s\n' "${service}" "${version}"
+            git -C "${destination}" fetch
+            git -C "${destination}" switch --detach "v${version}"
+        else
+            printf 'Cloning %s at v%s\n' "${service}" "${version}"
+            gh repo clone "air-hand-org/jobdeck-${service}" "${destination}" -- --branch "v${version}" --depth 1
+        fi
     ) &
     PIDS+=("$!")
 done
