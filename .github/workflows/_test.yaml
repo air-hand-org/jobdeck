@@ -150,6 +150,10 @@ jobs:
       - name: Diagnose runner capacity after cache restore
         if: ${{ runner.debug == '1' }}
         run: bash .github/scripts/diagnose-e2e-capacity.sh after-cache-restore
+      - name: Build local service sources
+        run: mise exec -- make services-build
+        env:
+          GH_TOKEN: ${{ steps.service-source-token.outputs.token }}
       - name: Diagnose runner capacity before local E2E
         if: ${{ runner.debug == '1' }}
         run: bash .github/scripts/diagnose-e2e-capacity.sh before-local-e2e
