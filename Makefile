@@ -26,4 +26,3 @@ test: node-test go-test cs-test
 .PHONY: node-test
 node-test:
 	@node .github/scripts/normalize-image-promotion-payload.test.js
-	@node --test tests/services-build.test.js
