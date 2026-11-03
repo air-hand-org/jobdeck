@@ -142,6 +142,7 @@ public sealed class JobWorkerBuilder(
                 targetPort: 3128
             )
             .WithReference(demoContainerEndpoint)
+            .WithEnvironment("SQUID_ALLOW_PRIVATE_DEMO", "true")
             .WithEnvironment(context =>
             {
                 context.EnvironmentVariables["SQUID_ALLOWED_DEMO_HOST_AND_PORT"] = demoContainerEndpoint.Property(EndpointProperty.HostAndPort);
