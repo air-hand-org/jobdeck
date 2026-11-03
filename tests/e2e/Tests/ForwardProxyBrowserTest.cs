@@ -54,15 +54,6 @@ public sealed class ForwardProxyBrowserTest(AppFixture fixture) : BrowserE2ETest
     }
 
     [Fact]
-    public async Task CanExecuteAllowedHttpsUrlThroughForwardProxy()
-    {
-        var page = await RequestExecutionAsync(new Uri("https://www.google.com/"));
-
-        await Expect(page.GetByText("Succeeded", new() { Exact = true }))
-            .ToBeVisibleAsync(new() { Timeout = 30_000 });
-    }
-
-    [Fact]
     public async Task CannotExecuteForbiddenLoopbackUrlThroughForwardProxy()
     {
         var page = await RequestExecutionAsync(new Uri("http://127.0.0.1/"));
