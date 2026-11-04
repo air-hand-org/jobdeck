@@ -2,6 +2,7 @@ using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Yarp;
 using Aspire.Hosting.Yarp.Transforms;
+using Aspire.Hosting.MongoDB;
 
 namespace apphosts;
 
@@ -9,6 +10,7 @@ public sealed class UiBuilder(
     IDistributedApplicationBuilder builder,
     EndpointReference jobApiGrpcEndpoint,
     EndpointReference authGrpcEndpoint,
+    IResourceBuilder<MongoDBDatabaseResource> mongodb,
     string imageTag,
     string repoRoot,
     bool useLocal
@@ -65,14 +67,22 @@ public sealed class UiBuilder(
     private IResourceBuilder<T> ConfigureBackend<T>(IResourceBuilder<T> backend)
         where T : IResource, IResourceWithEnvironment, IResourceWithEndpoints
     {
+        var githubAppOAuthClientID = builder.AddParameter("github-oauth-client-id", secret: false);
+        var githubAppOAuthClientSecret = builder.AddParameter("github-oauth-client-secret", secret: true);
         return backend
             .WithReference(jobApiGrpcEndpoint)
             .WithReference(authGrpcEndpoint)
+            .WithReference(mongodb)
             .WithEnvironment("ASPNETCORE_FORWARDEDHEADERS_ENABLED", "true")
             .WithEnvironment(context =>
             {
                 context.EnvironmentVariables["JOB_API_GRPC_ENDPOINT"] = jobApiGrpcEndpoint.Property(EndpointProperty.Url);
                 context.EnvironmentVariables["AUTH_GRPC_ENDPOINT"] = authGrpcEndpoint.Property(EndpointProperty.Url);
+                context.EnvironmentVariables["MONGODB_URI"] = mongodb.Resource.ConnectionStringExpression;
+                context.EnvironmentVariables["MONGODB_DATABASE"] = mongodb.Resource.DatabaseName;
+
+                context.EnvironmentVariables["GITHUB_OAUTH_CLIENT_ID"] = githubAppOAuthClientID;
+                context.EnvironmentVariables["GITHUB_OAUTH_CLIENT_SECRET"] = githubAppOAuthClientSecret;
             })
             .WithHttpHealthCheck("/health/ready");
     }

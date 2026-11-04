@@ -51,6 +51,15 @@ if (useVolumes)
     postgres.WithDataVolume();
 }
 
+var mongo = builder.AddMongoDB("mongo")
+  .WithImageTag("8.3")
+;
+if (useVolumes)
+{
+    mongo.WithDataVolume();
+}
+var mongodb = mongo.AddDatabase("mongodb");
+
 var pubsubBuilder = new PubSubBuilder(builder);
 
 var pubsub = pubsubBuilder.PubSub();
@@ -118,6 +127,7 @@ new UiBuilder(
     builder: builder,
     jobApiGrpcEndpoint: jobApiGrpcEndpoint,
     authGrpcEndpoint: authGrpcEndpoint,
+    mongodb: mongodb,
     imageTag: uiImageTag,
     repoRoot: repoRoot,
     useLocal: useLocal
