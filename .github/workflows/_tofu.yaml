@@ -87,6 +87,7 @@ jobs:
           cd "iac/${TOFU_ROOT}"
           plan_args=(
             -out=tfplan
+            -lock-timeout=10m
             -var="project_id=${{ vars.GCP_PROJECT_ID }}"
           )
 
@@ -110,7 +111,7 @@ jobs:
         run: |
           cd "iac/${TOFU_ROOT}"
           if [[ -n "$TFCMT_PR_NUMBER" ]]; then
-            tfcmt -var "target:${TOFU_ROOT}" apply -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -auto-approve tfplan
+            tfcmt -var "target:${TOFU_ROOT}" apply -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -lock-timeout=10m -auto-approve tfplan
           else
-            GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -auto-approve tfplan
+            GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -lock-timeout=10m -auto-approve tfplan
           fi
