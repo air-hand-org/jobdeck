@@ -16,7 +16,7 @@ jobs:
       github.event.pull_request.head.repo.full_name == github.repository
     permissions:
       pull-requests: read
-    uses: air-hand-org/jobdeck-actions/.github/workflows/reusable-slack-pr-review-request.yaml@19271b7a2a9332bc2066ae136c0b2dc1d8751747 # v1.5.0
+    uses: air-hand-org/jobdeck-actions/.github/workflows/reusable-slack-pr-review-request.yaml@ba969be0fe03495b63e798ba2c41040bae6dd340 # v1.7.1
     secrets:
       channel-id: ${{ secrets.SLACK_REVIEW_CHANNEL_ID }}
       reviewer-user-id: ${{ secrets.SLACK_REVIEWER_USER_ID }}
