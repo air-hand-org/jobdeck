@@ -5,7 +5,7 @@ go = "1.26.4"
 grpcurl = "1.9.4"
 node = "24"
 
-powershell = '7.5.0'
+powershell = '7.6.9'
 
 [env]
 # set GITHUB_PACKAGES_TOKEN that has read:packages classic token in .env.local
