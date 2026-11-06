@@ -1,5 +1,5 @@
 using Microsoft.Playwright;
-using Microsoft.Playwright.Xunit;
+using Microsoft.Playwright.Xunit.v3;
 
 using e2e.Attributes;
 using e2e.Fixtures;
@@ -12,7 +12,7 @@ public abstract class BrowserE2ETest(AppFixture fixture) : BrowserTest
 
     protected IBrowserContext Context { get; private set; } = null!;
 
-    public override async Task InitializeAsync()
+    public override async ValueTask InitializeAsync()
     {
         await base.InitializeAsync();
         Context = await Browser.NewContextAsync();
@@ -25,7 +25,7 @@ public abstract class BrowserE2ETest(AppFixture fixture) : BrowserTest
         });
     }
 
-    public override async Task DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
         if (Context is not null)
         {
