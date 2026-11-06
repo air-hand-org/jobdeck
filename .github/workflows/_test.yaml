@@ -115,7 +115,7 @@ jobs:
       - uses: air-hand-org/jobdeck-actions/actions/setup-tools@ba969be0fe03495b63e798ba2c41040bae6dd340 # v1.7.1
       - name: Create a service source checkout token
         id: service-source-token
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           client-id: ${{ vars.GH_APP_RELEASE_CLIENT_ID }}
           private-key: ${{ secrets.GH_APP_RELEASE_PRIVATE_KEY }}
