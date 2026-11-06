@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Go;
@@ -34,6 +35,8 @@ public sealed class AppFixture : IAsyncLifetime
     public AppTestTarget Target { get; private set; } = null!;
 
     private DistributedApplication? app;
+
+    private TempDirectory? certDir;
 
     private static Uri ValidUri(string inputUri)
     {
@@ -91,6 +94,15 @@ public sealed class AppFixture : IAsyncLifetime
         Environment.SetEnvironmentVariable(
             "Parameters__auth-jwt-key-id",
             "jobdeck-auth-e2e-1"
+        );
+        Environment.SetEnvironmentVariable(
+            "Parameters__ui-cert-password",
+            Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))
+        );
+        certDir = new TempDirectory("jobdeck-e2e-");
+        Environment.SetEnvironmentVariable(
+            "UI_CERT_DIR",
+            $"{certDir.Dir.FullName}"
         );
 
         var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.Apphosts>(
@@ -192,6 +204,8 @@ public sealed class AppFixture : IAsyncLifetime
             await app.DisposeAsync();
             app = null;
         }
+
+        certDir?.Dispose();
     }
 
     private async Task CaptureResourceLogsAsync()
