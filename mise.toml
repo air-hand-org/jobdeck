@@ -3,7 +3,7 @@ aspire = "13.6.4"
 dotnet = "10.0"
 go = "1.27.3"
 grpcurl = "1.9.4"
-node = "24"
+node = "26"
 
 powershell = '7.6.9'
 
