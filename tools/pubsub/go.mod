@@ -1,6 +1,6 @@
 module jobdeck/tools/pubsub
 
-go 1.26.4
+go 1.27.3
 
 require (
 	cloud.google.com/go/pubsub/v2 v2.6.1
