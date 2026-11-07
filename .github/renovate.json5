@@ -1,0 +1,176 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "github>aquaproj/aqua-renovate-config#2.14.0",
+    "helpers:pinGitHubActionDigestsToSemver",
+    "config:recommended",
+    ":semanticCommits"
+  ],
+  "prConcurrentLimit": 10,
+  "enabledManagers": [
+    "custom.regex",
+    "mise",
+    "github-actions",
+    "gomod",
+    "nuget",
+    "terraform"
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "minimumReleaseAge": "3 days",
+  "automerge": false,
+  "automergeType": "pr",
+  "automergeStrategy": "squash",
+  "platformAutomerge": true,
+  "rebaseWhen": "conflicted",
+  "vulnerabilityAlerts": {
+    "automerge": false
+  },
+  "lockFileMaintenance": {
+    "automerge": false
+  },
+  "packageRules": [
+    {
+      "description": "Consume internally controlled jobdeck-actions releases without an additional delay",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchPackageNames": [
+        "air-hand-org/jobdeck-actions"
+      ],
+      "minimumReleaseAge": "0 days"
+    },
+    {
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "addLabels": [
+        "major"
+      ],
+      "automerge": false
+    },
+    {
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "addLabels": [
+        "minor"
+      ],
+      "automerge": true
+    },
+    {
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "addLabels": [
+        "patch"
+      ],
+      "automerge": true
+    },
+    {
+      "description": "Update mise Go version with go.mod Go directive",
+      "matchManagers": [
+        "mise"
+      ],
+      "matchDepNames": [
+        "go"
+      ],
+      "groupName": "Go",
+      "groupSlug": "go",
+      "semanticCommitType": "fix",
+      "semanticCommitScope": "deps"
+    },
+    {
+      "description": "Update go.mod Go directive with mise Go version",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchDepNames": [
+        "go"
+      ],
+      "matchDepTypes": [
+        "golang"
+      ],
+      "groupName": "Go",
+      "groupSlug": "go",
+      "rangeStrategy": "bump",
+      "semanticCommitType": "fix",
+      "semanticCommitScope": "deps"
+    },
+    {
+      "matchManagers": [
+        "gomod"
+      ],
+      "postUpdateOptions": [
+        "gomodTidy",
+        "gomodUpdateImportPaths"
+      ]
+    },
+    {
+      "matchManagers": [
+        "nuget"
+      ],
+      "rangeStrategy": "bump"
+    },
+    {
+      "description": "OpenTofu compatibility constraints are not HashiCorp Terraform runtime pins",
+      "matchManagers": [
+        "terraform"
+      ],
+      "matchDepTypes": [
+        "required_version"
+      ],
+      "enabled": false
+    },
+    {
+      "matchManagers": [
+        "terraform"
+      ],
+      "matchDepTypes": [
+        "required_provider"
+      ],
+      "registryUrls": [
+        "https://registry.opentofu.org"
+      ]
+    }
+  ],
+  "mise": {
+    "managerFilePatterns": [
+      "(^|/)\\.?mise\\.toml$",
+      "(^|/)\\.?mise/config\\.toml$",
+      "(^|/)\\.?mise/config.*\\.toml$"
+    ]
+  },
+  "assigneesFromCodeOwners": true,
+  "ignorePaths": [
+    "apphosts/.agents/**",
+    "environments/production.yaml"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^mise\\.toml$/"
+      ],
+      "matchStrings": [
+        "(?:^|\\n)dotnet\\s*=\\s*[\"'](?<currentValue>\\d+\\.\\d+(?:\\.\\d+)?)[\"']"
+      ],
+      "depNameTemplate": "dotnet-sdk",
+      "datasourceTemplate": "dotnet-version",
+      "versioningTemplate": "dotnet"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^apphosts/Program\\.cs$/"
+      ],
+      "matchStrings": [
+        "AddPostgres\\(\"postgres\"\\)\\s*\\.WithImageTag\\(\"(?<currentValue>[^\"\\r\\n]+)\"\\)"
+      ],
+      "depNameTemplate": "postgres",
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker"
+    }
+  ]
+}

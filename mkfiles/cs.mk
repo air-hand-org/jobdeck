@@ -19,7 +19,7 @@ cs-test-prepare:
 .PHONY: cs-test
 cs-test: cs-build cs-test-prepare
 	@cd $(CS_MK_DIR)../ && \
-	    dotnet test $(CS_SLN) --no-build --no-restore
+	    dotnet test --solution $(CS_SLN) --no-build --no-restore
 
 .PHONY: cs-lint
 cs-lint:

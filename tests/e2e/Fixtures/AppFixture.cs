@@ -49,7 +49,7 @@ public sealed class AppFixture : IAsyncLifetime
         return uri;
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var useLocal = string.Equals(Environment.GetEnvironmentVariable("USE_LOCAL"), "true", StringComparison.OrdinalIgnoreCase);
         var uiBaseUrl = Environment.GetEnvironmentVariable("E2E_UI_BASE_URL");
@@ -188,7 +188,7 @@ public sealed class AppFixture : IAsyncLifetime
         Assert.Equal(useLocal, forwardProxy.Annotations.OfType<DockerfileBuildAnnotation>().Any());
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         if (app is null)
         {

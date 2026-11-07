@@ -35,11 +35,11 @@ jobs:
       # before the later `tofu plan -var=...` invocation.
       TF_VAR_project_id: ${{ vars.GCP_PROJECT_ID }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Create GitHub App token for governance
         if: inputs.root == 'bootstrap'
         id: github-app-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           client-id: ${{ vars.GH_IAC_APP_CLIENT_ID }}
           private-key: ${{ secrets.GH_IAC_APP_PRIVATE_KEY }}
@@ -47,7 +47,7 @@ jobs:
           # Do not set `repositories`: a repository created by this OpenTofu
           # run does not exist yet and therefore cannot scope the token. Apps
           # that create repositories must be installed for all repositories.
-      - uses: air-hand-org/jobdeck-actions/actions/setup-tools@287f4026cd3c9245ccb7755f427ce5c8ebe75482 # v1.4.1
+      - uses: air-hand-org/jobdeck-actions/actions/setup-tools@ba969be0fe03495b63e798ba2c41040bae6dd340 # v1.7.1
       - name: Lint OpenTofu
         run: make tofu-lint
       - name: Validate root and environment
@@ -87,6 +87,7 @@ jobs:
           cd "iac/${TOFU_ROOT}"
           plan_args=(
             -out=tfplan
+            -lock-timeout=10m
             -var="project_id=${{ vars.GCP_PROJECT_ID }}"
           )
 
@@ -110,7 +111,7 @@ jobs:
         run: |
           cd "iac/${TOFU_ROOT}"
           if [[ -n "$TFCMT_PR_NUMBER" ]]; then
-            tfcmt -var "target:${TOFU_ROOT}" apply -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -auto-approve tfplan
+            tfcmt -var "target:${TOFU_ROOT}" apply -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -lock-timeout=10m -auto-approve tfplan
           else
-            GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -auto-approve tfplan
+            GITHUB_TOKEN="$GH_IAC_TOKEN" tofu apply -lock-timeout=10m -auto-approve tfplan
           fi

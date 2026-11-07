@@ -116,13 +116,13 @@ public sealed class AppStartupTests
     [Fact]
     public async Task ActualAspireStartupFailsFastForMissingExecutable()
     {
-        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.StartupTestAppHost>();
+        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.StartupTestAppHost>(TestContext.Current.CancellationToken);
         builder.AddExecutable("broken", "jobdeck-deliberately-missing-executable", ".");
         var waiting = builder.AddExecutable("waiting", "unused", ".");
         // Keep StartAsync pending, as real dependency/environment preparation can do.
         builder.Eventing.Subscribe<BeforeResourceStartedEvent>(waiting.Resource,
             (_, token) => Task.Delay(Timeout.InfiniteTimeSpan, token));
-        await using var app = await builder.BuildAsync();
+        await using var app = await builder.BuildAsync(TestContext.Current.CancellationToken);
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         var elapsed = Stopwatch.StartNew();
         var error = await Assert.ThrowsAsync<DistributedApplicationException>(() => AppStartup.RunAsync(
@@ -138,11 +138,11 @@ public sealed class AppStartupTests
     [Fact]
     public async Task ActualOneShotCompletionAndHealthyResourceAreAccepted()
     {
-        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.StartupTestAppHost>();
+        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.StartupTestAppHost>(TestContext.Current.CancellationToken);
         var migrator = builder.AddExecutable("migrator", "dotnet", ".", "--version");
         builder.AddExecutable("healthy", "node", ".", "-e", "setInterval(() => {}, 1000)")
             .WaitForCompletion(migrator);
-        await using var app = await builder.BuildAsync();
+        await using var app = await builder.BuildAsync(TestContext.Current.CancellationToken);
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         await AppStartup.RunAsync(app.ResourceNotifications, async token =>
         {
