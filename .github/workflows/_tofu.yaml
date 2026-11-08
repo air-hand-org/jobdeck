@@ -47,7 +47,7 @@ jobs:
           # Do not set `repositories`: a repository created by this OpenTofu
           # run does not exist yet and therefore cannot scope the token. Apps
           # that create repositories must be installed for all repositories.
-      - uses: air-hand-org/jobdeck-actions/actions/setup-tools@ba969be0fe03495b63e798ba2c41040bae6dd340 # v1.7.1
+      - uses: air-hand-org/jobdeck-actions/actions/setup-tools@942a96db0ec375d908dd8a8fd97cefc6eaf9f734 # v1.7.2
       - name: Lint OpenTofu
         run: make tofu-lint
       - name: Validate root and environment
