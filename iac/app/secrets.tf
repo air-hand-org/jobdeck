@@ -2,13 +2,13 @@ locals {
   # A write-only argument does not reveal value changes to OpenTofu. Bump the
   # corresponding number whenever the encrypted source rotates that value.
   secret_data_wo_versions = {
-    "auth-jwt-private-key"          = 1
-    "auth-jwt-public-key"           = 1
-    "job-worker-client-secret"      = 1
-    "job-worker-client-secret-hash" = 1
-    "postgres-password"             = 1
-    "test-user-client-secret"       = 1
-    "test-user-client-secret-hash"  = 1
+    "auth-jwt-private-key"          = "1"
+    "auth-jwt-public-key"           = "1"
+    "job-worker-client-secret"      = "1"
+    "job-worker-client-secret-hash" = "1"
+    "postgres-password"             = "1"
+    "test-user-client-secret"       = "1"
+    "test-user-client-secret-hash"  = "1"
   }
 
 }
