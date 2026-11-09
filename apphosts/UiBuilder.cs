@@ -96,12 +96,7 @@ public sealed class UiBuilder(
     {
         var githubAppOAuthClientID = builder.AddParameter("github-oauth-client-id", secret: false);
         var githubAppOAuthClientSecret = builder.AddParameter("github-oauth-client-secret", secret: true);
-        var certPassword = builder.Configuration["Parameters:ui-cert-password"];
-        if (string.IsNullOrEmpty(certPassword))
-        {
-            throw new InvalidOperationException("Parameters:ui-cert-password is required. set `aspire secret set Parameters:ui-cert-password <password>`");
-        }
-        var certFactory = new LocalCertificateParameterFactory(builder, certPassword, builder.Configuration["UI_CERT_DIR"]);
+        var certFactory = new LocalCertificateParameterFactory(builder, string.Empty, builder.Configuration["UI_CERT_DIR"]);
         var dataProtectionCert = certFactory.AddParameterAsBase64("ui-dataprotection", X509KeyUsageFlags.KeyEncipherment);
         var openidEncryptionCert = certFactory.AddParameterAsBase64("ui-openid-encryption", X509KeyUsageFlags.KeyEncipherment);
         var openidSigningCert = certFactory.AddParameterAsBase64("ui-openid-signing", X509KeyUsageFlags.DigitalSignature);
@@ -151,6 +146,7 @@ public sealed class UiBuilder(
         return migrator
             .WithReference(db)
             .WithEnvironment("ConnectionStrings__Postgres", db.Resource.ConnectionStringExpression)
+            .WithEnvironment("MIGRATOR_EXECUTE", "true")
             .WaitFor(db)
             ;
     }

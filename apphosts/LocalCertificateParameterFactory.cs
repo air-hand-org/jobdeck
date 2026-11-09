@@ -30,6 +30,7 @@ public sealed class LocalCertificateParameterFactory(
 
         try
         {
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
             pfx = File.ReadAllBytes(path);
         }
         catch (FileNotFoundException)
@@ -81,7 +82,7 @@ public sealed class LocalCertificateParameterFactory(
 
         using var certificate = request.CreateSelfSigned(
             notBefore: now.AddMinutes(-5),
-            notAfter: now.AddYears(1)
+            notAfter: now.AddYears(10)
         );
 
         return certificate.Export(X509ContentType.Pfx, password);
