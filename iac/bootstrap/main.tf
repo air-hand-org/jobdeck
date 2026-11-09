@@ -62,6 +62,22 @@ locals {
     "postgres-password" = toset([
       "auth",
       "job_api",
+      "ui",
+    ])
+    "github-oauth-client-id" = toset([
+      "ui",
+    ])
+    "github-oauth-client-secret" = toset([
+      "ui",
+    ])
+    "ui-dataprotection-pfx-base64" = toset([
+      "ui",
+    ])
+    "ui-openid-encryption-pfx-base64" = toset([
+      "ui",
+    ])
+    "ui-openid-signing-pfx-base64" = toset([
+      "ui",
     ])
   }
 
