@@ -67,21 +67,21 @@ resource "google_cloud_run_v2_service" "ui" {
         value = "true"
       }
 
-      dynamic "secrets" {
+      dynamic "env" {
         for_each = [
-          { env = "GITHUB_OAUTH_CLIENT_ID", key = "github-oauth-client-id" },
-          { env = "GITHUB_OAUTH_CLIENT_SECRET", key = "github-oauth-client-secret" },
-          { env = "CERT_DATAPROTECTION_BASE64", key = "ui-dataprotection-pfx-base64" },
-          { env = "CERT_OPENID_ENCRYPTION_BASE64", key = "ui-openid-encryption-pfx-base64" },
-          { env = "CERT_OPENID_SIGNING_BASE64", key = "ui-openid-signing-pfx-base64" },
-          { env = "POSTGRES_PASSWORD", key = "postgres-password" }
+          { name = "GITHUB_OAUTH_CLIENT_ID", key = "github-oauth-client-id" },
+          { name = "GITHUB_OAUTH_CLIENT_SECRET", key = "github-oauth-client-secret" },
+          { name = "CERT_DATAPROTECTION_BASE64", key = "ui-dataprotection-pfx-base64" },
+          { name = "CERT_OPENID_ENCRYPTION_BASE64", key = "ui-openid-encryption-pfx-base64" },
+          { name = "CERT_OPENID_SIGNING_BASE64", key = "ui-openid-signing-pfx-base64" },
+          { name = "POSTGRES_PASSWORD", key = "postgres-password" }
         ]
 
         content {
           env {
-            name = secrets.env
+            name = env.name
             value_source {
-              secret  = local.application_secrets[secrets.key]
+              secret  = local.application_secrets[env.key]
               version = "latest"
             }
           }
