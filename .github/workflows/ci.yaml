@@ -41,8 +41,8 @@ jobs:
           github-token: ${{ github.token }}
 
   request-review:
-    needs: [ci, review-eligibility]
-    if: needs.ci.result == 'success' && needs.review-eligibility.outputs.eligible == 'true'
+    needs: review-eligibility
+    if: needs.review-eligibility.outputs.eligible == 'true'
     permissions:
       pull-requests: read
     uses: air-hand-org/jobdeck-actions/.github/workflows/reusable-slack-pr-review-request.yaml@56b5a3e5540b1a1d42a0dbd3ae45b48910f42e83 # v1.7.3
