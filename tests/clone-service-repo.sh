@@ -19,8 +19,9 @@ for service in "${SERVICES[@]}"; do
         fi
         if [[ -e "${destination}" || -L "${destination}" ]]; then
             printf 'Switch %s to v%s\n' "${service}" "${version}"
-            git -C "${destination}" fetch
-            git -C "${destination}" switch --detach "v${version}"
+            # A shallow tag clone tracks only its initial tag, not new releases.
+            git -C "${destination}" fetch --no-tags --depth 1 origin "refs/tags/v${version}:refs/tags/v${version}"
+            git -C "${destination}" switch --detach "refs/tags/v${version}"
         else
             printf 'Cloning %s at v%s\n' "${service}" "${version}"
             gh repo clone "air-hand-org/jobdeck-${service}" "${destination}" -- --branch "v${version}" --depth 1

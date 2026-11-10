@@ -71,7 +71,7 @@ set -euo pipefail
 [[ "$1" == -C && "$2" == "${TEST_REPO}/services/"* ]]
 service=${2##*/}
 case "$3" in
-    fetch) [[ "$#" == 3 ]] ;;
+    fetch) [[ "$#" == 8 && "$4" == --no-tags && "$5" == --depth && "$6" == 1 && "$7" == origin && "$8" == "refs/tags/"* ]] ;;
     switch) [[ "$#" == 5 && "$4" == --detach ]] ;;
     *) exit 99 ;;
 esac
@@ -101,10 +101,10 @@ for service in auth job-api job-worker ui demo; do
     test -f "${TEST_STATE}/${service}.finished"
     test ! -e "${TEST_STATE}/${service}.git"
     assert_checkout "${service}" 1.2
-    # Model an existing developer checkout tracking remote branches. A shallow
-    # tag-only clone has no branch fetch refspec; that production limitation is
-    # separate from the existing-checkout fetch/switch contract tested here.
-    "${REAL_GIT}" -C "${TEST_REPO}/services/${service}" config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+    # Match the production shallow tag clone: no artificial branch tracking.
+    test "$("${REAL_GIT}" -C "${TEST_REPO}/services/${service}" rev-parse --is-shallow-repository)" == true
+    test "$("${REAL_GIT}" -C "${TEST_REPO}/services/${service}" config --get-all remote.origin.fetch)" == \
+        "+refs/tags/v1.2.${#service}:refs/tags/v1.2.${#service}"
     # Publish a new commit/tag only after the shallow initial clone.
     printf 'updated\n' > "${TEST_REMOTE}/${service}/version"
     "${REAL_GIT}" -C "${TEST_REMOTE}/${service}" commit -qam updated
@@ -118,7 +118,7 @@ rm "${TEST_STATE}"/*.started "${TEST_STATE}"/*.finished
 make -f "${TEST_REPO}/mkfiles/services.mk" clone-service-repo
 for service in auth job-api job-worker ui demo; do
     assert_checkout "${service}" 1.3
-    test "$(cat "${TEST_STATE}/${service}.git")" == "$(printf 'fetch\nswitch --detach v1.3.%s' "${#service}")"
+    test "$(cat "${TEST_STATE}/${service}.git")" == "$(printf 'fetch --no-tags --depth 1 origin refs/tags/v1.3.%s:refs/tags/v1.3.%s\nswitch --detach refs/tags/v1.3.%s' "${#service}" "${#service}" "${#service}")"
     test ! -e "${TEST_STATE}/${service}.started"
 done
 test "$(cat "${TEST_REPO}/services/auth/local-file")" == 'local edit'
@@ -130,6 +130,30 @@ for service in auth job-api job-worker ui demo; do
     assert_checkout "${service}" 1.2
     test ! -e "${TEST_STATE}/${service}.started"
 done
+
+# Real fetch failure must not fall back to a locally available stale tag.
+"${REAL_GIT}" -C "${TEST_REMOTE}/auth" tag -d v1.2.4
+if bash "${TEST_REPO}/tests/clone-service-repo.sh"; then
+    printf 'Expected missing remote tag failure to propagate\n' >&2
+    exit 1
+fi
+"${REAL_GIT}" -C "${TEST_REMOTE}/auth" tag v1.2.4 HEAD~1
+assert_checkout auth 1.2
+test "$(cat "${TEST_REPO}/services/auth/local-file")" == 'local edit'
+
+# Git must refuse a switch that would overwrite tracked local edits.
+printf 'local tracked edit\n' > "${TEST_REPO}/services/auth/version"
+printf '1.3\n' > "${TEST_STATE}/version-prefix"
+if bash "${TEST_REPO}/tests/clone-service-repo.sh"; then
+    printf 'Expected conflicting local edit failure to propagate\n' >&2
+    exit 1
+fi
+assert_checkout auth 1.2
+test "$(cat "${TEST_REPO}/services/auth/version")" == 'local tracked edit'
+test "$(cat "${TEST_REPO}/services/auth/local-file")" == 'local edit'
+printf 'initial\n' > "${TEST_REPO}/services/auth/version"
+printf '1.2\n' > "${TEST_STATE}/version-prefix"
+bash "${TEST_REPO}/tests/clone-service-repo.sh"
 
 # Mixed existing/missing checkouts: a failed clone propagates after peers finish.
 rm -rf "${TEST_REPO}/services/job-api" "${TEST_REPO}/services/ui"
@@ -158,9 +182,9 @@ for command in fetch switch; do
         exit 1
     fi
     if [[ "${command}" == fetch ]]; then
-        test "$(cat "${TEST_STATE}/auth.git")" == fetch
+        test "$(cat "${TEST_STATE}/auth.git")" == 'fetch --no-tags --depth 1 origin refs/tags/v1.2.4:refs/tags/v1.2.4'
     fi
-    test "$(cat "${TEST_STATE}/demo.git")" == "$(printf 'fetch\nswitch --detach v1.2.4')"
+    test "$(cat "${TEST_STATE}/demo.git")" == "$(printf 'fetch --no-tags --depth 1 origin refs/tags/v1.2.4:refs/tags/v1.2.4\nswitch --detach refs/tags/v1.2.4')"
 done
 rm "${TEST_STATE}"/*.git
 if MISSING_VERSION_SERVICE=auth bash "${TEST_REPO}/tests/clone-service-repo.sh"; then

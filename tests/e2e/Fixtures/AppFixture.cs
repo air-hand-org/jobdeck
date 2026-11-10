@@ -95,6 +95,11 @@ public sealed class AppFixture : IAsyncLifetime
             "Parameters__auth-jwt-key-id",
             "jobdeck-auth-e2e-1"
         );
+        // Dummy OAuth configuration satisfies UI startup in both source modes.
+        // These tests do not exercise GitHub login or contact OAuth endpoints.
+        Environment.SetEnvironmentVariable("Parameters__github-oauth-client-id", "e2e-dummy-client-id");
+        Environment.SetEnvironmentVariable("Parameters__github-oauth-client-secret", "e2e-dummy-client-secret");
+
         Environment.SetEnvironmentVariable(
             "Parameters__ui-cert-password",
             Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))
