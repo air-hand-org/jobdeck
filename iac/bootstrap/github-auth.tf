@@ -17,6 +17,15 @@ resource "github_repository" "auth" {
   squash_merge_commit_message = "COMMIT_MESSAGES"
   squash_merge_commit_title   = "PR_TITLE"
 
+  security_and_analysis {
+    secret_scanning {
+      status = "enabled"
+    }
+    secret_scanning_push_protection {
+      status = "enabled"
+    }
+  }
+
   lifecycle {
     prevent_destroy = true
 
