@@ -4,6 +4,9 @@ resource "google_cloud_run_v2_service" "ui" {
   ingress              = "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER"
   invoker_iam_disabled = false
 
+  # Secret IDs come from bootstrap state, so latest-version readiness is not inferred.
+  depends_on = [google_secret_manager_secret_version.application]
+
   template {
     service_account = local.runtime_service_accounts.ui
     timeout         = "60s"
