@@ -36,6 +36,8 @@ jobs:
       TF_VAR_project_id: ${{ vars.GCP_PROJECT_ID }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Create GitHub App token for governance
         if: inputs.root == 'bootstrap'
         id: github-app-token
@@ -92,6 +94,78 @@ jobs:
           )
 
           tfcmt -var "target:${TOFU_ROOT}" plan --patch -- env GITHUB_TOKEN="$GH_IAC_TOKEN" tofu plan "${plan_args[@]}"
+      # Trial only: consume the successful plan, never re-plan or change its backend.
+      - name: Generate TerraVision diagram
+        id: diagram
+        if: inputs.command == 'plan'
+        continue-on-error: true
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          work="$(mktemp -d "$RUNNER_TEMP/terravision.XXXXXX")"
+          trap 'rm -rf "$work"' EXIT
+          python3 -m venv "$work/venv"
+          "$work/venv/bin/pip" install --disable-pip-version-check 'terravision==0.56.1' 'Pillow==13.0.0' > "$work/install.log" 2>&1
+          sudo apt-get update -qq > "$work/apt.log" 2>&1
+          sudo apt-get install -y graphviz >> "$work/apt.log" 2>&1
+          cd "iac/${TOFU_ROOT}"
+          tofu graph > "$work/input.dot" 2> "$work/graph.log"
+          # Values, instance keys, outputs and original HCL never reach the renderer.
+          # Keep only configuration-level resource identifiers and dependency edges.
+          tofu show -json tfplan 2> "$work/show.log" | python3 -c '
+          import json, pathlib, re, sys
+          work = pathlib.Path(sys.argv[1])
+          plan = json.load(sys.stdin)
+          resources = {}
+          for r in plan.get("resource_changes", []):
+              if r["mode"] != "managed":
+                  continue
+              kind, name = r["type"], r["name"]
+              if not all(re.fullmatch(r"[A-Za-z_][A-Za-z_0-9]*", x) for x in (kind, name)):
+                  raise ValueError("Unexpected resource identifier")
+              address = kind + "." + name
+              resources[address] = dict(address=address, mode="managed", type=kind, name=name,
+                  change=dict(actions=["no-op"], before={}, after={}, after_unknown={}))
+          assert resources, "No managed resources in saved plan"
+          (work / "plan.json").write_text(json.dumps(dict(format_version="1.2", resource_changes=list(resources.values()))))
+          source = work / "source"
+          source.mkdir()
+          (source / "main.tf").write_text("\n".join("resource \""+r["type"]+"\" \""+r["name"]+"\" {}" for r in resources.values()))
+          edges = []
+          for a, b in re.findall(r"\"([^\"]+)\"\s*->\s*\"([^\"]+)\"", (work / "input.dot").read_text()):
+              if a in resources and b in resources:
+                  edges.append(json.dumps(a)+" -> "+json.dumps(b)+";")
+          (work / "graph.dot").write_text("digraph {\n" + "\n".join(json.dumps(a)+" [label="+json.dumps(a)+"];" for a in resources) + "\n" + "\n".join(edges) + "\n}")
+          ' "$work"
+          cd "$work"
+          "$work/venv/bin/terravision" draw --engine tofu --source "$work/source" \
+            --planfile "$work/plan.json" --graphfile "$work/graph.dot" \
+            --outfile "$work/architecture" --format png --use-tf-names \
+            > "$work/render.log" 2>&1
+          # Re-encode pixels to discard any ancillary PNG metadata before upload.
+          "$work/venv/bin/python" -c '
+          import pathlib, sys
+          from PIL import Image
+          source, target = map(pathlib.Path, sys.argv[1:])
+          assert source.is_file() and not source.is_symlink()
+          with Image.open(source) as image:
+              assert image.format == "PNG"
+              clean = Image.new("RGB", image.size)
+              clean.paste(image.convert("RGB"))
+              clean.save(target, format="PNG")
+          with Image.open(target) as image:
+              image.verify()
+          ' "$work/architecture-gcp.dot.png" "$RUNNER_TEMP/architecture-${TOFU_ROOT}.png"
+          echo 'safe=true' >> "$GITHUB_OUTPUT"
+      - name: Upload architecture diagram
+        if: inputs.command == 'plan' && steps.diagram.outputs.safe == 'true'
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: architecture-${{ inputs.root }}
+          path: ${{ runner.temp }}/architecture-${{ inputs.root }}.png
+          if-no-files-found: error
+          retention-days: 3
       - name: Find associated pull request
         id: pull-request
         if: ${{ inputs.command == 'apply' }}
