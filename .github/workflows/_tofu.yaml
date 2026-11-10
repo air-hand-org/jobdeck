@@ -104,6 +104,7 @@ jobs:
         run: |
           work="$(mktemp -d "$RUNNER_TEMP/terravision.XXXXXX")"
           trap 'rm -rf "$work"' EXIT
+          trap 'printf "::warning::TerraVision failed at script line %s\n" "$LINENO"' ERR
           python3 -m venv "$work/venv"
           "$work/venv/bin/pip" install --disable-pip-version-check 'terravision==0.56.1' 'Pillow==13.0.0' > "$work/install.log" 2>&1
           sudo apt-get update -qq > "$work/apt.log" 2>&1
