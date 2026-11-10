@@ -1,4 +1,4 @@
-module.exports = async ({ github, context, env = process.env }) => {
+module.exports = async ({ github, context }) => {
   let number;
   if (context.eventName === 'issue_comment') {
     if (context.payload.action !== 'created' || !context.payload.issue?.pull_request ||
@@ -19,12 +19,5 @@ module.exports = async ({ github, context, env = process.env }) => {
     pr.head.repo?.full_name !== `${context.repo.owner}/${context.repo.repo}` ||
     pr.head.sha !== context.payload.pull_request.head.sha
   )) return null;
-  const repositoryUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}`;
-  return {
-    channel: env.SLACK_CHANNEL_ID,
-    text: `<@${env.SLACK_REVIEWER_USER_ID}> Please review ${repositoryUrl}/pull/${pr.number}\n` +
-      `Head: ${pr.head.sha}\nEvent: ${context.eventName}\nWorkflow: ${repositoryUrl}/actions/runs/${context.runId}`,
-    unfurl_links: false,
-    unfurl_media: false,
-  };
+  return true;
 };

@@ -25,7 +25,7 @@ jobs:
       pull-requests: write
     secrets: inherit
 
-  request-review:
+  review-eligibility:
     needs: ci
     if: >-
       github.event_name == 'pull_request' && needs.ci.result == 'success' &&
@@ -35,13 +35,24 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
+    outputs:
+      eligible: ${{ steps.check.outputs.eligible }}
     steps:
-      - uses: $/.github/actions/request-review
+      - id: check
+        uses: $/.github/actions/review-eligibility
         with:
           github-token: ${{ github.token }}
-          channel-id: ${{ secrets.SLACK_REVIEW_CHANNEL_ID }}
-          reviewer-user-id: ${{ secrets.SLACK_REVIEWER_USER_ID }}
-          slack-bot-token: ${{ secrets.SLACK_REVIEW_NOTIFIER_BOT_TOKEN }}
+
+  request-review:
+    needs: [ci, review-eligibility]
+    if: needs.ci.result == 'success' && needs.review-eligibility.outputs.eligible == 'true'
+    permissions:
+      pull-requests: read
+    uses: air-hand-org/jobdeck-actions/.github/workflows/reusable-slack-pr-review-request.yaml@9ab6d972e4385388fb1b4644160b43cc828884d1
+    secrets:
+      channel-id: ${{ secrets.SLACK_REVIEW_CHANNEL_ID }}
+      reviewer-user-id: ${{ secrets.SLACK_REVIEWER_USER_ID }}
+      slack-bot-token: ${{ secrets.SLACK_REVIEW_NOTIFIER_BOT_TOKEN }}
 
   check-result:
     needs: ci

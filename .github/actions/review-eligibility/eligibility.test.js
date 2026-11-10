@@ -1,13 +1,13 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const prepare = require('./review-request');
+const prepare = require('./eligibility');
 
 const fixture = (eventName = 'pull_request') => {
   const pr = { number: 293, state: 'open', merged: false, draft: false, auto_merge: null, head: { sha: 'tested', repo: { full_name: 'air-hand-org/jobdeck' } } };
   const context = { eventName, repo: { owner: 'air-hand-org', repo: 'jobdeck' }, serverUrl: 'https://github.com', runId: 123, payload: { pull_request: structuredClone(pr), action: 'created', issue: { number: 293, pull_request: {} }, comment: { body: '/review', user: { login: 'writer' } } } };
   let permission = { permission: 'write' };
   const github = { rest: { pulls: { get: async () => ({ data: pr }) }, repos: { getCollaboratorPermissionLevel: async () => ({ data: permission }) } } };
-  const run = () => prepare({ github, context, env: { SLACK_CHANNEL_ID: 'channel', SLACK_REVIEWER_USER_ID: 'reviewer' } });
+  const run = () => prepare({ github, context });
   return { pr, context, run, setPermission: (value) => { permission = value; } };
 };
 
@@ -51,5 +51,5 @@ test('manual command permits draft, closed, merged and fork PRs with current wri
   const f = fixture('issue_comment');
   Object.assign(f.pr, { state: 'closed', merged: true, draft: true, auto_merge: {} });
   f.pr.head.repo.full_name = 'fork/jobdeck';
-  assert.match((await f.run()).text, /pull\/293/);
+  assert.equal(await f.run(), true);
 });
