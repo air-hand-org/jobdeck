@@ -26,3 +26,4 @@ test: node-test go-test cs-test
 .PHONY: node-test
 node-test:
 	@node .github/scripts/normalize-image-promotion-payload.test.js
+	@node --test .github/actions/review-eligibility/eligibility.test.js

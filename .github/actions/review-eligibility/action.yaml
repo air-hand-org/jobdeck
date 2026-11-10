@@ -1,0 +1,21 @@
+name: Review eligibility
+description: Apply Jobdeck review policy without delivering notifications.
+inputs:
+  github-token:
+    required: true
+    description: Token for live PR and repository permission reads
+outputs:
+  eligible:
+    description: Whether the caller should request review
+    value: ${{ steps.check.outputs.eligible }}
+runs:
+  using: composite
+  steps:
+    - name: Check eligibility
+      id: check
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const eligible = require(process.env.GITHUB_ACTION_PATH + '/eligibility.js');
+          core.setOutput('eligible', (await eligible({ github, context })) === true);

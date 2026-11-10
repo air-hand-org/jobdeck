@@ -1,19 +1,29 @@
 name: Request PR review
 
 on:
-  pull_request:
-    branches:
-      - main
-    types: [opened, reopened, ready_for_review, synchronize]
+  # No PR checkout/artifacts: exact command plus live repository permission check.
+  issue_comment: # zizmor: ignore[dangerous-triggers]
+    types: [created]
 
 permissions: {}
 
 jobs:
+  review-eligibility:
+    runs-on: ubuntu-slim
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      eligible: ${{ steps.check.outputs.eligible }}
+    steps:
+      - id: check
+        uses: $/.github/actions/review-eligibility
+        with:
+          github-token: ${{ github.token }}
+
   notify:
-    if: >-
-      github.event.pull_request.state == 'open' &&
-      !github.event.pull_request.draft &&
-      github.event.pull_request.head.repo.full_name == github.repository
+    needs: review-eligibility
+    if: needs.review-eligibility.outputs.eligible == 'true'
     permissions:
       pull-requests: read
     uses: air-hand-org/jobdeck-actions/.github/workflows/reusable-slack-pr-review-request.yaml@56b5a3e5540b1a1d42a0dbd3ae45b48910f42e83 # v1.7.3
