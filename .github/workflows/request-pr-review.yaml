@@ -27,7 +27,7 @@ jobs:
     if: needs.review-eligibility.outputs.eligible == 'true'
     permissions:
       pull-requests: read
-    uses: air-hand-org/jobdeck-actions/.github/workflows/reusable-slack-pr-review-request.yaml@d208b77ee41f1f9a973a64d1ca89b8436245ee7d
+    uses: air-hand-org/jobdeck-actions/.github/workflows/reusable-slack-pr-review-request.yaml@11698fc773cb306a807f51353a2f67e191ecc9bf
     secrets:
       channel-id: ${{ secrets.SLACK_REVIEW_CHANNEL_ID }}
       reviewer-user-id: ${{ secrets.SLACK_REVIEWER_USER_ID }}
