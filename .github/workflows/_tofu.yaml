@@ -108,7 +108,7 @@ jobs:
           python3 -m venv "$work/venv"
           "$work/venv/bin/pip" install --disable-pip-version-check 'terravision==0.56.1' 'Pillow==13.0.0' > "$work/install.log" 2>&1
           sudo apt-get update -qq > "$work/apt.log" 2>&1
-          sudo apt-get install -y graphviz >> "$work/apt.log" 2>&1
+          sudo apt-get install -y graphviz libgvplugin-neato-layout8 >> "$work/apt.log" 2>&1
           cd "iac/${TOFU_ROOT}"
           tofu graph > "$work/input.dot" 2> "$work/graph.log"
           # Values, instance keys, outputs and original HCL never reach the renderer.
