@@ -30,7 +30,7 @@ public sealed class LocalCertificateParameterFactory(
 
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             pfx = File.ReadAllBytes(path);
         }
         catch (FileNotFoundException)
