@@ -4,6 +4,7 @@ dotnet = "10.0"
 go = "1.27.3"
 grpcurl = "1.9.4"
 node = "26"
+"pipx:terravision" = "0.56.1"
 
 powershell = '7.6.9'
 
