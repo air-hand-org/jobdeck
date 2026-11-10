@@ -9,7 +9,6 @@ permissions: {}
 
 jobs:
   review-eligibility:
-    if: github.event.issue.pull_request && github.event.comment.body == '/review'
     runs-on: ubuntu-slim
     permissions:
       contents: read
