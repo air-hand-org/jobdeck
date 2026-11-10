@@ -1,11 +1,7 @@
 name: Request PR review
 
 on:
-  # Pinned notifier only: no PR checkout/artifacts; it rechecks live CI and PR state.
-  workflow_run: # zizmor: ignore[dangerous-triggers]
-    workflows: [CI]
-    types: [completed]
-  # Exact /review only; pinned notifier verifies association and current write access.
+  # No PR checkout/artifacts: exact command plus live repository permission check.
   issue_comment: # zizmor: ignore[dangerous-triggers]
     types: [created]
 
@@ -13,18 +9,15 @@ permissions: {}
 
 jobs:
   notify:
-    if: >-
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
-      (github.event_name == 'issue_comment' && github.event.issue.pull_request && github.event.comment.body == '/review')
+    if: github.event.issue.pull_request && github.event.comment.body == '/review'
+    runs-on: ubuntu-slim
     permissions:
-      actions: read
       contents: read
       pull-requests: read
-    uses: air-hand-org/jobdeck-actions/.github/workflows/reusable-slack-pr-review-request.yaml@911158cdceb01af16cb2fd3f64fb32cb1174a085
-    with:
-      ci-workflow-path: .github/workflows/ci.yaml
-      target-branch: main
-    secrets:
-      channel-id: ${{ secrets.SLACK_REVIEW_CHANNEL_ID }}
-      reviewer-user-id: ${{ secrets.SLACK_REVIEWER_USER_ID }}
-      slack-bot-token: ${{ secrets.SLACK_REVIEW_NOTIFIER_BOT_TOKEN }}
+    steps:
+      - uses: $/.github/actions/request-review
+        with:
+          github-token: ${{ github.token }}
+          channel-id: ${{ secrets.SLACK_REVIEW_CHANNEL_ID }}
+          reviewer-user-id: ${{ secrets.SLACK_REVIEWER_USER_ID }}
+          slack-bot-token: ${{ secrets.SLACK_REVIEW_NOTIFIER_BOT_TOKEN }}
