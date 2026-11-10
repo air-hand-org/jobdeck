@@ -3,7 +3,7 @@ using Aspire.Hosting;
 using e2e.Fixtures;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace e2e;
+namespace e2e.Tests;
 
 public sealed class AppStartupTests
 {
@@ -116,9 +116,7 @@ public sealed class AppStartupTests
     [Fact]
     public async Task ActualAspireStartupFailsFastForMissingExecutable()
     {
-        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.Apphosts>(
-            ["UseVolumes=false", "UsePgAdmin=false", "USE_LOCAL=false"], TestContext.Current.CancellationToken);
-        builder.Resources.Clear();
+        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.StartupTestAppHost>(TestContext.Current.CancellationToken);
         builder.AddExecutable("broken", "jobdeck-deliberately-missing-executable", ".");
         var waiting = builder.AddExecutable("waiting", "unused", ".");
         // Keep StartAsync pending, as real dependency/environment preparation can do.
@@ -140,9 +138,7 @@ public sealed class AppStartupTests
     [Fact]
     public async Task ActualOneShotCompletionAndHealthyResourceAreAccepted()
     {
-        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.Apphosts>(
-            ["UseVolumes=false", "UsePgAdmin=false", "USE_LOCAL=false"], TestContext.Current.CancellationToken);
-        builder.Resources.Clear();
+        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.StartupTestAppHost>(TestContext.Current.CancellationToken);
         var migrator = builder.AddExecutable("migrator", "dotnet", ".", "--version");
         builder.AddExecutable("healthy", "node", ".", "-e", "setInterval(() => {}, 1000)")
             .WaitForCompletion(migrator);

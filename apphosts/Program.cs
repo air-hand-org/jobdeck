@@ -118,6 +118,7 @@ new UiBuilder(
     builder: builder,
     jobApiGrpcEndpoint: jobApiGrpcEndpoint,
     authGrpcEndpoint: authGrpcEndpoint,
+    postgres: postgres,
     imageTag: uiImageTag,
     repoRoot: repoRoot,
     useLocal: useLocal
