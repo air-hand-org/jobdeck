@@ -138,6 +138,10 @@ jobs:
                   edges.append(json.dumps(a)+" -> "+json.dumps(b)+";")
           (work / "graph.dot").write_text("digraph {\n" + "\n".join(json.dumps(a)+" [label="+json.dumps(a)+"];" for a in resources) + "\n" + "\n".join(edges) + "\n}")
           ' "$work"
+          # Aqua shims need the checkout config; pin its resolved binary before cd.
+          mkdir "$work/bin"
+          ln -s "$(aqua which tofu)" "$work/bin/tofu"
+          export PATH="$work/bin:$PATH"
           cd "$work"
           "$work/venv/bin/terravision" draw --engine tofu --source "$work/source" \
             --planfile "$work/plan.json" --graphfile "$work/graph.dot" \
