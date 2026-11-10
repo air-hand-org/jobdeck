@@ -27,10 +27,7 @@ jobs:
 
   review-eligibility:
     needs: ci
-    if: >-
-      github.event_name == 'pull_request' && needs.ci.result == 'success' &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      !github.event.pull_request.draft
+    if: github.event_name == 'pull_request' && needs.ci.result == 'success'
     runs-on: ubuntu-slim
     permissions:
       contents: read
