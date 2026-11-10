@@ -78,10 +78,10 @@ resource "google_cloud_run_v2_service" "ui" {
         ]
 
         content {
-          name = env.name
+          name = env.value.name
           value_source {
             secret_key_ref {
-              secret  = local.application_secrets[env.key]
+              secret  = local.application_secrets[env.value.key]
               version = "latest"
             }
           }
