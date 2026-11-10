@@ -6,6 +6,8 @@ images:
     version: 1.2.0
   ui:
     version: 1.4.3
+  ui-migrator:
+    version: 1.4.3
   demo:
     version: 1.4.3
   job-api:
