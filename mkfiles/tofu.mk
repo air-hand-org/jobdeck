@@ -15,7 +15,10 @@ tofu-diagram:
 	@test -n "$(TOFU_DIAGRAM_OUT)" || { echo 'Set TOFU_DIAGRAM_OUT to a private absolute output prefix' >&2; exit 1; }
 	@terravision draw --engine tofu --source "$(abspath $(TOFU_DIAGRAM_SOURCE))" \
 		--planfile "$(abspath $(TOFU_DIAGRAM_PLAN))" --graphfile "$(abspath $(TOFU_DIAGRAM_GRAPH))" \
-		--outfile "$(abspath $(TOFU_DIAGRAM_OUT))" --format png --use-tf-names
+		--outfile "$(abspath $(TOFU_DIAGRAM_OUT))" --format drawio --use-tf-names --fontsize 20 --iconsize 192 \
+	&& terravision visualise --engine tofu --source "$(abspath $(TOFU_DIAGRAM_SOURCE))" \
+		--planfile "$(abspath $(TOFU_DIAGRAM_PLAN))" --graphfile "$(abspath $(TOFU_DIAGRAM_GRAPH))" \
+		--outfile "$(abspath $(TOFU_DIAGRAM_OUT))" --use-tf-names --fontsize 20 --iconsize 192
 
 .PHONY: tofu-fmt
 tofu-fmt:

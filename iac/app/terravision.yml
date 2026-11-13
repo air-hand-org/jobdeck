@@ -1,0 +1,28 @@
+format: 0.3  # Required: annotation format version (0.1, 0.2, or 0.3)
+
+title: "Foo Bar Baz"  # Optional: main diagram heading
+
+fontsize: 20   # Optional: label font size in points (default: 28, new in 0.3)
+iconsize: 192  # Optional: icon size in pixels (default: 128, new in 0.3)
+
+connect:
+  # Add new connections
+
+disconnect:
+  # Remove connections
+
+add:
+  # Add new resources
+
+remove:
+  # Delete resources
+  - "google_secret_manager_secret.*"
+  - "google_secret_manager_secret_version.*"
+  - "google_dns*"
+  - "google_certificate_manager*"
+
+update:
+  # Modify existing resources
+
+flows:
+  # Numbered flow sequences (new in format 0.2)
