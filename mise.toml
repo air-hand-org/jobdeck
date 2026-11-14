@@ -1,6 +1,6 @@
 [tools]
 aspire = "13.6.5"
-dotnet = "10.0"
+dotnet = "11.0.100"
 go = "1.27.4"
 grpcurl = "1.9.4"
 node = "26"
