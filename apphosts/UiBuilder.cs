@@ -136,7 +136,7 @@ public sealed class UiBuilder(
             :
             builder.AddDockerfile(
                 name: "ui-db-migrator",
-                contextPath: Path.GetFullPath(Path.Combine(Path.GetDirectoryName(localProjectPath!)!, "../")),
+                contextPath: Path.GetFullPath(Path.Combine(repoRoot, "services", "ui")),
                 stage: "migrator"
             )
             .WithBuildSecret("github_packages_token", builder.AddParameterFromConfiguration("github-packages-token", "GITHUB_PACKAGES_TOKEN", secret: true))
@@ -158,7 +158,12 @@ public sealed class UiBuilder(
             return null;
         }
 
-        var projectPath = Path.Combine(repoRoot, "services", "ui", "src", "ui.csproj");
+        var projectPath = Path.Combine(repoRoot, "services", "ui", "src", "bff", "ui.csproj");
+        if (!File.Exists(projectPath))
+        {
+            // Keep released checkouts usable while the BFF layout is adopted.
+            projectPath = Path.Combine(repoRoot, "services", "ui", "src", "ui.csproj");
+        }
         if (!File.Exists(projectPath))
         {
             return null;
