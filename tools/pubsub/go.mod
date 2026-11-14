@@ -3,7 +3,7 @@ module jobdeck/tools/pubsub
 go 1.27.3
 
 require (
-	cloud.google.com/go/pubsub/v2 v2.8.1
+	cloud.google.com/go/pubsub/v2 v2.9.0
 	google.golang.org/grpc v1.85.0
 )
 
