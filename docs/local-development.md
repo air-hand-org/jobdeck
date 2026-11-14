@@ -75,7 +75,9 @@ must have read access to the private service repositories.
 
 `USE_LOCAL=true` selects local source mode independently for each checkout. It
 requires the respective `go.mod` file for auth, job-api, job-worker, and demo,
-or `services/ui/src/ui.csproj` for UI. The Go services start with `AddGoApp`, UI
+or `services/ui/src/bff/ui.csproj` for UI. Older UI releases with
+`services/ui/src/ui.csproj` remain supported; the BFF path takes precedence when
+both exist. The Go services start with `AddGoApp`, UI
 starts as a local .NET project, and the job-worker forward proxy is built from
 its local checkout. The TLS reverse proxies remain YARP resources.
 `DEBUG=true` also enables the auth and job-worker Delve
