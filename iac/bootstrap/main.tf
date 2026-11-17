@@ -43,9 +43,6 @@ locals {
     "auth-jwt-private-key" = toset([
       "auth",
     ])
-    "auth-jwt-public-key" = toset([
-      "job_api",
-    ])
     "job-worker-client-secret" = toset([
       "job_worker",
     ])
