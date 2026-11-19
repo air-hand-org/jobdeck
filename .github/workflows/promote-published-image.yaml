@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   promote:
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     steps:
       - name: Create release GitHub App token
         id: app-token
