@@ -25,7 +25,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: air-hand-org/jobdeck-actions/actions/setup-tools@56b5a3e5540b1a1d42a0dbd3ae45b48910f42e83 # v1.7.3
+      - uses: air-hand-org/jobdeck-actions/actions/setup-tools@5d5ae954d815d44bd28dbebd4c920773aed02c8d # v1.7.4
 
       - name: Validate the dispatched image promotion
         id: payload
