@@ -3,9 +3,9 @@ images:
   auth:
     version: 1.4.2
   ui:
-    version: 1.5.1
+    version: 1.6.1
   ui-migrator:
-    version: 1.5.1
+    version: 1.6.1
   demo:
     version: 1.4.3
   job-api:
