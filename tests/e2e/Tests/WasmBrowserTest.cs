@@ -10,15 +10,11 @@ namespace e2e.Tests;
 [Collection(nameof(AppFixture))]
 public sealed class WasmBrowserTest(AppFixture fixture) : BrowserE2ETest(fixture)
 {
-    // Released UI images remain the default target; explicitly opt in for a compatible source/image.
-    public static bool IsWasmTarget => string.Equals(
-        Environment.GetEnvironmentVariable("E2E_UI_WASM"), "true", StringComparison.OrdinalIgnoreCase);
-
     private const string JobRpc = "/jobdeck.job.v1.JobService/";
     private const string ExecutionRpc = "/jobdeck.job.v1.ExecutionService/";
     private const string TokenRpc = "/jobdeck.bff.v1.AntiforgeryService/GetAntiforgeryToken";
 
-    [Fact(Skip = "Requires an explicitly selected WASM/gRPC-Web UI target (E2E_UI_WASM=true).", SkipUnless = nameof(IsWasmTarget))]
+    [Fact]
     public async Task HydratedJobsCrudPollingAndReloginUseFreshAntiforgery()
     {
         var page = await Context.NewPageAsync();
