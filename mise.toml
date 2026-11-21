@@ -1,5 +1,5 @@
 [tools]
-aspire = "13.6.5"
+aspire = "17.0.0"
 dotnet = "10.0"
 go = "1.27.4"
 grpcurl = "1.9.4"
