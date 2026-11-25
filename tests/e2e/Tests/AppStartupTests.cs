@@ -5,6 +5,10 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace e2e.Tests;
 
+[CollectionDefinition(nameof(AppStartupTests), DisableParallelization = true)]
+public sealed class AppStartupTestCollection;
+
+[Collection(nameof(AppStartupTests))]
 public sealed class AppStartupTests
 {
     [Fact]
