@@ -39,6 +39,7 @@ var enableGrpcReflection = builder.Configuration["GRPC_REFLECTION_ENABLED"] ?? "
 
 var apiAuthMode = builder.Configuration["API_AUTH_MODE"] ?? "OPTIONAL"; // fallback
 
+// FIXME: postgresql create role and create user with password
 var postgres = builder.AddPostgres("postgres")
   .WithImageTag("18.7-bookworm")
   ;

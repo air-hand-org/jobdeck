@@ -13,6 +13,7 @@ locals {
     "secretmanager.googleapis.com",
     "sts.googleapis.com",
     "cloudscheduler.googleapis.com",
+    "cloudsql.googleapis.com",
   ])
 
   deployer_roles = toset([

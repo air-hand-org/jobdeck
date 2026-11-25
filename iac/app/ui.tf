@@ -28,7 +28,7 @@ resource "google_cloud_run_v2_service" "ui" {
     containers {
       name       = "ui"
       image      = local.images.ui
-      depends_on = ["postgres"]
+      depends_on = ["postgres", "cloud-sql-proxy"]
 
       ports {
         container_port = 8080
@@ -98,6 +98,26 @@ resource "google_cloud_run_v2_service" "ui" {
         }
         failure_threshold = 10
         period_seconds    = 3
+        timeout_seconds   = 1
+      }
+    }
+
+    containers {
+      name = "cloud-sql-proxy"
+      image = "gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.28.1"
+
+      command = [
+        "--auth-iam-authn",
+        data.terraform_remote_state.bootstrap.sql_connection_name
+      ]
+
+      // FIXME
+      startup_probe {
+        tcp_socket {
+          port = 5432
+        }
+        failure_threshold = 30
+        period_seconds    = 1
         timeout_seconds   = 1
       }
     }

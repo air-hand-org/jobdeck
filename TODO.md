@@ -184,3 +184,14 @@
     - manual execution
     - execution status and history
     - worker execution log display
+
+---
+- CloudSQLインスタンス作成
+- サービスごとのロール作成
+- Service accountと紐づいたpguser作成
+- CloudRun sidecarでcloud-sql-proxy導入
+- マイグレーター用のcloudrun jobs設定と停止中の場合の起動待ち処理
+- マイグレーター側のロール指定
+- これらのローカル開発との整合性合わせ
+- schedulerでの夜間停止
+- pubsubでの情報同期
