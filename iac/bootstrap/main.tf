@@ -32,7 +32,6 @@ locals {
   artifact_registry_repositories = {
     ui            = "jobdeck-ui"
     auth          = "jobdeck-auth"
-    auth_proxy    = "jobdeck-auth-proxy"
     job_api       = "jobdeck-job-api"
     job_worker    = "jobdeck-job-worker"
     demo          = "jobdeck-demo"
@@ -42,9 +41,6 @@ locals {
   secret_consumers = {
     "auth-jwt-private-key" = toset([
       "auth",
-    ])
-    "auth-jwt-public-key" = toset([
-      "job_api",
     ])
     "job-worker-client-secret" = toset([
       "job_worker",

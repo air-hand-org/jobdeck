@@ -3,7 +3,6 @@ locals {
   # corresponding number whenever the encrypted source rotates that value.
   secret_data_wo_versions = {
     "auth-jwt-private-key"            = "1"
-    "auth-jwt-public-key"             = "1"
     "job-worker-client-secret"        = "1"
     "job-worker-client-secret-hash"   = "1"
     "postgres-password"               = "1"
