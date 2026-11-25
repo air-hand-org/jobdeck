@@ -4,7 +4,7 @@ set -euo pipefail
 
 SCRIPT_DIR=$(dirname $(readlink -f $0))
 
-pwsh $SCRIPT_DIR/e2e/bin/Debug/net10.0/playwright.ps1 install chromium
+pwsh $SCRIPT_DIR/e2e/bin/Debug/net11.0/playwright.ps1 install chromium
 
 if ! command -v certutil &>/dev/null; then
     sudo apt-get update
