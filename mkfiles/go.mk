@@ -19,8 +19,14 @@ go-lint:
 		(cd $$mod && golangci-lint fmt ./... --diff && golangci-lint run ./...) || exit $$?; \
 	done;
 
-.PHONY: go-test
+# Set to a seed printed by go test to reproduce the test order.
+GO_TEST_SHUFFLE ?= on
+
+.PHONY: go-test go-test-race
 go-test:
 	@for mod in $(GO_MODULES); do \
-		(cd $$mod && go test -race -shuffle=on -cover ./...) || exit $$?; \
+		(cd $$mod && go test -shuffle="$(GO_TEST_SHUFFLE)" -cover $(GO_TEST_FLAGS) ./...) || exit $$?; \
 	done;
+
+go-test-race: GO_TEST_FLAGS := -race
+go-test-race: go-test
