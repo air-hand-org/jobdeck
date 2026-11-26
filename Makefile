@@ -23,6 +23,9 @@ check-clean:
 .PHONY: test
 test: node-test go-test cs-test
 
+.PHONY: test-race
+test-race: node-test go-test-race cs-test test-clone-service-repo
+
 .PHONY: node-test
 node-test:
 	@node .github/scripts/normalize-image-promotion-payload.test.js

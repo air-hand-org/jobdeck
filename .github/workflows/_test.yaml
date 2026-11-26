@@ -59,7 +59,7 @@ jobs:
         run: bash .github/scripts/diagnose-e2e-capacity.sh before-container-e2e
       - name: test
         id: container-test
-        run: make test
+        run: make test-race
       - name: Diagnose runner capacity after container E2E
         if: ${{ always() && runner.debug == '1' && steps.container-test.outcome != 'skipped' }}
         run: bash .github/scripts/diagnose-e2e-capacity.sh after-container-e2e
