@@ -65,11 +65,16 @@ resource "google_cloud_run_v2_service" "auth" {
     containers {
       name       = "auth"
       image      = local.images.auth
-      depends_on = ["postgres"]
+      depends_on = ["postgres", "cloud-sql-proxy"]
 
       ports {
         container_port = 8080
         name           = "h2c"
+      }
+
+      env {
+        name = "POSTGRES_URI"
+        value = "postgresql://${urlencode(google_sql_user.auth_runtime_user.name)}@127.0.0.1:5432/${google_sql_database.auth.name}"
       }
 
       env {
@@ -78,28 +83,8 @@ resource "google_cloud_run_v2_service" "auth" {
       }
 
       env {
-        name  = "POSTGRES_HOST"
-        value = "127.0.0.1"
-      }
-
-      env {
-        name  = "POSTGRES_DATABASE"
-        value = "jobdeck-auth"
-      }
-
-      env {
         name  = "AUTH_JOB_WORKER_CLIENT_ID"
         value = "job-worker"
-      }
-
-      env {
-        name = "POSTGRES_PASSWORD"
-        value_source {
-          secret_key_ref {
-            secret  = local.application_secrets["postgres-password"]
-            version = "latest"
-          }
-        }
       }
 
       env {
@@ -138,6 +123,27 @@ resource "google_cloud_run_v2_service" "auth" {
         }
         failure_threshold = 30
         period_seconds    = 3
+        timeout_seconds   = 1
+      }
+    }
+
+    containers {
+      name = "cloud-sql-proxy"
+      image = "gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.28.1"
+
+      command = [
+        "--auth-iam-authn",
+        "--port", "5432",
+        google_sql_database_instance.shared.connection_name
+      ]
+
+      // FIXME
+      startup_probe {
+        tcp_socket {
+          port = 5432
+        }
+        failure_threshold = 30
+        period_seconds    = 1
         timeout_seconds   = 1
       }
     }

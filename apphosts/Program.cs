@@ -39,18 +39,18 @@ var enableGrpcReflection = builder.Configuration["GRPC_REFLECTION_ENABLED"] ?? "
 
 var apiAuthMode = builder.Configuration["API_AUTH_MODE"] ?? "OPTIONAL"; // fallback
 
-// FIXME: postgresql create role and create user with password
-var postgres = builder.AddPostgres("postgres")
+var postgresServer = builder.AddPostgres("postgres")
   .WithImageTag("18.7-bookworm")
   ;
 if (builder.Configuration.GetValue<bool>("UsePgAdmin", true))
 {
-    postgres.WithPgAdmin();
+    postgresServer.WithPgAdmin();
 }
 if (useVolumes)
 {
-    postgres.WithDataVolume();
+    postgresServer.WithDataVolume();
 }
+var postgres = new PostgresDBBuilder(builder, postgresServer);
 
 var pubsubBuilder = new PubSubBuilder(builder);
 

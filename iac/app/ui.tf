@@ -108,7 +108,8 @@ resource "google_cloud_run_v2_service" "ui" {
 
       command = [
         "--auth-iam-authn",
-        data.terraform_remote_state.bootstrap.sql_connection_name
+        "--port", "5432",
+        google_sql_database_instance.shared.connection_name
       ]
 
       // FIXME

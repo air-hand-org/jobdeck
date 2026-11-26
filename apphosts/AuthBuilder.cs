@@ -14,7 +14,7 @@ public sealed record AuthEndpoints(
 
 public sealed class AuthBuilder(
     IDistributedApplicationBuilder builder
-    , IResourceBuilder<PostgresServerResource> postgres
+    , PostgresDBBuilder postgres
     , string workerClientId
     , string imageTag
     , string repoRoot
@@ -25,7 +25,7 @@ public sealed class AuthBuilder(
 
     public AuthEndpoints Build(int port, bool isDebug, string grpcReflectionFlag)
     {
-        var authDB = postgres.AddDatabase("jobdeck-auth");
+        var authDB = postgres.ProvisionDB("auth");
         var backend = localAppDirectory is null
             ? ContainerBackend(grpcReflectionFlag, authDB)
             : LocalBackend(isDebug, grpcReflectionFlag, authDB);
@@ -52,7 +52,7 @@ public sealed class AuthBuilder(
 
     private BackendEndpoints ContainerBackend(
         string grpcReflectionFlag,
-        IResourceBuilder<PostgresDatabaseResource> authDB
+        PostgresDBResource authDB
     )
     {
         var authJwtPrivateKey = builder.AddParameter("auth-jwt-private-key", secret: true);
@@ -83,7 +83,7 @@ public sealed class AuthBuilder(
     private BackendEndpoints LocalBackend(
         bool isDebug,
         string grpcReflectionFlag,
-        IResourceBuilder<PostgresDatabaseResource> authDB
+        PostgresDBResource authDB
     )
     {
         var authJwtPrivateKey = builder.AddParameter("auth-jwt-private-key", secret: true);
@@ -95,16 +95,18 @@ public sealed class AuthBuilder(
             appDirectory: localAppDirectory!,
             packagePath: "./cmd/migrator"
         )
-        .WithReference(authDB)
+        .WithReference(authDB.DB)
         .WithEnvironment("GOWORK", "off")
         .WithEnvironment(context =>
         {
-            context.EnvironmentVariables["POSTGRESDB_URI"] = authDB.Resource.UriExpression;
+            context.EnvironmentVariables["POSTGRESDB_URI"] = authDB.UriForMigrate();
             context.EnvironmentVariables["AUTH_JOB_WORKER_SECRET_HASH"] = workerClientSecretHash;
             context.EnvironmentVariables["AUTH_JOB_WORKER_CLIENT_ID"] = workerClientId;
             context.EnvironmentVariables["AUTH_TEST_USER_SECRET_HASH"] = testUserSecretHash;
         })
-        .WaitFor(authDB);
+        .WaitFor(authDB.DB)
+        .WaitForCompletion(authDB.Provisioner)
+        ;
 
         var backend = ConfigureBackend(builder.AddGoApp(
             name: "auth",
@@ -140,7 +142,7 @@ public sealed class AuthBuilder(
 
     private IResourceBuilder<T> ConfigureBackend<T>(
         IResourceBuilder<T> backend,
-        IResourceBuilder<PostgresDatabaseResource> authDB,
+        PostgresDBResource authDB,
         string grpcReflectionFlag,
         IResourceBuilder<ParameterResource> authJwtPrivateKey,
         IResourceBuilder<ParameterResource> authJwtKeyID,
@@ -149,10 +151,10 @@ public sealed class AuthBuilder(
     ) where T : IResource, IResourceWithEnvironment, IResourceWithWaitSupport
     {
         return backend
-            .WithReference(authDB)
+            .WithReference(authDB.DB)
             .WithEnvironment(context =>
             {
-                context.EnvironmentVariables["POSTGRESDB_URI"] = authDB.Resource.UriExpression;
+                context.EnvironmentVariables["POSTGRESDB_URI"] = authDB.UriForRuntime();
                 context.EnvironmentVariables["GRPC_REFLECTION_ENABLED"] = grpcReflectionFlag;
                 context.EnvironmentVariables["AUTH_JWT_PRIVATE_KEY"] = authJwtPrivateKey;
                 context.EnvironmentVariables["AUTH_JWT_KEY_ID"] = authJwtKeyID;
@@ -160,7 +162,7 @@ public sealed class AuthBuilder(
                 context.EnvironmentVariables["AUTH_JOB_WORKER_CLIENT_ID"] = workerClientId;
                 context.EnvironmentVariables["AUTH_TEST_USER_SECRET_HASH"] = testUserSecretHash;
             })
-            .WaitFor(authDB);
+            .WaitFor(authDB.DB);
     }
 
     private static string? GetLocalAppDirectory(string repoRoot, bool useLocal)
