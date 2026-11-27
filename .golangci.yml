@@ -5,6 +5,13 @@ linters:
     - govet
     - revive
     - testifylint
+    - gocognit
+    - gocyclo
+  settings:
+    gocognit:
+      min-complexity: 10
+    gocyclo:
+      min-complexity: 10
   exclusions:
     paths:
       - gen/
@@ -14,6 +21,13 @@ linters:
         linters:
           - govet
           - revive
+      # Allow only the existing diagnostic for each function, not later increases.
+      - path: ^tools/pubsub/cmd/subscription/main\.go$
+        linters: [gocognit]
+        text: '^cognitive complexity 12 of func `ensureWithEndpoint` is high \(> 10\)$'
+      - path: ^tools/pubsub/cmd/topic/main\.go$
+        linters: [gocognit]
+        text: '^cognitive complexity 13 of func `ensureTopic` is high \(> 10\)$'
 
 formatters:
   enable:
